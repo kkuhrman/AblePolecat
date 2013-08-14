@@ -77,6 +77,21 @@ function ABLE_POLECAT_CLOCK_PRINT() {
 	return $ellapsed_time;
 }
 
+/**
+ * Helper function for desperate developers only.
+ */
+function panic($msg = 'arrrrrrgghh...', $die = TRUE) {
+  
+  if ($die) {
+    $trace = debug_backtrace();
+    var_dump($trace);
+    die(print_r($msg, TRUE));
+  }
+  else {
+    print sprintf("<p>%s</p>", print_r($msg, TRUE));
+  }
+}
+
 //
 // Define PHP ERROR reporting level
 // ABLE_POLECAT_ERROR_ON | ABLE_POLECAT_ERROR_OFF | ABLE_POLECAT_ERROR_CUSTOM
