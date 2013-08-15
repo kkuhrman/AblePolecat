@@ -58,6 +58,10 @@ interface AblePolecat_EnvironmentInterface {
    */
   public function logErrorMessage($msg = NULL);
   
+  /**
+   * Persist state prior to going out of scope.
+   */
+  public function sleep();
 }
 
 abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_EnvironmentInterface {
@@ -119,6 +123,29 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
+   * Handle critical environment errors depending on runtime context.
+   */
+  protected function handleCriticalError($error_number, $error_message = NULL) {
+    
+    !isset($error_message) ? $error_message = ABLE_POLECAT_EXCEPTION_MSG($error_number) : NULL;
+    $runtime_context = self::getRuntimeContext();
+    switch ($runtime_context) {
+      case ABLE_POLECAT_RUNTIME_DEV:
+        //
+        // Override SEH - trigger error and die.
+        //
+        trigger_error($error_message, E_USER_ERROR);
+        break;
+      default:
+        //
+        // throw exception
+        //
+        throw new AblePolecat_Environment_Exception($error_message, $error_number);
+        break;
+    }
+  }
+  
+  /**
    * Registers path and creation method for loadable class.
    *
    * @param string $class_name The name of class to register.
@@ -138,13 +165,13 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
         );
       }
       else {
-        throw new AblePolecat_Environment_Exception("Invalid registration for $class_name: constructor", 
-          AblePolecat_Environment_Exception::ERROR_ENV_BOOTSTRAP_CLASS_REG);
+        $this->handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_CLASS_REG,
+          "Invalid registration for $class_name: constructor");
       }
     }
     else {
-      throw new AblePolecat_Environment_Exception("Invalid include path for $class_name: include file path", 
-        AblePolecat_Environment_Exception::ERROR_ENV_BOOTSTRAP_PATH);
+      $this->handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_PATH_INVALID,
+        "Invalid include path for $class_name: include file path");
     }
   }
   
@@ -241,8 +268,12 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
       }
     }
     if (!isset($Environment)) {
-      throw new AblePolecat_Environment_Exception("Failure to return a current environment object.", 
-        AblePolecat_Environment_Exception::ERROR_ENV_GET_CURRENT);
+      //
+      // Do not use handleCriticalError() in this case.
+      // Catching this exception prevents recursive calls on bootstrap().
+      //
+      throw new AblePolecat_Environment_Exception(ABLE_POLECAT_EXCEPTION_MSG(ABLE_POLECAT_EXCEPTION_GET_CURRENT_ENV), 
+        ABLE_POLECAT_EXCEPTION_GET_CURRENT_ENV);
     }
     
     return $Environment;
@@ -264,6 +295,26 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    */
   public function getServiceBus() {
     return $this->m_ServiceBus;
+  }
+  
+  /**
+   * @return ABLE_POLECAT_RUNTIME_DEV < ABLE_POLECAT_RUNTIME_QA < ABLE_POLECAT_RUNTIME_USE
+   */
+  public function getRuntimeContext() {
+    
+    $runtime_context = ABLE_POLECAT_RUNTIME_USE;
+    // ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_USE) ? var_dump('use') : null;
+    // ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_QA) ? var_dump('qa') : null;
+    // ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_DEV) ? var_dump('dev') : null;
+    if (!ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_USE)) {
+      if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_QA)) {
+        $runtime_context = ABLE_POLECAT_RUNTIME_QA;
+      }
+      else if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_DEV)) {
+        $runtime_context = ABLE_POLECAT_RUNTIME_DEV;
+      }
+    }
+    return $runtime_context;
   }
   
   /**
@@ -361,8 +412,8 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
       if ($this->isLoadable($class_name)) {
         $this->m_Logger[$logger_id] = $this->loadClass($class_name);
         if (!isset($this->m_Logger[$logger_id])) {
-          throw new AblePolecat_Environment_Exception("Failed to load logger class $class_name.", 
-            AblePolecat_Environment_Exception::ERROR_ENV_BOOTSTRAP_LOGGER);
+          $this->handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_LOGGER,
+            "Failed to load logger class $class_name.");
         }
       }
     }
@@ -431,10 +482,36 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
+   * Persist state prior to going out of scope.
+   */
+  public function sleep() {
+    $runtime_context = $this->getRuntimeContext();
+    switch ($runtime_context) {
+      case ABLE_POLECAT_RUNTIME_DEV:
+      case ABLE_POLECAT_RUNTIME_QA:
+        //
+        // Runtime context may be saved in cookie for local development and testing.
+        //
+        ABLE_POLECAT_RUNTIME_CONTEXT_COOKIE_SET($runtime_context);
+        break;
+      default:
+        //
+        // Otherwise, expire any existing runtime context cookie
+        //
+        ABLE_POLECAT_RUNTIME_CONTEXT_COOKIE_SET(NULL);
+        break;
+    }
+  }
+  
+  /**
    * Sub classes must implement bootstrap(), which will return instance of class.
    */
   final protected function __construct() {
     $this->initialize();
+  }
+  
+  final public function __destruct() {
+    $this->sleep();
   }
 }
 
@@ -488,18 +565,5 @@ class AblePolecat_Environment_Aware_Object {
  * Exceptions thrown by environment objects.
  */
 class AblePolecat_Environment_Exception extends AblePolecat_Exception {
-  
-  /**
-   * Error codes for environment bootstrap process.
-   */
-  const ERROR_ENV_BOOTSTRAP_PATH          = 0x01; // Invalid boot file path encountered.
-  const ERROR_ENV_BOOTSTRAP_CLASS_REG     = 0x02; // Invalid loadable class registration.
-  const ERROR_ENV_BOOTSTRAP_LOGGER        = 0x04; // Failure to set logger.
-  const ERROR_ENV_BOOTSTRAP_AGENT         = 0x08; // Failure to initialize application access control agent.
-  const ERROR_ENV_BOOTSTRAP_CONFIG        = 0x10; // Failure to access/set application configuration.
-  const ERROR_ENV_BOOTSTRAP_SESSION       = 0x20; // Failure to start session.
-  const ERROR_ENV_BOOTSTRAP_DB            = 0x40; // Failure to open application database.
-  const ERROR_ENV_BOOTSTRAP_BUS           = 0x80; // Failure to bring service bus online.
-  const ERROR_ENV_GET_CURRENT             = 0x100; // Failure to return a current environment object.
-  const ERROR_ENV_GET_MEMBER              = 0x200; // Failure to return a environment member object.
 }
+

@@ -19,16 +19,33 @@ define('ABLE_POLECAT_LOCAL_HOST',   0x00000001);
 define('ABLE_POLECAT_REMOTE_HOST',  0x00000002);
 
 //
+// Runtime context.
+//
+define('ABLE_POLECAT_RUNTIME_DEV',  0x00000004);
+define('ABLE_POLECAT_RUNTIME_QA',   0x00000008);
+define('ABLE_POLECAT_RUNTIME_USE',  0x00000010);
+$ABLE_POLECAT_RUNTIME_CONTEXT = array(
+  'dev' => ABLE_POLECAT_RUNTIME_DEV, 
+  'qa'  => ABLE_POLECAT_RUNTIME_QA,
+  'use' => ABLE_POLECAT_RUNTIME_USE,
+);
+$ABLE_POLECAT_RUNTIME_CONTEXT_STR = array(
+  ABLE_POLECAT_RUNTIME_DEV => 'dev', 
+  ABLE_POLECAT_RUNTIME_QA  => 'qa',
+  ABLE_POLECAT_RUNTIME_USE => 'use',
+);
+
+//
 // Error reporting
 //
-define('ABLE_POLECAT_ERROR_OFF',    0x00000010);
-define('ABLE_POLECAT_ERROR_ON',     0x00000020);
-define('ABLE_POLECAT_ERROR_CUSTOM', 0x00000040);
+define('ABLE_POLECAT_ERROR_OFF',    0x00000100);
+define('ABLE_POLECAT_ERROR_ON',     0x00000200);
+define('ABLE_POLECAT_ERROR_CUSTOM', 0x00000400);
 
 //
 // Performance monitoring options
 //
-define('ABLE_POLECAT_MONITOR_TIME', 0x00000100);
+define('ABLE_POLECAT_MONITOR_TIME', 0x00001000);
 
 /**
  * Helper function sets the global mode bit.
@@ -52,6 +69,101 @@ function ABLE_POLECAT_IS_MODE($mode) {
      }
   }
   return $is_mode;
+}
+
+/**
+ * Used to set/unset default exception handler.
+ */
+function ABLE_POLECAT_SET_EXCEPTION_HANDLER($Handler = 'ABLE_POLECAT_EXCEPTION_HANDLER_DEFAULT') {
+  set_exception_handler($Handler);
+}
+
+/**
+ * Used to log exceptions thrown before user logger(s) initialized.
+ */
+function ABLE_POLECAT_EXCEPTION_HANDLER_DEFAULT($Exception) {
+  //
+  // open syslog, include the process ID and also send
+  // the log to standard error, and use a user defined
+  // logging mechanism
+  //
+  openlog("AblePolecat", LOG_PID | LOG_ERR, LOG_USER);
+
+  //
+  // log the exception
+  //
+  $access = date("Y/m/d H:i:s");
+  $message = $Exception->getMessage();
+  syslog(LOG_WARNING, "Able Polecat, $access, {$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}), $message");
+  closelog();
+}
+
+/**
+ * Used to set/unset default error handler.
+ */
+function ABLE_POLECAT_SET_ERROR_HANDLER($Handler = 'ABLE_POLECAT_ERROR_HANDLER_DEFAULT') {
+  set_error_handler($Handler);
+}
+
+/**
+ * Used to handle errors encountered while running in production mode.
+ */
+function ABLE_POLECAT_ERROR_HANDLER_DEFAULT($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
+  
+  $die = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
+  
+  //
+  // Get error information
+  //
+  $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
+  isset($errfile) ? $msg .= " in $errfile" : NULL;
+  isset($errline) ? $msg .= " line $errline" : NULL;
+  isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
+  
+  //
+  // Send error information to syslog
+  //
+  openlog("AblePolecat", LOG_PID | LOG_ERR, LOG_USER);
+  syslog(LOG_ERR, $msg);
+  closelog();
+  
+  if ($die) {
+    die('arrrgghh...');
+  }
+  
+  return $die;
+}
+
+/**
+ * Helper function uses a cookie to store local dev/test mode settings.
+ */
+function ABLE_POLECAT_RUNTIME_CONTEXT_COOKIE_SET($runtime_context) {
+  //
+  // @todo: Do nothing if agent is not browser.
+  //
+  if (isset($runtime_context)) {
+    if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+      //
+      // Compare current cookie setting to parameter
+      //
+      $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
+      isset($data['context']) ? $stored_runtime_context = $data['context'] : NULL;
+      if ($runtime_context != $stored_runtime_context) {
+        //
+        // Setting changed, first expire cookie
+        //
+        setcookie('ABLE_POLECAT_RUNTIME', '', time() - 3600);
+      }
+    }
+    $data = array('context' => $runtime_context);
+    setcookie('ABLE_POLECAT_RUNTIME', serialize($data), time() + 3600);    
+  }
+  else if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+    //
+    // Expire any runtime context cookie
+    //
+    setcookie('ABLE_POLECAT_RUNTIME', '', time() - 3600);
+  }
 }
 
 /**
@@ -119,11 +231,58 @@ else {
 	// define custom error reporting level here...
 	//
 	!ABLE_POLECAT_IS_MODE(ABLE_POLECAT_ERROR_CUSTOM) ? ABLE_POLECAT_SET_MODE(ABLE_POLECAT_ERROR_CUSTOM) : NULL;
+  ABLE_POLECAT_SET_ERROR_HANDLER();
 }
+
+//
+// Default exception handler (until application loggers are initialized).
+//
+ABLE_POLECAT_SET_EXCEPTION_HANDLER();
 
 //
 // Initialize performance monitoring options
 //
 if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_MONITOR_TIME)) {
 	ABLE_POLECAT_CLOCK_START();
+}
+
+//
+// Runtime context.
+//
+if (isset($_GET['run'])) {
+  switch ($_GET['run']) {
+    default:
+      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USE);
+      break;
+    case 'dev':
+      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_DEV);
+      break;
+    case 'qa':
+      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_QA);
+      break;
+  }
+}
+else if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+  //
+  // If runtime context was saved in a cookie, use that until agent
+  // explicitly unsets with run=use or cookie expires.
+  //
+  $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
+  isset($data['context']) ? $runtime_context = $data['context'] : NULL;
+  switch ($runtime_context) {
+    case ABLE_POLECAT_RUNTIME_DEV:
+    case ABLE_POLECAT_RUNTIME_QA:
+      ABLE_POLECAT_SET_MODE($runtime_context);
+      break;
+    default:
+      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USE);
+      break;
+  }
+}
+else {
+    //
+    // Otherwise, override runtime context here for Cron or service testing.
+    // ABLE_POLECAT_RUNTIME_DEV | ABLE_POLECAT_RUNTIME_QA | ABLE_POLECAT_RUNTIME_USE
+    //
+    ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USE);
 }

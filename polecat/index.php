@@ -6,14 +6,14 @@
 
 require_once('bootmode.php');
 
-// $ABLE_POLECAT_ENVIRONMENT_INCL_PATH = ABLE_POLECAT_PATH  . DIRECTORY_SEPARATOR . 'Environment'   . DIRECTORY_SEPARATOR . 'Default.php';
-// if (!is_file($ABLE_POLECAT_ENVIRONMENT_INCL_PATH)) {
-  // die("Able Polecat failed to start. Invalid path for environment given: $ABLE_POLECAT_ENVIRONMENT_INCL_PATH");
-// }
-// else {
-  // require_once($ABLE_POLECAT_ENVIRONMENT_INCL_PATH);
-  // AblePolecat_Environment_Default::bootstrap();
-// }
+$ABLE_POLECAT_ENVIRONMENT_INCL_PATH = ABLE_POLECAT_PATH  . DIRECTORY_SEPARATOR . 'Environment'   . DIRECTORY_SEPARATOR . 'Default.php';
+if (!is_file($ABLE_POLECAT_ENVIRONMENT_INCL_PATH)) {
+  die("Able Polecat failed to start. Invalid path for environment given: $ABLE_POLECAT_ENVIRONMENT_INCL_PATH");
+}
+else {
+  require_once($ABLE_POLECAT_ENVIRONMENT_INCL_PATH);
+  AblePolecat_Environment_Default::bootstrap();
+}
 
 //
 // Logging examples
@@ -53,9 +53,12 @@ require_once('bootmode.php');
     </p>
     <br />
 	<p>Script execution time was <?php echo ABLE_POLECAT_CLOCK_PRINT(); ?></p>
-  <p>Able Polecat Exception base code is <?php 
-    $code = AblePolecat_Exception::ABLE_POLECAT_EXCEPTION_CODE | 0x00000002;
-    echo sprintf("%1$032b", $code) . ' aka ' . print_r($code, TRUE); ?></p>
+  <p>Able Polecat runtime context is <?php 
+    $code = AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext();
+    echo sprintf("%1$032b", $code) . ' aka ' . print_r($code, TRUE) . ' (' . $ABLE_POLECAT_RUNTIME_CONTEXT_STR[$code] . ') '; ?>
+    <a href="devset.php"><small>change this</small></a>
+    </p>
+    <p><?php print_r($_COOKIE); ?></p>
     <h4>Background</h4>
     <p>
       <small>The name of the project draws its inspiration from the fabled "Skunk Works" R&D at Lockheed Martin and from an offensive system developed 
