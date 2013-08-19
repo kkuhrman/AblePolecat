@@ -4,12 +4,13 @@
  * Simple form for changing Able Polecat runtime context.
  */
 
-$ABLE_POLECAT_ROOT = dirname(dirname(dirname(__DIR__)));
+$ABLE_POLECAT_ROOT = dirname(__DIR__);
 require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'pathdefs.php');
+require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'bootmode.php');
 
-if (isset($_GET['runtime_context'])) {
+if(isset($_GET['runtime_context'])) {
   $runtime_context = $_GET['runtime_context'];
-  header("Location: index.php?run=$runtime_context");
+  header("Location: " . ABLE_POLECAT_BASE_URL . "?run=$runtime_context");
 }
 
 ?>

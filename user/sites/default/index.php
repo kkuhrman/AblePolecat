@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Default point of entry to Able Polecat web interface.
+ * Default Able Polecat user website.
  */
 
 $ABLE_POLECAT_ROOT = dirname(dirname(dirname(__DIR__)));
@@ -53,13 +53,6 @@ else {
       For more information or if you wish to contribute: <a href="mailto:webmaster@abledistributors.com">webmaster@abledistributors.com</a>
     </p>
     <br />
-	<p>Script execution time was <?php echo ABLE_POLECAT_CLOCK_PRINT(); ?></p>
-  <p>Able Polecat runtime context is <?php 
-    $code = AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext();
-    echo sprintf("%1$032b", $code) . ' aka ' . print_r($code, TRUE) . ' (' . $ABLE_POLECAT_RUNTIME_CONTEXT_STR[$code] . ') '; ?>
-    <a href="<?php print(ABLE_POLECAT_BASE_URL . '/runctxt.php'); ?>"><small>change this</small></a>
-    </p>
-    <p><?php print_r($_COOKIE); ?></p>
     <h4>Background</h4>
     <p>
       <small>The name of the project draws its inspiration from the fabled "Skunk Works" R&D at Lockheed Martin and from an offensive system developed 

@@ -9,19 +9,29 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTO
 abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_ResourceAbstract {
   
   /**
+   * Element attribute names.
+   */
+  const ATTRIBUTE_AUTHOR  = 'author';  
+  const ATTRIBUTE_DESC    = 'description';
+  const ATTRIBUTE_NAME    = 'name';
+  
+  /**
    * Element names.
    */
   const CONF_NAMESPACE    = 'polecat';
   const ELEMENT_ROOT      = 'config';
-  const ELEMENT_CLASS     = 'class';
-  const ELEMENT_NAME      = 'name';
-  const ELEMENT_VALUE     = 'value';
   const ELEMENT_CHILDREN  = 'children';
+  const ELEMENT_CLASS     = 'class';
+  const ELEMENT_CLIENT    = 'client';
   const ELEMENT_DBS       = 'databases';
   const ELEMENT_DB        = 'database';
   const ELEMENT_HOST      = 'host';
-  const ELEMENT_USER      = 'user';
+  const ELEMENT_MODULE    = 'module';
+  const ELEMENT_MODULES   = 'modules';
+  const ELEMENT_NAME      = 'name';
   const ELEMENT_PASS      = 'pass';
+  const ELEMENT_USER      = 'user';
+  const ELEMENT_VALUE     = 'value';
   
   /**
    * @var Configuration data as a simple, well-formed XML document.
