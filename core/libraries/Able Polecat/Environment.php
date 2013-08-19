@@ -298,15 +298,12 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
-   * @return ABLE_POLECAT_RUNTIME_DEV < ABLE_POLECAT_RUNTIME_QA < ABLE_POLECAT_RUNTIME_USE
+   * @return ABLE_POLECAT_RUNTIME_DEV < ABLE_POLECAT_RUNTIME_QA < ABLE_POLECAT_RUNTIME_USER
    */
   public function getRuntimeContext() {
     
-    $runtime_context = ABLE_POLECAT_RUNTIME_USE;
-    // ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_USE) ? var_dump('use') : null;
-    // ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_QA) ? var_dump('qa') : null;
-    // ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_DEV) ? var_dump('dev') : null;
-    if (!ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_USE)) {
+    $runtime_context = ABLE_POLECAT_RUNTIME_USER;
+    if (!ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_USER)) {
       if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_QA)) {
         $runtime_context = ABLE_POLECAT_RUNTIME_QA;
       }

@@ -4,7 +4,8 @@
  * Default point of entry to Able Polecat web interface.
  */
 
-require_once('bootmode.php');
+$ABLE_POLECAT_ROOT = dirname(dirname(dirname(__DIR__)));
+require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'bootmode.php');
 
 $ABLE_POLECAT_ENVIRONMENT_INCL_PATH = ABLE_POLECAT_PATH  . DIRECTORY_SEPARATOR . 'Environment'   . DIRECTORY_SEPARATOR . 'Default.php';
 if (!is_file($ABLE_POLECAT_ENVIRONMENT_INCL_PATH)) {
@@ -56,7 +57,7 @@ else {
   <p>Able Polecat runtime context is <?php 
     $code = AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext();
     echo sprintf("%1$032b", $code) . ' aka ' . print_r($code, TRUE) . ' (' . $ABLE_POLECAT_RUNTIME_CONTEXT_STR[$code] . ') '; ?>
-    <a href="devset.php"><small>change this</small></a>
+    <a href="<?php print(ABLE_POLECAT_BASE_URL . '/runctxt.php'); ?>"><small>change this</small></a>
     </p>
     <p><?php print_r($_COOKIE); ?></p>
     <h4>Background</h4>

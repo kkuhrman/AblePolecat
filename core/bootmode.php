@@ -4,13 +4,7 @@
  * Settings necessary to properly bootstrap Able Polecat in desired mode.
  */
 
-//
-// Path to Able Polecat library.
-//
-if (!defined('ABLE_POLECAT_PATH')) {
-  $ABLE_POLECAT_PATH = __DIR__ . DIRECTORY_SEPARATOR . 'libraries'  . DIRECTORY_SEPARATOR . 'Able Polecat';
-  define('ABLE_POLECAT_PATH', $ABLE_POLECAT_PATH);
-}
+require_once('pathdefs.php');
 
 //
 // Host context definitions (local or remote)
@@ -23,16 +17,16 @@ define('ABLE_POLECAT_REMOTE_HOST',  0x00000002);
 //
 define('ABLE_POLECAT_RUNTIME_DEV',  0x00000004);
 define('ABLE_POLECAT_RUNTIME_QA',   0x00000008);
-define('ABLE_POLECAT_RUNTIME_USE',  0x00000010);
+define('ABLE_POLECAT_RUNTIME_USER',  0x00000010);
 $ABLE_POLECAT_RUNTIME_CONTEXT = array(
   'dev' => ABLE_POLECAT_RUNTIME_DEV, 
   'qa'  => ABLE_POLECAT_RUNTIME_QA,
-  'use' => ABLE_POLECAT_RUNTIME_USE,
+  'user' => ABLE_POLECAT_RUNTIME_USER,
 );
 $ABLE_POLECAT_RUNTIME_CONTEXT_STR = array(
   ABLE_POLECAT_RUNTIME_DEV => 'dev', 
   ABLE_POLECAT_RUNTIME_QA  => 'qa',
-  ABLE_POLECAT_RUNTIME_USE => 'use',
+  ABLE_POLECAT_RUNTIME_USER => 'user',
 );
 
 //
@@ -84,7 +78,7 @@ function ABLE_POLECAT_SET_EXCEPTION_HANDLER($Handler = 'ABLE_POLECAT_EXCEPTION_H
 function ABLE_POLECAT_EXCEPTION_HANDLER_DEFAULT($Exception) {
   //
   // open syslog, include the process ID and also send
-  // the log to standard error, and use a user defined
+  // the log to standard error, and user a user defined
   // logging mechanism
   //
   openlog("AblePolecat", LOG_PID | LOG_ERR, LOG_USER);
@@ -252,7 +246,7 @@ if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_MONITOR_TIME)) {
 if (isset($_GET['run'])) {
   switch ($_GET['run']) {
     default:
-      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USE);
+      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USER);
       break;
     case 'dev':
       ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_DEV);
@@ -265,7 +259,7 @@ if (isset($_GET['run'])) {
 else if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
   //
   // If runtime context was saved in a cookie, use that until agent
-  // explicitly unsets with run=use or cookie expires.
+  // explicitly unsets with run=user or cookie expires.
   //
   $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
   isset($data['context']) ? $runtime_context = $data['context'] : NULL;
@@ -275,14 +269,14 @@ else if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
       ABLE_POLECAT_SET_MODE($runtime_context);
       break;
     default:
-      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USE);
+      ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USER);
       break;
   }
 }
 else {
     //
     // Otherwise, override runtime context here for Cron or service testing.
-    // ABLE_POLECAT_RUNTIME_DEV | ABLE_POLECAT_RUNTIME_QA | ABLE_POLECAT_RUNTIME_USE
+    // ABLE_POLECAT_RUNTIME_DEV | ABLE_POLECAT_RUNTIME_QA | ABLE_POLECAT_RUNTIME_USER
     //
-    ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USE);
+    ABLE_POLECAT_SET_MODE(ABLE_POLECAT_RUNTIME_USER);
 }
