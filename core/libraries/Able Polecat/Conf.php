@@ -11,6 +11,7 @@ abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_Resour
   /**
    * Element names.
    */
+  const CONF_NAMESPACE    = 'polecat';
   const ELEMENT_ROOT      = 'config';
   const ELEMENT_CLASS     = 'class';
   const ELEMENT_NAME      = 'name';

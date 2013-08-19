@@ -77,11 +77,38 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
       //    created in #4 to gain access to this. If file does not exist 
       //    initialization routine will create it with default settings.
       //
-      // $Environment->registerLoadableClass(
-        // 'AblePolecat_Conf_Application',
-        // ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf' . DIRECTORY_SEPARATOR . 'Application.php',
-        // 'touch'
-      // );
+      $Environment->registerLoadableClass(
+        'AblePolecat_Conf_Default',
+        ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf' . DIRECTORY_SEPARATOR . 'Default.php',
+        'touch'
+      );
+      $Config = $Environment->loadClass('AblePolecat_Conf_Default');
+      if (isset($Config)) {
+        //
+        // Grant open permission on config file to agent.
+        //
+        $Config->setPermission($Agent, AblePolecat_AccessControl_Constraint_Open::getId());
+        $Config->setPermission($Agent, AblePolecat_AccessControl_Constraint_Read::getId());
+        
+        //
+        // Set configuration file/path.
+        //
+        $conf_path = NULL;
+        $filename = 'default.xml';
+        if (isset($ABLE_POLECAT_RUNTIME_CONTEXT_STR[$Environment->getRuntimeContext()])) {
+          $conf_path = $ABLE_POLECAT_RUNTIME_CONTEXT_STR[$Environment->getRuntimeContext()] . 
+            DIRECTORY_SEPARATOR . $filename;
+        }
+        else {
+          $conf_path = 'user' . DIRECTORY_SEPARATOR . $filename;
+        }
+        $ConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($conf_path, ABLE_POLECAT_CONF_PATH);
+        $Environment->setConf($Config, $ConfigUrl);
+      }
+      else {
+        throw new AblePolecat_Environment_Exception("Failure to access/set application configuration.", 
+          AblePolecat_Environment_Exception::ERROR_ENV_BOOTSTRAP_CONFIG);
+      }
 
       //
       // 5. @todo: Register and load modules.

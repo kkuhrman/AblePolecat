@@ -1,0 +1,11 @@
+<?xml version='1.0' standalone='yes'?>
+<polecat:config>
+  <application>
+    <name>Able Polecat</name>
+  </application>
+  <polecat:file>
+    <author>Karl Kuhrman</author>
+    <name>default.xml</name>
+    <description>Default Able Polecat application configuration file</description>
+  </polecat:file>
+</polecat:config>
