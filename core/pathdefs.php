@@ -61,6 +61,51 @@ if (!defined('ABLE_POLECAT_BASE_URL')) {
 }
 
 //
+// Contributed libraries directory.
+//
+if (!defined('ABLE_POLECAT_LIBS_PATH')) {
+  $ABLE_POLECAT_LIBS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'libs';
+  define('ABLE_POLECAT_LIBS_PATH', $ABLE_POLECAT_LIBS_PATH);
+  if (!file_exists(ABLE_POLECAT_LIBS_PATH)) {
+    if (!mkdir(ABLE_POLECAT_LIBS_PATH)) {
+      //
+      // @todo: report warning
+      //
+    }
+  }
+}
+
+//
+// Log files directory.
+//
+if (!defined('ABLE_POLECAT_LOGS_PATH')) {
+  $ABLE_POLECAT_LOGS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'logs';
+  define('ABLE_POLECAT_LOGS_PATH', $ABLE_POLECAT_LOGS_PATH);
+  if (!file_exists(ABLE_POLECAT_LOGS_PATH)) {
+    if (!mkdir(ABLE_POLECAT_LOGS_PATH)) {
+      //
+      // @todo: report warning
+      //
+    }
+  }
+}
+
+//
+// Contributed modules directory.
+//
+if (!defined('ABLE_POLECAT_MODS_PATH')) {
+  $ABLE_POLECAT_MODS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'mods';
+  define('ABLE_POLECAT_MODS_PATH', $ABLE_POLECAT_MODS_PATH);
+  if (!file_exists(ABLE_POLECAT_MODS_PATH)) {
+    if (!mkdir(ABLE_POLECAT_MODS_PATH)) {
+      //
+      // @todo: report warning
+      //
+    }
+  }
+}
+
+//
 // Path to Able Polecat library.
 //
 if (!defined('ABLE_POLECAT_PATH')) {
@@ -82,14 +127,6 @@ if (!defined('ABLE_POLECAT_CONF_PATH')) {
 if (!defined('ABLE_POLECAT_DEV_PATH')) {
   $ABLE_POLECAT_DEV_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'dev';
   define('ABLE_POLECAT_DEV_PATH', $ABLE_POLECAT_DEV_PATH);
-}
-
-//
-// Path to Able Polecat modules.
-//
-if (!defined('ABLE_POLECAT_MODS_PATH')) {
-  $ABLE_POLECAT_MODS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'mods';
-  define('ABLE_POLECAT_MODS_PATH', $ABLE_POLECAT_MODS_PATH);
 }
 
 //

@@ -3,9 +3,8 @@
  * @file: info.php
  * Default landing page for user site in dev mode.
  */
-$ABLE_POLECAT_ROOT = dirname(__DIR__);
-require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'pathdefs.php');
-require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'bootmode.php');
+
+require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'boot.php');
 
 ?>
 
@@ -24,7 +23,9 @@ require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPAR
     </p>
     <p>Script execution time was <?php echo ABLE_POLECAT_CLOCK_PRINT(); ?></p>
     <p>Able Polecat runtime context is <?php 
-    echo sprintf("%1$032b", $runtime_context) . ' aka ' . print_r($runtime_context, TRUE) . ' (' . $ABLE_POLECAT_RUNTIME_CONTEXT_STR[$runtime_context] . ') '; ?>
+      $runtime_context = AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext();
+      echo sprintf("%1$032b", $runtime_context) . ' aka ' . print_r($runtime_context, TRUE) . ' (' . AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext(TRUE) . ') '; 
+    ?>
     <a href="<?php print(ABLE_POLECAT_BASE_URL . 'dev/runctxt.php'); ?>"><small>change this</small></a>
     </p>
     <p><?php print_r($_COOKIE); ?></p>

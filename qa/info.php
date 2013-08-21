@@ -3,9 +3,8 @@
  * @file: info.php
  * Default landing page for user site in qa mode.
  */
-$ABLE_POLECAT_ROOT = dirname(__DIR__);
-require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'pathdefs.php');
-require_once($ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'bootmode.php');
+
+require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'boot.php');
 
 ?>
 

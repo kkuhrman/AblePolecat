@@ -8,14 +8,19 @@
  * Able Polecat exception codes.
  */
 
-//
-// Unknown exception.
-//
+/**
+ * Unknown exception.
+ */
 define('ABLE_POLECAT_EXCEPTION_UNKNOWN', 0);
 
-//
-// Invalid boot file path encountered.
-//
+/**
+ * Violation of bootstrap procedure sequence rules.
+ */
+define('ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION', 10);
+
+/**
+ * Invalid boot file path encountered.
+ */
 define('ABLE_POLECAT_EXCEPTION_BOOT_PATH_INVALID', 100);
 
 /**
@@ -64,20 +69,54 @@ define('ABLE_POLECAT_EXCEPTION_GET_CURRENT_ENV', 108);
 define('ABLE_POLECAT_EXCEPTION_GET_MEMBER', 109);
 
 /**
+ * Invalid path for contributed class libraries.
+ */
+define('ABLE_POLECAT_EXCEPTION_LIBS_PATH_INVALID', 110);
+
+/**
+ * Invalid path for log files.
+ */
+define('ABLE_POLECAT_EXCEPTION_LOGS_PATH_INVALID', 111);
+
+/**
+ * Invalid path for contributed modules.
+ */
+define('ABLE_POLECAT_EXCEPTION_MODS_PATH_INVALID', 112);
+
+/**
  * Session unavailable.
  */
-define('ABLE_POLECAT_EXCEPTION_UNAVAILABLE', 0x00000000);
+define('ABLE_POLECAT_EXCEPTION_UNAVAILABLE', 201);
 
 /**
  * Session not started.
  */
-define('ABLE_POLECAT_EXCEPTION_NOT_STARTED', 0x00000000);
+define('ABLE_POLECAT_EXCEPTION_NOT_STARTED', 202);
 
 /**
  * Failed to decode session.
  */
-define('ABLE_POLECAT_EXCEPTION_DECODE_FAIL', 0x00000000);
+define('ABLE_POLECAT_EXCEPTION_DECODE_FAIL', 203);
 
+/**
+ * Failed to open specified syslog.
+ */
+define('ABLE_POLECAT_EXCEPTION_SYSLOG', 301);
+
+/**
+ * No default logger.
+ */
+define('ABLE_POLECAT_EXCEPTION_NO_DEF_LOG', 302); 
+
+/**
+ * Failed to open log file.
+ */
+define('ABLE_POLECAT_EXCEPTION_LOG_OPEN_FAIL', 303);
+
+/**
+ * Attempt to log to an invalid stream.
+ */
+define('ABLE_POLECAT_EXCEPTION_LOG_INVALID', 304);
 
 /**
  * @return Default message for given exception code.
@@ -85,6 +124,7 @@ define('ABLE_POLECAT_EXCEPTION_DECODE_FAIL', 0x00000000);
 function ABLE_POLECAT_EXCEPTION_MSG($code = NULL) {
   $message = array(
     ABLE_POLECAT_EXCEPTION_UNKNOWN => 'Exception thrown in Able Polecat.',
+    ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION => 'Bootstrap procedure sequence violation.',
     ABLE_POLECAT_EXCEPTION_BOOT_PATH_INVALID => 'Invalid boot file path encountered.',
     ABLE_POLECAT_EXCEPTION_BOOTSTRAP_CLASS_REG => 'Invalid loadable class registration.',
     ABLE_POLECAT_EXCEPTION_BOOTSTRAP_LOGGER => 'Failure to set logger.',
@@ -95,9 +135,16 @@ function ABLE_POLECAT_EXCEPTION_MSG($code = NULL) {
     ABLE_POLECAT_EXCEPTION_BOOTSTRAP_BUS => 'Failure to bring service bus online.',
     ABLE_POLECAT_EXCEPTION_GET_CURRENT_ENV => 'Failure to return a current environment object.',
     ABLE_POLECAT_EXCEPTION_GET_MEMBER => 'Failure to return a environment member object.',
+    ABLE_POLECAT_EXCEPTION_LIBS_PATH_INVALID => 'Invalid path for contributed class libraries.',
+    ABLE_POLECAT_EXCEPTION_MODS_PATH_INVALID => 'Invalid path for contributed modules.',
+    ABLE_POLECAT_EXCEPTION_LOGS_PATH_INVALID => 'Invalid path for log files.',
     ABLE_POLECAT_EXCEPTION_UNAVAILABLE => 'Session unavailable.',
     ABLE_POLECAT_EXCEPTION_NOT_STARTED => 'Session not started.',
     ABLE_POLECAT_EXCEPTION_DECODE_FAIL => 'Failed to decode session.',
+    ABLE_POLECAT_EXCEPTION_SYSLOG => 'Failed to open syslog.',
+    ABLE_POLECAT_EXCEPTION_NO_DEF_LOG => 'No default logger.',
+    ABLE_POLECAT_EXCEPTION_LOG_OPEN_FAIL => 'Failed to open log file.',
+    ABLE_POLECAT_EXCEPTION_LOG_INVALID => 'Attempt to log to an invalid stream.',
   );
 
   if (isset($code) && isset($message[$code])) {

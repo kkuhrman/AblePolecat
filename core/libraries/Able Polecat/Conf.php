@@ -9,6 +9,12 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTO
 abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_ResourceAbstract {
   
   /**
+   * write() parameters
+   */
+  const WRITE_PARAM_ELEMENT_NAME  = 'element_name';
+  const WRITE_PARAM_ELEMENT_VALUE = 'element_value';
+  
+  /**
    * Element attribute names.
    */
   const ATTRIBUTE_AUTHOR  = 'author';  
@@ -161,17 +167,31 @@ abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_Resour
    * 
    * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking to read.
    * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
+   * @param mixed $data The data to write to the resource.
    *
    * @return bool TRUE if write to resource is successful, otherwise FALSE.
    */
-  public function write(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_Resource_LocaterInterface $Url) {
+  public function write(
+    AblePolecat_AccessControl_AgentInterface $Agent, 
+    AblePolecat_AccessControl_Resource_LocaterInterface $Url,
+    $data
+  ) {
     
     $result = FALSE;
     
     if ($this->hasPermission($Agent, AblePolecat_AccessControl_Constraint_Write::getId())) {
-      //
-      // @todo save file as XML.
-      //
+      if (isset($this->m_SimpleXml)) {
+        $element_name = NULL;
+        $element_value = NULL;
+        if (isset($data) && is_array($data)) {
+          isset($data[self::WRITE_PARAM_ELEMENT_NAME]) ? $element_name = $data[self::WRITE_PARAM_ELEMENT_NAME] : NULL;
+          isset($data[self::WRITE_PARAM_ELEMENT_VALUE]) ? $element_value = $data[self::WRITE_PARAM_ELEMENT_VALUE] : NULL;
+        }
+        else if (isset($data) && is_string($data)) {
+          $element_name = $data;
+        }
+        $result = $this->m_SimpleXml->addChild($element_name, $element_value);
+      }
     }
     return $result;
   }

@@ -9,6 +9,7 @@ if (!defined('ABLE_POLECAT_PATH')) {
   define('ABLE_POLECAT_PATH', $able_polecat_path);
 }
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
+include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Log.php');
 
 interface AblePolecat_EnvironmentInterface {
   
@@ -71,6 +72,7 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    */
   const CLASS_REG_PATH    = 'path';
   const CLASS_REG_METHOD  = 'method';
+  const DEFAULT_LOGGER    = 0;
   
   /**
    * @var Array Registry of classes which can be loaded.
@@ -78,12 +80,12 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   private $m_loadable_classes;
   
   /**
-   * @var Array Registry of loggers.
+   * @var Array Registry of contributed module configurations.
    */
-  private $m_registered_loggers;
+  private $m_registered_modules;
   
   /**
-   * @var Logger is used to send messages to stdout and stderr.
+   * @var Array Loggers used for saving status, error messages etc.
    */
   private $m_Logger;
   
@@ -114,8 +116,8 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    */
   protected function initialize() {
     $this->m_loadable_classes = array();
-    $this->m_registered_loggers = array();
-    $this->m_Logger = NULL;
+    $this->m_registered_modules = array();
+    $this->m_Logger = array();
     $this->m_Agents = array();
     $this->m_Config = NULL;
     $this->m_AppDb = NULL;
@@ -140,9 +142,64 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
         //
         // throw exception
         //
-        throw new AblePolecat_Environment_Exception($error_message, $error_number);
+        if (count($this->m_Logger)) {
+          throw new AblePolecat_Environment_Exception($error_message, $error_number);
+        }
+        else {
+          trigger_error($error_message, E_USER_ERROR);
+        }
         break;
     }
+  }
+  
+  /**
+   * Helper function searches given directory for module configuration file.
+   *
+   * Able Polecat requires contributed modules to have at least one configuration file 
+   * with the name module.xml. This file *must* be located in the mods directory. All 
+   * other module resources (files, class libraries, etc) can be located elsewhere as 
+   * defined in module.xml.
+   *
+   * Examples of acceptable module configuration file placement:
+   * 1. One configuration for all runtime contexts:
+   *    [AblePolecat ROOT]/mods/MyModule/conf/module.xml
+   * 2. Different configurations for one or more runtime contexts:
+   *    [AblePolecat ROOT]/mods/MyModule/conf/dev/module.xml
+   *                                      .../qa/module.xml
+   *                                      .../use/module.xml
+   *
+   * @param string $search_directory Name of directory to search.
+   * @param string $parent_directory i.e. cd ..
+   *
+   * @return string Full path name of module configuration file or NULL if not found.
+   */
+  protected function findModuleConfigurationFile($search_directory, $parent_directory = ABLE_POLECAT_MODS_PATH) {
+    
+    $conf_path = NULL;
+    
+    if ($search_directory != "." && $search_directory != "..") {
+      $full_path = $parent_directory . DIRECTORY_SEPARATOR . $search_directory;
+      if (is_dir($full_path)) {
+        $test_path = implode(DIRECTORY_SEPARATOR, array($full_path, 'conf', 'module.xml'));
+        if (file_exists($test_path)) {
+          //
+          // One configuration for all runtime contexts.
+          //
+          $conf_path = $test_path;
+        }
+        else {
+          $context_dir = $this->getRuntimeContext(TRUE);
+          $test_path = implode(DIRECTORY_SEPARATOR, array($full_path, 'conf', $context_dir, 'module.xml'));
+          if (file_exists($test_path)) {
+            //
+            // Configuration specific to runtime context.
+            //
+            $conf_path = $test_path;
+          }
+        }
+      }
+    }
+    return $conf_path;
   }
   
   /**
@@ -176,6 +233,125 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
+   * Load registered contributed modules.
+   */
+  public function loadModules() {
+    foreach($this->m_registered_modules as $modName => $modReg) {
+      $modLoadClasses = $modReg['classes'];
+      foreach($modLoadClasses as $key => $className) {
+        $class = $this->loadClass($className);
+        
+        //
+        // If module class is a logger, add it to environment
+        //
+        if (is_a($class, 'AblePolecat_LogInterface')) {
+          $this->m_Logger[] = $class;
+        }
+      }
+      $this->logStatusMessage("Loaded contributed module $modName.");
+    }
+  }
+  
+  /**
+   * Registers all contributed modules in mods directory flagged to be registered.
+   * @see findModuleConfigurationFile().
+   */
+  public function registerModules() {
+    //
+    // Application agent must be assigned already or all shall fail... oh woe!
+    //
+    $Agent = $this->getAgentById(AblePolecat_AccessControl_Agent_Application::getId());
+    if (isset($Agent)) {
+      if (count($this->m_registered_modules) === 0) {
+        if (file_exists(ABLE_POLECAT_MODS_PATH) && is_dir(ABLE_POLECAT_MODS_PATH)) {
+          $h_mods_dir = opendir(ABLE_POLECAT_MODS_PATH);
+          if ($h_mods_dir) {
+            while (false !== ($current_file = readdir($h_mods_dir))) {
+              $module_conf_path = $this->findModuleConfigurationFile($current_file);
+              if (isset($module_conf_path)) {
+                $ModConfig = $this->loadClass('AblePolecat_Conf_Module');
+                if (isset($ModConfig)) {
+                  //
+                  // Grant open permission on config file to agent.
+                  //
+                  $ModConfig->setPermission($Agent, AblePolecat_AccessControl_Constraint_Open::getId());
+                  $ModConfig->setPermission($Agent, AblePolecat_AccessControl_Constraint_Read::getId());              
+                  $ModConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($module_conf_path);
+                  $this->registerModule($ModConfig, $ModConfigUrl);
+                }
+              }
+            }
+            closedir($h_mods_dir);
+          }
+        }
+        else {
+          throw new AblePolecat_Environment_Exception(ABLE_POLECAT_EXCEPTION_MSG(ABLE_POLECAT_EXCEPTION_MODS_PATH_INVALID), 
+            ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+        }
+      }
+    }
+    else {
+      throw new AblePolecat_Environment_Exception('Cannot register modules before application agent is assigned.', 
+        ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+    }
+  }
+  
+  /**
+   * Registers the given contributed module.
+   *
+   * Configuration is type SimpleXMLElement, elements are SimpleXMLElement or SimpleXMLIterator.
+   * Must cast text as string when passing as function parameters. Make sure __toString is invoked.
+   * @see: http://us3.php.net/manual/en/simplexml.examples-basic.php
+   *
+   * @param AblePolecat_Conf_Module $modConfig Module configuration file
+   * @param AblePolecat_AccessControl_Resource_LocaterInterface $modPath Full path to contributed module directory.
+   */
+  public function registerModule(AblePolecat_Conf_Module $modConfig, AblePolecat_AccessControl_Resource_LocaterInterface $modPath) {
+    
+    $Agent = $this->getAgentById(AblePolecat_AccessControl_Agent_Application::getId());
+    if ($modConfig->open($Agent, $modPath)) {
+      $modConfSxElement = $modConfig->read($Agent);
+      $moduleAttributes = $modConfSxElement->attributes();
+      isset($modConfSxElement->classes) ? $moduleClasses = $modConfSxElement->classes : $moduleClasses = array();
+      $modLoadClasses = array();
+      foreach($moduleClasses as $key => $class) {
+        if(isset($class->{'class'})) {
+          $classAttributes = $class->{'class'}->attributes();
+          if (isset($classAttributes['register']) && intval($classAttributes['register'])) {
+            isset($class->{'class'}->classname) ? $className = $class->{'class'}->classname->__toString() : $className = NULL;
+            isset($class->{'class'}->filename) ? $fileName = $class->{'class'}->filename->__toString() : $fileName = NULL;
+            if(isset($className) && isset($fileName)) {
+              //
+              // Trim any leading and trailing slashes from relative URL.
+              //
+              isset($moduleAttributes['fullpath']) ? $moduleFullpath = trim($moduleAttributes['fullpath'], '/') : $moduleFullpath = '';
+              isset($fileName) ? $classFullPath = $moduleFullpath . DIRECTORY_SEPARATOR . $fileName : $classFullPath = NULL;
+              isset($class->{'class'}->classFactoryMethod) ? $classFactoryMethod = $class->{'class'}->classFactoryMethod->__toString() : $classFactoryMethod = NULL;
+              if(isset($classFullPath) && isset($classFactoryMethod)) {
+                $this->registerLoadableClass($className, $classFullPath, $classFactoryMethod);
+                if (isset($classAttributes['load']) && intval($classAttributes['load'])) {
+                  $modLoadClasses[] = $className;
+                }
+              }
+            }
+          }
+        }
+      }
+      $moduleName = $moduleAttributes['name']->__toString();
+      $this->m_registered_modules[$moduleName] = array(
+        'conf' => $modConfig,
+        'path' => $modPath,
+        'classes' => $modLoadClasses,
+      );
+      $this->logStatusMessage("Registered contributed module $moduleName.");
+    }
+    else {
+      $path = $modPath->__toString();
+      $this->logErrorMessage("Failed to open module configuration file at $path.");
+    }
+  }
+  
+  /**
    * Adds given access control agent to environment.
    *
    * @param object Instance of class which implements AblePolecat_AccessControl_AgentInterface.
@@ -195,8 +371,6 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    */
   public function getAgentById($agent_id) {
     $Agent = NULL;
-    // $this->logStatusMessage('agent id', $agent_id);
-    // $this->logStatusMessage('agents', $this->m_Agents);
     if (isset($this->m_Agents[$agent_id])) {
       $Agent = $this->m_Agents[$agent_id];
     }
@@ -298,10 +472,20 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
-   * @return ABLE_POLECAT_RUNTIME_DEV < ABLE_POLECAT_RUNTIME_QA < ABLE_POLECAT_RUNTIME_USER
+   * Runtime context is one of the following:
+   * user - normal operation
+   * dev  - check configuration, file syntax, unit tests...
+   * qa   - performance monitoring, use case testing...
+   *
+   * @param bool $as_string If TRUE, will return string value of rtc, otherwise numeric.
+   *
+   * @return int or string based on value of $as_string.
    */
-  public function getRuntimeContext() {
+  public function getRuntimeContext($as_string = FALSE) {
     
+    //
+    // defaults: ABLE_POLECAT_RUNTIME_DEV < ABLE_POLECAT_RUNTIME_QA < ABLE_POLECAT_RUNTIME_USER
+    //
     $runtime_context = ABLE_POLECAT_RUNTIME_USER;
     if (!ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_USER)) {
       if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_QA)) {
@@ -309,6 +493,19 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
       }
       else if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_RUNTIME_DEV)) {
         $runtime_context = ABLE_POLECAT_RUNTIME_DEV;
+      }
+    }
+    if ($as_string) {
+      switch ($runtime_context) {
+        case ABLE_POLECAT_RUNTIME_DEV: 
+          $runtime_context = 'dev';
+          break;
+        case ABLE_POLECAT_RUNTIME_QA:
+          $runtime_context = 'qa';
+          break;
+        case ABLE_POLECAT_RUNTIME_USER:
+          $runtime_context = 'user';
+          break;
       }
     }
     return $runtime_context;
@@ -362,7 +559,10 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    */
   public function setConf(AblePolecat_ConfAbstract $Config, AblePolecat_AccessControl_Resource_LocaterInterface $Url) {
     $Agent = $this->getAgentById(AblePolecat_AccessControl_Agent_Application::getId());
-    if (isset($Agent) && $Config->open($Agent, $Url)) {
+    //
+    // Application configuration file
+    //
+    if ($Config->open($Agent, $Url)) {
       $this->m_Config = $Config;
     }
   }
@@ -381,6 +581,35 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
+   * Set default logger for environment.
+   * 
+   * @param AblePolecat_LogInterface $Logger.
+   */
+  public function setDefaultLogger(AblePolecat_LogInterface $Logger) {
+    
+    if (isset($Logger)) {
+      if (isset($this->m_Logger[self::DEFAULT_LOGGER])) {
+        //
+        // Only replace default logger if different type.
+        //
+        $className = get_class($Logger);
+        if (!is_a($this->m_Logger[self::DEFAULT_LOGGER], $className)) {
+          $oldDefaultLogger = $this->m_Logger[self::DEFAULT_LOGGER];
+          $this->m_Logger[self::DEFAULT_LOGGER] = $Logger;
+          $this->m_Logger[] = $oldDefaultLogger;
+        }
+      }
+      else {
+        $this->m_Logger[self::DEFAULT_LOGGER] = $Logger;
+      }
+    }
+    else {
+      $this->handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_LOGGER,
+        "Default logger cannot be NULL.");
+    }
+  }
+  
+  /**
    * Set the service bus.
    *
    * @param AblePolecat_Service_Bus $Bus.
@@ -391,40 +620,14 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   }
   
   /**
-   * Registers logger classes for later loading based settings.php defs.
-   */
-  public function registerLoggerClasses() {
-    //
-    // @todo: loggers will be defined in global conf file and module conf files
-    //
-    // add so: $this->m_registered_loggers[$logger_id] = $class_name;
-  }
-  
-  /**
-   * Loads preregistered logger classes.
-   */
-  public function loadLoggerClasses() {
-    $this->m_Logger = array();
-    foreach($this->m_registered_loggers as $logger_id => $class_name) {
-      if ($this->isLoadable($class_name)) {
-        $this->m_Logger[$logger_id] = $this->loadClass($class_name);
-        if (!isset($this->m_Logger[$logger_id])) {
-          $this->handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_LOGGER,
-            "Failed to load logger class $class_name.");
-        }
-      }
-    }
-  }
-  
-  /**
    * Log a status message to all logger streams.
    * 
    * @param mixed $msg... variable set of arguments.
    *
    */
   public function logStatusMessage($msg = NULL) {
-    !is_string($msg) ? $message = serialize($msg) : $message = $msg;
-    if (isset($this->m_Logger) && is_array($this->m_Logger)) {
+    if (isset($this->m_Logger) && count($this->m_Logger)) {
+      !is_string($msg) ? $message = serialize($msg) : $message = $msg;
       foreach($this->m_Logger as $key => $logger) {
         $logger->logStatusMessage($message);
       }
@@ -438,8 +641,8 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    *
    */
   public function logWarningMessage($msg = NULL) {
-    !is_string($msg) ? $message = serialize($msg) : $message = $msg;
-    if (isset($this->m_Logger) && is_array($this->m_Logger)) {
+    if (isset($this->m_Logger) && count($this->m_Logger)) {
+      !is_string($msg) ? $message = serialize($msg) : $message = $msg;
       foreach($this->m_Logger as $key => $logger) {
         $logger->logWarningMessage($message);
       }
@@ -454,10 +657,13 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    */
   public function logErrorMessage($msg = NULL) {
     !is_string($msg) ? $message = serialize($msg) : $message = $msg;
-    if (isset($this->m_Logger) && is_array($this->m_Logger)) {
+    if (isset($this->m_Logger) && count($this->m_Logger)) {
       foreach($this->m_Logger as $key => $logger) {
         $logger->logErrorMessage($message);
       }
+    }
+    else {
+      throw new AblePolecat_Environment_Exception($msg, ABLE_POLECAT_EXCEPTION_UNKNOWN);
     }
   }
   
@@ -547,8 +753,10 @@ class AblePolecat_Environment_Aware_Object {
         default:
           break;
         case AblePolecat_LogInterface::STATUS:
-        case AblePolecat_LogInterface::WARNING:
           $Environment->logStatusMessage($message, $data);
+          break;
+        case AblePolecat_LogInterface::WARNING:
+          $Environment->logWarningMessage($message, $data);
           break;
         case AblePolecat_LogInterface::ERROR:
           $Environment->logErrorMessage($message, $data);

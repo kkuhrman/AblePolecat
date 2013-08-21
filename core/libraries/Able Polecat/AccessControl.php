@@ -387,10 +387,14 @@ interface AblePolecat_AccessControl_ResourceInterface extends AblePolecat_Access
    * 
    * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking to read.
    * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
+   * @param mixed $data The data to write to the resource.
    *
    * @return bool TRUE if write to resource is successful, otherwise FALSE.
    */
-  public function write(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_Resource_LocaterInterface $Url);
+  public function write(
+    AblePolecat_AccessControl_AgentInterface $Agent, 
+    AblePolecat_AccessControl_Resource_LocaterInterface $Url,
+    $data);
 }
 
 /**

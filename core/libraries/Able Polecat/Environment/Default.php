@@ -28,15 +28,26 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
     }
     catch (AblePolecat_Environment_Exception $e) {
       //
-      // 1. Create environment object.
+      // Create environment object.
       //
       // Global variable provides access to environment object during bootstrap.
       //
       $GLOBALS['ABLE_POLECAT_ENVIRONMENT_BOOTSTRAP'] = new AblePolecat_Environment_Default();
       $Environment = $GLOBALS['ABLE_POLECAT_ENVIRONMENT_BOOTSTRAP'];
+      
+      //
+      // Initialize the default logger (CSV file).
+      //
+      $Environment->registerLoadableClass(
+        'AblePolecat_Log_Csv',
+        ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Log' . DIRECTORY_SEPARATOR . 'Csv.php',
+        'wakeup'
+      );
+      $defaultLogger = $Environment->loadClass('AblePolecat_Log_Csv');
+      $Environment->setDefaultLogger($defaultLogger);
 
       //
-      // 2. Start or resume session.
+      // Start or resume session.
       //
       $Environment->registerLoadableClass(
         'AblePolecat_Session',
@@ -49,12 +60,12 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
       }
 
       //
-      // 3. Initialize application access control.
+      // Initialize application access control.
       //
-      //    Create instance of AblePolecat_AccessControl_Agent_Application 
-      //    which must implement AblePolecat_AccessControl_AgentInterface.
-      //    This should have access to config file, which must implement 
-      //    AblePolecat_AccessControl_ResourceInterface.
+      // Create instance of AblePolecat_AccessControl_Agent_Application 
+      // which must implement AblePolecat_AccessControl_AgentInterface.
+      // This should have access to config file, which must implement 
+      // AblePolecat_AccessControl_ResourceInterface.
       //
       $Environment->registerLoadableClass(
         'AblePolecat_AccessControl_Agent_Application', 
@@ -70,12 +81,12 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
       }
 
       //
-      // 4. @todo: Load application configuration settings.
+      // Load application configuration settings.
       //    
-      //    Load AblePolecat_Storage_File_Conf, which must implement 
-      //    AblePolecat_AccessControl_ResourceInterface. Will use agent 
-      //    created in #4 to gain access to this. If file does not exist 
-      //    initialization routine will create it with default settings.
+      // Load AblePolecat_Storage_File_Conf, which must implement 
+      // AblePolecat_AccessControl_ResourceInterface. Will use agent 
+      // created in #4 to gain access to this. If file does not exist 
+      // initialization routine will create it with default settings.
       //
       $Environment->registerLoadableClass(
         'AblePolecat_Conf_Default',
@@ -95,13 +106,7 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
         //
         $conf_path = NULL;
         $filename = 'default.xml';
-        if (isset($ABLE_POLECAT_RUNTIME_CONTEXT_STR[$Environment->getRuntimeContext()])) {
-          $conf_path = $ABLE_POLECAT_RUNTIME_CONTEXT_STR[$Environment->getRuntimeContext()] . 
-            DIRECTORY_SEPARATOR . $filename;
-        }
-        else {
-          $conf_path = 'user' . DIRECTORY_SEPARATOR . $filename;
-        }
+        $conf_path = $Environment->getRuntimeContext(TRUE) . DIRECTORY_SEPARATOR . $filename;
         $ConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($conf_path, ABLE_POLECAT_CONF_PATH);
         $Environment->setConf($Config, $ConfigUrl);
       }
@@ -111,8 +116,20 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
       }
 
       //
-      // 5. @todo: Register and load modules.
+      // Register and load modules.
       //
+      $Environment->registerLoadableClass(
+        'AblePolecat_Conf_Module',
+        ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf' . DIRECTORY_SEPARATOR . 'Module.php',
+        'touch'
+      );
+      $Environment->registerModules();
+      $Environment->loadModules();
+      
+      //JUNK
+      $Environment->logStatusMessage('this is a test status message');
+      $Environment->logWarningMessage('this is a test warning message');
+      $Environment->logErrorMessage('this is a test error message');
 
       //
       // 6. @todo: Register and load loggers.

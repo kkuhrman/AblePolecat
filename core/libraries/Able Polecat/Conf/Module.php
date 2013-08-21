@@ -1,15 +1,15 @@
 <?php 
 /**
- * @file: Default.php
- * Default application configuration settings.
+ * @file: Module.php
+ * Module configuration settings.
  */
 
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
 
-class AblePolecat_Conf_Default extends AblePolecat_ConfAbstract {
+class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
   
-  const UUID              = 'fba4f890-60eb-11e2-bcfd-0800200c9a66';
-  const NAME              = 'Default Able Polecat Configuration';
+  const UUID              = 'fff28c77-3e91-4f3b-98d1-1e3a5347f1df';
+  const NAME              = 'Able Polecat Module Configuration';
   
   /**
    * Extends __construct().
@@ -40,7 +40,7 @@ class AblePolecat_Conf_Default extends AblePolecat_ConfAbstract {
    * Creates empty resource.
    */
   public static function touch() {
-    $Conf = new AblePolecat_Conf_Default();
+    $Conf = new AblePolecat_Conf_Module();
     return $Conf;
   }
   
@@ -60,10 +60,11 @@ class AblePolecat_Conf_Default extends AblePolecat_ConfAbstract {
       //
       // Read configuration file.
       //
+      $configFullPath = NULL;
       if (isset($Url) && is_file("$Url")) {
-        $filename = "$Url";
-        $handle = fopen($filename, "r");
-        $xmldoc = fread($handle, filesize($filename));
+        $configFullPath = "$Url";
+        $handle = fopen($configFullPath, "r");
+        $xmldoc = fread($handle, filesize($configFullPath));
         $this->setLocater($Url);
         fclose($handle);
       }
@@ -72,16 +73,22 @@ class AblePolecat_Conf_Default extends AblePolecat_ConfAbstract {
         // Default document.
         //
         $xmldoc = sprintf("<?xml version='1.0' standalone='yes'?><%s></%s>", 
-          self::CONF_NAMESPACE . ':' . self::ELEMENT_ROOT,
-          self::CONF_NAMESPACE . ':' . self::ELEMENT_ROOT);
+          self::CONF_NAMESPACE . ':' . self::ELEMENT_MODULE,
+          self::CONF_NAMESPACE . ':' . self::ELEMENT_MODULE);
       }
       try {
         @$this->m_SimpleXml = new SimpleXMLElement($xmldoc);
         $this->m_SimpleXml->addChild(self::CONF_NAMESPACE . ':' . self::ELEMENT_CLASS, get_class($this));
+        $attributes = $this->m_SimpleXml->attributes();
+        if (!isset($attributes['fullpath'])) {
+          $pos = strripos($configFullPath, 'conf');
+          $moduleFullpath = substr($configFullPath, 0, $pos - 1);
+          $this->m_SimpleXml->addAttribute('fullpath',$moduleFullpath);
+        }
         $open = TRUE;
       }
       catch(Exception $exception) {
-        $this->logMessage("Failed to open application configuration file: " . $exception->getMessage());
+        $this->logMessage("Failed to open module configuration file: " . $exception->getMessage());
         $this->m_SimpleXml = NULL;
       }
     }
