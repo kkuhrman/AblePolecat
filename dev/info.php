@@ -23,8 +23,7 @@ require_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'boot.php');
     </p>
     <p>Script execution time was <?php echo ABLE_POLECAT_CLOCK_PRINT(); ?></p>
     <p>Able Polecat runtime context is <?php 
-      $runtime_context = AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext();
-      echo sprintf("%1$032b", $runtime_context) . ' aka ' . print_r($runtime_context, TRUE) . ' (' . AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext(TRUE) . ') '; 
+      echo 'Server mode is ' . AblePolecat_Conf_Server::getDefaultSubDir(); 
     ?>
     <a href="<?php print(ABLE_POLECAT_BASE_URL . 'dev/runctxt.php'); ?>"><small>change this</small></a>
     </p>

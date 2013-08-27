@@ -5,28 +5,7 @@
  * @todo: URL rewrites
  */
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'boot.php');
-
-//
-// Redirect to dev or qa
-//
-$runtime_context = AblePolecat_EnvironmentAbstract::getCurrent()->getRuntimeContext();
-switch ($runtime_context) {
-  default:
-    break;
-  case ABLE_POLECAT_RUNTIME_USER:
-    $default_url = ABLE_POLECAT_BASE_URL . 'user/sites/default/index.php';
-    header("Location: $default_url");
-    break;
-  case ABLE_POLECAT_RUNTIME_DEV:
-    $dev_url = ABLE_POLECAT_BASE_URL . 'dev/info.php';
-    header("Location: $dev_url");
-    break;
-  case ABLE_POLECAT_RUNTIME_QA:
-    $qa_url = ABLE_POLECAT_BASE_URL . 'qa/info.php';
-    header("Location: $qa_url");
-    break;
-}
+require_once('boot.php');
 ?>
 
 <!DOCTYPE html>
@@ -42,10 +21,7 @@ switch ($runtime_context) {
     <p>
       Copyright &copy; 2008-2013 <a href="http://www.abledistributors.com" target="new">Able Distributors Inc.</a>. All rights reserved.
     </p>
-    <p>Able Polecat runtime context <?php echo sprintf("%1$032b", $runtime_context) . 
-      ' (' . print_r($runtime_context, TRUE) . ') is not recognized. '; ?>
-    <a href="<?php print(ABLE_POLECAT_BASE_URL . '/dev/runctxt.php'); ?>"><small>change this</small></a>
-    </p>
+    <p><?php var_dump(AblePolecat_Server::ready()); ?></p>
   </div>
 </body>
 </html>

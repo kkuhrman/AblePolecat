@@ -9,7 +9,7 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessContro
 include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Write.php')));
 include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Resource', 'Locater.php')));
 
-abstract class AblePolecat_AccessControl_ResourceAbstract extends AblePolecat_Environment_Aware_Object implements AblePolecat_AccessControl_ResourceInterface {
+abstract class AblePolecat_AccessControl_ResourceAbstract implements AblePolecat_AccessControl_ResourceInterface {
   
   /**
    * Constraint data keys.

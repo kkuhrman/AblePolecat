@@ -19,6 +19,11 @@ define('ABLE_POLECAT_EXCEPTION_UNKNOWN', 0);
 define('ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION', 10);
 
 /**
+ * System path error.
+ */
+define('ABLE_POLECAT_EXCEPTION_SYS_PATH_ERROR', 11);
+
+/**
  * Invalid boot file path encountered.
  */
 define('ABLE_POLECAT_EXCEPTION_BOOT_PATH_INVALID', 100);
@@ -119,12 +124,33 @@ define('ABLE_POLECAT_EXCEPTION_LOG_OPEN_FAIL', 303);
 define('ABLE_POLECAT_EXCEPTION_LOG_INVALID', 304);
 
 /**
+ * Failed to establish client connection to web service.
+ */
+define('ABLE_POLECAT_EXCEPTION_SVC_CLIENT_CONNECT_FAIL', 401);
+
+/**
+ * Failed to exchange data with service client.
+ */
+define('ABLE_POLECAT_EXCEPTION_SVC_DATA_ERROR', 402);
+
+/**
+ * Service client failed to process query.
+ */
+define('ABLE_POLECAT_EXCEPTION_SVC_QUERY_FAIL', 403);
+
+/**
+ * Invalid message format.
+ */
+define('ABLE_POLECAT_EXCEPTION_INVALID_MSG_FMT', 501);
+
+/**
  * @return Default message for given exception code.
  */
 function ABLE_POLECAT_EXCEPTION_MSG($code = NULL) {
   $message = array(
     ABLE_POLECAT_EXCEPTION_UNKNOWN => 'Exception thrown in Able Polecat.',
     ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION => 'Bootstrap procedure sequence violation.',
+    ABLE_POLECAT_EXCEPTION_SYS_PATH_ERROR => 'Invalid system path error encountered.',
     ABLE_POLECAT_EXCEPTION_BOOT_PATH_INVALID => 'Invalid boot file path encountered.',
     ABLE_POLECAT_EXCEPTION_BOOTSTRAP_CLASS_REG => 'Invalid loadable class registration.',
     ABLE_POLECAT_EXCEPTION_BOOTSTRAP_LOGGER => 'Failure to set logger.',
@@ -145,6 +171,9 @@ function ABLE_POLECAT_EXCEPTION_MSG($code = NULL) {
     ABLE_POLECAT_EXCEPTION_NO_DEF_LOG => 'No default logger.',
     ABLE_POLECAT_EXCEPTION_LOG_OPEN_FAIL => 'Failed to open log file.',
     ABLE_POLECAT_EXCEPTION_LOG_INVALID => 'Attempt to log to an invalid stream.',
+    ABLE_POLECAT_EXCEPTION_SVC_CLIENT_CONNECT_FAIL => 'Failed to establish client connection to web service.',
+    ABLE_POLECAT_EXCEPTION_SVC_DATA_ERROR => 'Failed to exchange data with service client.',
+    ABLE_POLECAT_EXCEPTION_SVC_QUERY_FAIL => 'Service client failed to process query.',
   );
 
   if (isset($code) && isset($message[$code])) {

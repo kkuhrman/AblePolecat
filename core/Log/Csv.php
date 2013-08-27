@@ -22,8 +22,9 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
     //
     $file_name = ABLE_POLECAT_LOGS_PATH . DIRECTORY_SEPARATOR . date('Y_m_d', time()) . '.csv';
     $this->hFile = fopen($file_name, 'a');
-    if ($this->hFile ==+ FALSE) {
-      unset($this->hFile);
+    if ($this->hFile == FALSE) {
+      $this->hFile = NULL;
+      trigger_error('Able Polecat failed to open default log file.', E_USER_ERROR);
     }
   }
   
@@ -49,7 +50,7 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
       $line = array(
         $type, 
         date('H:i:s u e', time()),
-        $msg,
+        $message,
       );
       fputcsv($this->hFile, $line);
     }

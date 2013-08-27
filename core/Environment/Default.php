@@ -20,7 +20,7 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
    *
    * @return AblePolecat_Environment_Default.
    */
-  public static function bootstrap() {
+  public static function load() {
   
     $Environment = NULL;
     try {
@@ -30,7 +30,7 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
       //
       // Create environment object.
       //
-      // Global variable provides access to environment object during bootstrap.
+      // Global variable provides access to environment object during load.
       //
       $GLOBALS['ABLE_POLECAT_ENVIRONMENT_BOOTSTRAP'] = new AblePolecat_Environment_Default();
       $Environment = $GLOBALS['ABLE_POLECAT_ENVIRONMENT_BOOTSTRAP'];
@@ -106,7 +106,7 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
         //
         $conf_path = NULL;
         $filename = 'default.xml';
-        $conf_path = $Environment->getRuntimeContext(TRUE) . DIRECTORY_SEPARATOR . $filename;
+        $conf_path = AblePolecat_Conf_Server::getDefaultSubDir() . DIRECTORY_SEPARATOR . $filename;
         $ConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($conf_path, ABLE_POLECAT_CONF_PATH);
         $Environment->setConf($Config, $ConfigUrl);
       }
@@ -125,22 +125,13 @@ class AblePolecat_Environment_Default extends AblePolecat_EnvironmentAbstract {
       );
       $Environment->registerModules();
       $Environment->loadModules();
-      
-      //JUNK
-      $Environment->logStatusMessage('this is a test status message');
-      $Environment->logWarningMessage('this is a test warning message');
-      $Environment->logErrorMessage('this is a test error message');
 
       //
-      // 6. @todo: Register and load loggers.
+      // @todo: Start application service bus.
       //
 
       //
-      // 7. @todo: Start application service bus.
-      //
-
-      //
-      // 8. Clean up and return Environment ready to go.
+      // Clean up and return Environment ready to go.
       //
       unset($GLOBALS['ABLE_POLECAT_ENVIRONMENT_BOOTSTRAP']);
       $GLOBALS['ABLE_POLECAT_ENVIRONMENT'] = $Environment;
