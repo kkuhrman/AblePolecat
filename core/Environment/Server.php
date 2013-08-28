@@ -67,11 +67,6 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       $Environment = new AblePolecat_Environment_Server();
       
       //
-      // Load an instance of the class registry.
-      //
-      $ClassRegistry = AblePolecat_ClassRegistry::wakeup();
-      
-      //
       // Initialize application access control.
       //
       // Create instance of AblePolecat_AccessControl_Agent_Server 
@@ -79,12 +74,12 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       // This should have access to config file, which must implement 
       // AblePolecat_AccessControl_ResourceInterface.
       //
-      $ClassRegistry->registerLoadableClass(
+      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
         'AblePolecat_AccessControl_Agent_Server', 
         implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Server.php')),
         'load'
       );
-      $Agent = $ClassRegistry->loadClass('AblePolecat_AccessControl_Agent_Server');
+      $Agent = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_AccessControl_Agent_Server');
       if (isset($Agent)) {
         $Environment->setAgent($Agent);
       }
@@ -100,12 +95,12 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       // created in #4 to gain access to this. If file does not exist 
       // initialization routine will create it with default settings.
       //
-      $ClassRegistry->registerLoadableClass(
+      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
         'AblePolecat_Conf_Server',
         ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf' . DIRECTORY_SEPARATOR . 'Server.php',
         'touch'
       );
-      $Config = $ClassRegistry->loadClass('AblePolecat_Conf_Server');
+      $Config = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Server');
       if (isset($Config)) {
         //
         // Grant open permission on config file to agent.

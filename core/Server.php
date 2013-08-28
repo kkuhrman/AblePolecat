@@ -64,6 +64,20 @@ interface AblePolecat_ServerInterface {
 class AblePolecat_Server implements AblePolecat_ServerInterface {
   
   /**
+   * Resource protection ring assignments.
+   */
+  const RING_BOOT_MODE        = 0;
+  const RING_DEFAULT_LOG      = 0;
+  const RING_CLASS_REGISTRY   = 0;
+  
+  /**
+   * Internal resource names.
+   */
+  const NAME_BOOT_MODE        = 'boot mode';
+  const NAME_DEFAULT_LOG      = 'default log';
+  const NAME_CLASS_REGISTRY   = 'class registry';
+  
+  /**
    * @var AblePolecat_Server Singleton instance.
    */
   private static $Server = NULL;
@@ -79,12 +93,24 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   private static $boot_mode = NULL;
   
   /**
-   * @var Array Loggers used for saving status, error messages etc.
+   * @var Array $Resources.
+   *
+   * Resources are cached to Able Polecat Server according to a model similar to
+   * OS protection rings. They are stored according to order in which the Server 
+   * initializes. This allows user to call for lower level resources prior to higher
+   * levels being initialized.
+   *
+   * They are stored as Array([zero-based protection ring number] => [internal resource name]);
+   */
+  private static $Resources = NULL;
+  
+  /**
+   * @var AblePolecat_LogInterface Default log file.
    */
   private $DefaultLog;
   
   /**
-   * @var 
+   * @var AblePolecat_ClassRegistryInterface.
    */
   private $ClassRegistry;
   
@@ -103,6 +129,12 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
+    
+    //
+    // 'Kernel' resources container.
+    //
+    self::$Resources[0] = array();
+    
     //
     // This code checks query string for a boot mode parameter named 'run'.
     // If passed, and mode is authorized for client, server will boot in
@@ -131,18 +163,69 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
         self::$boot_mode = $run_var;
         break;
     }
+    self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, self::$boot_mode);
     
     //
-    // Wakeup default log file and class registry.
+    // Wakeup default log file.
     //
     $this->DefaultLog = AblePolecat_Log_Csv::wakeup();
+    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $this->DefaultLog);
+    
+    //
+    // Wakeup class registry.
+    //
     $this->ClassRegistry = AblePolecat_ClassRegistry::wakeup();
+    self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $this->ClassRegistry);
     
     //
     // These are initialzied in bootstrap().
     //
     $this->ServerMode = NULL;
     $this->ServiceBus = NULL;
+  }
+  
+  /**
+   * Retrieves resource given by $name in protection ring given by $ring.
+   *
+   * @param int $ring Ring assignment.
+   * @param string $name Internal name of resource.
+   *
+   * @return mixed The cached resource or NULL.
+   *
+   * @throw Exception if no resource stored at given location.
+   */
+  protected static function getResource($ring, $name) {
+    
+    $resource = NULL;
+    if (isset(self::$Resources[$ring]) && isset(self::$Resources[$ring][$name])) {
+      $resource = self::$Resources[$ring][$name];
+    }
+    else {
+      self::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION, 
+        "Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed.");
+    }
+    return $resource;
+  }
+  
+  /**
+   * Caches resource given by $name in protection ring if available.
+   *
+   * @param int $ring Ring assignment.
+   * @param string $name Internal name of resource.
+   * @param mixed $resource The resource to cache.
+   *
+   * @throw Exception if ring is not intialized.
+   */
+  protected static function setResource($ring, $name, $resource) {
+    if (isset(self::$Resources[$ring]) && is_array(self::$Resources[$ring])) {
+      if (!isset(self::$Resources[$ring][$name])) {
+        self::$Resources[$ring][$name] = $resource;
+      }
+    }
+    else {
+      self::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION, 
+        "Able Polecat Server rejected attempt to cache resource given by $name at protection ring $ring.");
+    }
   }
   
   /**
@@ -273,21 +356,21 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * @return string dev | qa | user.
    */
   public static function getBootMode() {
-    
-    $BootMode = NULL;
-    switch (self::$boot_mode) {
-      default:
-        break;
-      case 'dev':
-      case 'qa':
-      case 'user':
-        $BootMode = self::$boot_mode;
-        break;
-    }
-    if (!isset($BootMode)) {
-      self::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION, 'Call for unitialized boot mode.');
-    }
-    return $BootMode;
+    return self::getResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE);
+  }
+  
+  /**
+   * @return AblePolecat_LogInterface.
+   */
+  public static function getDefaultLog() {
+    return self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG);
+  }
+  
+  /**
+   * @return AblePolecat_ClassRegistryInterface.
+   */
+  public static function getClassRegistry() {
+    return self::getResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY);
   }
   
   /**
@@ -383,6 +466,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   }
   
   final protected function __construct() {
+    self::$Resources = array();
     $this->initialize();
   }
 }
