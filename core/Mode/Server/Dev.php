@@ -4,7 +4,7 @@
  * Boots Able Polecat server in development mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Server', 'Check', 'Paths.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Server', 'Check', 'Paths.php')));
 
 class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
   /**
@@ -61,7 +61,7 @@ class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
       self::$ServerMode = $ServerMode;
       self::$ready = TRUE;
     }
-    return $ServerMode;
+    return self::$ServerMode;
   }
   
   /**
@@ -71,6 +71,6 @@ class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
     //
     // Persist...
     //
-    self::$Singleton = NULL;
+    self::$ServerMode = NULL;
   }
 }

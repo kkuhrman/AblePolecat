@@ -33,6 +33,21 @@ interface AblePolecat_ServerInterface {
   public static function bootstrap();
   
   /**
+   * @return string dev | qa | user.
+   */
+  public static function getBootMode();
+  
+  /**
+   * @return AblePolecat_ClassRegistryInterface.
+   */
+  public static function getClassRegistry();
+  
+  /**
+   * @return AblePolecat_LogInterface.
+   */
+  public static function getDefaultLog();
+  
+  /**
    * @return AblePolecat_Mode_ServerAbstract.
    */
   public static function getServerMode();
@@ -43,6 +58,17 @@ interface AblePolecat_ServerInterface {
    * @return AblePolecat_Service_BusInterface or NULL.
    */
   public static function getServiceBus();
+  
+  /**
+   * Handle critical environment errors depending on runtime context.
+   * 
+   * @param int $error_number Predefined Able Polecat error constant or E_USER_ERROR.
+   * @param mixed $error_message The body of the error message.
+   *
+   * If $error_code is a predefined Able Polecat error constant and $error_message
+   * is not given, the default error message from Exception.php will be used.
+   */
+  public static function handleCriticalError($error_number, $error_message = NULL);
   
   /**
    * Log a message to standard/default log (file).
@@ -69,6 +95,8 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   const RING_BOOT_MODE        = 0;
   const RING_DEFAULT_LOG      = 0;
   const RING_CLASS_REGISTRY   = 0;
+  const RING_SERVER_MODE      = 0;
+  const RING_SERVICE_BUS      = 0;
   
   /**
    * Internal resource names.
@@ -76,6 +104,8 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   const NAME_BOOT_MODE        = 'boot mode';
   const NAME_DEFAULT_LOG      = 'default log';
   const NAME_CLASS_REGISTRY   = 'class registry';
+  const NAME_SERVER_MODE      = 'server mode';
+  const NAME_SERVICE_BUS      = 'service bus';
   
   /**
    * @var AblePolecat_Server Singleton instance.
@@ -88,11 +118,6 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   private static $ready = FALSE;
   
   /**
-   * @var string DEV | QA | USER.
-   */
-  private static $boot_mode = NULL;
-  
-  /**
    * @var Array $Resources.
    *
    * Resources are cached to Able Polecat Server according to a model similar to
@@ -103,30 +128,9 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * They are stored as Array([zero-based protection ring number] => [internal resource name]);
    */
   private static $Resources = NULL;
-  
+    
   /**
-   * @var AblePolecat_LogInterface Default log file.
-   */
-  private $DefaultLog;
-  
-  /**
-   * @var AblePolecat_ClassRegistryInterface.
-   */
-  private $ClassRegistry;
-  
-  /**
-   * @var AblePolecat_Mode_ServerAbstract.
-   */
-  protected $ServerMode;
-  
-  /**
-   * @var Service bus.
-   */
-  protected $ServiceBus;
-  
-  /**
-   * Extends constructor.
-   * Sub-classes should override to initialize members.
+   * Initialize resources in protection ring '0' (e.g. kernel).
    */
   protected function initialize() {
     
@@ -153,35 +157,56 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
         isset($data['context']) ? $run_var = $data['context'] : NULL;
       }
     }
+    $BootMode = 'user';
     switch ($run_var) {
       default:
-        self::$boot_mode = 'user';
         break;
       case 'dev':
       case 'qa':
       case 'user':
-        self::$boot_mode = $run_var;
+        $BootMode = $run_var;
         break;
     }
-    self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, self::$boot_mode);
+    self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, $BootMode);
     
     //
     // Wakeup default log file.
     //
-    $this->DefaultLog = AblePolecat_Log_Csv::wakeup();
-    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $this->DefaultLog);
+    $DefaultLog = AblePolecat_Log_Csv::wakeup();
+    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
     
     //
     // Wakeup class registry.
     //
-    $this->ClassRegistry = AblePolecat_ClassRegistry::wakeup();
-    self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $this->ClassRegistry);
+    $ClassRegistry = AblePolecat_ClassRegistry::wakeup();
+    self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
     
     //
-    // These are initialzied in bootstrap().
+    // Server mode
+    // 1. Initialize error reporting
+    // 2. Set default error handler
+    // 3. Set default exception handler
+    // 4. Normal | Development | Testing mode
     //
-    $this->ServerMode = NULL;
-    $this->ServiceBus = NULL;
+    $ServerMode = NULL;
+    switch(self::getBootMode()) {
+      default:
+        require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Normal.php')));
+        $ServerMode = AblePolecat_Mode_Normal::wakeup();
+        break;
+      case 'dev':
+        require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Dev.php')));
+        $ServerMode = AblePolecat_Mode_Dev::wakeup();
+        break;
+      case 'qa':
+        require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Qa.php')));
+        $ServerMode = AblePolecat_Mode_Qa::wakeup();
+        break;
+    }
+    self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
+    
+    //
+    // @todo: Service Bus
   }
   
   /**
@@ -229,13 +254,6 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   }
   
   /**
-   * @param AblePolecat_Mode_ServerAbstract $ServerMode.
-   */
-  protected function setServerMode(AblePolecat_Mode_ServerAbstract $ServerMode) {
-    $this->ServerMode = $ServerMode;
-  }
-  
-  /**
    * Log a message to standard/default log (file).
    * 
    * @param string $severity error | warning | status | info | debug.
@@ -243,24 +261,23 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * @param int    $code Error code.
    */
   protected function writeToDefaultLog($severity, $message, $code = NULL) {
-    if (isset($this->DefaultLog)) {
-      switch ($severity) {
-        default:
-          $this->DefaultLog->logStatusMessage($message);
-          break;
-        case AblePolecat_LogInterface::STATUS:
-          $this->DefaultLog->logStatusMessage($message);
-          break;
-        case AblePolecat_LogInterface::WARNING:
-          $this->DefaultLog->logWarningMessage($message);
-          break;
-        case AblePolecat_LogInterface::ERROR:
-          $this->DefaultLog->logErrorMessage($message);
-          break;
-        case AblePolecat_LogInterface::DEBUG:
-          $this->DefaultLog->logStatusMessage($message);
-          break;
-      }
+    $DefaultLog = self::getDefaultLog();
+    switch ($severity) {
+      default:
+        $DefaultLog->logStatusMessage($message);
+        break;
+      case AblePolecat_LogInterface::STATUS:
+        $DefaultLog->logStatusMessage($message);
+        break;
+      case AblePolecat_LogInterface::WARNING:
+        $DefaultLog->logWarningMessage($message);
+        break;
+      case AblePolecat_LogInterface::ERROR:
+        $DefaultLog->logErrorMessage($message);
+        break;
+      case AblePolecat_LogInterface::DEBUG:
+        $DefaultLog->logStatusMessage($message);
+        break;
     }
   }
   
@@ -279,38 +296,11 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       // Create instance of Singleton.
       //
       $Server = new self();
-      
-      //
-      // Server mode
-      // 1. Initialize error reporting
-      // 2. Set default error handler
-      // 3. Set default exception handler
-      // 4. Normal | Development | Testing mode
-      //
-      switch(self::$boot_mode) {
-        default:
-          require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Normal.php')));
-          $Server->setServerMode(AblePolecat_Mode_Normal::wakeup());
-          break;
-        case 'dev':
-          require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Dev.php')));
-          $Server->setServerMode(AblePolecat_Mode_Dev::wakeup());
-          break;
-        case 'qa':
-          require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Qa.php')));
-          $Server->setServerMode(AblePolecat_Mode_Qa::wakeup());
-          break;
-      }
     
     //
     // @todo: 
     // Port module logging feature from AblePolecat_Environment to AblePolecat_Mode_Application
-    // Change AblePolecat_EnvironmentInterface::bootstrap() to ::load()
     // Implement AblePolecat_EnvironmentInterface for Server, Application, User
-	  // @todo:  AblePolecat_Environment_Server::load();
-	  // 1. Class registry
-	  // 2. Class loader
-	  // 3. Load conf file
 	  //
 	  
 	  //
@@ -360,13 +350,6 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   }
   
   /**
-   * @return AblePolecat_LogInterface.
-   */
-  public static function getDefaultLog() {
-    return self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG);
-  }
-  
-  /**
    * @return AblePolecat_ClassRegistryInterface.
    */
   public static function getClassRegistry() {
@@ -374,27 +357,24 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   }
   
   /**
+   * @return AblePolecat_LogInterface.
+   */
+  public static function getDefaultLog() {
+    return self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG);
+  }
+  
+  /**
    * @return AblePolecat_Mode_ServerAbstract or NULL.
    */
   public static function getServerMode() {
-    $ServerMode = NULL;
-    $Server = self::ready();
-    if ($Server) {
-      $ServerMode = $Server->ServerMode;
-    }
-    return $ServerMode;
+    return self::getResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE);
   }
   
   /**
    * @return AblePolecat_Service_BusInterface or NULL.
    */
   public static function getServiceBus() {
-    $ServiceBus = NULL;
-    $Server = self::ready();
-    if ($Server) {
-      $ServiceBus = $Server->ServiceBus;
-    }
-    return $ServiceBus;
+    return self::getResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS);
   }
   
   /**

@@ -73,7 +73,17 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
+    
+    parent::initialize();
     self::$ServerMode = NULL;
+    
+    //
+    // Check for reuired server resources.
+    // (these will throw exception if not ready).
+    //
+    AblePolecat_Server::getBootMode();
+    AblePolecat_Server::getClassRegistry();
+    AblePolecat_Server::getDefaultLog();
   }
   
   /**

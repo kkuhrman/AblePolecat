@@ -9,9 +9,9 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Clock.php');
 class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
   
   /**
-   * @var Used for performance monitoring.
+   * @var AblePolecat_Clock Internal timer.
    */
-  private static $Clock;
+  private $Clock;
   
   /**
    * Extends constructor.
@@ -21,8 +21,15 @@ class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
     parent::initialize();
     set_error_handler(array('AblePolecat_Mode_ServerAbstract', 'defaultErrorHandler'));
     set_exception_handler(array('AblePolecat_Mode_ServerAbstract', 'defaultExceptionHandler'));
-    self::$Clock = new AblePolecat_Clock();
-    self::$Clock->start();
+    $this->Clock = new AblePolecat_Clock();
+    $this->Clock->start();
+  }
+  
+  /**
+   * @return AblePolecat_Clock Internal timer.
+   */
+  public function getClock() {
+    return $this->Clock;
   }
   
   /**
@@ -32,12 +39,8 @@ class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
    *
    * @return mixed Ellapsed time.
    */
-  public static function getElapsedTime($asString = TRUE) {
-    $ellapsed_time = NULL;
-    if (isset(self::$Clock)) {
-      $ellapsed_time = self::$Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, $asString);
-    }
-    return $ellapsed_time;
+  public function getElapsedTime($asString = TRUE) {
+    return $this->Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, $asString);
   }
   
   /**
@@ -50,7 +53,7 @@ class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
       //
       // Create instance of server mode
       //
-      $ServerMode = new AblePolecat_Mode_Dev();
+      $ServerMode = new AblePolecat_Mode_Qa();
       
       //
       // Load environment settings
@@ -70,7 +73,7 @@ class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
       self::$ServerMode = $ServerMode;
       self::$ready = TRUE;
     }
-    return $ServerMode;
+    return self::$ServerMode;
   }
   
   /**
@@ -80,6 +83,6 @@ class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
     //
     // Persist...
     //
-    self::$Singleton = NULL;
+    self::$ServerMode = NULL;
   }
 }

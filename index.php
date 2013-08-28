@@ -21,7 +21,11 @@ require_once('boot.php');
     <p>
       Copyright &copy; 2008-2013 <a href="http://www.abledistributors.com" target="new">Able Distributors Inc.</a>. All rights reserved.
     </p>
-    <p><?php var_dump(AblePolecat_Server::ready()); ?></p>
+    <p><?php 
+        $ServerMode = AblePolecat_Server::getServerMode();
+        var_dump($ServerMode); 
+      ?>
+    </p>
   </div>
 </body>
 </html>
