@@ -33,6 +33,11 @@ interface AblePolecat_ServerInterface {
   public static function bootstrap();
   
   /**
+   * @return AblePolecat_Mode_Application.
+   */
+  public static function getApplicationMode();
+  
+  /**
    * @return string dev | qa | user.
    */
   public static function getBootMode();
@@ -89,24 +94,35 @@ interface AblePolecat_ServerInterface {
 
 class AblePolecat_Server implements AblePolecat_ServerInterface {
   
-  /**
-   * Resource protection ring assignments.
-   */
+  //
+  // protection ring 0, Server Mode.
+  //
   const RING_BOOT_MODE        = 0;
   const RING_DEFAULT_LOG      = 0;
   const RING_CLASS_REGISTRY   = 0;
   const RING_SERVER_MODE      = 0;
   const RING_SERVICE_BUS      = 0;
   
-  /**
-   * Internal resource names.
-   */
   const NAME_BOOT_MODE        = 'boot mode';
   const NAME_DEFAULT_LOG      = 'default log';
   const NAME_CLASS_REGISTRY   = 'class registry';
   const NAME_SERVER_MODE      = 'server mode';
   const NAME_SERVICE_BUS      = 'service bus';
+
+  //
+  // Protection ring 1, Application Mode.
+  //
+  const RING_APPLICATION_MODE = 1;
   
+  const NAME_APPLICATION_MODE = 'application mode';
+  
+  //
+  // Protection ring 2, User Mode.
+  //
+  const RING_USER_MODE        = 2;
+  
+  const NAME_USER_MODE        = 'user mode';
+    
   /**
    * @var AblePolecat_Server Singleton instance.
    */
@@ -296,6 +312,14 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       // Create instance of Singleton.
       //
       $Server = new self();
+      
+      //
+      // @todo: Protection ring 1, Application mode.
+      //
+      self::$Resources[1] = array();
+      require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Application.php')));
+      $ApplicationMode = AblePolecat_Mode_Application::wakeup();
+      self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
     
     //
     // @todo: 
@@ -340,6 +364,13 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       self::$ready = TRUE;
     }
     return self::$Server;
+  }
+  
+  /**
+   * @return AblePolecat_Mode_Application.
+   */
+  public static function getApplicationMode() {
+    return self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE);
   }
   
   /**

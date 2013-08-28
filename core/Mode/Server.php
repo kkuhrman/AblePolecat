@@ -78,7 +78,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     self::$ServerMode = NULL;
     
     //
-    // Check for reuired server resources.
+    // Check for required server resources.
     // (these will throw exception if not ready).
     //
     AblePolecat_Server::getBootMode();
@@ -97,11 +97,5 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       $ready = self::$ServerMode;
     }
     return $ready;
-  }
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep() {
   }
 }

@@ -42,8 +42,36 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
    * Sub-classes can override to initialize members prior to load.
    */
   protected function initialize() {
-    $this->Agent = array();
+    $this->Agent = NULL;
     $this->Config = NULL;
+  }
+  
+  /**
+   * Load an agent with access to mode configuration file.
+   *
+   * @param string $agentClassName Class name of respective access control agent.
+   * @param string $agentClassPath Full path to respective agent class file.
+   * @param string $createMethod Name of creational method.
+   */
+  protected function loadAccessControlAgent($agentClassName, $agentClassPath, $createMethod) {
+    //
+    // Agent must implement AblePolecat_AccessControl_AgentInterface.
+    // This should have access to mode config file, which must implement 
+    // AblePolecat_AccessControl_ResourceInterface.
+    //
+    AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+      $agentClassName, 
+      $agentClassPath,
+      $createMethod
+    );
+    $Agent = AblePolecat_Server::getClassRegistry()->loadClass($agentClassName);
+    if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_AgentInterface')) {
+      $this->Agent = $Agent;
+    }
+    else {
+      AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_AGENT);
+    }
+    return $this->Agent;
   }
   
   /**

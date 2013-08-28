@@ -45,7 +45,7 @@ class AblePolecat_Mode_Normal extends AblePolecat_Mode_ServerAbstract {
       self::$ServerMode = $ServerMode;
       self::$ready = TRUE;
     }
-    return $ServerMode;
+    return self::$ServerMode;
   }
   
   /**

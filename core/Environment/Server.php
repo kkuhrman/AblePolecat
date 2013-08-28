@@ -67,25 +67,30 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       $Environment = new AblePolecat_Environment_Server();
       
       //
-      // Initialize application access control.
+      // Initialize server access control.
       //
       // Create instance of AblePolecat_AccessControl_Agent_Server 
       // which must implement AblePolecat_AccessControl_AgentInterface.
       // This should have access to config file, which must implement 
       // AblePolecat_AccessControl_ResourceInterface.
       //
-      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        'AblePolecat_AccessControl_Agent_Server', 
+      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        // 'AblePolecat_AccessControl_Agent_Server', 
+        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Server.php')),
+        // 'load'
+      // );
+      // $Agent = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_AccessControl_Agent_Server');
+      // if (isset($Agent)) {
+        // $Environment->setAgent($Agent);
+      // }
+      // else {
+        // AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_AGENT);
+      // }
+      $Agent = $Environment->loadAccessControlAgent(
+        'AblePolecat_AccessControl_Agent_Server',
         implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Server.php')),
         'load'
       );
-      $Agent = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_AccessControl_Agent_Server');
-      if (isset($Agent)) {
-        $Environment->setAgent($Agent);
-      }
-      else {
-        AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_AGENT);
-      }
 
       //
       // Load application configuration settings.

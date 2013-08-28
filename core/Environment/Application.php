@@ -9,6 +9,11 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
 class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstract {
   
   /**
+   * @var AblePolecat_Environment_Server Singleton instance.
+   */
+  private static $Environment = NULL;
+  
+  /**
    * @var Array Registry of contributed module configurations.
    */
   private $m_registered_modules;
@@ -78,7 +83,25 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
    *
    * @return AblePolecat_Environment_Server.
    */
-  public static function load() {}
+  public static function load() {
+    $Environment = self::$Environment;
+    if (!isset($Environment)) {
+      //
+      // Create environment object.
+      //
+      $Environment = new AblePolecat_Environment_Server();
+      
+      //
+      // @todo: $Environment->loadAccessControlAgent()
+      //
+      
+      //
+      // Initialize singleton instance.
+      //
+      self::$Environment = $Environment;
+    }
+    return self::$Environment;
+  }
   
   /**
    * Load registered contributed modules.
@@ -200,4 +223,9 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
         "Failed to open module configuration file at $path.");
     }
   }
+  
+  /**
+   * Persist state prior to going out of scope.
+   */
+  public function sleep() {}
 }
