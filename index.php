@@ -24,6 +24,7 @@ require_once('boot.php');
     <p><?php 
         $ApplicationMode = AblePolecat_Server::getApplicationMode();
         var_dump($ApplicationMode); 
+        AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, "Application mode loaded.");
       ?>
     </p>
   </div>

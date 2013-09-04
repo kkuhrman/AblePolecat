@@ -26,6 +26,15 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   protected function initialize() {
     parent::initialize();
     $this->m_registered_modules = array();
+    
+    //
+    // Needed for module registration.
+    //
+    AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        'AblePolecat_Conf_Module',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Conf', 'Module.php')),
+        'touch'
+      );
   }
   
   /**
@@ -89,11 +98,22 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
       //
       // Create environment object.
       //
-      $Environment = new AblePolecat_Environment_Server();
+      $Environment = new AblePolecat_Environment_Application();
       
       //
-      // @todo: $Environment->loadAccessControlAgent()
+      // Initialize access control for application environment settings.
       //
+      $Agent = $Environment->loadAccessControlAgent(
+        'AblePolecat_AccessControl_Agent_Application',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Application.php')),
+        'load'
+      );
+      
+      //
+      // Register and load contributed classes
+      //
+      $Environment->registerModules();
+      // $Environment->loadModules();
       
       //
       // Initialize singleton instance.
@@ -104,24 +124,12 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   }
   
   /**
-   * Load registered contributed modules.
+   * Return module registration data.
+   *
+   * @return Array.
    */
-  public function loadModules() {
-    foreach($this->m_registered_modules as $modName => $modReg) {
-      $modLoadClasses = $modReg['classes'];
-      foreach($modLoadClasses as $key => $className) {
-        $class = AblePolecat_Server::loadClass($className);
-        
-        //
-        // @todo: If module class is a logger, add to logging queue (Mode?)
-        //
-        if (is_a($class, 'AblePolecat_LogInterface')) {
-          // $this->m_Logger[] = $class;
-        }
-      }
-      AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, 
-        "Loaded contributed module $modName.");
-    }
+  public function getRegisteredModules() {
+    return $this->m_registered_modules;
   }
   
   /**
@@ -141,7 +149,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
             while (false !== ($current_file = readdir($h_mods_dir))) {
               $module_conf_path = $this->findModuleConfigurationFile($current_file);
               if (isset($module_conf_path)) {
-                $ModConfig = AblePolecat_Server::loadClass('AblePolecat_Conf_Module');
+                $ModConfig = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Module');
                 if (isset($ModConfig)) {
                   //
                   // Grant open permission on config file to agent.
@@ -199,7 +207,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
               isset($fileName) ? $classFullPath = $moduleFullpath . DIRECTORY_SEPARATOR . $fileName : $classFullPath = NULL;
               isset($class->{'class'}->classFactoryMethod) ? $classFactoryMethod = $class->{'class'}->classFactoryMethod->__toString() : $classFactoryMethod = NULL;
               if(isset($classFullPath) && isset($classFactoryMethod)) {
-                AblePolecat_Server::registerLoadableClass($className, $classFullPath, $classFactoryMethod);
+                AblePolecat_Server::getClassRegistry()->registerLoadableClass($className, $classFullPath, $classFactoryMethod);
                 if (isset($classAttributes['load']) && intval($classAttributes['load'])) {
                   $modLoadClasses[] = $className;
                 }

@@ -89,6 +89,11 @@ define('ABLE_POLECAT_EXCEPTION_LOGS_PATH_INVALID', 111);
 define('ABLE_POLECAT_EXCEPTION_MODS_PATH_INVALID', 112);
 
 /**
+ * Unsupported interface.
+ */
+define ('ABLE_POLECAT_EXCEPTION_UNSUPPORTED_INTERFACE', 113);
+
+/**
  * Session unavailable.
  */
 define('ABLE_POLECAT_EXCEPTION_UNAVAILABLE', 201);
@@ -174,6 +179,7 @@ function ABLE_POLECAT_EXCEPTION_MSG($code = NULL) {
     ABLE_POLECAT_EXCEPTION_SVC_CLIENT_CONNECT_FAIL => 'Failed to establish client connection to web service.',
     ABLE_POLECAT_EXCEPTION_SVC_DATA_ERROR => 'Failed to exchange data with service client.',
     ABLE_POLECAT_EXCEPTION_SVC_QUERY_FAIL => 'Service client failed to process query.',
+    ABLE_POLECAT_EXCEPTION_UNSUPPORTED_INTERFACE => 'Interface is not supported.',
   );
 
   if (isset($code) && isset($message[$code])) {

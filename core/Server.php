@@ -230,18 +230,19 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    *
    * @param int $ring Ring assignment.
    * @param string $name Internal name of resource.
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
    *
    * @return mixed The cached resource or NULL.
    *
    * @throw Exception if no resource stored at given location.
    */
-  protected static function getResource($ring, $name) {
+  protected static function getResource($ring, $name, $safe = TRUE) {
     
     $resource = NULL;
     if (isset(self::$Resources[$ring]) && isset(self::$Resources[$ring][$name])) {
       $resource = self::$Resources[$ring][$name];
     }
-    else {
+    else if ($safe) {
       self::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION, 
         "Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed.");
     }
@@ -460,6 +461,14 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
           break;
       }
       $Server->writeToDefaultLog($type, $message, $code);
+    }
+    
+    //
+    // Write to application logs
+    //
+    $ApplicationMode = self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, FALSE);
+    if (isset($ApplicationMode)) {
+      $ApplicationMode->log($severity, $message, $code);
     }
   }
   
