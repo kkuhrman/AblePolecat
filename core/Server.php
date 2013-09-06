@@ -22,6 +22,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'ClassRegistry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Log', 'Csv.php')));
 include_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Http', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Service', 'Bus.php')));
 
 interface AblePolecat_ServerInterface {
   
@@ -222,7 +223,10 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
     self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
     
     //
-    // @todo: Service Bus
+    // Service Bus
+    //
+    $ServiceBus = AblePolecat_Service_Bus::wakeup();
+    self::setResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $ServiceBus);
   }
   
   /**

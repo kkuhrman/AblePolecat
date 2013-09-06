@@ -134,19 +134,29 @@ define('ABLE_POLECAT_EXCEPTION_LOG_INVALID', 304);
 define('ABLE_POLECAT_EXCEPTION_SVC_CLIENT_CONNECT_FAIL', 401);
 
 /**
+ * Could not add service client because type is not valid.
+ */
+define('ABLE_POLECAT_EXCEPTION_SVC_CLIENT_TYPE_FAIL', 402);
+
+/**
  * Failed to exchange data with service client.
  */
-define('ABLE_POLECAT_EXCEPTION_SVC_DATA_ERROR', 402);
+define('ABLE_POLECAT_EXCEPTION_SVC_DATA_ERROR', 403);
 
 /**
  * Service client failed to process query.
  */
-define('ABLE_POLECAT_EXCEPTION_SVC_QUERY_FAIL', 403);
+define('ABLE_POLECAT_EXCEPTION_SVC_QUERY_FAIL', 404);
 
 /**
  * Invalid message format.
  */
 define('ABLE_POLECAT_EXCEPTION_INVALID_MSG_FMT', 501);
+
+/**
+ * Failed database connection.
+ */
+define('ABLE_POLECAT_EXCEPTION_DB_CONNECT_FAIL', 601);
 
 /**
  * @return Default message for given exception code.
@@ -177,9 +187,11 @@ function ABLE_POLECAT_EXCEPTION_MSG($code = NULL) {
     ABLE_POLECAT_EXCEPTION_LOG_OPEN_FAIL => 'Failed to open log file.',
     ABLE_POLECAT_EXCEPTION_LOG_INVALID => 'Attempt to log to an invalid stream.',
     ABLE_POLECAT_EXCEPTION_SVC_CLIENT_CONNECT_FAIL => 'Failed to establish client connection to web service.',
+    ABLE_POLECAT_EXCEPTION_SVC_CLIENT_TYPE_FAIL => 'Could not add service client because type is not valid.',
     ABLE_POLECAT_EXCEPTION_SVC_DATA_ERROR => 'Failed to exchange data with service client.',
     ABLE_POLECAT_EXCEPTION_SVC_QUERY_FAIL => 'Service client failed to process query.',
     ABLE_POLECAT_EXCEPTION_UNSUPPORTED_INTERFACE => 'Interface is not supported.',
+    ABLE_POLECAT_EXCEPTION_DB_CONNECT_FAIL => 'Database connection failed.',
   );
 
   if (isset($code) && isset($message[$code])) {

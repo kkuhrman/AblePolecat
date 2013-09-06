@@ -11,7 +11,32 @@
  * 
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Client.php')));
+
+/**
+ * Manages multiple web services client connections and routes messages
+ * between these and the application in scope.
+ */
+interface AblePolecat_Service_BusInterface extends AblePolecat_Service_Interface {
+  
+  /**
+   * Add a service client to the bus.
+   * 
+   * @param string $class_name The name of class to register.
+   *
+   * @throw AblePolecat_Service_Exception if client cannot be set.
+   */
+  public function setClient($class_name);
+  
+  /**
+   * Returns a service client by class name.
+   *
+   * @param string $class_name Name of the service client class.
+   *
+   * @return AblePolecat_Service_ClientInterface or NULL.
+   */
+  public function getClient($class_name);
+}
 
 class AblePolecat_Service_Bus implements AblePolecat_Service_BusInterface {
   
@@ -21,22 +46,12 @@ class AblePolecat_Service_Bus implements AblePolecat_Service_BusInterface {
   /**
    * @var object Singleton instance
    */
-  private static $m_Instance;
-  
-  /**
-   * @var resource Database connection.
-   */
-  private $m_Database = NULL;
-  
-  /**
-   * @var resource A prepared PDO statement for setting locks on service requests.
-   */
-  private $m_InsertLockStatement = null;
+  private static $ServiceBus;
   
   /**
    * @var Array Web service clients.
    */
-  protected $m_Clients;
+  protected $Clients;
   
   /**
    * Return unique, system-wide identifier for security resource.
@@ -62,98 +77,57 @@ class AblePolecat_Service_Bus implements AblePolecat_Service_BusInterface {
    * @return bool TRUE if configuration is valid, otherwise FALSE.
    */
   protected function initialize() {
+  }
+  
+  /**
+   * Add a service client to the bus.
+   * 
+   * @param string $class_name The name of class to register.
+   *
+   * @throw AblePolecat_Service_Exception if client cannot be set.
+   */
+  public function setClient($class_name) {
     
     //
-    // Get connection to the database.
+    // Class name is internal id.
     //
-    if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_DB_MYSQL)) {
-      $Environment = AblePolecat_EnvironmentAbstract::getCurrent();
-      if (isset($Environment)) {
-        $this->m_Database = $Environment->getDb();
-      }
-      if (!isset($this->m_Database)) {
-        throw new AblePolecat_Log_Exception("Not connected to Able Polecat database", 
-          AblePolecat_Log_Exception::ERROR_LOG_INVALID_DB);
-      }
-      
+    if (!isset($this->Clients[$class_name])) {
       //
-      // Prepare parameterized PDO statement for inserting log messages.
+      // Preliminary checks.
+      // Class must be registered with Able Polecat.
+      // Class must implement AblePolecat_Service_ClientInterface.
       //
-      $sql = "INSERT locks(service, id, createdbyid) VALUES(:service, :id, :createdbyid)";
-      $this->m_InsertLockStatement = $this->m_Database->prepareStatement($sql);
-    }
-    
-  }
-  
-  /**
-   * Close connection and destroy current session variables relating to connection.
-   *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent.
-   */
-  public function close(AblePolecat_AccessControl_AgentInterface $Agent = NULL) {
-  }
-  
-  /**
-   * Send asynchronous message over client connection.
-   *
-   * @param AblePolecat_MessageInterface $Message.
-   */
-  public function dispatch(AblePolecat_MessageInterface $Message) {
-  }
-  
-  /**
-   * Returns a connection to the Google client.
-   */
-  public function getGoogleClient() {
-    if (!isset($this->m_Clients[AblePolecat_Service_Client_Google::getId()])) {
-      $Environment = AblePolecat_EnvironmentAbstract::getCurrent();
-      $this->m_Clients[AblePolecat_Service_Client_Google::getId()] = $Environment->loadClass('AblePolecat_Service_Client_Google');
-    }
-    return $this->m_Clients[AblePolecat_Service_Client_Google::getId()];
-  }
-  /**
-   * Returns a connection to the ProvideX client.
-   */
-  public function getProvideXClient() {
-    if (!isset($this->m_Clients[AblePolecat_Service_Client_ProvideX::getId()])) {
-      $Environment = AblePolecat_EnvironmentAbstract::getCurrent();
-      $this->m_Clients[AblePolecat_Service_Client_ProvideX::getId()] = $Environment->loadClass('AblePolecat_Service_Client_ProvideX');
-    }
-    return $this->m_Clients[AblePolecat_Service_Client_ProvideX::getId()];
-  }
-  
-  /**
-   * Returns a connection to the Salesforce.com client.
-   */
-  public function getSalesforceClient() {
-    if (!isset($this->m_Clients[AblePolecat_Service_Client_Salesforce::getId()])) {
-      $Environment = AblePolecat_EnvironmentAbstract::getCurrent();
-      $this->m_Clients[AblePolecat_Service_Client_Salesforce::getId()] = $Environment->loadClass('AblePolecat_Service_Client_Salesforce');
-    }
-    return $this->m_Clients[AblePolecat_Service_Client_Salesforce::getId()];
-  }
-  
-  /**
-   * Sets a lock for the given service.
-   *
-   * @param string $service The service which is subject to the lock.
-   * @param string $id The ID of the object of the service.
-   * @param int $createdbyid The ID of the user setting the lock. 
-   *
-   * @return TRUE if the lock was set, otherwise FALSE.
-   */
-  public function setLock($service, $id, $createdbyid = 0) {
-    
-    $result = FALSE;
-    if (ABLE_POLECAT_IS_MODE(ABLE_POLECAT_DB_MYSQL)) {
-      if (isset($this->m_InsertLockStatement)) {
-        $this->m_InsertLockStatement->bindParam(':service', $service);
-        $this->m_InsertLockStatement->bindParam(':id', $id);
-        $this->m_InsertLockStatement->bindParam(':createdbyid', $createdbyid);
-        $result = $this->m_InsertLockStatement->execute();
+      if (AblePolecat_ClassRegistry::isLoadable($class_name) &&
+          is_subclass_of($class_name, 'AblePolecat_Service_ClientInterface')) {
+          //
+          // Do not load the client until first call to getClient().
+          //
+      }
+      else {
+        throw new AblePolecat_Service_Exception("Able Polecat rejected attempt to add client type $class_name to service bus.",
+          ABLE_POLECAT_EXCEPTION_SVC_CLIENT_TYPE_FAIL
+        );
       }
     }
-    return $result;
+  }
+  
+  /**
+   * Returns a service client by class name.
+   *
+   * @param string $class_name Name of the service client class.
+   *
+   * @return AblePolecat_Service_ClientInterface or NULL.
+   */
+  public function getClient($class_name) {
+    $Client = NULL;
+    if (isset($this->Clients[$class_name])) {
+      $Client = $this->Clients[$class_name];
+    }
+    else {
+      $Client = AblePolecat_ClassRegistry::loadClass($class_name);
+      $this->Clients[$class_name] = $Client;
+    }
+    return $Client;
   }
   
   /**
@@ -169,26 +143,17 @@ class AblePolecat_Service_Bus implements AblePolecat_Service_BusInterface {
    *
    * @param AblePolecat_AccessControl_AgentInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_Api_ClientAbstract Initialized/connected instance of class ready for business or NULL.
+   * @return AblePolecat_Service_Bus or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_AgentInterface $Agent = NULL) {
-    
-    $Client = new AblePolecat_Service_Client_Google();
-    return $Client;
-  }
-  
-  /**
-   * Initialize singleton instance of this class.
-   */
-  public static function getInstance() {
-    if (!isset(self::$m_Instance)) {
-      self::$m_Instance = new self();
+    if (!isset(self::$ServiceBus)) {
+      self::$ServiceBus = new AblePolecat_Service_Bus();
     }					
-    return self::$m_Instance;
+    return self::$ServiceBus;
   }
   
   final protected function __construct() {
-    $this->m_Clients = array();
+    $this->Clients = array();
     $this->initialize();
   }
 }
