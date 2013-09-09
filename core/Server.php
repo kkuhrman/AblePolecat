@@ -319,49 +319,30 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       $Server = new self();
       
       //
-      // @todo: Protection ring 1, Application mode.
+      // Protection ring 1, Application mode.
       //
       self::$Resources[1] = array();
       require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Application.php')));
       $ApplicationMode = AblePolecat_Mode_Application::wakeup();
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
-    
-    //
-    // @todo: 
-    // Port module logging feature from AblePolecat_Environment to AblePolecat_Mode_Application
-    // Implement AblePolecat_EnvironmentInterface for Server, Application, User
-	  //
-	  
-	  //
-	  // @todo: AblePolecat_Mode_Application::start();
-	  // @see:  AblePolecat_Environment_Application::load();
-	  // 1. Module registry
-	  // 2. Module conf files
-	  // 3. Load modules as directed
-	  //
-	  
-	  //
-	  // @todo:  AblePolecat_Mode_User::start();
-	  // @see:  AblePolecat_Environment_User::load();
-	  // 1. Session management
-	  // 2. Cookies
-	  // 3. Other stored user settings (database).
-	  //
       
-      // @TODO:
-      // Port default error/exception handling from bootmode.php
-      // Port cookie stuff in bootmode.php to AblePolecat_Environment_User (new)
-      // Port rest of stuff in bootmode.php to appropriate AblePolecat_Server_Mode class
-      // Use AblePolecat_Http_Request::getVariable('mode') to get boot mode.
-      // Create instance of AblePolecat_Server_ModeInterface accordingly
-      // Get rid of pathdefs.php and bootmode.php
-      // Port default logger (CSV) implementation from AblePolecat_Environment_Default
-      // AblePolecat_Environment_Server replaces AblePolecat_Environment_Default and will...
-      //   1. Encapsulate class registry and loader
-      //   2. Encapsulate server configuration (./polecat_root/conf)
-      // AblePolecat_Environment_User will encapulate contributed modules stuff
       //
+      // @todo: Add contributed service client classes to service bus.
+      //
+      $Clients = $ApplicationMode->getResource('AblePolecat_Service_ClientInterface', 
+        AblePolecat_Mode_Application::RESOURCE_ALL, FALSE);
+      var_dump($Clients);
       
+      //
+      // @todo: 
+      // Implement AblePolecat_EnvironmentInterface for User
+      // AblePolecat_Mode_User::wakeup();
+      // @see:  AblePolecat_Environment_User::load();
+      // 1. Session management
+      // 2. Cookies
+      // 3. Other stored user settings (database).
+      //
+        
       //
       // Bootstrap completed successfully
       //

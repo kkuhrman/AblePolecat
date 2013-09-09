@@ -56,7 +56,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     AblePolecat_Server::getClassRegistry();
     AblePolecat_Server::getDefaultLog();
     AblePolecat_Server::getServerMode();
-    // AblePolecat_Server::getServiceBus();
+    AblePolecat_Server::getServiceBus();
   }
   
   /**
@@ -71,7 +71,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * @throw Exception if no resource stored at given location.
    * @see setResource().
    */
-  protected function getResource($interface, $module = self::RESOURCE_ALL, $safe = TRUE) {
+  public function getResource($interface, $module = self::RESOURCE_ALL, $safe = TRUE) {
     
     $resource = NULL;
     if (isset($this->Resources[$interface])) {

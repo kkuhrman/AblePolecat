@@ -4,7 +4,6 @@
  */
 
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Message.php');
 
 /**
  * Manages a client connection to a web services provider.
@@ -12,18 +11,13 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Message.php');
 interface AblePolecat_Service_ClientInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_Service_Interface {
   
   /**
-   * Close connection and destroy current session variables relating to connection.
+   * Prepares a statement for execution and returns a statement object.
    *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent.
-   */
-  public function close(AblePolecat_AccessControl_AgentInterface $Agent = NULL);
-  
-  /**
-   * Send asynchronous message over client connection.
+   * @param string $statement A data retrieval/manipulation statement in query language supported by client.
    *
-   * @param AblePolecat_MessageInterface $Message.
+   * @return AblePolecat_QueryLanguage_StatementInterface or NULL.
    */
-  public function dispatch(AblePolecat_MessageInterface $Message);
+  public function prepare($statement);
 }
 
 abstract class AblePolecat_Service_ClientAbstract implements AblePolecat_Service_ClientInterface {
