@@ -346,6 +346,11 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
       
       //
+      // Load contributed modules.
+      //
+      $ApplicationMode->loadRegisteredModules();
+      
+      //
       // @todo: Add contributed service client classes to service bus.
       //
       $Clients = $ApplicationMode->getResource('AblePolecat_Service_ClientInterface', 

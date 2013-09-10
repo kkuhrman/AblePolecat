@@ -124,6 +124,27 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   }
   
   /**
+   * Return configuration file for a registered module.
+   * 
+   * @param string $moduleName Name of a registered module.
+   * @param string $start Optional offset to start reading from.
+   * @param string $end Optional offset to end reading at.
+   *
+   * @return SimpleXMLElement Environment configuration settings.
+   */
+  public function getModuleConf($moduleName, $start = NULL, $end = NULL) {
+    
+    $modConf = NULL;
+    if (isset($this->Agent) && isset($this->m_registered_modules[$moduleName])) {
+      if (isset($this->m_registered_modules[$moduleName]['conf'])) {
+        $modConf = $this->m_registered_modules[$moduleName]['conf']->
+          read($this->Agent, $start, $end);
+      }
+    }
+    return $modConf;
+  }
+  
+  /**
    * Return module registration data.
    *
    * @return Array.

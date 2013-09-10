@@ -149,6 +149,33 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /**
+   * Load registered modules.
+   * @throw AblePolecat_Server_Exception is application mode is not ready.
+   */
+  public function loadRegisteredModules() {
+    $ApplicationMode = self::ready();
+    if ($ApplicationMode) {
+      //
+      // Load registered modules
+      //
+      foreach($this->getEnvironment()->getRegisteredModules() as $modName => $modReg) {
+        $modLoadClasses = $modReg['classes'];
+        foreach($modLoadClasses as $key => $className) {
+          $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
+          $ApplicationMode->setResource($modName, $class);
+        }
+        AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, 
+          "Loaded contributed module $modName.");
+      }
+    }
+    else {
+      throw new AblePolecat_Server_Exception('Failed to load registered modules. Application mode is not ready.',
+        ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION
+      );
+    }
+  }
+  
+  /**
    * Log a message to application log(s).
    * 
    * @param string $severity error | warning | status | info | debug.
@@ -203,19 +230,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       else {
         throw new AblePolecat_Environment_Exception('Failed to load Able Polecat application environment.',
           ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
-      }
-      
-      //
-      // Load registered modules
-      //
-      foreach($Environment->getRegisteredModules() as $modName => $modReg) {
-        $modLoadClasses = $modReg['classes'];
-        foreach($modLoadClasses as $key => $className) {
-          $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
-          $ApplicationMode->setResource($modName, $class);
-        }
-        AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, 
-        "Loaded contributed module $modName.");
       }
       
       //
