@@ -187,12 +187,6 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
     self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, $BootMode);
     
     //
-    // Wakeup default log file.
-    //
-    $DefaultLog = AblePolecat_Log_Csv::wakeup();
-    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
-    
-    //
     // Wakeup class registry.
     //
     $ClassRegistry = AblePolecat_ClassRegistry::wakeup();
@@ -221,6 +215,31 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
         break;
     }
     self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
+    
+    //
+    // Server environment initialized.
+    // Set configurable system paths.
+    //
+    $paths = $ServerMode->getEnvironment()->getConf('paths');
+    if (isset($paths->path) && is_subclass_of($paths->path, 'iterator')) {
+      foreach($paths->path as $key => $path) {
+        $pathAttributes = $path->attributes();
+        if (isset($pathAttributes['name'])) {
+          AblePolecat_Server_Paths::setFullPath($pathAttributes['name'], $path->__toString());
+        }
+      }
+    }
+    
+    //
+    // Verify user/configurable directories.
+    //
+    AblePolecat_Server_Paths::verifyConfDirs();
+    
+    //
+    // Wakeup default log file.
+    //
+    $DefaultLog = AblePolecat_Log_Csv::wakeup();
+    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
     
     //
     // Service Bus
@@ -331,7 +350,6 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       //
       $Clients = $ApplicationMode->getResource('AblePolecat_Service_ClientInterface', 
         AblePolecat_Mode_Application::RESOURCE_ALL, FALSE);
-      var_dump($Clients);
       
       //
       // @todo: 

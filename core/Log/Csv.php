@@ -20,7 +20,7 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
     //
     // Default name of log file is YYYY_MM_DD.csv
     //
-    $file_name = ABLE_POLECAT_LOGS_PATH . DIRECTORY_SEPARATOR . date('Y_m_d', time()) . '.csv';
+    $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . date('Y_m_d', time()) . '.csv';
     $this->hFile = fopen($file_name, 'a');
     if ($this->hFile == FALSE) {
       $this->hFile = NULL;

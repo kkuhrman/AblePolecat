@@ -83,7 +83,6 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     //
     AblePolecat_Server::getBootMode();
     AblePolecat_Server::getClassRegistry();
-    AblePolecat_Server::getDefaultLog();
   }
   
   /**

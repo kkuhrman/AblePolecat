@@ -13,7 +13,7 @@ interface AblePolecat_Service_ClientInterface extends AblePolecat_AccessControl_
   /**
    * Prepares a statement for execution and returns a statement object.
    *
-   * @param string $statement A data retrieval/manipulation statement in query language supported by client.
+   * @param mixed Valid DDL or DML for the client in the form or string, object or array.
    *
    * @return AblePolecat_QueryLanguage_StatementInterface or NULL.
    */

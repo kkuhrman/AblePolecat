@@ -37,39 +37,6 @@ if (!defined('ABLE_POLECAT_DEV_PATH')) {
 }
 
 //
-// Contributed libraries directory.
-//
-if (!defined('ABLE_POLECAT_LIBS_PATH')) {
-  $ABLE_POLECAT_LIBS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'libs';
-  define('ABLE_POLECAT_LIBS_PATH', $ABLE_POLECAT_LIBS_PATH);
-  if (!file_exists(ABLE_POLECAT_LIBS_PATH)) {
-    mkdir(ABLE_POLECAT_LIBS_PATH);
-  }
-}
-
-//
-// Log files directory.
-//
-if (!defined('ABLE_POLECAT_LOGS_PATH')) {
-  $ABLE_POLECAT_LOGS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'logs';
-  define('ABLE_POLECAT_LOGS_PATH', $ABLE_POLECAT_LOGS_PATH);
-  if (!file_exists(ABLE_POLECAT_LOGS_PATH)) {
-    mkdir(ABLE_POLECAT_LOGS_PATH);
-  }
-}
-
-//
-// Contributed modules directory.
-//
-if (!defined('ABLE_POLECAT_MODS_PATH')) {
-  $ABLE_POLECAT_MODS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'mods';
-  define('ABLE_POLECAT_MODS_PATH', $ABLE_POLECAT_MODS_PATH);
-  if (!file_exists(ABLE_POLECAT_MODS_PATH)) {
-    mkdir(ABLE_POLECAT_MODS_PATH);
-  }
-}
-
-//
 // Path to Able Polecat unit test and qa directory.
 //
 if (!defined('ABLE_POLECAT_QA_PATH')) {
@@ -126,21 +93,6 @@ class AblePolecat_Server_Paths {
   const dev = ABLE_POLECAT_DEV_PATH;
   
   /**
-   * Contributed libraries directory.
-   */
-  const libs = ABLE_POLECAT_LIBS_PATH;
-  
-  /**
-   * Log files directory.
-   */
-  const logs = ABLE_POLECAT_LOGS_PATH;
-  
-  /**
-   * Contributed modules directory.
-   */
-  const mods = ABLE_POLECAT_MODS_PATH;
-  
-  /**
    * Path to Able Polecat unit test and qa directory.
    */
   const qa = ABLE_POLECAT_QA_PATH;
@@ -161,7 +113,14 @@ class AblePolecat_Server_Paths {
   const services = ABLE_POLECAT_SERVICES_PATH;
   
   /**
+   * @var Array Some paths are set in server conf file.
+   */
+  private static $conf_paths = array(
+  );
+  
+  /**
    * @param string $subdir Name of system directory.
+   *
    * @return string Full path of given system directory or NULL.
    */
   public static function getFullPath($subdir) {
@@ -170,6 +129,16 @@ class AblePolecat_Server_Paths {
     if (isset($subdir) && is_string($subdir)) {
       switch($subdir) {
         default:
+          //
+          // Configurable (not core) paths.
+          //
+          if (isset(self::$conf_paths[$subdir])) {
+            $path = self::$conf_paths[$subdir];
+          }
+          else {
+            throw new AblePolecat_Server_Paths_Exception("Attempt to access $subdir directory before configurable paths initialized.",
+              ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+          }
           break;
         case 'root':
           $path = self::root;
@@ -182,15 +151,6 @@ class AblePolecat_Server_Paths {
           break;
         case 'dev':
           $path = self::dev;
-          break;
-        case 'libs':
-          $path = self::libs;
-          break;
-        case 'logs':
-          $path = self::logs;
-          break;
-        case 'mods':
-          $path = self::mods;
           break;
         case 'qa':
           $path = self::qa;
@@ -207,6 +167,74 @@ class AblePolecat_Server_Paths {
       }
     }
     return $path;
+  }
+  
+  /**
+   * Override default location of certain sub-directories.
+   *
+   * @param string $subdir Name of system directory.
+   * @param string $fullpath Full path to given sub directory.
+   */
+  public static function setFullPath($subdir, $fullpath) {
+    switch($subdir) {
+      default:
+        break;
+      case 'libs':
+        self::$conf_paths['libs'] = self::sanitizePath($fullpath);
+        break;
+      case 'logs':
+        self::$conf_paths['logs'] = self::sanitizePath($fullpath);
+        break;
+      case 'mods':
+        self::$conf_paths['mods'] = self::sanitizePath($fullpath);
+        break;
+    }
+  }
+  
+  /**
+   * @todo:
+   * @param string $path The path to sanitize.
+   * @return string A sanitized path or NULL.
+   * @throw AblePolecat_Server_Paths_Exception if paths is not valid.
+   */
+  public static function sanitizePath($path) {
+    $sanitized_path = trim($path);
+    return $sanitized_path;
+  }
+  
+  /**
+   * User/configurable directories.
+   */
+  public static function verifyConfDirs() {
+    //
+    // Contributed libraries directory.
+    //
+    if (!isset(self::$conf_paths['libs'])) {
+        self::$conf_paths['libs'] = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'libs';
+    }
+    if (!file_exists(self::$conf_paths['libs'])) {
+      mkdir(self::$conf_paths['libs']);
+    }
+    
+    //
+    // Log files directory.
+    //
+    if (!isset(self::$conf_paths['logs'])) {
+        self::$conf_paths['logs'] = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'logs';
+    }
+    if (!file_exists(self::$conf_paths['logs'])) {
+      mkdir(self::$conf_paths['logs']);
+    }
+    
+    //
+    // Contributed modules directory.
+    //
+    if (!isset(self::$conf_paths['mods'])) {
+        self::$conf_paths['mods'] = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'mods';
+    }
+    if (!file_exists(self::$conf_paths['mods'])) {
+      mkdir(self::$conf_paths['mods']);
+    }
   }
 }
 

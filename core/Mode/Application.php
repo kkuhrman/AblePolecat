@@ -4,6 +4,36 @@
  * Base class for Application modes (most protected).
  */
 
+/**
+ * Configurable paths are defined *after* server conf file is loaded.
+ * Any use prior to this must use AblePolecat_Server_Paths::getFullPath().
+ * This is best practice in any case rather than using global constants .
+ */
+ 
+//
+// Contributed libraries directory.
+//
+if (!defined('ABLE_POLECAT_LIBS_PATH')) {
+  $ABLE_POLECAT_LIBS_PATH = AblePolecat_Server_Paths::getFullPath('libs');
+  define('ABLE_POLECAT_LIBS_PATH', $ABLE_POLECAT_LIBS_PATH);
+}
+
+//
+// Contributed modules directory.
+//
+if (!defined('ABLE_POLECAT_MODS_PATH')) {
+  $ABLE_POLECAT_MODS_PATH = AblePolecat_Server_Paths::getFullPath('mods');
+  define('ABLE_POLECAT_MODS_PATH', $ABLE_POLECAT_MODS_PATH);
+}
+
+//
+// Log files directory.
+//
+if (!defined('ABLE_POLECAT_LOGS_PATH')) {
+  $ABLE_POLECAT_LOGS_PATH = AblePolecat_Server_Paths::getFullPath('logs');
+  define('ABLE_POLECAT_LOGS_PATH', $ABLE_POLECAT_LOGS_PATH);
+}
+
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Mode.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Application.php')));
 

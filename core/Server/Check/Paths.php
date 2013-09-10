@@ -20,13 +20,17 @@ class AblePolecat_Server_Check_Paths extends AblePolecat_Server_CheckAbstract {
       AblePolecat_Server_Paths::conf,
       AblePolecat_Server_Paths::core,
       AblePolecat_Server_Paths::dev,
-      AblePolecat_Server_Paths::libs,
-      AblePolecat_Server_Paths::logs,
-      AblePolecat_Server_Paths::mods,
       AblePolecat_Server_Paths::qa,
       AblePolecat_Server_Paths::user,
       AblePolecat_Server_Paths::sites,
       AblePolecat_Server_Paths::services,
+      
+      //
+      // @todo: these paths are configurable
+      //
+      // AblePolecat_Server_Paths::libs,
+      // AblePolecat_Server_Paths::logs,
+      // AblePolecat_Server_Paths::mods,
     );
     foreach ($dirs as $key => $dir) {
       if (!self::directoryExists($dir)) {
