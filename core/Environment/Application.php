@@ -106,7 +106,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
       $Agent = $Environment->loadAccessControlAgent(
         'AblePolecat_AccessControl_Agent_Application',
         implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Application.php')),
-        'load'
+        'wakeup'
       );
       
       //

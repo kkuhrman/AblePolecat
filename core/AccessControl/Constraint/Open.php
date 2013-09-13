@@ -4,7 +4,7 @@
  * Base class for constraint on opening an access controlled resource.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint.php')));
 
 class AblePolecat_AccessControl_Constraint_Open implements AblePolecat_AccessControl_ConstraintInterface {
   

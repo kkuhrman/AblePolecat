@@ -21,7 +21,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'ClassRegistry.php')));
 //
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Log', 'Csv.php')));
 include_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Http', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Http', 'Message', 'Request.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Service', 'Bus.php')));
 
 interface AblePolecat_ServerInterface {
@@ -163,7 +163,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
     // cookie, server will boot in cookie mode. Otherwise, the server will 
     // boot in normal mode.
     //
-    $run_var = AblePolecat_Http_Request::getVariable('run');
+    $run_var = AblePolecat_Http_Message_Request::getVariable('run');
     if (!isset($run_var)) {
       //
       // If runtime context was saved in a cookie, use that until agent

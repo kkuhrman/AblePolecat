@@ -4,9 +4,9 @@
  * Role reserved for anonymous agent (user).
  */
  
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
+include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Role.php');
 
-class AblePolecat_AccessControl_Role_Anonymous implements AblePolecat_AccessControl_RoleInterface {
+class AblePolecat_AccessControl_Role_Anonymous extends AblePolecat_AccessControl_RoleAbstract {
   
   /**
    * Constants.
@@ -15,50 +15,46 @@ class AblePolecat_AccessControl_Role_Anonymous implements AblePolecat_AccessCont
   const NAME = 'Anonymous';
   
   /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    parent::initialize();
+  }
+  
+  /**
    * Return unique, system-wide identifier for agent.
    *
-   * @return string Agent identifier.
+   * @return string Role identifier.
    */
   public static function getId() {
     return self::UUID;
   }
   
   /**
-   * Return common name for agent.
+   * Return common name for role.
    *
-   * @return string Agent name.
+   * @return string Role name.
    */
   public static function getName() {
     return self::NAME;
   }
   
   /**
-   * Specify if role is authorized for given agent object.
+   * Serialize object to cache.
    *
-   * @param object Object implementing AblePolecat_AccessControl_AgentInterface.
-   *
-   * @return bool TRUE if role is authorized for given agent object, otherwise FALSE.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function isAuthorized(AblePolecat_AccessControl_AgentInterface $Agent) {
-    
-    $authorized = FALSE;
-    
-    switch (get_class($Agent)) {
-      case 'AblePolecat_AccessControl_Agent_Anonymous':
-        $authorized = TRUE;
-        break;
-      default:
-        break;
-    }
-    return $authorized;
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
   
   /**
-   * Creational function, initialize members from storage.
+   * Create a new instance of object or restore cached object to previous state.
    *
-   * @return object Instance of class which implments AblePolecat_AccessControl_RoleInterface.
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_CacheObjectInterface or NULL.
    */
-  public static function load() {
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     $Role = new AblePolecat_AccessControl_Role_Anonymous();
     return $Role;
   }

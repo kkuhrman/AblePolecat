@@ -2,6 +2,7 @@
 /**
  * @file: Url.php
  * Encapsulates system (aka 'base') URL and URL related functions.
+ * @todo: should implement AblePolecat_AccessControl_Resource_LocaterInterface
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Server', 'Paths.php')));

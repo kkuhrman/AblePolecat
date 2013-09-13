@@ -6,32 +6,118 @@
 
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
 
-interface AblePolecat_MessageInterface extends Serializable {
+interface AblePolecat_MessageInterface {
   
   /**
-   * Create an 'empty' message (i.e. no trailing headers or body).
+   * Create a concrete instance of AblePolecat_MessageInterface.
    *
-   * HTTP HEAD request is an example of an 'empty' message.
+   * @param Array $head Optional message header fields (NVP).
+   * @param mixed $body Optional message body.
    *
-   * @param variable $tokens Minimal requirements for creating the message.
-   *
-   * @return AblePolecat_MessageAbstract New instance of message or NULL.
+   * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
    */
-  public static function createEmpty($tokens = NULL);
+  public static function create($head = NULL, $body = NULL);
   
   /**
-   * Create and format the entire message from the given tokens.
+   * Return message BODY.
    *
-   * @param variable $tokens All the data necessary to create entire message.
-   *
-   * @return AblePolecat_MessageAbstract New instance of message or NULL.
+   * @return mixed Message BODY or NULL.
    */
-  public static function create($tokens = NULL);
+  public function getBody();
   
   /**
-   * Output the entire message as text.
+   * Return message HEAD or a specific header field.
+   *
+   * @param string $field_name Given if only part of HEAD is requested.
+   *
+   * @return mixed HEAD, value of header field given by $field_name or NULL.
    */
-  public function __toString();
+  public function getHead($field_name = NULL);
+}
+
+abstract class AblePolecat_MessageAbstract implements AblePolecat_MessageInterface {
+  
+  /**
+   * @var BODY.
+   */
+  private $body;
+  
+  /**
+   * @var HEAD.
+   */
+  private $head;
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize properties.
+   */
+  protected function initialize() {
+  }
+  
+  /**
+   * Set message BODY.
+   *
+   * @param mixed $body.
+   */
+  protected function setBody($body) {
+    $this->body = $body;
+  }
+  
+  /**
+   * Set part or all of message HEAD.
+   *
+   * @param Array $head HEAD NVP(s).
+   */
+  protected function setHead($head) {
+    if (isset($head) && is_array($head)) {
+      foreach($head as $name => $value) {
+        $this->head[$name] = $value;
+      }
+    }
+  }
+  
+  /**
+   * Helper funciton for outputting message as text.
+   */
+  protected function CRLF() {
+    return sprintf("%c%c", 13, 10);
+  }
+  
+  /**
+   * Return message BODY.
+   *
+   * @return mixed Message BODY or NULL.
+   */
+  public function getBody() {
+    return $this->body;
+  }
+  
+  /**
+   * Return message HEAD or a specific header field.
+   *
+   * @param string $field_name Given if only part of HEAD is requested.
+   *
+   * @return mixed HEAD, value of header field given by $field_name or NULL.
+   */
+  public function getHead($field_name = NULL) {
+    $value = NULL;
+    if (count($this->head)) {
+      if (isset($this->head[$field_name])) {
+        $value = $this->head[$field_name];
+      }
+      else {
+        $value = $this->head;
+      }
+    }
+    return $value;
+  }
+  
+  final protected function __construct() {
+    $this->body = NULL;
+    $this->head = array();
+    $this->initialize();
+  }
 }
 
 /**

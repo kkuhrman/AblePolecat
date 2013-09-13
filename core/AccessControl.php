@@ -1,400 +1,127 @@
 <?php
 /**
  * @file: AccessControl.php
- * Public interfaces to essential Able Polecat access control objects.
+ * Manages access control for Able Polecat server.
  */
 
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role.php')));
+include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
 
-/**
- * Similar to 'the' (definite), 'a'/'an' (indefinite) in English grammar.
- * Used to  indicate the type of reference (general, specific, etc) being 
- * made by the Subject, Object, Constraint etc. in an access control system.
- */
-interface AblePolecat_AccessControl_ArticleInterface {
+interface AblePolecat_AccessControlInterface extends AblePolecat_CacheObjectInterface {
   
   /**
-   * Ideally unique id will be UUID.
+   * Assign agent to given role.
    *
-   * @return string Subject unique identifier.
-   */
-  public static function getId();
-  
-  /**
-   * Common name, need not be unique.
-   *
-   * @return string Common name.
-   */
-  public static function getName();
-}
- 
-/**
- * 'Subject' (agent or role) seeks access to 'Object' (resource).
- */
-interface AblePolecat_AccessControl_SubjectInterface extends AblePolecat_AccessControl_ArticleInterface {
-}
-
-/**
- * The opposite, denial of a permission; e.g. deny_write = TRUE.
- */
-interface AblePolecat_AccessControl_ConstraintInterface extends AblePolecat_AccessControl_ArticleInterface {
-}
-
-/**
- * The access control 'subject'; for example, a user.
- *
- * Intended to follow interface specified by W3C but does not provide public access to 
- * properties (get/set methods provided).
- *
- * @see http://www.w3.org/TR/url/#url
- */
-interface AblePolecat_AccessControl_AgentInterface extends AblePolecat_AccessControl_SubjectInterface {
-  
-  /**
-   * Assign the given role to the agent.
-   *
-   * @param object Object implementing AblePolecat_AccessControl_RoleInterface.
-   *
-   * @return bool TRUE if the role is assigned to agent, otherwise FALSE.
-   */
-  public function assignRole(AblePolecat_AccessControl_RoleInterface $Role);
-  
-  /**
-   * Return roles assigned to agent.
-   *
-   * @return Array Zero or more instances of class implementing AblePolecat_AccessControl_RoleInterface.
-   */
-  public function getRoles();
-  
-  /**
-   * Creational function, load agent from storage with no active session.
-   *
-   * @return object Instance of class implmenting AblePolecat_AccessControl_AgentInterface.
-   */
-  public static function load();
-  
-  /**
-   * Creational function, load agent from storage and resume session.
-   *
-   * @return object Instance of class implmenting AblePolecat_AccessControl_AgentInterface.
-   */
-  public static function wakeup();
-}
-
-/**
- * A job function within the system such as 'anonymous', 'authenticated', 'administrator' etc.
- */
-interface AblePolecat_AccessControl_RoleInterface extends AblePolecat_AccessControl_SubjectInterface {
-
-  /**
-   * Specify if role is authorized for given agent object.
-   *
-   * @param object Object implementing AblePolecat_AccessControl_AgentInterface.
-   *
-   * @return bool TRUE if role is authorized for given agent object, otherwise FALSE.
-   */
-  public static function isAuthorized(AblePolecat_AccessControl_AgentInterface $Agent);
-  
-  /**
-   * Creational function, initialize members from storage.
-   *
-   * @return object Instance of class which implments AblePolecat_AccessControl_RoleInterface.
-   */
-  public static function load();
-}
-
-/**
- * The URL part of a URI.
- */
-interface AblePolecat_AccessControl_Resource_LocaterInterface {
-  
-  /**
-   * Create URL.
+   * @param AblePolecat_AccessControl_AgentInterface $Agent
+   * @param AblePolecat_AccessControl_RoleInterface $Role
    * 
-   * @param DOMString $url Relative or absolute path.
-   * @param optional DOMString $baseURL.
+   * @return bool TRUE if agent is assigned to role, otherwise FALSE.
+   */
+  public function assign(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_RoleInterface $Role);
+  
+  /**
+   * Authorize role for given agent.
    *
-   * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
-   */
-  public static function create($url, $baseURL = NULL);
-  
-  /**
-   * @return DOMString protocol.
-   */
-  public function getProtocol();
-  
-  /**
-   * @return DOMString username.
-   */
-  public function getUsername();
-  
-  /**
-   * @return DOMString password.
-   */
-  public function getPassword();
-  
-  /**
-   * @return DOMString host.
-   */
-  public function getHost();
-  
-  /**
-   * @return DOMString hostname.
-   */
-  public function getHostname();
-  
-  /**
-   * @return DOMString port.
-   */
-  public function getPort();
-  
-  /**
-   * @return DOMString pathname.
-   */
-  public function getPathname();
-  
-  /**
-   * @return DOMString search.
-   */
-  public function getSearch();
-  
-  /**
-   * @return DOMString hash.
-   */
-  public function getHash();
-  
-  /**
-   * @return DOMString filename.
-   */
-  public function getFilename();
-  
-  /**
-   * @return DOMString origin.
-   */
-  public function getOrigin();
-  
-  /**
-   * Set protocol.
-   *
-   * @param DOMString $protocol
-   */
-  public function setProtocol($protocol);
-  
-  /**
-   * Set username.
-   *
-   * @param DOMString $username
-   */
-  public function setUsername($username);
-  
-  /**
-   * Set password.
-   *
-   * @param DOMString $password
-   */
-  public function setPassword($password);
-  
-  /**
-   * Set host.
-   *
-   * @param DOMString $host
-   */
-  public function setHost($host);
-  
-  /**
-   * Set hostname.
-   *
-   * @param DOMString $hostname
-   */
-  public function setHostname($hostname);
-  
-  /**
-   * Set port.
-   *
-   * @param DOMString $port
-   */
-  public function setPort($port);
-  
-  /**
-   * Set pathname.
-   *
-   * @param DOMString $pathname
-   */
-  public function setPathname($pathname);
-  
-  /**
-   * Set search.
-   *
-   * @param DOMString $search
-   */
-  public function setSearch($search);
-  
-  /**
-   * Set hash.
-   *
-   * @param DOMString $hash
-   */
-  public function setHash($hash);
-  
-  /**
-   * Set filename.
-   *
-   * @param DOMString $filename
-   */
-  public function setFilename($filename);
-  
-  /**
-   * Return all unique names of parameters in list.
-   *
-   * @return Array Names of parameters.
-   */
-  public function getParameterNames();
-  
-  /**
-   * Return all values for parameter by given name.
+   * @param AblePolecat_AccessControl_RoleInterface $Role
+   * @param AblePolecat_AccessControl_AgentInterface $Agent
    * 
-   * @param DOMString $name Name of given parameter.
-   *
-   * @return Array All parameter values or NULL.
+   * @return bool TRUE if role is authorized for agent, otherwise FALSE.
    */
-  public function getParameterValues($name);
-  
-  /**
-   * @return bool TRUE if given parameter set, otherwise FALSE.
-   */
-  public function hasParameter($name);
-  
-  /**
-   * Get value of given parameter.
-   *
-   * @param DOMString $name Name of parameter to update.
-   *
-   * @return DOMString Value of parameter or NULL.
-   */
-   public function getParameter($name);
+   public function authorize(AblePolecat_AccessControl_RoleInterface $Role, AblePolecat_AccessControl_AgentInterface $Agent);
    
-  /**
-   * Set value of given parameter.
-   *
-   * @param DOMString $name Name of parameter to update.
-   * @param DOMString $value Parameter value.
-   */
-  public function setParameter($name, $value);
-  
-  /**
-   * Add given parameter to list.
-   *
-   * @param DOMString $name Name of parameter to add to list.
-   * @param DOMString $value Parameter value.
-   */
-  public function addParameter($name, $value);
-  
-  /**
-   * Remove given parameter from list.
-   *
-   * @param DOMString $name Name of parameter to remove.
-   */
-  public function removeParameter($name);
-  
-  /**
-   * Clear all parameters, reset list.
-   */
-  public function clearParameters();
-  
-  /**
-   * Return URL as a string.
-   *
-   * @return DOMString href.
-   */
-  public function __toString();
-}
-
-/**
- * The access control 'object', some resource secured by constraints which agents may 
- * seek to gain access to; e.g. a file, a device, a database connection, etc.
- */
-interface AblePolecat_AccessControl_ResourceInterface extends AblePolecat_AccessControl_ArticleInterface {
-  
-  /**
-   * Sets given constraint on the resource.
-   *
-   * By default, setting constraint on this resource denies this action to all 
-   * agents and roles. 
-   *
-   * @param AblePolecat_AccessControl_ConstraintInterface $Constraint.
-   *
-   * @return bool TRUE if constraint is set, otherwise FALSE.
-   * 
-   * @see setPermission().
-   */
-  public function setConstraint(AblePolecat_AccessControl_ConstraintInterface $Constraint);
-  
-  /**
-   * Sets permission for given agent or role.
+   /**
+   * Grants permission (removes constraint) to given agent or role.
    *
    * In actuality, unless a constraint is set on the resource, all agents and roles 
-   * have permission for corresponding action. If constraint is set, setPermission 
+   * have permission for corresponding action. If constraint is set, grant() 
    * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
-   * @param string $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId().
+   * @param AblePolecat_AccessControl_ConstraintInterface $Constraint.
    *
    * @return bool TRUE if permission is granted, otherwise FALSE.
    */
-  public function setPermission(AblePolecat_AccessControl_SubjectInterface $Subject, $constraint_id);
+  public function grant(AblePolecat_AccessControl_SubjectInterface $Subject, AblePolecat_AccessControl_ConstraintInterface $Constraint);
+}
+
+class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
   
   /**
-   * Verifies that agent or role has given permission.
+   * Extends __construct().
+   * Sub-classes should override to initialize properties.
+   */
+  protected function initialize() {
+  }
+  
+  /**
+   * Assign agent to given role.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent
+   * @param AblePolecat_AccessControl_RoleInterface $Role
+   * 
+   * @return bool TRUE if agent is assigned to role, otherwise FALSE.
+   */
+  public function assign(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_RoleInterface $Role) {
+    //
+    // @TODO:
+    //
+    return TRUE;
+  }
+  
+  /**
+   * Authorize role for given agent.
+   *
+   * @param AblePolecat_AccessControl_RoleInterface $Role
+   * @param AblePolecat_AccessControl_AgentInterface $Agent
+   * 
+   * @return bool TRUE if role is authorized for agent, otherwise FALSE.
+   */
+   public function authorize(AblePolecat_AccessControl_RoleInterface $Role, AblePolecat_AccessControl_AgentInterface $Agent) {
+    //
+    // @TODO:
+    //
+    return TRUE;
+   }
+   
+   /**
+   * Grants permission (removes constraint) to given agent or role.
+   *
+   * In actuality, unless a constraint is set on the resource, all agents and roles 
+   * have permission for corresponding action. If constraint is set, grant() 
+   * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
-   * @param string $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId().
+   * @param AblePolecat_AccessControl_ConstraintInterface $Constraint.
    *
-   * @return bool TRUE if agent or role has permission, otherwise FALSE.
+   * @return bool TRUE if permission is granted, otherwise FALSE.
    */
-  public function hasPermission(AblePolecat_AccessControl_SubjectInterface $Subject, $constraint_id);
+  public function grant(AblePolecat_AccessControl_SubjectInterface $Subject, AblePolecat_AccessControl_ConstraintInterface $Constraint) {
+    //
+    // @TODO:
+    //
+    return TRUE;
+  }
   
   /**
-   * Creational function; similar to UNIX program, creates an empty resource.
+   * Serialize object to cache.
    *
-   * @return object Instance of class which implments AblePolecat_AccessControl_ResourceInterface.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function touch();
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+  }
   
   /**
-   * Opens an existing resource or makes an empty one accessible depending on permissions.
-   * 
-   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking access.
-   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
-   * @param string $name Optional common name for new resources.
+   * Create a new instance of object or restore cached object to previous state.
    *
-   * @return bool TRUE if access to resource is granted, otherwise FALSE.
-   */
-  public function open(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_Resource_LocaterInterface $Url = NULL);
-  
-  /**
-   * Read from an existing resource or depending on permissions.
-   * 
-   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking to read.
-   * @param string $start Optional offset to start reading from.
-   * @param string $end Optional offset to end reading at.
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return mixed Data read from resource or NULL.
+   * @return AblePolecat_AccessControl Initialized access control service or NULL.
    */
-  public function read(AblePolecat_AccessControl_AgentInterface $Agent, $start = NULL, $end = NULL);
-  
-  /**
-   * Write to a new or existing resource or depending on permissions.
-   * 
-   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking to read.
-   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
-   * @param mixed $data The data to write to the resource.
-   *
-   * @return bool TRUE if write to resource is successful, otherwise FALSE.
-   */
-  public function write(
-    AblePolecat_AccessControl_AgentInterface $Agent, 
-    AblePolecat_AccessControl_Resource_LocaterInterface $Url,
-    $data);
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    $AccessControl = new AblePolecat_AccessControl();
+    return $AccessControl;
+  }
 }
 
 /**

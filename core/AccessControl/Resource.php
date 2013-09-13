@@ -1,13 +1,54 @@
 <?php
 /**
  * @file: Resource.php
- * Base class for Able Polecat access controlled resources (object).
+ * The access control 'object', some resource secured by constraints which agents may 
+ * seek to gain access to; e.g. a file, a device, a database connection, etc.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Open.php')));
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Read.php')));
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Write.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Subject.php')));
 include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Resource', 'Locater.php')));
+
+interface AblePolecat_AccessControl_ResourceInterface extends AblePolecat_AccessControl_ArticleInterface {
+  
+  /**
+   * Sets given constraint on the resource.
+   *
+   * By default, setting constraint on this resource denies this action to all 
+   * agents and roles. 
+   *
+   * @param AblePolecat_AccessControl_ConstraintInterface $Constraint.
+   *
+   * @return bool TRUE if constraint is set, otherwise FALSE.
+   * 
+   * @see setPermission().
+   */
+  public function setConstraint(AblePolecat_AccessControl_ConstraintInterface $Constraint);
+  
+  /**
+   * Sets permission for given agent or role.
+   *
+   * In actuality, unless a constraint is set on the resource, all agents and roles 
+   * have permission for corresponding action. If constraint is set, setPermission 
+   * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
+   * @param string $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId().
+   *
+   * @return bool TRUE if permission is granted, otherwise FALSE.
+   */
+  public function setPermission(AblePolecat_AccessControl_SubjectInterface $Subject, $constraint_id);
+  
+  /**
+   * Verifies that agent or role has given permission.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
+   * @param string $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId().
+   *
+   * @return bool TRUE if agent or role has permission, otherwise FALSE.
+   */
+  public function hasPermission(AblePolecat_AccessControl_SubjectInterface $Subject, $constraint_id);
+}
 
 abstract class AblePolecat_AccessControl_ResourceAbstract implements AblePolecat_AccessControl_ResourceInterface {
   

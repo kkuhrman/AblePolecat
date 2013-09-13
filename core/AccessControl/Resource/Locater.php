@@ -12,7 +12,208 @@
  * class as more than a crude container for local file paths names and very simple web addresses.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
+interface AblePolecat_AccessControl_Resource_LocaterInterface {
+  
+  /**
+   * Create URL.
+   * 
+   * @param DOMString $url Relative or absolute path.
+   * @param optional DOMString $baseURL.
+   *
+   * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
+   */
+  public static function create($url, $baseURL = NULL);
+  
+  /**
+   * @return DOMString protocol.
+   */
+  public function getProtocol();
+  
+  /**
+   * @return DOMString username.
+   */
+  public function getUsername();
+  
+  /**
+   * @return DOMString password.
+   */
+  public function getPassword();
+  
+  /**
+   * @return DOMString host.
+   */
+  public function getHost();
+  
+  /**
+   * @return DOMString hostname.
+   */
+  public function getHostname();
+  
+  /**
+   * @return DOMString port.
+   */
+  public function getPort();
+  
+  /**
+   * @return DOMString pathname.
+   */
+  public function getPathname();
+  
+  /**
+   * @return DOMString search.
+   */
+  public function getSearch();
+  
+  /**
+   * @return DOMString hash.
+   */
+  public function getHash();
+  
+  /**
+   * @return DOMString filename.
+   */
+  public function getFilename();
+  
+  /**
+   * @return DOMString origin.
+   */
+  public function getOrigin();
+  
+  /**
+   * Set protocol.
+   *
+   * @param DOMString $protocol
+   */
+  public function setProtocol($protocol);
+  
+  /**
+   * Set username.
+   *
+   * @param DOMString $username
+   */
+  public function setUsername($username);
+  
+  /**
+   * Set password.
+   *
+   * @param DOMString $password
+   */
+  public function setPassword($password);
+  
+  /**
+   * Set host.
+   *
+   * @param DOMString $host
+   */
+  public function setHost($host);
+  
+  /**
+   * Set hostname.
+   *
+   * @param DOMString $hostname
+   */
+  public function setHostname($hostname);
+  
+  /**
+   * Set port.
+   *
+   * @param DOMString $port
+   */
+  public function setPort($port);
+  
+  /**
+   * Set pathname.
+   *
+   * @param DOMString $pathname
+   */
+  public function setPathname($pathname);
+  
+  /**
+   * Set search.
+   *
+   * @param DOMString $search
+   */
+  public function setSearch($search);
+  
+  /**
+   * Set hash.
+   *
+   * @param DOMString $hash
+   */
+  public function setHash($hash);
+  
+  /**
+   * Set filename.
+   *
+   * @param DOMString $filename
+   */
+  public function setFilename($filename);
+  
+  /**
+   * Return all unique names of parameters in list.
+   *
+   * @return Array Names of parameters.
+   */
+  public function getParameterNames();
+  
+  /**
+   * Return all values for parameter by given name.
+   * 
+   * @param DOMString $name Name of given parameter.
+   *
+   * @return Array All parameter values or NULL.
+   */
+  public function getParameterValues($name);
+  
+  /**
+   * @return bool TRUE if given parameter set, otherwise FALSE.
+   */
+  public function hasParameter($name);
+  
+  /**
+   * Get value of given parameter.
+   *
+   * @param DOMString $name Name of parameter to update.
+   *
+   * @return DOMString Value of parameter or NULL.
+   */
+   public function getParameter($name);
+   
+  /**
+   * Set value of given parameter.
+   *
+   * @param DOMString $name Name of parameter to update.
+   * @param DOMString $value Parameter value.
+   */
+  public function setParameter($name, $value);
+  
+  /**
+   * Add given parameter to list.
+   *
+   * @param DOMString $name Name of parameter to add to list.
+   * @param DOMString $value Parameter value.
+   */
+  public function addParameter($name, $value);
+  
+  /**
+   * Remove given parameter from list.
+   *
+   * @param DOMString $name Name of parameter to remove.
+   */
+  public function removeParameter($name);
+  
+  /**
+   * Clear all parameters, reset list.
+   */
+  public function clearParameters();
+  
+  /**
+   * Return URL as a string.
+   *
+   * @return DOMString href.
+   */
+  public function __toString();
+}
 
 class AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessControl_Resource_LocaterInterface {
 

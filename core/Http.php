@@ -1,12 +1,12 @@
 <?php
 /**
  * @file: Http.php
- * Base interface for all classes encapsulating HTTP messages (request/response).
+ * Base interface for all classes encapsulating HTTP activity.
  */
 
-interface AblePolecat_Http {
+interface AblePolecat_HttpInterface {
   /**
-   * Output the entire message as text.
+   * At present, should return HTTP/1.1.
    */
-  public function __toString();
+  public function getVersion();
 }

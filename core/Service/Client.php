@@ -3,21 +3,12 @@
  * Base for web service clients.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Initiator.php')));
 
 /**
  * Manages a client connection to a web services provider.
  */
 interface AblePolecat_Service_ClientInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_Service_Interface {
-  
-  /**
-   * Prepares a statement for execution and returns a statement object.
-   *
-   * @param mixed Valid DDL or DML for the client in the form or string, object or array.
-   *
-   * @return AblePolecat_QueryLanguage_StatementInterface or NULL.
-   */
-  public function prepare($statement);
 }
 
 abstract class AblePolecat_Service_ClientAbstract implements AblePolecat_Service_ClientInterface {
@@ -30,20 +21,18 @@ abstract class AblePolecat_Service_ClientAbstract implements AblePolecat_Service
   /**
    * Iniitialize client configuration settings prior to attempting a connection.
    *
-   * @return bool TRUE if configuration is valid, otherwise FALSE.
+   * @throw AblePolecat_Service_Client_Exception If client is not ready to connect.
    */
-  protected function initialize() {
-  }
-  
-  /**
-   * Returns the encapsulated client object.
-   */
-  public function getNativeClient() {
-    return $this->Client;
-  }
+  abstract protected function initialize();
   
   final protected function __construct() {
     $this->Client = NULL;
     $this->initialize();
   }
+}
+
+/**
+ * Exceptions thrown by Able Polecat service clients.
+ */
+class AblePolecat_Service_Client_Exception extends AblePolecat_Exception {
 }

@@ -4,8 +4,7 @@
  * Base class for access control for applications using Able Polecat.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role', 'Application.php')));
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Agent.php');
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent.php')));
 
 class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessControl_AgentAbstract {
   
@@ -19,9 +18,6 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
    * Extends __construct().
    */
   protected function initialize() {
-    parent::initialize();
-    $Role = AblePolecat_AccessControl_Role_Application::load();
-    $this->assignRole($Role);
   }
   
   /**
@@ -43,21 +39,22 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
   }
   
   /**
-   * Creational function, load agent from storage with no active session.
+   * Serialize object to cache.
    *
-   * @return object Instance of AblePolecat_AccessControl_Agent_Application.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function load() {
-    $Agent = new AblePolecat_AccessControl_Agent_Application();
-    return $Agent;
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
   
   /**
-   * Creational function, load agent from storage and resume session.
+   * Create a new instance of object or restore cached object to previous state.
    *
-   * @return object Instance of AblePolecat_AccessControl_Agent_Application.
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
-  public static function wakeup() {
-    return self::load();
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    $Agent = new AblePolecat_AccessControl_Agent_Application();
+    return $Agent;
   }
 }

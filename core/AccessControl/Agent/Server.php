@@ -19,9 +19,6 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
    * Extends __construct().
    */
   protected function initialize() {
-    parent::initialize();
-    $Role = AblePolecat_AccessControl_Role_Server::load();
-    $this->assignRole($Role);
   }
   
   /**
@@ -43,21 +40,22 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
   }
   
   /**
-   * Creational function, load agent from storage with no active session.
+   * Serialize object to cache.
    *
-   * @return object Instance of AblePolecat_AccessControl_Agent_Server.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function load() {
-    $Agent = new AblePolecat_AccessControl_Agent_Server();
-    return $Agent;
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
   
   /**
-   * Creational function, load agent from storage and resume session.
+   * Create a new instance of object or restore cached object to previous state.
    *
-   * @return object Instance of AblePolecat_AccessControl_Agent_Server.
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
-  public static function wakeup() {
-    return self::load();
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    $Agent = new AblePolecat_AccessControl_Agent_Server();
+    return $Agent;
   }
 }

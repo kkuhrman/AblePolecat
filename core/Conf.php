@@ -4,9 +4,12 @@
  * Base class for Able Polecat configuration objects.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Resource.php');
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Open.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Read.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint', 'Write.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Resource', 'File.php')));
 
-abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_ResourceAbstract {
+abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_Resource_FileAbstract {
   
   /**
    * write() parameters
