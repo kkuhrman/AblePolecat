@@ -32,7 +32,13 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
     isset($errfile) ? $msg .= " in $errfile" : NULL;
     isset($errline) ? $msg .= " line $errline" : NULL;
-    isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
+    
+    //
+    // @todo: perhaps better diagnostics.
+    // serialize() is not supported for all types
+    //
+    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
+    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
     
     //
     // Send error information to syslog
@@ -43,8 +49,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     
     if ($die) {
       die('arrrgghh...');
-    }
-    
+    }    
     return $die;
   }
   
@@ -62,9 +67,17 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     //
     // log the exception
     //
-    $access = date("Y/m/d H:i:s");
-    $message = $Exception->getMessage();
-    syslog(LOG_WARNING, "Able Polecat, $access, {$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}), $message");
+    $msg = sprintf("Exception %d thrown in Able Polecat. %s line %d : %s", 
+      $Exception->getCode(),
+      $Exception->getFile(),
+      $Exception->getLine(),
+      $Exception->getMessage()
+    );
+    // $trace = $Exception->getTrace();
+    // var_dump($trace);
+    
+    // $access = date("Y/m/d H:i:s");
+    // syslog(LOG_WARNING, "Able Polecat, $access, {$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}), $message");
     closelog();
   }
   

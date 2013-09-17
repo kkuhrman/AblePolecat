@@ -1,18 +1,18 @@
 <?xml version='1.0' standalone='yes'?>
-<polecat:config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
-  <polecat:paths>
-    <polecat:path name="libs">
+<config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
+  <paths>
+    <path name="libs">
       C:\wamp\www\Private\AblePolecat\libs
-    </polecat:path>
-    <polecat:path name="logs">
+    </path>
+    <path name="logs">
       C:\wamp\www\Private\AblePolecat\logs
-    </polecat:path>
-    <polecat:path name="mods">
+    </path>
+    <path name="mods">
       C:\wamp\www\Private\AblePolecat\mods
-    </polecat:path>
-  </polecat:paths>
-  <polecat:modules>
-    <polecat:module name="FirePHP" decsription="FirePHP module for Able Polecat.">
-    </polecat:module>
-  </polecat:modules>
-</polecat:config>
+    </path>
+  </paths>
+  <modules>
+    <module name="FirePHP" decsription="FirePHP module for Able Polecat.">
+    </module>
+  </modules>
+</config>

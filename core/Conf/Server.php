@@ -89,7 +89,8 @@ class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
         $open = TRUE;
       }
       catch(Exception $exception) {
-        $this->logMessage("Failed to open application configuration file: " . $exception->getMessage());
+        AblePolecat_Server::handleCriticalError($exception->getCode(), 
+          "Failed to open application configuration file: " . $exception->getMessage());
         $this->m_SimpleXml = NULL;
       }
     }
