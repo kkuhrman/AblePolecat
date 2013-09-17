@@ -113,7 +113,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       }
     }
     if (!isset($resource) && $safe) {
-      AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_UNSUPPORTED_INTERFACE, 
+      AblePolecat_Server::handleCriticalError(AblePolecat_Error::UNSUPPORTED_INTERFACE, 
         "Attempt to retrieve Able Polecat application resource of type $interface, module $module failed.");
     }
     return $resource;
@@ -144,7 +144,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         $module,
         get_class($resource)
       );
-      AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_UNSUPPORTED_INTERFACE, $msg);
+      AblePolecat_Server::handleCriticalError(AblePolecat_Error::UNSUPPORTED_INTERFACE, $msg);
     }
   }
   
@@ -170,7 +170,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     }
     else {
       throw new AblePolecat_Server_Exception('Failed to load registered modules. Application mode is not ready.',
-        ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION
+        AblePolecat_Error::BOOT_SEQ_VIOLATION
       );
     }
   }
@@ -259,7 +259,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       }
       else {
         throw new AblePolecat_Environment_Exception('Failed to load Able Polecat application environment.',
-          ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+          AblePolecat_Error::BOOT_SEQ_VIOLATION);
       }
       
       //

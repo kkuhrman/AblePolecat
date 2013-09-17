@@ -68,8 +68,6 @@ if (!defined('ABLE_POLECAT_SERVICES_PATH')) {
   define('ABLE_POLECAT_SERVICES_PATH', $ABLE_POLECAT_SERVICES_PATH);
 }
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
-
 class AblePolecat_Server_Paths {
 
   /**
@@ -137,7 +135,7 @@ class AblePolecat_Server_Paths {
           }
           else {
             throw new AblePolecat_Server_Paths_Exception("Attempt to access $subdir directory before configurable paths initialized.",
-              ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+              AblePolecat_Error::BOOT_SEQ_VIOLATION);
           }
           break;
         case 'root':

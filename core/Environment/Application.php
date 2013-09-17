@@ -120,14 +120,14 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
           }
         }
         else {
-          throw new AblePolecat_Environment_Exception(ABLE_POLECAT_EXCEPTION_MSG(ABLE_POLECAT_EXCEPTION_MODS_PATH_INVALID), 
-            ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+          throw new AblePolecat_Environment_Exception(AblePolecat_Error::defaultMessage(AblePolecat_Error::MODS_PATH_INVALID), 
+            AblePolecat_Error::BOOT_SEQ_VIOLATION);
         }
       }
     }
     else {
       throw new AblePolecat_Environment_Exception('Cannot register modules before application agent is assigned.', 
-        ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+        AblePolecat_Error::BOOT_SEQ_VIOLATION);
     }
   }
   

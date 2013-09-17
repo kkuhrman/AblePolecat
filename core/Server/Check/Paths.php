@@ -34,7 +34,7 @@ class AblePolecat_Server_Check_Paths extends AblePolecat_Server_CheckAbstract {
     );
     foreach ($dirs as $key => $dir) {
       if (!self::directoryExists($dir)) {
-        self::$error_code = ABLE_POLECAT_EXCEPTION_SYS_PATH_ERROR;
+        self::$error_code = AblePolecat_Error::SYS_PATH_ERROR;
         self::$error_message = "Invalid system path encountered: $dir";
         $pathsAreGo = FALSE;
         goto ABLE_POLECAT_CHECK_FAIL;

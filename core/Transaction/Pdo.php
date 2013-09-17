@@ -31,7 +31,7 @@ class AblePolecat_Transaction_Pdo extends AblePolecat_TransactionAbstract {
     }
     if (!isset($this->Database)) {
       throw new AblePolecat_Log_Exception("Failed to connect to Able Polecat database", 
-        ABLE_POLECAT_EXCEPTION_DB_CONNECT_FAIL);
+        AblePolecat_Error::DB_CONNECT_FAIL);
     }
     
     //

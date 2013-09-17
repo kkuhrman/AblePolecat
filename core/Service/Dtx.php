@@ -166,8 +166,8 @@ abstract class AblePolecat_Service_DtxAbstract implements AblePolecat_Service_Dt
   public function getServiceBus() {
     $Bus = $this->getEnvironment()->getServiceBus();
     if (!isset($Bus)) {
-      throw new AblePolecat_Environment_Exception("Failure to return valid service bus object.", 
-        AblePolecat_Environment_Exception::ERROR_ENV_GET_MEMBER);
+      throw new AblePolecat_Environment_Exception("Attempt to access invalid service bus object.", 
+        AblePolecat_Error::ACCESS_INVALID_OBJECT);
     }
     return $Bus;
   }

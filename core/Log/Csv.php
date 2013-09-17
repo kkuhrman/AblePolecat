@@ -24,7 +24,7 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
     $this->hFile = fopen($file_name, 'a');
     if ($this->hFile == FALSE) {
       $this->hFile = NULL;
-      trigger_error('Able Polecat failed to open default log file.', E_USER_ERROR);
+      trigger_error(AblePolecat_Error::defaultMessage(AblePolecat_Error::BOOTSTRAP_LOGGER), E_USER_ERROR);
     }
   }
   

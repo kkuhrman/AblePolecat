@@ -54,7 +54,7 @@ abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_CacheObjectAb
       $this->Agent = $Agent;
     }
     else {
-      AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_AGENT);
+      AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOTSTRAP_AGENT);
     }
     return $this->Agent;
   }

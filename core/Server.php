@@ -12,17 +12,12 @@
  */
 
 //
-// Sets paths for entire framework; must be first
-//
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'ClassRegistry.php')));
-
-//
 // These are listed in the order they are created in initialize() and bootstrap()
 //
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Http', 'Message', 'Request.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Log', 'Csv.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Service', 'Bus.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Http', 'Message', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Log', 'Csv.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Bus.php')));
 
 class AblePolecat_Server {
   
@@ -128,15 +123,15 @@ class AblePolecat_Server {
     $ServerMode = NULL;
     switch(self::getBootMode()) {
       default:
-        require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Normal.php')));
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Normal.php')));
         $ServerMode = AblePolecat_Mode_Normal::wakeup();
         break;
       case 'dev':
-        require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Dev.php')));
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Dev.php')));
         $ServerMode = AblePolecat_Mode_Dev::wakeup();
         break;
       case 'qa':
-        require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server', 'Qa.php')));
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Qa.php')));
         $ServerMode = AblePolecat_Mode_Qa::wakeup();
         break;
     }
@@ -192,7 +187,7 @@ class AblePolecat_Server {
       $resource = self::$Resources[$ring][$name];
     }
     else if ($safe) {
-      self::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION, 
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, 
         "Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed.");
     }
     return $resource;
@@ -214,7 +209,7 @@ class AblePolecat_Server {
       }
     }
     else {
-      self::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION, 
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, 
         "Able Polecat Server rejected attempt to cache resource given by $name at protection ring $ring.");
     }
   }
@@ -267,7 +262,7 @@ class AblePolecat_Server {
       // Protection ring 1, Application mode.
       //
       self::$Resources[1] = array();
-      require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Application.php')));
+      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Application.php')));
       $ApplicationMode = AblePolecat_Mode_Application::wakeup();
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
       

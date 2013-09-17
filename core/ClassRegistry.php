@@ -94,12 +94,12 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
         );
       }
       else {
-        AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_CLASS_REG,
+        AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOTSTRAP_CLASS_REG,
           "Invalid registration for $class_name: constructor");
       }
     }
     else {
-      AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOT_PATH_INVALID,
+      AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOT_PATH_INVALID,
         "Invalid include path for $class_name: include file path");
     }
   }

@@ -90,14 +90,14 @@ class AblePolecat_Session implements Serializable {
       if (!session_decode($session_data)) {
         throw new AblePolecat_Session_Exception(
           'Failed to decode session data.',
-          AblePolecat_Session_Exception::ERROR_SESSION_DECODE_FAIL
+          AblePolecat_Error::SESSION_DECODE_FAIL
       );
       }
     }
     else {
       throw new AblePolecat_Session_Exception(
         'Cannot decode unavailable session data.',
-        AblePolecat_Session_Exception::ERROR_SESSION_NOT_STARTED
+        AblePolecat_Error::SESSION_DECODE_FAIL
       );
     }
   }

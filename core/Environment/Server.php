@@ -121,7 +121,7 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       }
       else {
         throw new AblePolecat_Environment_Exception("Failure to access/set application configuration.", 
-          AblePolecat_Environment_Exception::ERROR_ENV_BOOTSTRAP_CONFIG);
+          AblePolecat_Error::BOOTSTRAP_CONFIG);
       }
 
       //

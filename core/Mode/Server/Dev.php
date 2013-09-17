@@ -68,7 +68,7 @@ class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
       }
       else {
         throw new AblePolecat_Environment_Exception('Failed to load Able Polecat server environment.',
-          ABLE_POLECAT_EXCEPTION_BOOT_SEQ_VIOLATION);
+          AblePolecat_Error::BOOT_SEQ_VIOLATION);
       }
       
       //
