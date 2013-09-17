@@ -128,12 +128,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * @var AblePolecat_Server Singleton instance.
    */
   private static $Server = NULL;
-  
-  /**
-   * @var bool Prevents some code from exceuting prior to bootstrap completing.
-   */
-  private static $ready = FALSE;
-  
+    
   /**
    * @var Array $Resources.
    *
@@ -335,7 +330,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       //
       // Create instance of Singleton.
       //
-      $Server = new self();
+      self::$Server = new self();
       
       //
       // Protection ring 1, Application mode.
@@ -365,12 +360,6 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
       // 2. Cookies
       // 3. Other stored user settings (database).
       //
-        
-      //
-      // Bootstrap completed successfully
-      //
-      self::$Server = $Server;
-      self::$ready = TRUE;
     }
     return self::$Server;
   }
@@ -423,8 +412,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   public static function handleCriticalError($error_number, $error_message = NULL) {
     
     !isset($error_message) ? $error_message = ABLE_POLECAT_EXCEPTION_MSG($error_number) : NULL;
-    $Server = self::ready();
-    if ($Server) {
+    if (isset(self::$Server)) {
       self::log(AblePolecat_LogInterface::ERROR, $error_message, $error_number);
       $ServerModeClass = get_class(self::getServerMode());
       switch ($ServerModeClass) {
@@ -455,8 +443,11 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * @param int    $code Error code.
    */
   public static function log($severity, $message, $code = NULL) {
-    $Server = self::ready();
-    if ($Server) {
+
+    if (isset(self::$Server)) {
+      //
+      // Default log.
+      //
       $type = AblePolecat_LogInterface::INFO;
       switch ($severity) {
         default:
@@ -468,15 +459,15 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
           $type = $severity;
           break;
       }
-      $Server->writeToDefaultLog($type, $message, $code);
-    }
-    
-    //
-    // Write to application logs
-    //
-    $ApplicationMode = self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, FALSE);
-    if (isset($ApplicationMode)) {
-      $ApplicationMode->log($severity, $message, $code);
+      self::$Server->writeToDefaultLog($type, $message, $code);
+      
+      //
+      // Application (contributed) logs
+      //
+      $ApplicationMode = self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, FALSE);
+      if (isset($ApplicationMode)) {
+        $ApplicationMode->log($severity, $message, $code);
+      }
     }
   }
   
@@ -486,14 +477,15 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
    * @return AblePolecat_ServerInterface or FALSE.
    */
   public static function ready() {
-    $ready = self::$ready;
-    if ($ready) {
-      $ready = self::$Server;
-    }
-    return $ready;
+    return self::$Server;
   }
   
   final protected function __construct() {
+    
+    //
+    // Not ready until after initialize().
+    //
+    self::$Server = NULL;
     self::$Resources = array();
     $this->initialize();
   }
