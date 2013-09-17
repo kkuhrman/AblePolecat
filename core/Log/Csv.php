@@ -95,20 +95,24 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
   }
   
   /**
-   * Creational function, returns logger ready to write to stdout or stderr.
+   * Serialize object to cache.
    *
-   * @return object Instance of class implmenting AblePolecat_LogInterface.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function wakeup() {
-    return new AblePolecat_Log_Csv();
-  }
-  
-  /**
-   * Flush any buffers and close down connections to stdout and stderr.
-   */
-  public function sleep() {
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (isset($this->hFile)) {
       fclose($this->hFile);
     }
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Log_Csv or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    return new AblePolecat_Log_Csv();
   }
 }

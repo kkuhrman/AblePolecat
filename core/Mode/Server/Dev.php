@@ -32,9 +32,25 @@ class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
   }
   
   /**
-   * Initialize and return object implementing AblePolecat_Mode.
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function wakeup() {
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    //
+    // todo: Persist...
+    //
+    self::$ServerMode = NULL;
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Mode_Dev or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     $ServerMode = self::ready();
     if (!$ServerMode) {
@@ -62,15 +78,5 @@ class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
       self::$ready = TRUE;
     }
     return self::$ServerMode;
-  }
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep() {
-    //
-    // Persist...
-    //
-    self::$ServerMode = NULL;
   }
 }

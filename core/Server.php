@@ -19,81 +19,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'ClassRegistry.php')));
 //
 // These are listed in the order they are created in initialize() and bootstrap()
 //
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Log', 'Csv.php')));
-include_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Http', 'Message', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Mode', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Log', 'Csv.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Service', 'Bus.php')));
 
-interface AblePolecat_ServerInterface {
-  
-  /**
-   * Bootstrap procedure for Able Polecat.
-   *
-   * @return AblePolecat_ServerInterface Bootstrapped system object.
-   */
-  public static function bootstrap();
-  
-  /**
-   * @return AblePolecat_Mode_Application.
-   */
-  public static function getApplicationMode();
-  
-  /**
-   * @return string dev | qa | user.
-   */
-  public static function getBootMode();
-  
-  /**
-   * @return AblePolecat_ClassRegistryInterface.
-   */
-  public static function getClassRegistry();
-  
-  /**
-   * @return AblePolecat_LogInterface.
-   */
-  public static function getDefaultLog();
-  
-  /**
-   * @return AblePolecat_Mode_ServerAbstract.
-   */
-  public static function getServerMode();
-  
-  /**
-   * Get handle the service bus.
-   *
-   * @return AblePolecat_Service_BusInterface or NULL.
-   */
-  public static function getServiceBus();
-  
-  /**
-   * Handle critical environment errors depending on runtime context.
-   * 
-   * @param int $error_number Predefined Able Polecat error constant or E_USER_ERROR.
-   * @param mixed $error_message The body of the error message.
-   *
-   * If $error_code is a predefined Able Polecat error constant and $error_message
-   * is not given, the default error message from Exception.php will be used.
-   */
-  public static function handleCriticalError($error_number, $error_message = NULL);
-  
-  /**
-   * Log a message to standard/default log (file).
-   * 
-   * @param string $severity error | warning | status | info | debug.
-   * @param mixed  $message Message body.
-   * @param int    $code Error code.
-   */
-  public static function log($severity, $message, $code = NULL);
-  
-  /**
-   * Similar to DOM ready() but for Able Polecat core system.
-   *
-   * @return AblePolecat_ServerInterface Bootstrapped system object.
-   */
-  public static function ready();
-}
-
-class AblePolecat_Server implements AblePolecat_ServerInterface {
+class AblePolecat_Server {
   
   //
   // protection ring 0, Server Mode.
@@ -319,7 +250,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   /**
    * Bootstrap procedure for Able Polecat.
    *
-   * @return AblePolecat_ServerInterface Bootstrapped system object.
+   * @return AblePolecat_Server Bootstrapped system object.
    */
   public static function bootstrap() {
     
@@ -379,7 +310,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   }
   
   /**
-   * @return AblePolecat_ClassRegistryInterface.
+   * @return AblePolecat_ClassRegistry.
    */
   public static function getClassRegistry() {
     return self::getResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY);
@@ -474,7 +405,7 @@ class AblePolecat_Server implements AblePolecat_ServerInterface {
   /**
    * Similar to DOM ready() but for Able Polecat core system.
    *
-   * @return AblePolecat_ServerInterface or FALSE.
+   * @return AblePolecat_Server or FALSE.
    */
   public static function ready() {
     return self::$Server;

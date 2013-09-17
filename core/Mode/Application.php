@@ -209,9 +209,39 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Initialize and return object implementing AblePolecat_Mode.
+   * Similar to DOM ready() but for Able Polecat application mode.
+   *
+   * @return AblePolecat_Mode_ApplicationAbstract or FALSE.
    */
-  public static function wakeup() {
+  public static function ready() {
+    $ready = self::$ready;
+    if ($ready) {
+      $ready = self::$ApplicationMode;
+    }
+    return $ready;
+  }
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    //
+    // @todo: persist
+    //
+    self::$ApplicationMode = NULL;
+    self::$ready = FALSE;
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Mode_Application or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     $ApplicationMode = self::ready();
     if (!$ApplicationMode) {
@@ -239,24 +269,5 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       self::$ready = TRUE;
     }
     return self::$ApplicationMode;
-  }
-  
-  /**
-   * Similar to DOM ready() but for Able Polecat application mode.
-   *
-   * @return AblePolecat_Mode_ApplicationAbstract or FALSE.
-   */
-  public static function ready() {
-    $ready = self::$ready;
-    if ($ready) {
-      $ready = self::$ApplicationMode;
-    }
-    return $ready;
-  }
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep() {
   }
 }

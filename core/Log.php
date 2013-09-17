@@ -2,7 +2,8 @@
 /**
  * Public interface to Able Polecat Logger.
  */
-
+ 
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'CacheObject.php')));
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
 
 if (isset($_SERVER['WINDIR'])) {
@@ -18,7 +19,7 @@ else {
   define('ABLE_POLECAT_EVENT_ID_DEBUG',       LOG_DEBUG);
 }
 
-interface AblePolecat_LogInterface {
+interface AblePolecat_LogInterface extends AblePolecat_CacheObjectInterface {
   
   const ERROR   = 'error';
   const DEBUG   = 'debug';
@@ -61,18 +62,6 @@ interface AblePolecat_LogInterface {
    * @param variable $msg Variable list of arguments comprising message.
    */
   public static function dumpBacktrace($msg = NULL);
-  
-  /**
-   * Creational function, returns logger ready to write to stdout or stderr.
-   *
-   * @return object Instance of class implmenting AblePolecat_LogInterface.
-   */
-  public static function wakeup();
-  
-  /**
-   * Flush any buffers and close down connections to stdout and stderr.
-   */
-  public function sleep();
 }
 
 abstract class AblePolecat_LogAbstract implements AblePolecat_LogInterface {
@@ -80,16 +69,20 @@ abstract class AblePolecat_LogAbstract implements AblePolecat_LogInterface {
   /**
    * Extends __construct(). 
    */
-  protected function initialize() {
-  }
+  abstract protected function initialize();
   
   /**
-   * Sub classes must implement wakeup(), which will return instance of class.
+   * Cached objects must be created by wakeup().
+   * Initialization of sub-classes should take place in initialize().
+   * @see initialize(), wakeup().
    */
   final protected function __construct() {
     $this->initialize();
   }
   
+  /**
+   * Serialization prior to going out of scope in sleep().
+   */
   final public function __destruct() {
     $this->sleep();
   }

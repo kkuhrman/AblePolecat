@@ -3,8 +3,10 @@
  * @file: Mode.php
  * Analogous to OS mode (protected etc) except defines context of web app.
  */
+ 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'CacheObject.php')));
 
-interface AblePolecat_Mode {
+interface AblePolecat_Mode extends AblePolecat_CacheObjectInterface {
   
   /**
    * @return AblePolecat_EnvironmentInterface.
@@ -15,16 +17,6 @@ interface AblePolecat_Mode {
    * @return AblePolecat_Mode if encapsulated mode is ready for work, otherwise NULL.
    */
   public static function ready();
-  
-  /**
-   * Initialize and return object implementing AblePolecat_Mode.
-   */
-  public static function wakeup();
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep();
 }
 
 abstract class AblePolecat_ModeAbstract implements AblePolecat_Mode {
@@ -48,16 +40,18 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_Mode {
   public function getEnvironment() {
     return $this->Environment;
   }
-    
+  
   /**
-   * @see: start();
+   * Cached objects must be created by wakeup().
+   * Initialization of sub-classes should take place in initialize().
+   * @see initialize(), wakeup().
    */
   final protected function __construct() {
     $this->initialize();
   }
   
   /**
-   * @see: sleep();
+   * Serialization prior to going out of scope in sleep().
    */
   final public function __destruct() {
     $this->sleep();

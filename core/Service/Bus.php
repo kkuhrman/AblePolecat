@@ -131,29 +131,31 @@ class AblePolecat_Service_Bus implements AblePolecat_Service_BusInterface {
   }
   
   /**
-   * Serialize configuration and connection settings prior to going out of scope.
+   * Serialize object to cache.
    *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public function sleep(AblePolecat_AccessControl_AgentInterface $Agent = NULL) {
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    //
+    // @todo: persist
+    //
+    self::$ServiceBus = NULL;
   }
   
   /**
-   * Open a new connection or resume a prior connection.
+   * Create a new instance of object or restore cached object to previous state.
    *
-   * @param AblePolecat_AccessControl_AgentInterface Session status helps determine if connection is new or established.
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
    * @return AblePolecat_Service_Bus or NULL.
    */
-  public static function wakeup(AblePolecat_AccessControl_AgentInterface $Agent = NULL) {
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$ServiceBus)) {
-      self::$ServiceBus = new AblePolecat_Service_Bus();
+      $ServiceBus = new AblePolecat_Service_Bus();
+      $ServiceBus->Clients = array();
+      self::$ServiceBus = $ServiceBus;
+      
     }					
     return self::$ServiceBus;
-  }
-  
-  final protected function __construct() {
-    $this->Clients = array();
-    $this->initialize();
   }
 }

@@ -20,6 +20,23 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
   protected static $ready = FALSE;
   
   /**
+   * Extends constructor.
+   * Sub-classes should override to initialize members.
+   */
+  protected function initialize() {
+    
+    parent::initialize();
+    self::$ServerMode = NULL;
+    
+    //
+    // Check for required server resources.
+    // (these will throw exception if not ready).
+    //
+    AblePolecat_Server::getBootMode();
+    AblePolecat_Server::getClassRegistry();
+  }
+  
+  /**
    * Used to handle errors encountered while running in production mode.
    */
   public static function defaultErrorHandler($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
@@ -74,28 +91,8 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       $Exception->getMessage()
     );
     // $trace = $Exception->getTrace();
-    // var_dump($trace);
-    
-    // $access = date("Y/m/d H:i:s");
-    // syslog(LOG_WARNING, "Able Polecat, $access, {$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}), $message");
+    syslog(LOG_WARNING, "$msg ({$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}))");
     closelog();
-  }
-  
-  /**
-   * Extends constructor.
-   * Sub-classes should override to initialize members.
-   */
-  protected function initialize() {
-    
-    parent::initialize();
-    self::$ServerMode = NULL;
-    
-    //
-    // Check for required server resources.
-    // (these will throw exception if not ready).
-    //
-    AblePolecat_Server::getBootMode();
-    AblePolecat_Server::getClassRegistry();
   }
   
   /**

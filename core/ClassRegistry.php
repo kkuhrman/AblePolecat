@@ -5,50 +5,9 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Server', 'Paths.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'CacheObject.php')));
 
-interface AblePolecat_ClassRegistryInterface {
-  
-  /**
-   * Check if class can be loaded in current environment.
-   * 
-   * @param string $class_name The name of class to check for.
-   *
-   * @return mixed Full include path if class can be loaded, otherwise FALSE.
-   */
-  public function isLoadable($class_name);
-  
-  /**
-   * Get instance of given class.
-   *
-   * @param string $class_name The name of class to instantiate.
-   * 
-   * @return object Instance of given class or NULL.
-   */
-  public function loadClass($class_name);
-  
-  /**
-   * Registers path and creation method for loadable class.
-   *
-   * @param string $class_name The name of class to register.
-   * @param string $path Full path of include file.
-   * @param string $method Method used for creation (default is __construct()).
-   */
-  public function registerLoadableClass($class_name, $path, $method = NULL);
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep();
-  
-  /**
-   * Creational function; restores saved state from memory/storage.
-   *
-   * @return object Instance of class implmenting AblePolecat_ClassRegistryInterface.
-   */
-  public static function wakeup();
-}
-
-class AblePolecat_ClassRegistry implements AblePolecat_ClassRegistryInterface {
+class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   
     /**
    * Class registration constants.
@@ -146,29 +105,24 @@ class AblePolecat_ClassRegistry implements AblePolecat_ClassRegistryInterface {
   }
   
   /**
-   * Persist state prior to going out of scope.
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public function sleep() {
-    self::$ClassRegistry = NULL;
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
   
   /**
-   * Creational function; restores saved state from memory/storage.
+   * Create a new instance of object or restore cached object to previous state.
    *
-   * @return object Instance of class implmenting AblePolecat_ClassRegistryInterface.
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
-  public static function wakeup() {
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$ClassRegistry)) {
       self::$ClassRegistry = new AblePolecat_ClassRegistry();
     }
     return self::$ClassRegistry;
-  }
-  
-  final protected function __construct() {
-    $this->initialize();
-  }
-  
-  final public function __destruct() {
-    $this->sleep();
   }
 }
