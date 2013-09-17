@@ -74,7 +74,7 @@ class AblePolecat_Mode_Qa extends AblePolecat_Mode_ServerAbstract {
       //
       // Load environment settings
       //
-      $Environment = AblePolecat_Environment_Server::load();
+      $Environment = AblePolecat_Environment_Server::wakeup();
       if (isset($Environment)) {
         $ServerMode->Environment = $Environment;
       }

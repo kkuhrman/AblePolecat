@@ -6,25 +6,10 @@
  * Duties of the Environment object:
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Mode' . DIRECTORY_SEPARATOR . 'Server.php');
+include_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'CacheObject.php')));
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
 
-interface AblePolecat_EnvironmentInterface {
-  
-  /**
-   * Initialize the environment for Able Polecat.
-   *
-   * @return AblePolecat_EnvironmentAbstract sub class.
-   */
-  public static function load();
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep();
-}
-
-abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_EnvironmentInterface {
+abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_CacheObjectAbstract {
   
   /**
    * @var Access control agent for Server.
@@ -39,7 +24,7 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
   /**
    * Extends __construct(). 
    * 
-   * Sub-classes can override to initialize members prior to load.
+   * Sub-classes can override to initialize members prior to wakeup().
    */
   protected function initialize() {
     $this->Agent = NULL;
@@ -72,15 +57,6 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
       AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_AGENT);
     }
     return $this->Agent;
-  }
-  
-  /**
-   * Adds given access control agent to environment.
-   *
-   * @param object Instance of class which implements AblePolecat_AccessControl_AgentInterface.
-   */
-  public function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
-    $this->Agent = $Agent;
   }
   
   /**
@@ -138,17 +114,6 @@ abstract class AblePolecat_EnvironmentAbstract implements AblePolecat_Environmen
         $this->Config = $Config;
       }
     }
-  }
-  
-  /**
-   * Sub classes must implement load(), which will return instance of class.
-   */
-  final protected function __construct() {
-    $this->initialize();
-  }
-  
-  final public function __destruct() {
-    $this->sleep();
   }
 }
 

@@ -286,7 +286,7 @@ class AblePolecat_Server {
       // @todo: 
       // Implement AblePolecat_EnvironmentInterface for User
       // AblePolecat_Mode_User::wakeup();
-      // @see:  AblePolecat_Environment_User::load();
+      // @see:  AblePolecat_Environment_User::wakeup();
       // 1. Session management
       // 2. Cookies
       // 3. Other stored user settings (database).

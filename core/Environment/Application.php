@@ -88,76 +88,10 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   }
   
   /**
-   * Initialize the environment for Able Polecat.
-   *
-   * @return AblePolecat_Environment_Server.
-   */
-  public static function load() {
-    $Environment = self::$Environment;
-    if (!isset($Environment)) {
-      //
-      // Create environment object.
-      //
-      $Environment = new AblePolecat_Environment_Application();
-      
-      //
-      // Initialize access control for application environment settings.
-      //
-      $Agent = $Environment->loadAccessControlAgent(
-        'AblePolecat_AccessControl_Agent_Application',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Application.php')),
-        'wakeup'
-      );
-      
-      //
-      // Register and load contributed classes
-      //
-      $Environment->registerModules();
-      // $Environment->loadModules();
-      
-      //
-      // Initialize singleton instance.
-      //
-      self::$Environment = $Environment;
-    }
-    return self::$Environment;
-  }
-  
-  /**
-   * Return configuration file for a registered module.
-   * 
-   * @param string $moduleName Name of a registered module.
-   * @param string $start Optional offset to start reading from.
-   * @param string $end Optional offset to end reading at.
-   *
-   * @return SimpleXMLElement Environment configuration settings.
-   */
-  public function getModuleConf($moduleName, $start = NULL, $end = NULL) {
-    
-    $modConf = NULL;
-    if (isset($this->Agent) && isset($this->m_registered_modules[$moduleName])) {
-      if (isset($this->m_registered_modules[$moduleName]['conf'])) {
-        $modConf = $this->m_registered_modules[$moduleName]['conf']->
-          read($this->Agent, $start, $end);
-      }
-    }
-    return $modConf;
-  }
-  
-  /**
-   * Return module registration data.
-   *
-   * @return Array.
-   */
-  public function getRegisteredModules() {
-    return $this->m_registered_modules;
-  }
-  
-  /**
    * Registers all contributed modules in mods directory flagged to be registered.
    * @see findModuleConfigurationFile().
    */
-  public function registerModules() {
+  protected function registerModules() {
     //
     // Application agent must be assigned already or all shall fail... oh woe!
     //
@@ -207,7 +141,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
    * @param AblePolecat_Conf_Module $modConfig Module configuration file
    * @param AblePolecat_AccessControl_Resource_LocaterInterface $modPath Full path to contributed module directory.
    */
-  public function registerModule(AblePolecat_Conf_Module $modConfig, AblePolecat_AccessControl_Resource_LocaterInterface $modPath) {
+  protected function registerModule(AblePolecat_Conf_Module $modConfig, AblePolecat_AccessControl_Resource_LocaterInterface $modPath) {
     
     if ($modConfig->open($this->Agent, $modPath)) {
       $modConfSxElement = $modConfig->read($this->Agent);
@@ -254,7 +188,78 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   }
   
   /**
-   * Persist state prior to going out of scope.
+   * Return configuration file for a registered module.
+   * 
+   * @param string $moduleName Name of a registered module.
+   * @param string $start Optional offset to start reading from.
+   * @param string $end Optional offset to end reading at.
+   *
+   * @return SimpleXMLElement Environment configuration settings.
    */
-  public function sleep() {}
+  public function getModuleConf($moduleName, $start = NULL, $end = NULL) {
+    
+    $modConf = NULL;
+    if (isset($this->Agent) && isset($this->m_registered_modules[$moduleName])) {
+      if (isset($this->m_registered_modules[$moduleName]['conf'])) {
+        $modConf = $this->m_registered_modules[$moduleName]['conf']->
+          read($this->Agent, $start, $end);
+      }
+    }
+    return $modConf;
+  }
+  
+  /**
+   * Return module registration data.
+   *
+   * @return Array.
+   */
+  public function getRegisteredModules() {
+    return $this->m_registered_modules;
+  }
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Environment_Application or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    $Environment = self::$Environment;
+    if (!isset($Environment)) {
+      //
+      // Create environment object.
+      //
+      $Environment = new AblePolecat_Environment_Application();
+      
+      //
+      // Initialize access control for application environment settings.
+      //
+      $Agent = $Environment->loadAccessControlAgent(
+        'AblePolecat_AccessControl_Agent_Application',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Application.php')),
+        'wakeup'
+      );
+      
+      //
+      // Register and load contributed classes
+      //
+      $Environment->registerModules();
+      // $Environment->loadModules();
+      
+      //
+      // Initialize singleton instance.
+      //
+      self::$Environment = $Environment;
+    }
+    return self::$Environment;
+  }
 }

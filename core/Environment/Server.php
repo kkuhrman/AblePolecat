@@ -53,11 +53,25 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   }
   
   /**
-   * Initialize the environment for Able Polecat.
+   * Serialize object to cache.
    *
-   * @return AblePolecat_Environment_Server.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  public static function load() {
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    //
+    // Runtime context may be saved in cookie for local development and testing.
+    //
+    $this->setServerModeCookie(AblePolecat_Server::getBootMode());
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Environment_Server or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     $Environment = self::$Environment;
     if (!isset($Environment)) {
@@ -69,23 +83,6 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       //
       // Initialize server access control.
       //
-      // Create instance of AblePolecat_AccessControl_Agent_Server 
-      // which must implement AblePolecat_AccessControl_AgentInterface.
-      // This should have access to config file, which must implement 
-      // AblePolecat_AccessControl_ResourceInterface.
-      //
-      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        // 'AblePolecat_AccessControl_Agent_Server', 
-        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Server.php')),
-        // 'load'
-      // );
-      // $Agent = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_AccessControl_Agent_Server');
-      // if (isset($Agent)) {
-        // $Environment->setAgent($Agent);
-      // }
-      // else {
-        // AblePolecat_Server::handleCriticalError(ABLE_POLECAT_EXCEPTION_BOOTSTRAP_AGENT);
-      // }
       $Agent = $Environment->loadAccessControlAgent(
         'AblePolecat_AccessControl_Agent_Server',
         implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Server.php')),
@@ -133,15 +130,5 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       self::$Environment = $Environment;
     }
     return self::$Environment;
-  }
-  
-  /**
-   * Persist state prior to going out of scope.
-   */
-  public function sleep() {
-    //
-    // Runtime context may be saved in cookie for local development and testing.
-    //
-    $this->setServerModeCookie(AblePolecat_Server::getBootMode());
   }
 }

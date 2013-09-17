@@ -253,7 +253,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       //
       // Load environment settings
       //
-      $Environment = AblePolecat_Environment_Application::load();
+      $Environment = AblePolecat_Environment_Application::wakeup();
       if (isset($Environment)) {
         $ApplicationMode->Environment = $Environment;
       }
