@@ -111,10 +111,43 @@ class AblePolecat_Server_Paths {
   const services = ABLE_POLECAT_SERVICES_PATH;
   
   /**
+   * @var Array Directories used for data storage.
+   */
+  private static $data_paths = array();
+  
+  /**
    * @var Array Some paths are set in server conf file.
    */
-  private static $conf_paths = array(
-  );
+  private static $conf_paths = array();
+  
+  /**
+   * Attempt to create configurable directory if it does not exist.
+   *
+   * @param string $path Full (unsanitized) path of directory to create.
+   * @param octal $mode Access restrictions for creating directory.
+   *
+   * @return mixed Full path if created or exists, otherwise FALSE.
+   * @throw AblePolecat_Server_Paths_Exception if absent directory could not be created.
+   */
+  public static function touch($path, $mode = 0644) {
+    
+    $full_path = FALSE;
+    $sanitized_path = self::sanitizePath($path);
+    if (file_exists($sanitized_path)) {
+      $full_path = $sanitized_path;
+    }
+    else {
+      $made = @mkdir($sanitized_path, 0644);
+      if ($made) {
+        $full_path = $sanitized_path;
+      }
+      else {
+        throw new AblePolecat_Server_Paths_Exception("Failed attempt to create directory $sanitized_path.",
+          AblePolecat_Error::MKDIR_FAIL);
+      }
+    }
+    return $full_path;
+  }
   
   /**
    * @param string $subdir Name of system directory.
@@ -132,6 +165,9 @@ class AblePolecat_Server_Paths {
           //
           if (isset(self::$conf_paths[$subdir])) {
             $path = self::$conf_paths[$subdir];
+          }
+          else if (isset(self::$data_paths[$subdir])) {
+            $path = self::$data_paths[$subdir];
           }
           else {
             throw new AblePolecat_Server_Paths_Exception("Attempt to access $subdir directory before configurable paths initialized.",
@@ -176,6 +212,14 @@ class AblePolecat_Server_Paths {
   public static function setFullPath($subdir, $fullpath) {
     switch($subdir) {
       default:
+        break;
+      case 'data':
+        $new_path = self::touch($fullpath);
+        self::$data_paths['data'] = $new_path;
+        break;
+      case 'session':
+        $new_path = self::touch($fullpath);
+        self::$data_paths['session'] = $new_path;
         break;
       case 'libs':
         self::$conf_paths['libs'] = self::sanitizePath($fullpath);

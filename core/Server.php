@@ -14,6 +14,7 @@
 //
 // These are listed in the order they are created in initialize() and bootstrap()
 //
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Session.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Http', 'Message', 'Request.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Log', 'Csv.php')));
@@ -66,11 +67,21 @@ class AblePolecat_Server {
    * They are stored as Array([zero-based protection ring number] => [internal resource name]);
    */
   private static $Resources = NULL;
+  
+  /**
+   * @var encapsulates session data.
+   */
+  private static $Session = NULL;
     
   /**
    * Initialize resources in protection ring '0' (e.g. kernel).
    */
   protected function initialize() {
+    
+    //
+    // Session is very first access control agent.
+    //
+    self::$Session = AblePolecat_Session::wakeup();
     
     //
     // 'Kernel' resources container.
@@ -110,7 +121,7 @@ class AblePolecat_Server {
     //
     // Wakeup class registry.
     //
-    $ClassRegistry = AblePolecat_ClassRegistry::wakeup();
+    $ClassRegistry = AblePolecat_ClassRegistry::wakeup(self::$Session);
     self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
     
     //
@@ -124,15 +135,15 @@ class AblePolecat_Server {
     switch(self::getBootMode()) {
       default:
         require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Normal.php')));
-        $ServerMode = AblePolecat_Mode_Normal::wakeup();
+        $ServerMode = AblePolecat_Mode_Normal::wakeup(self::$Session);
         break;
       case 'dev':
         require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Dev.php')));
-        $ServerMode = AblePolecat_Mode_Dev::wakeup();
+        $ServerMode = AblePolecat_Mode_Dev::wakeup(self::$Session);
         break;
       case 'qa':
         require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Qa.php')));
-        $ServerMode = AblePolecat_Mode_Qa::wakeup();
+        $ServerMode = AblePolecat_Mode_Qa::wakeup(self::$Session);
         break;
     }
     self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
@@ -159,13 +170,13 @@ class AblePolecat_Server {
     //
     // Wakeup default log file.
     //
-    $DefaultLog = AblePolecat_Log_Csv::wakeup();
+    $DefaultLog = AblePolecat_Log_Csv::wakeup(self::$Session);
     self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
     
     //
     // Service Bus
     //
-    $ServiceBus = AblePolecat_Service_Bus::wakeup();
+    $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Session);
     self::setResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $ServiceBus);
   }
   
@@ -263,7 +274,7 @@ class AblePolecat_Server {
       //
       self::$Resources[1] = array();
       require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Application.php')));
-      $ApplicationMode = AblePolecat_Mode_Application::wakeup();
+      $ApplicationMode = AblePolecat_Mode_Application::wakeup(self::$Session);
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
       
       //

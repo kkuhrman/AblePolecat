@@ -10,6 +10,7 @@ class AblePolecat_Error {
    * Able Polecat core error codes.
    */
   const NO_ERROR_CODE_GIVEN   = 10000;
+  const UNSUPPORTED_PHP_VER   = 10001;
   const BOOT_SEQ_VIOLATION    = 10005;
   const SYS_PATH_ERROR        = 10010;
   const BOOT_PATH_INVALID     = 10015;
@@ -21,6 +22,7 @@ class AblePolecat_Error {
   const BOOTSTRAP_DB          = 10045;
   const BOOTSTRAP_BUS         = 10050;
   const NO_ENVIRONMENT_CONFIG = 10055;
+  const MKDIR_FAIL            = 10061;
   const ACCESS_INVALID_OBJECT = 10060;
   const LIBS_PATH_INVALID     = 10065;
   const LOGS_PATH_INVALID     = 10070;
@@ -45,6 +47,9 @@ class AblePolecat_Error {
     
     switch ($code) {
       default:
+        break;
+      case self::UNSUPPORTED_PHP_VER:
+        $message = 'PHP version not supported by Able Polecat';
         break;
       case self::BOOT_SEQ_VIOLATION:
         $message = 'Bootstrap procedure sequence violation.';
@@ -78,6 +83,9 @@ class AblePolecat_Error {
         break;
       case self::NO_ENVIRONMENT_CONFIG:
         $message = 'Could not load environment configuration.';
+        break;
+      case self::MKDIR_FAIL:
+        $message = 'Failed attempt to create directory.';
         break;
       case self::ACCESS_INVALID_OBJECT:
         $message = 'Failure to return a environment member object.';

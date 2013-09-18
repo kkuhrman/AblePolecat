@@ -23,6 +23,7 @@ require_once('boot.php');
     </p>
     <p><?php 
         AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, "Application mode loaded.");
+        echo "<p>PHP Version: " . phpversion() . "</p>";
       ?>
     </p>
   </div>

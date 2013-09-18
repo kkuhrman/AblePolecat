@@ -4,6 +4,10 @@
  * Handles registration and lazy loading of Able Polecat classes.
  */
 
+//
+// One of the few core files which does not make use of the defined constant
+// 'ABLE_POLECAT_PATH', which is initialized in the first required script.
+//
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Server', 'Paths.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'CacheObject.php')));
 
