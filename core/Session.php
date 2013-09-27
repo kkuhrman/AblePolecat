@@ -18,45 +18,7 @@ abstract class AblePolecat_SessionAbstract implements AblePolecat_SessionInterfa
    * Extends __construct().
    * Sub-classes initialize properties here.
    */
-  protected function initialize() {
-    //
-    // @todo: PHP version 5.4
-    //
-    session_save_path(AblePolecat_Server_Paths::getFullPath('session'));
-    session_set_save_handler($this, true);
-    session_start();
-  }
-  
-  /**
-   * Close the session.
-   *
-   * @return bool TRUE on success, otherwise FALSE.
-   */
-  public function close() {
-    return TRUE;
-  }
-  
-  /**
-   * Destroy a session.
-   *
-   * @param string $session_id ID of session to destroy.
-   * 
-   * @return bool TRUE on success, otherwise FALSE.
-   */
-  public function destroy($session_id) {
-    return TRUE;
-  }
-  
-  /**
-   * Cleanup old sessions.
-   *
-   * @param string $maxlifetime Maximum life of sessions which have not been updated.
-   *
-   * @return bool TRUE on success, otherwise FALSE.
-   */
-  public function gc($maxlifetime) {
-    return TRUE;
-  }
+  abstract protected function initialize();
   
   /**
    * Returns the current session status.
@@ -72,44 +34,6 @@ abstract class AblePolecat_SessionAbstract implements AblePolecat_SessionInterfa
     // $status = array(PHP_SESSION_DISABLED => 'disabled', PHP_SESSION_NONE => 'none', PHP_SESSION_ACTIVE => 'active');
     // isset($status[$session_status]) ? $status_str = $status[$session_status] : $status_str = 'unknown';
     return $session_status;
-  }
-  
-  /**
-   * Initialize the session.
-   *
-   * @param string $save_path The path where to store/retrieve the session.
-   * @param string $name The session name.
-   *
-   * @return bool TRUE on success, otherwise FALSE.
-   */
-  public function open($save_path, $name) {
-    return TRUE;
-  }
-  
-  /**
-   * Read session data.
-   *
-   * @param string $session_id The session ID.
-   *
-   * @return string Encoded session data.
-   */
-  public function read($session_id) {
-    return '';
-  }
-  
-  /**
-   * Write session data to storage.
-   *
-   * @param string $session_id The session ID.
-   * @param string $session_data The encoded session data.
-   *
-   * @return bool TRUE on success otherwise FALSE.
-   */
-  public function write($session_id , $session_data) {
-    //
-    // @todo: PHP version 5.4
-    //
-    return TRUE;
   }
 	
   /**

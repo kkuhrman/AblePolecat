@@ -17,28 +17,8 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
  * Manages multiple web services client connections and routes messages
  * between these and the application in scope.
  */
-interface AblePolecat_Service_BusInterface extends AblePolecat_Service_Interface {
-  
-  /**
-   * Add a service client to the bus.
-   * 
-   * @param string $class_name The name of class to register.
-   *
-   * @throw AblePolecat_Service_Exception if client cannot be set.
-   */
-  public function setClient($class_name);
-  
-  /**
-   * Returns a service client by class name.
-   *
-   * @param string $class_name Name of the service client class.
-   *
-   * @return AblePolecat_Service_ClientInterface or NULL.
-   */
-  public function getClient($class_name);
-}
 
-class AblePolecat_Service_Bus implements AblePolecat_Service_BusInterface {
+ class AblePolecat_Service_Bus  {
   
   const UUID              = '3d50dbb0-715e-11e2-bcfd-0800200c9a66';
   const NAME              = 'Able Polecat Service Bus';

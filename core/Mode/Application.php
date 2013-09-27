@@ -55,6 +55,16 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   protected static $ready = FALSE;
   
   /**
+   * @var List of interfaces which can be used as application resources.
+   */
+  private static $supported_interfaces = NULL;
+  
+  /**
+   * @var Array Class configuration data for resources from contributed modules.
+   */
+  private $resource_registration;
+  
+  /**
    * @var Array $Resources.
    *
    * Application resources are stored as Array([type] => [module name]).
@@ -71,12 +81,18 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     self::$ApplicationMode = NULL;
     
     //
+    // Class registry for application resources.
+    //
+    $resource_registration = array();
+    
+    //
     // Supported Able Polecat interfaces.
     //
-    $this->Resources = array(
-      'AblePolecat_LogInterface' => array(),
-      'AblePolecat_Service_ClientInterface' => array(),
-    );
+    $this->Resources = array();
+    $supported_resources = self::getSupportedResourceInterfaces();
+    foreach($supported_resources as $key => $interface_name) {
+      $this->Resources[$interface_name] = array();
+    }
     
     //
     // Check for required server resources.
@@ -120,46 +136,121 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /**
+   * Return an array with the names of all supported resource interfaces.
+   *
+   * @return Array Names of supported resource interfaces.
+   */
+  public static function getSupportedResourceInterfaces() {
+    
+    //
+    // @todo: perhaps this should be in conf file, database, other?
+    //
+    if (!isset(self::$supported_interfaces)) {
+      self::$supported_interfaces = array(
+        'AblePolecat_LogInterface',
+      );
+    }
+    return self::$supported_interfaces;
+  }
+  
+  /**
+   * Indicates whether given interface/class combination qualifies as an application resource.
+   *
+   * @param int $interface Name of interface.
+   * @param mixed $resource Object or class name.
+   *
+   * @return mixed Name of supported resource interface implemented by object/class or FALSE.
+   */
+  public static function isValidResource($interface, $resource) {
+    
+    $valid = array_key_exists($interface, array_flip(self::getSupportedResourceInterfaces()));
+    
+    if ($valid && isset($resource)) {
+      if (is_object($resource)) {
+        $valid = is_a($resource, $interface);
+      }
+      else if (is_string($resource)) {
+        $valid = is_subclass_of($resource, $interface);
+      }
+      else {
+        $valid = FALSE;
+      }
+    }
+    return $valid;
+  }
+  
+  /**
+   * Stores class configuration data in a registry so resource can be loaded on demand.
+   *
+   * @param int $interface One of the supported interface types.
+   * @param string $module Name of module.
+   * @param string $class_name Name of a loadable class which implements given interface.
+   *
+   * @return bool TRUE if class is registered, otherwise FALSE.
+   */
+  public function registerResource($interface, $module, $class_name) {
+    
+    $registered = self::isValidResource($interface, $class_name);
+    
+    if ($registered) {
+      if (!isset($this->resource_registration[$interface])) {
+        $this->resource_registration[$interface] = array();
+      }
+      if (!isset($this->resource_registration[$interface][$module])) {
+        $this->resource_registration[$interface][$module] = array();
+      }
+      $this->resource_registration[$interface][$module] = $class_name;
+    }
+    return $registered;
+  }
+  
+  /**
    * Stores an application resource.
    *
-   * @param int $interface Type of resource.
+   * @param int $interface One of the supported interface types.
    * @param string $module Name of module.
    * @param mixed $resource The resource to cache.
    *
-   * @throw Exception if ring is not intialized.
+   * @return mixed Name of supported resource interface.
+   * @throw Exception if resource does not implement a supoprted interface.
    */
-  protected function setResource($module, $resource) {
-    $storedType = NULL;
-    foreach($this->Resources as $interfaceType => $interfaceResources) {
-      if (is_a($resource, $interfaceType)) {
-        if (!isset($this->Resources[$interfaceType][$module])) {
-          $this->Resources[$interfaceType][$module] = $resource;
-          $storedType = $interfaceType;
-          break;
-        }
+  protected function setResource($interface, $module, $resource) {
+    
+    if (self::isValidResource($interface, $resource)) {
+      if(!isset($this->Resources[$interface])) {
+        $this->Resources[$interface] = array();
+      }
+      if (!isset($this->Resources[$interface][$module])) {
+        $this->Resources[$interface][$module] = array();
+      }
+      $class_name = get_class($resource);
+      if (!isset($this->Resources[$interface][$module][$class_name])) {
+        $this->Resources[$interface][$module][$class_name] = $resource;
       }
     }
-    if (!isset($storedType)) {
-      $msg = sprintf("Able Polecat rejected attempt to store application resource for module %s. Interface type %s is not supported.",
+    else {
+      $msg = sprintf("Able Polecat rejected attempt to store application resource for module %s. %s does not implement %s or %s is not a supported resource interface.",
         $module,
-        get_class($resource)
+        get_class($resource),
+        $interface,
+        $interface
       );
       AblePolecat_Server::handleCriticalError(AblePolecat_Error::UNSUPPORTED_INTERFACE, $msg);
     }
   }
   
   /**
-   * Load registered modules.
+   * Load resources from registered modules based on class attribute load.
    * @throw AblePolecat_Server_Exception is application mode is not ready.
    */
-  public function loadRegisteredModules() {
+  public function loadRegisteredResources() {
     $ApplicationMode = self::ready();
     if ($ApplicationMode) {
       //
       // Load registered modules
       //
       foreach($this->getEnvironment()->getRegisteredModules() as $modName => $modReg) {
-        $modLoadClasses = $modReg['classes'];
+        isset($modReg['classes']['load']) ? $modLoadClasses = $modReg['classes']['load'] : $modLoadClasses = array();
         foreach($modLoadClasses as $key => $className) {
           $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
           $ApplicationMode->setResource($modName, $class);

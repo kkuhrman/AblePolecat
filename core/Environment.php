@@ -1,7 +1,7 @@
 <?php
 /**
  * @file: Environment.php
- * Public interface to Able Polecat Environment.
+ * Base class for Able Polecat Environment objects.
  *
  * Duties of the Environment object:
  */

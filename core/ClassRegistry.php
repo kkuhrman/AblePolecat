@@ -23,6 +23,11 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
    * @var AblePolecat_ClassRegistry Singleton instance.
    */
   private static $ClassRegistry = NULL;
+  
+  /**
+   * @var List of Able Polecat interfaces.
+   */
+  private static $AblePolecatInterfaces = NULL;
    
   
   /**
@@ -36,6 +41,101 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
    */
   protected function initialize() {
     $this->m_loadable_classes = array();
+  }
+  
+  /**
+   * Return names of Able Polecat interfaces.
+   *
+   * @return Array Names of Able Polecat interfaces.
+   */
+  public static function getAblePolecatInterfaces() {
+    if (!isset(self::$AblePolecatInterfaces)) {
+      self::$AblePolecatInterfaces = array(
+        'AblePolecat_AccessControl_AgentInterface',
+        'AblePolecat_AccessControl_ArticleInterface',
+        'AblePolecat_AccessControl_ConstraintInterface',
+        'AblePolecat_AccessControl_Resource_LocaterInterface',
+        'AblePolecat_AccessControl_ResourceInterface',
+        'AblePolecat_AccessControl_RoleInterface',
+        'AblePolecat_AccessControl_SubjectInterface',
+        'AblePolecat_CacheObjectInterface',
+        'AblePolecat_Http_Message_RequestInterface',
+        'AblePolecat_Http_MessageInterface',
+        'AblePolecat_HttpInterface',
+        'AblePolecat_LogInterface',
+        'AblePolecat_MessageInterface',
+        'AblePolecat_ModeInterface',
+        'AblePolecat_Server_CheckInterface',
+        'AblePolecat_Service_ClientInterface',
+        'AblePolecat_Service_DtxInterface',
+        'AblePolecat_Service_InitiatorInterface',
+        'AblePolecat_Service_Interface',
+        'AblePolecat_SessionInterface',
+        'AblePolecat_TransactionInterface',
+      );
+    }
+    return self::$AblePolecatInterfaces;
+  }
+  
+  /**
+   * Returns name of Able Polecat interface if implemented.
+   *
+   * @param mixed $class Object or class name.
+   * @param string $path Full path of include file if not registered.
+   *
+   * @return mixed Name of implemented Able Polecat interface(s) or false.
+   */
+  public static function getImplementedAblePolecatInterfaces($class, $path = NULL) {
+    
+    $implemented_interface = FALSE;
+    
+    //
+    // Class may not be regisetered
+    //
+    if (isset($path) && is_file($path)) {
+      include_once($path);
+    }
+    
+    if (isset($class)) {
+      $class_name = FALSE;
+      if (is_object($class)) {
+        $class_name = get_class($class);
+      }
+      else if (is_string($class)) {
+        $class_name = $class;
+      }
+      if ($class_name) {        
+        $AblePolecatInterfaces = self::getAblePolecatInterfaces();
+        foreach($AblePolecatInterfaces as $key => $InterfaceName) {
+          if (is_subclass_of($class_name, $InterfaceName)) {
+            if ($implemented_interface === FALSE) {
+              $implemented_interface = array();
+            }
+            $implemented_interface[] = $InterfaceName;
+          }
+        }
+      }
+    }    
+    return $implemented_interface;
+  }
+  
+  /**
+   * Check if given class implements given Able Polecat interface.
+   *
+   * @param string $interface Name of an Able Polecat interface.
+   * @param mixed $class Object or class name.
+   * @param string $path Full path of include file if not registered.
+   *
+   * @return bool TRUE if $interface is an Able Polecat interface and is implemented by $class, otherwise FALSE.
+   */
+  public static function implementsAblePolecatInterface($interface, $class, $path = NULL) {
+    
+    $result = FALSE;
+    $implemented_interfaces = array_flip(self::getImplementedAblePolecatInterfaces($class, $path));
+    if ($implemented_interfaces) {
+      $result = array_key_exists($interface, $implemented_interfaces);
+    }
+    return $result;
   }
   
   /**
@@ -82,14 +182,23 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
    * Registers path and creation method for loadable class.
    *
    * @param string $class_name The name of class to register.
-   * @param string $path Full path of include file.
+   * @param string $path Full path of include file if not given elsewhere in script.
    * @param string $method Method used for creation (default is __construct()).
    */
-  public function registerLoadableClass($class_name, $path, $method = NULL) {
+  public function registerLoadableClass($class_name, $path = NULL, $method = NULL) {
     
-    if (is_file($path)) {
-      include_once($path);
-      $methods = get_class_methods($class_name);
+    if (isset($path)) {
+      if (is_file($path)) {
+        include_once($path);
+      }
+      else {
+        AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOT_PATH_INVALID,
+          "Invalid include path for $class_name: $path");
+      }
+    }
+    
+    $methods = get_class_methods($class_name);
+    if (isset($methods)) {
       if (FALSE !== array_search($method, $methods)) {
         !isset($method) ? $method = '__construct' : NULL;
         $this->m_loadable_classes[$class_name] = array(
@@ -102,9 +211,35 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
           "Invalid registration for $class_name: constructor");
       }
     }
-    else {
-      AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOT_PATH_INVALID,
-        "Invalid include path for $class_name: include file path");
+  }
+  
+  /**
+   * Register classes in contributed modules.
+   *
+   * @param string $className Name of class.
+   * @param string $classFullPath FullPath of class.
+   * @param string $classFactoryMethod FactoryMethod of class.
+   * @param string $classInterface Interface of class.
+   */
+  public function registerModuleClass($className, $filePath, $classFactoryMethod,$interface) {
+    
+    $implemented_interfaces = self::getImplementedAblePolecatInterfaces($className, $filePath, $interface);
+    if ($implemented_interfaces) {
+      //
+      // Do not pass $path because getImplementedAblePolecatInterfaces() has already included file.
+      //
+      $this->registerLoadableClass($className, NULL, $classFactoryMethod);
+      
+      //
+      // @todo: now what?
+      // if it's a resource such as a logger, register with app mode
+      // if it's a service client, register it with bus
+      // and so on...
+      //
+      if(AblePolecat_Mode_Application::isValidResource($interface, $className)) {
+        AblePolecat_Server::log('warning', '@todo: register resources and repeat for service clients.');
+      }
+      
     }
   }
   

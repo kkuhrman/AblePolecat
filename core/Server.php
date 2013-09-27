@@ -278,15 +278,13 @@ class AblePolecat_Server {
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
       
       //
-      // Load contributed modules.
+      // Load application resources from contributed modules.
       //
-      $ApplicationMode->loadRegisteredModules();
+      // $ApplicationMode->loadRegisteredResources();
       
       //
-      // @todo: Add contributed service client classes to service bus.
+      // @todo: Load service clients from contributed contributed modules.
       //
-      $Clients = $ApplicationMode->getResource('AblePolecat_Service_ClientInterface', 
-        AblePolecat_Mode_Application::RESOURCE_ALL, FALSE);
       
       //
       // @todo: 

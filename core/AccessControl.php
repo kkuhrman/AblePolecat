@@ -8,43 +8,6 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessContro
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
 
-interface AblePolecat_AccessControlInterface extends AblePolecat_CacheObjectInterface {
-  
-  /**
-   * Assign agent to given role.
-   *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent
-   * @param AblePolecat_AccessControl_RoleInterface $Role
-   * 
-   * @return bool TRUE if agent is assigned to role, otherwise FALSE.
-   */
-  public function assign(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_RoleInterface $Role);
-  
-  /**
-   * Authorize role for given agent.
-   *
-   * @param AblePolecat_AccessControl_RoleInterface $Role
-   * @param AblePolecat_AccessControl_AgentInterface $Agent
-   * 
-   * @return bool TRUE if role is authorized for agent, otherwise FALSE.
-   */
-   public function authorize(AblePolecat_AccessControl_RoleInterface $Role, AblePolecat_AccessControl_AgentInterface $Agent);
-   
-   /**
-   * Grants permission (removes constraint) to given agent or role.
-   *
-   * In actuality, unless a constraint is set on the resource, all agents and roles 
-   * have permission for corresponding action. If constraint is set, grant() 
-   * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
-   * @param AblePolecat_AccessControl_ConstraintInterface $Constraint.
-   *
-   * @return bool TRUE if permission is granted, otherwise FALSE.
-   */
-  public function grant(AblePolecat_AccessControl_SubjectInterface $Subject, AblePolecat_AccessControl_ConstraintInterface $Constraint);
-}
-
 class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
   
   /**

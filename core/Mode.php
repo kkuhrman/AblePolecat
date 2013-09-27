@@ -6,7 +6,7 @@
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'CacheObject.php')));
 
-interface AblePolecat_Mode extends AblePolecat_CacheObjectInterface {
+interface AblePolecat_ModeInterface extends AblePolecat_CacheObjectInterface {
   
   /**
    * @return AblePolecat_EnvironmentInterface.
@@ -14,12 +14,12 @@ interface AblePolecat_Mode extends AblePolecat_CacheObjectInterface {
   public function getEnvironment();
   
   /**
-   * @return AblePolecat_Mode if encapsulated mode is ready for work, otherwise NULL.
+   * @return AblePolecat_ModeInterface if encapsulated mode is ready for work, otherwise NULL.
    */
   public static function ready();
 }
 
-abstract class AblePolecat_ModeAbstract implements AblePolecat_Mode {
+abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
   
   /**
    * @var AblePolecat_EnvironmentInterface.
