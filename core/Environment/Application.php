@@ -216,80 +216,17 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
       $registration_directive = $this->getModuleRegisterDirective($modConfig, $modPath);
     }
     if ($registration_directive && $modConfig->open($this->Agent, $modPath)) {
-      // $modConfSxElement = $modConfig->read($this->Agent);
-      // $moduleAttributes = $modConfSxElement->attributes();
-      // var_dump($moduleAttributes);
-      // var_dump($modConfig->getModuleAttributes($this->Agent));
       $moduleAttributes = $modConfig->getModuleAttributes($this->Agent);
-      $moduleFullpath = trim($moduleAttributes['fullpath'], '/');
+      $moduleName = $moduleAttributes[AblePolecat_Conf_Module::ATTRIBUTE_NAME];
+      isset($moduleAttributes[AblePolecat_Conf_Module::ATTRIBUTE_PATH]) ? $moduleFullpath = trim($moduleAttributes[AblePolecat_Conf_Module::ATTRIBUTE_PATH], '/') : $moduleFullpath = '';
       $moduleClasses = $modConfig->getModuleClasses($this->Agent);
       foreach($moduleClasses as $className => $classConfig) {
-        if ($classConfig[AblePolecat_Conf_Module::ELEMENT_ATTR][AblePolecat_Conf_Module::ATTRIBUTE_REG]) {
-          $classFullPath = $moduleFullpath . DIRECTORY_SEPARATOR . $classConfig[AblePolecat_Conf_Module::ELEMENT_FILENAME];
-          $classFactoryMethod = $classConfig[AblePolecat_Conf_Module::ELEMENT_CLASSMETH];
-          $classInterface = $classConfig[AblePolecat_Conf_Module::ELEMENT_INTERFACE];
-          AblePolecat_Server::getClassRegistry()->registerModuleClass($className, $classFullPath, $classFactoryMethod, $classInterface);
-        }
+        AblePolecat_Server::getClassRegistry()->registerModuleClass($moduleName, $classConfig);
       }
-      if (true) return;
-      
-      //
-      // @todo: move all this module class business to AblePolecat_ClassRegistry::registerModuleClasses()
-      //
-      isset($modConfSxElement->classes) ? $moduleClasses = $modConfSxElement->classes : $moduleClasses = array();
-      $modLoadClasses = array();
-      $modNoLoadClasses = array();
-      foreach($moduleClasses as $key => $class) {
-        if(isset($class->{'class'})) {
-          $classAttributes = $class->{'class'}->attributes();
-          if (isset($classAttributes['register']) && intval($classAttributes['register'])) {
-            isset($class->{'class'}->classname) ? $className = $class->{'class'}->classname->__toString() : $className = NULL;
-            isset($class->{'class'}->interface) ? $interface = $class->{'class'}->interface->__toString() : $interface = NULL;
-            isset($class->{'class'}->filename) ? $fileName = $class->{'class'}->filename->__toString() : $fileName = NULL;
-            if(isset($className) && isset($interface) && isset($fileName)) {
-              //
-              // Trim any leading and trailing slashes from relative URL.
-              //
-              isset($moduleAttributes['fullpath']) ? $moduleFullpath = trim($moduleAttributes['fullpath'], '/') : $moduleFullpath = '';
-              isset($fileName) ? $classFullPath = $moduleFullpath . DIRECTORY_SEPARATOR . $fileName : $classFullPath = NULL;
-              isset($class->{'class'}->classFactoryMethod) ? $classFactoryMethod = $class->{'class'}->classFactoryMethod->__toString() : $classFactoryMethod = NULL;
-              if(isset($classFullPath) && isset($classFactoryMethod)) {
-                //
-                // *All* module classes will be registered by default unless the class attribute 'register'
-                // is set to zero in the conf file (e.g. <class register="0">). Generally, classes should be
-                // preregistered unless they are somehow included internally by the module only on-demand.
-                //
-                if (isset($classAttributes['register']) && intval($classAttributes['register']) === 0) {
-                  //
-                  // do not register
-                  //
-                  continue;
-                }
-                AblePolecat_Server::getClassRegistry()->registerModuleClass($className, $classFullPath, $classFactoryMethod);
-                
-                // var_dump(AblePolecat_Server::getClassRegistry()->implementsAblePolecatInterface('AblePolecat_Service_ClientInterface', $className, $classFullPath));
-                
-                //
-                // Classes will not automatically be instantiated until needed unless the class attribute 'load'
-                // is explicitly non-zero in the conf file (e.g. <class load="1">). Load at boot time may be useful
-                // for some classes such as loggers; others should be on-demand only.
-                //
-                if (isset($classAttributes['load']) && intval($classAttributes['load']) != 0) {
-                  $modLoadClasses[] = $className;
-                }
-                else {
-                  $modNoLoadClasses[] = $className;
-                }
-              }
-            }
-          }
-        }
-      }
-      $moduleName = $moduleAttributes['name']->__toString();
       $this->m_registered_modules[$moduleName] = array(
         'conf' => $modConfig,
-        'path' => $modPath,
-        'classes' => array('load' => $modLoadClasses, 'no load' => $modNoLoadClasses,),
+        'path' => $moduleFullpath,
+        'classes' => $moduleClasses,
       );
       AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, 
         "Registered contributed module $moduleName.");

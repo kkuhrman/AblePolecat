@@ -60,11 +60,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   private static $supported_interfaces = NULL;
   
   /**
-   * @var Array Class configuration data for resources from contributed modules.
-   */
-  private $resource_registration;
-  
-  /**
    * @var Array $Resources.
    *
    * Application resources are stored as Array([type] => [module name]).
@@ -79,11 +74,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     
     parent::initialize();
     self::$ApplicationMode = NULL;
-    
-    //
-    // Class registry for application resources.
-    //
-    $resource_registration = array();
     
     //
     // Supported Able Polecat interfaces.
@@ -180,31 +170,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Stores class configuration data in a registry so resource can be loaded on demand.
-   *
-   * @param int $interface One of the supported interface types.
-   * @param string $module Name of module.
-   * @param string $class_name Name of a loadable class which implements given interface.
-   *
-   * @return bool TRUE if class is registered, otherwise FALSE.
-   */
-  public function registerResource($interface, $module, $class_name) {
-    
-    $registered = self::isValidResource($interface, $class_name);
-    
-    if ($registered) {
-      if (!isset($this->resource_registration[$interface])) {
-        $this->resource_registration[$interface] = array();
-      }
-      if (!isset($this->resource_registration[$interface][$module])) {
-        $this->resource_registration[$interface][$module] = array();
-      }
-      $this->resource_registration[$interface][$module] = $class_name;
-    }
-    return $registered;
-  }
-  
-  /**
    * Stores an application resource.
    *
    * @param int $interface One of the supported interface types.
@@ -244,25 +209,20 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * @throw AblePolecat_Server_Exception is application mode is not ready.
    */
   public function loadRegisteredResources() {
+  
     $ApplicationMode = self::ready();
     if ($ApplicationMode) {
-      //
-      // Load registered modules
-      //
-      foreach($this->getEnvironment()->getRegisteredModules() as $modName => $modReg) {
-        isset($modReg['classes']['load']) ? $modLoadClasses = $modReg['classes']['load'] : $modLoadClasses = array();
-        foreach($modLoadClasses as $key => $className) {
-          $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
-          $ApplicationMode->setResource($modName, $class);
+      $registeredClasses = AblePolecat_Server::getClassRegistry()->getModuleClasses('interface');   
+      foreach($this->Resources as $interfaceName => $resources) {
+        if (isset($registeredClasses[$interfaceName])) {
+          foreach($registeredClasses[$interfaceName] as $moduleName => $moduleClasses) {
+            foreach($moduleClasses as $key => $className) {
+              $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
+              $ApplicationMode->setResource($interfaceName, $moduleName, $class);
+            }
+          }
         }
-        AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, 
-          "Loaded contributed module $modName.");
       }
-    }
-    else {
-      throw new AblePolecat_Server_Exception('Failed to load registered modules. Application mode is not ready.',
-        AblePolecat_Error::BOOT_SEQ_VIOLATION
-      );
     }
   }
   
@@ -275,25 +235,27 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    */
   public function log($severity, $message, $code = NULL) {
     
-    $logs = $this->getResource('AblePolecat_LogInterface', self::RESOURCE_ALL, FALSE);
-    if (isset($logs)) {
-      foreach($logs as $modName => $log) {
-        switch ($severity) {
-          default:
-            $log->logStatusMessage($message);
-            break;
-          case AblePolecat_LogInterface::STATUS:
-            $log->logStatusMessage($message);
-            break;
-          case AblePolecat_LogInterface::WARNING:
-            $log->logWarningMessage($message);
-            break;
-          case AblePolecat_LogInterface::ERROR:
-            $log->logErrorMessage($message);
-            break;
-          case AblePolecat_LogInterface::DEBUG:
-            $log->logStatusMessage($message);
-            break;
+    $allRegisteredLogs = $this->getResource('AblePolecat_LogInterface', self::RESOURCE_ALL, FALSE);
+    if (isset($allRegisteredLogs)) {
+      foreach($allRegisteredLogs as $moduleName => $moduleRegisteredLogs) {
+        foreach($moduleRegisteredLogs as $className => $log) {
+          switch ($severity) {
+            default:
+              $log->logStatusMessage($message);
+              break;
+            case AblePolecat_LogInterface::STATUS:
+              $log->logStatusMessage($message);
+              break;
+            case AblePolecat_LogInterface::WARNING:
+              $log->logWarningMessage($message);
+              break;
+            case AblePolecat_LogInterface::ERROR:
+              $log->logErrorMessage($message);
+              break;
+            case AblePolecat_LogInterface::DEBUG:
+              $log->logStatusMessage($message);
+              break;
+          }
         }
       }
     }

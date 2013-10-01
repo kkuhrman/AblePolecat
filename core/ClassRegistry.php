@@ -33,14 +33,40 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   /**
    * @var Array Registry of classes which can be loaded.
    */
-  private $m_loadable_classes;
+  private $classRegistry;
+  
+  /**
+   * @var Array Registered contributed modules.
+   */
+  private $moduleRegistry;
   
   /**
    * Extends constructor.
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
-    $this->m_loadable_classes = array();
+    
+    //
+    // Class registration.
+    //
+    $this->classRegistry = array();
+    
+    //
+    // Module registration.
+    // 'conf' contains all class conf data in order of registration.
+    // 'interface' registers classes by type of implemented interface
+    // 'module' registers classes by module name
+    // last two arrays are keyed as follows: class name => index in 'conf'[]
+    //
+    $this->moduleRegistry = array(
+      'conf' => array(),
+      'interface' => array(),
+      'module' => array(),
+    );
+    $AblePolecatInterfaces = self::getAblePolecatInterfaces();
+    foreach($AblePolecatInterfaces as $key => $InterfaceName) {
+      $this->moduleRegistry['interface'][$InterfaceName] = array();
+    }
   }
   
   /**
@@ -139,6 +165,39 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   }
   
   /**
+   * Returns list of names of registered module classes.
+   *
+   * @param $filter_name Preset name of a module registry filter (interface name, module name etc).
+   * @param $filter_value Value of filter.
+   *
+   * If no filter is defined, all registered module class names will be returned.
+   *
+   * @return Array Names of registered module classes.
+   */
+  public function getModuleClasses($filter_name = NULL, $filter_value = NULL) {
+    
+    $moduleClasses = array();
+    $searchReg = NULL;
+    switch($filter_name) {
+      default:
+        foreach($this->moduleRegistry['conf'] as $className => $classConf) {
+          $moduleClasses[] = $className;
+        }
+        break;
+      case 'module':
+      case 'interface':      
+        if (isset($filter_value) && isset($this->moduleRegistry[$filter_name][$filter_value])) {
+          $moduleClasses = $this->moduleRegistry[$filter_name][$filter_value];
+        }
+        else {
+          $moduleClasses = $this->moduleRegistry[$filter_name];
+        }
+        break;
+    }    
+    return $moduleClasses;
+  }
+  
+  /**
    * Check if class can be loaded in current environment.
    * 
    * @param string $class_name The name of class to check for.
@@ -148,8 +207,8 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   public function isLoadable($class_name) {
     
     $response = FALSE;
-    if (isset($this->m_loadable_classes[$class_name])) {
-      $response = $this->m_loadable_classes[$class_name];
+    if (isset($this->classRegistry[$class_name])) {
+      $response = $this->classRegistry[$class_name];
     }
     return $response;
   }
@@ -184,8 +243,12 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
    * @param string $class_name The name of class to register.
    * @param string $path Full path of include file if not given elsewhere in script.
    * @param string $method Method used for creation (default is __construct()).
+   *
+   * @return TRUE if class is registered, otherwise FALSE.
    */
   public function registerLoadableClass($class_name, $path = NULL, $method = NULL) {
+    
+    $registered = FALSE;
     
     if (isset($path)) {
       if (is_file($path)) {
@@ -201,46 +264,66 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     if (isset($methods)) {
       if (FALSE !== array_search($method, $methods)) {
         !isset($method) ? $method = '__construct' : NULL;
-        $this->m_loadable_classes[$class_name] = array(
+        $this->classRegistry[$class_name] = array(
           self::CLASS_REG_PATH => $path,
           self::CLASS_REG_METHOD => $method,
         );
+        $registered = TRUE;
       }
       else {
         AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOTSTRAP_CLASS_REG,
           "Invalid registration for $class_name: constructor");
       }
     }
+    return $registered;
   }
   
   /**
    * Register classes in contributed modules.
    *
-   * @param string $className Name of class.
-   * @param string $classFullPath FullPath of class.
-   * @param string $classFactoryMethod FactoryMethod of class.
-   * @param string $classInterface Interface of class.
+   * @param string moduleName Name of module.
+   * @param Array $classConfig Class configuration data from conf file.
+   *
+   * @see AblePolecat_Conf_Module::getModuleClasses()
    */
-  public function registerModuleClass($className, $filePath, $classFactoryMethod,$interface) {
+  public function registerModuleClass($moduleName, $classConfig) {
+  
+    $registerClass = isset($classConfig['attributes']) &&
+      isset($classConfig['attributes']['register']) &&
+      (0 != $classConfig['attributes']['register']);
     
-    $implemented_interfaces = self::getImplementedAblePolecatInterfaces($className, $filePath, $interface);
-    if ($implemented_interfaces) {
-      //
-      // Do not pass $path because getImplementedAblePolecatInterfaces() has already included file.
-      //
-      $this->registerLoadableClass($className, NULL, $classFactoryMethod);
+    if ($registerClass) {
+      isset($classConfig['interface']) ? $interface = $classConfig['interface'] : $interface = NULL;
+      isset($classConfig['classname']) ? $className = $classConfig['classname'] : $className = NULL;
+      isset($classConfig['fullpath']) ? $fullPath = $classConfig['fullpath'] : $fullPath = NULL;
+      isset($classConfig['classFactoryMethod']) ? $classFactoryMethod = $classConfig['classFactoryMethod'] : $classFactoryMethod = NULL;
       
-      //
-      // @todo: now what?
-      // if it's a resource such as a logger, register with app mode
-      // if it's a service client, register it with bus
-      // and so on...
-      //
-      if(AblePolecat_Mode_Application::isValidResource($interface, $className)) {
-        AblePolecat_Server::log('warning', '@todo: register resources and repeat for service clients.');
+      if (isset($interface) && isset($className) && isset($fullPath) && isset($classFactoryMethod) && isset($this->moduleRegistry['interface'][$interface])) {
+        
+        if ($this->registerLoadableClass($className, $fullPath, $classFactoryMethod)) {
+          if (!isset($this->moduleRegistry['module'][$moduleName])) {
+            $this->moduleRegistry['module'][$moduleName] = array();
+          }
+          $this->moduleRegistry['conf'][$className] = $classConfig;
+          if (!isset($this->moduleRegistry['interface'][$interface][$moduleName])) {
+            $this->moduleRegistry['interface'][$interface][$moduleName] = array();
+          }
+          $this->moduleRegistry['interface'][$interface][$moduleName][$className] = $className;
+          if (!isset($this->moduleRegistry['module'][$moduleName][$interface])) {
+            $this->moduleRegistry['module'][$moduleName][$interface] = array();
+          }
+          $this->moduleRegistry['module'][$moduleName][$interface][$className] = $className;
+        }
+        else {
+          $registerClass = FALSE;
+        }
       }
-      
+      else {
+        AblePolecat_Server::log('warning', "Invalid class configuration encountered in module $moduleName conf file.");
+        $registerClass = FALSE;
+      }
     }
+    return $registerClass;
   }
   
   /**

@@ -25,6 +25,7 @@ class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
   const ELEMENT_CLASSNAME = 'classname';
   const ELEMENT_INTERFACE = 'interface';
   const ELEMENT_FILENAME  = 'filename';
+  const ELEMENT_FULLPATH  = 'fullpath';
   const ELEMENT_CLASSMETH = 'classFactoryMethod';
   
   /**
@@ -95,6 +96,17 @@ class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
     $moduleClasses = FALSE;
     
     if (isset($this->m_SimpleXml) && $this->hasPermission($Agent, AblePolecat_AccessControl_Constraint_Read::getId())) {
+      
+      //
+      // Need module full path from attributes.
+      //
+      $moduleAttributes = array();
+      $modAttrIter = $this->m_SimpleXml->{self::ELEMENT_ATTR}();
+      isset($modAttrIter[self::ATTRIBUTE_PATH]) ? $moduleAttributes[self::ATTRIBUTE_PATH] = $modAttrIter[self::ATTRIBUTE_PATH]->__toString() : $moduleAttributes[self::ATTRIBUTE_PATH] = NULL;
+      
+      //
+      // Module classes
+      //
       if (isset($this->m_SimpleXml->classes)) {
         $moduleClasses = array();
         $modClassIter = $this->m_SimpleXml->{self::ELEMENT_CLASSES};
@@ -112,6 +124,7 @@ class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
               isset($class->{self::ELEMENT_CLASS}->{self::ELEMENT_INTERFACE}) ? $moduleClasses[$class_name][self::ELEMENT_INTERFACE] = $class->{self::ELEMENT_CLASS}->{self::ELEMENT_INTERFACE}->__toString() : $moduleClasses[$class_name][self::ELEMENT_INTERFACE] = NULL;
               isset($class->{self::ELEMENT_CLASS}->{self::ELEMENT_FILENAME}) ? $moduleClasses[$class_name][self::ELEMENT_FILENAME] = $class->{self::ELEMENT_CLASS}->{self::ELEMENT_FILENAME}->__toString() : $moduleClasses[$class_name][self::ELEMENT_FILENAME] = NULL;
               isset($class->{self::ELEMENT_CLASS}->{self::ELEMENT_CLASSMETH}) ? $moduleClasses[$class_name][self::ELEMENT_CLASSMETH] = $class->{self::ELEMENT_CLASS}->{self::ELEMENT_CLASSMETH}->__toString() : $moduleClasses[$class_name][self::ELEMENT_CLASSMETH] = NULL;
+              $moduleClasses[$class_name][self::ELEMENT_FULLPATH] = $moduleAttributes[self::ATTRIBUTE_PATH] . DIRECTORY_SEPARATOR . $moduleClasses[$class_name][self::ELEMENT_FILENAME];
             }
           }
         }

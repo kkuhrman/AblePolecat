@@ -280,7 +280,7 @@ class AblePolecat_Server {
       //
       // Load application resources from contributed modules.
       //
-      // $ApplicationMode->loadRegisteredResources();
+      $ApplicationMode->loadRegisteredResources();
       
       //
       // @todo: Load service clients from contributed contributed modules.

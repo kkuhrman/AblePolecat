@@ -24,7 +24,6 @@ require_once('boot.php');
     <p><?php 
         AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, "Application mode loaded.");
         echo "<p>PHP Version: " . phpversion() . "</p>";
-        // var_dump(AblePolecat_Server::getApplicationMode()->getEnvironment()->getRegisteredModules());
       ?>
     </p>
   </div>
