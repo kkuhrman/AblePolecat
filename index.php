@@ -24,6 +24,7 @@ require_once('boot.php');
     <p><?php 
         AblePolecat_Server::log(AblePolecat_LogInterface::STATUS, "Application mode loaded.");
         echo "<p>PHP Version: " . phpversion() . "</p>";
+        $ApexClient = AblePolecat_Server::getServiceBus()->getClient('f5ec7a80-7159-11e2-bcfd-0800200c9a666');
       ?>
     </p>
   </div>

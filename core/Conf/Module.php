@@ -14,7 +14,7 @@ class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
   const ATTRIBUTE_NAME    = 'name';
   const ATTRIBUTE_DESC    = 'decsription';
   const ATTRIBUTE_REG     = 'register';
-  const ATTRIBUTE_LOAD    = 'load';
+  const ATTRIBUTE_ID      = 'id';
   const ATTRIBUTE_PATH    = 'fullpath';
   
   const ELEMENT_ATTR      = 'attributes';
@@ -77,8 +77,8 @@ class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
       $modAttrIter = $this->m_SimpleXml->{self::ELEMENT_ATTR}();
       isset($modAttrIter[self::ATTRIBUTE_NAME]) ? $moduleAttributes[self::ATTRIBUTE_NAME] = $modAttrIter[self::ATTRIBUTE_NAME]->__toString() : $moduleAttributes[self::ATTRIBUTE_NAME] = NULL;
       isset($modAttrIter[self::ATTRIBUTE_DESC]) ? $moduleAttributes[self::ATTRIBUTE_DESC] = $modAttrIter[self::ATTRIBUTE_DESC]->__toString() : $moduleAttributes[self::ATTRIBUTE_DESC] = NULL;
-      isset($modAttrIter[self::ATTRIBUTE_REG]) ? $moduleAttributes[self::ATTRIBUTE_REG] = $modAttrIter[self::ATTRIBUTE_REG]->__toString() : $moduleAttributes[self::ATTRIBUTE_REG] = NULL;
-      isset($modAttrIter[self::ATTRIBUTE_LOAD]) ? $moduleAttributes[self::ATTRIBUTE_LOAD] = $modAttrIter[self::ATTRIBUTE_LOAD]->__toString() : $moduleAttributes[self::ATTRIBUTE_LOAD] = NULL;
+      isset($classAttributesIter[self::ATTRIBUTE_REG]) ? $classAttributes[self::ATTRIBUTE_REG] = intval($classAttributesIter[self::ATTRIBUTE_REG]) : $classAttributes[self::ATTRIBUTE_REG] = 0;
+      isset($modAttrIter[self::ATTRIBUTE_ID]) ? $moduleAttributes[self::ATTRIBUTE_ID] = $modAttrIter[self::ATTRIBUTE_ID]->__toString() : $moduleAttributes[self::ATTRIBUTE_ID] = NULL;
       isset($modAttrIter[self::ATTRIBUTE_PATH]) ? $moduleAttributes[self::ATTRIBUTE_PATH] = $modAttrIter[self::ATTRIBUTE_PATH]->__toString() : $moduleAttributes[self::ATTRIBUTE_PATH] = NULL;
     }
     return $moduleAttributes;
@@ -118,8 +118,8 @@ class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
               $moduleClasses[$class_name][self::ELEMENT_CLASSNAME] = $class_name;
               $classAttributes = array();
               $classAttributesIter = $class->{self::ELEMENT_CLASS}->attributes();
-              isset($classAttributesIter[self::ATTRIBUTE_REG]) ? $classAttributes[self::ATTRIBUTE_REG] = intval($classAttributesIter[self::ATTRIBUTE_REG]) : $classAttributes[self::ATTRIBUTE_REG] = 0;
-              isset($classAttributesIter[self::ATTRIBUTE_LOAD]) ? $classAttributes[self::ATTRIBUTE_LOAD] = intval($classAttributesIter[self::ATTRIBUTE_LOAD]) : $classAttributes[self::ATTRIBUTE_LOAD] = 0;
+              isset($classAttributesIter[self::ATTRIBUTE_REG]) ? $classAttributes[self::ATTRIBUTE_REG] = intval($classAttributesIter[self::ATTRIBUTE_REG]->__toString()) : $classAttributes[self::ATTRIBUTE_REG] = 0;
+              isset($classAttributesIter[self::ATTRIBUTE_ID]) ? $classAttributes[self::ATTRIBUTE_ID] = $classAttributesIter[self::ATTRIBUTE_ID]->__toString() : $classAttributes[self::ATTRIBUTE_ID] = NULL;
               $moduleClasses[$class_name][self::ELEMENT_ATTR] = $classAttributes;
               isset($class->{self::ELEMENT_CLASS}->{self::ELEMENT_INTERFACE}) ? $moduleClasses[$class_name][self::ELEMENT_INTERFACE] = $class->{self::ELEMENT_CLASS}->{self::ELEMENT_INTERFACE}->__toString() : $moduleClasses[$class_name][self::ELEMENT_INTERFACE] = NULL;
               isset($class->{self::ELEMENT_CLASS}->{self::ELEMENT_FILENAME}) ? $moduleClasses[$class_name][self::ELEMENT_FILENAME] = $class->{self::ELEMENT_CLASS}->{self::ELEMENT_FILENAME}->__toString() : $moduleClasses[$class_name][self::ELEMENT_FILENAME] = NULL;

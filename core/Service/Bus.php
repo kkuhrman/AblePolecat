@@ -57,55 +57,86 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
    * @return bool TRUE if configuration is valid, otherwise FALSE.
    */
   protected function initialize() {
+    $this->Clients = array();
   }
   
   /**
    * Add a service client to the bus.
    * 
+   * @param string $id UUID of service client class.
    * @param string $class_name The name of class to register.
    *
    * @throw AblePolecat_Service_Exception if client cannot be set.
    */
-  public function setClient($class_name) {
+  protected function registerClient($id, $class_name) {
     
-    //
-    // Class name is internal id.
-    //
-    if (!isset($this->Clients[$class_name])) {
-      //
-      // Preliminary checks.
-      // Class must be registered with Able Polecat.
-      // Class must implement AblePolecat_Service_ClientInterface.
-      //
-      if (AblePolecat_ClassRegistry::isLoadable($class_name) &&
-          is_subclass_of($class_name, 'AblePolecat_Service_ClientInterface')) {
-          //
-          // Do not load the client until first call to getClient().
-          //
-      }
-      else {
-        throw new AblePolecat_Service_Exception("Able Polecat rejected attempt to add client type $class_name to service bus.",
-          ABLE_POLECAT_EXCEPTION_SVC_CLIENT_TYPE_FAIL
-        );
+    $ClassRegistry = AblePolecat_Server::getClassRegistry();
+    if (isset($ClassRegistry)) {
+      if (!isset($this->Clients[$id])) {
+        //
+        // Preliminary checks.
+        // Class must be registered with Able Polecat.
+        // Class must implement AblePolecat_Service_ClientInterface.
+        //
+        if ($ClassRegistry->isLoadable($class_name) &&
+            is_subclass_of($class_name, 'AblePolecat_Service_ClientInterface')) {
+            //
+            // Do not load the client until first call to getClient().
+            //
+            $this->Clients[$id] = $class_name;
+        }
+        else {
+          throw new AblePolecat_Service_Exception("Able Polecat rejected attempt to add client type $class_name to service bus.",
+            ABLE_POLECAT_EXCEPTION_SVC_CLIENT_TYPE_FAIL
+          );
+        }
       }
     }
   }
   
   /**
-   * Returns a service client by class name.
+   * Is singleton initialized?
    *
-   * @param string $class_name Name of the service client class.
+   * @return AblePolecat_Service_Bus or FALSE.
+   */
+  public static function ready() {
+    
+    $ready = isset(self::$ServiceBus);
+    if ($ready) {
+      $ready = self::$ServiceBus;
+    }
+    return $ready;
+  }
+  
+  /**
+   * Registers service clients by id => class name.
+   */
+  public function registerClients() {
+    
+    $registeredClasses = AblePolecat_Server::getClassRegistry()->getModuleClasses('interface', 'AblePolecat_Service_ClientInterface');
+    foreach($registeredClasses as $moduleName => $clientClasses) {
+      foreach($clientClasses as $classId => $className) {
+        $this->registerClient($classId, $className);
+      }
+    }
+  }
+  
+  /**
+   * Returns a service client by class id.
+   *
+   * @param string $id UUID of service client class.
    *
    * @return AblePolecat_Service_ClientInterface or NULL.
    */
-  public function getClient($class_name) {
+  public function getClient($id) {
+    
     $Client = NULL;
-    if (isset($this->Clients[$class_name])) {
-      $Client = $this->Clients[$class_name];
-    }
-    else {
-      $Client = AblePolecat_ClassRegistry::loadClass($class_name);
-      $this->Clients[$class_name] = $Client;
+    if (isset($this->Clients[$id])) {
+      $class = $this->Clients[$id];
+      if (!is_object($class)) {
+        $this->Clients[$id] = AblePolecat_Server::getClassRegistry()->loadClass($class);
+      }
+      $Client = $this->Clients[$id];
     }
     return $Client;
   }
@@ -132,7 +163,6 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$ServiceBus)) {
       $ServiceBus = new AblePolecat_Service_Bus();
-      $ServiceBus->Clients = array();
       self::$ServiceBus = $ServiceBus;
       
     }					

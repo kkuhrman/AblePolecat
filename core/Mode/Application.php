@@ -216,7 +216,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       foreach($this->Resources as $interfaceName => $resources) {
         if (isset($registeredClasses[$interfaceName])) {
           foreach($registeredClasses[$interfaceName] as $moduleName => $moduleClasses) {
-            foreach($moduleClasses as $key => $className) {
+            foreach($moduleClasses as $id => $className) {
               $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
               $ApplicationMode->setResource($interfaceName, $moduleName, $class);
             }

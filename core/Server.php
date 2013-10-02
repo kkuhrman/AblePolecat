@@ -283,8 +283,9 @@ class AblePolecat_Server {
       $ApplicationMode->loadRegisteredResources();
       
       //
-      // @todo: Load service clients from contributed contributed modules.
+      // Register client classes from contributed contributed modules with service bus.
       //
+      self::getServiceBus()->registerClients();
       
       //
       // @todo: 

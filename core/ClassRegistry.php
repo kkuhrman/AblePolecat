@@ -33,12 +33,12 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   /**
    * @var Array Registry of classes which can be loaded.
    */
-  private $classRegistry;
+  private $registeredClasses;
   
   /**
    * @var Array Registered contributed modules.
    */
-  private $moduleRegistry;
+  private $registeredModules;
   
   /**
    * Extends constructor.
@@ -49,7 +49,7 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     //
     // Class registration.
     //
-    $this->classRegistry = array();
+    $this->registeredClasses = array();
     
     //
     // Module registration.
@@ -58,14 +58,14 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     // 'module' registers classes by module name
     // last two arrays are keyed as follows: class name => index in 'conf'[]
     //
-    $this->moduleRegistry = array(
+    $this->registeredModules = array(
       'conf' => array(),
       'interface' => array(),
       'module' => array(),
     );
     $AblePolecatInterfaces = self::getAblePolecatInterfaces();
     foreach($AblePolecatInterfaces as $key => $InterfaceName) {
-      $this->moduleRegistry['interface'][$InterfaceName] = array();
+      $this->registeredModules['interface'][$InterfaceName] = array();
     }
   }
   
@@ -180,17 +180,17 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     $searchReg = NULL;
     switch($filter_name) {
       default:
-        foreach($this->moduleRegistry['conf'] as $className => $classConf) {
+        foreach($this->registeredModules['conf'] as $className => $classConf) {
           $moduleClasses[] = $className;
         }
         break;
       case 'module':
       case 'interface':      
-        if (isset($filter_value) && isset($this->moduleRegistry[$filter_name][$filter_value])) {
-          $moduleClasses = $this->moduleRegistry[$filter_name][$filter_value];
+        if (isset($filter_value) && isset($this->registeredModules[$filter_name][$filter_value])) {
+          $moduleClasses = $this->registeredModules[$filter_name][$filter_value];
         }
         else {
-          $moduleClasses = $this->moduleRegistry[$filter_name];
+          $moduleClasses = $this->registeredModules[$filter_name];
         }
         break;
     }    
@@ -207,8 +207,8 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   public function isLoadable($class_name) {
     
     $response = FALSE;
-    if (isset($this->classRegistry[$class_name])) {
-      $response = $this->classRegistry[$class_name];
+    if (isset($this->registeredClasses[$class_name])) {
+      $response = $this->registeredClasses[$class_name];
     }
     return $response;
   }
@@ -223,7 +223,7 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
   public function loadClass($class_name) {
     
     $Instance = NULL;
-    $info = self::isLoadable($class_name);
+    $info = $this->isLoadable($class_name);
     if (isset($info[self::CLASS_REG_METHOD])) {
       switch ($info[self::CLASS_REG_METHOD]) {
         default:
@@ -264,7 +264,7 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     if (isset($methods)) {
       if (FALSE !== array_search($method, $methods)) {
         !isset($method) ? $method = '__construct' : NULL;
-        $this->classRegistry[$class_name] = array(
+        $this->registeredClasses[$class_name] = array(
           self::CLASS_REG_PATH => $path,
           self::CLASS_REG_METHOD => $method,
         );
@@ -298,21 +298,26 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
       isset($classConfig['fullpath']) ? $fullPath = $classConfig['fullpath'] : $fullPath = NULL;
       isset($classConfig['classFactoryMethod']) ? $classFactoryMethod = $classConfig['classFactoryMethod'] : $classFactoryMethod = NULL;
       
-      if (isset($interface) && isset($className) && isset($fullPath) && isset($classFactoryMethod) && isset($this->moduleRegistry['interface'][$interface])) {
+      if (isset($interface) && isset($className) && isset($fullPath) && isset($classFactoryMethod) && isset($this->registeredModules['interface'][$interface])) {
+        
+        //
+        // UUID is vital for many interface implementations such as service clients; but optional for some others.
+        //
+        isset($classConfig['attributes']['id']) ? $classId = $classConfig['attributes']['id'] : $classId = $className;
         
         if ($this->registerLoadableClass($className, $fullPath, $classFactoryMethod)) {
-          if (!isset($this->moduleRegistry['module'][$moduleName])) {
-            $this->moduleRegistry['module'][$moduleName] = array();
+          if (!isset($this->registeredModules['module'][$moduleName])) {
+            $this->registeredModules['module'][$moduleName] = array();
           }
-          $this->moduleRegistry['conf'][$className] = $classConfig;
-          if (!isset($this->moduleRegistry['interface'][$interface][$moduleName])) {
-            $this->moduleRegistry['interface'][$interface][$moduleName] = array();
+          $this->registeredModules['conf'][$className] = $classConfig;
+          if (!isset($this->registeredModules['interface'][$interface][$moduleName])) {
+            $this->registeredModules['interface'][$interface][$moduleName] = array();
           }
-          $this->moduleRegistry['interface'][$interface][$moduleName][$className] = $className;
-          if (!isset($this->moduleRegistry['module'][$moduleName][$interface])) {
-            $this->moduleRegistry['module'][$moduleName][$interface] = array();
+          $this->registeredModules['interface'][$interface][$moduleName][$classId] = $className;
+          if (!isset($this->registeredModules['module'][$moduleName][$interface])) {
+            $this->registeredModules['module'][$moduleName][$interface] = array();
           }
-          $this->moduleRegistry['module'][$moduleName][$interface][$className] = $className;
+          $this->registeredModules['module'][$moduleName][$interface][$classId] = $className;
         }
         else {
           $registerClass = FALSE;
