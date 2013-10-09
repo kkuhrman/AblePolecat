@@ -6,7 +6,10 @@
 
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Message.php');
 
-class AblePolecat_Message_Response extends AblePolecat_MessageAbstract {
+interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInterface {
+}
+
+abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_ResponseInterface {
   
   /**
    * @var string The response status code (e.g. HTTP example would be 200).
@@ -17,6 +20,16 @@ class AblePolecat_Message_Response extends AblePolecat_MessageAbstract {
    * @var string The response reason phrase (e.g. HTTP example would be 'OK').
    */
   private $m_reason_phrase;
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize properties.
+   */
+  protected function initialize() {
+    $this->m_status_code = 200;
+    $this->m_reason_phrase = 'OK';
+  }
   
   /**
    * Initialize the status code.
@@ -37,22 +50,6 @@ class AblePolecat_Message_Response extends AblePolecat_MessageAbstract {
   }
   
   /**
-   * Create a concrete instance of AblePolecat_MessageInterface.
-   *
-   * @param Array $head Optional message header fields (NVP).
-   * @param mixed $body Optional message body.
-   *
-   * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
-   */
-  public static function create($head = NULL, $body = NULL) {
-    
-    $Response = new AblePolecat_Message_Response();
-    $Response->setHead($head);
-    $Response->setBody($body);
-    return $Response;
-  }
-  
-  /**
    * @return string The response status code.
    */
   public function getStatusCode() {
@@ -64,5 +61,17 @@ class AblePolecat_Message_Response extends AblePolecat_MessageAbstract {
    */
   public function getReasonPhrase() {
     return $this->m_reason_phrase;
+  }
+}
+
+class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract {
+    /**
+   * Create a concrete instance of AblePolecat_MessageInterface.
+   *
+   * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
+   */
+  public static function create() {
+    $Response = new AblePolecat_Message_Response();
+    return $Response;
   }
 }

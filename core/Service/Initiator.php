@@ -4,10 +4,11 @@
  * Interface for any class which will dispatch a request to a service (initiate a response).
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request.php')));
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request.php')));
 
-interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ArticleInterface {
+interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_CacheObjectInterface {
   
   /**
    * Prepares a request to be dispatched to a service.
@@ -18,8 +19,8 @@ interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessContr
    * @return AblePolecat_Service_InitiatorInterface Client prepared to dispatch request.
    * @throw AblePolecat_Service_Exception if request could not be prepared.
    */
-  public static function prepare(AblePolecat_AccessControl_AgentInterface $Agent, 
-    AblePolecat_Message_RequestAbstract $request);
+  public function prepare(AblePolecat_AccessControl_AgentInterface $Agent, 
+    AblePolecat_Message_RequestInterface $request);
   
   /**
    * Dispatch a prepared request to a service.

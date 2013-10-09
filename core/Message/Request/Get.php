@@ -11,16 +11,11 @@ class AblePolecat_Message_Request_Get extends AblePolecat_Message_RequestAbstrac
   /**
    * Create a concrete instance of AblePolecat_MessageInterface.
    *
-   * @param Array $head Optional message header fields (NVP).
-   * @param mixed $body Optional message body.
-   *
    * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
    */
-  public static function create($head = NULL, $body = NULL) {
+  public static function create() {
     
     $Request = new AblePolecat_Message_Request_Get();
-    $Request->setHead($head);
-    $Request->setBody($body);
     return $Request;
   }
   

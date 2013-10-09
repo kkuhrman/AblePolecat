@@ -23,6 +23,9 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
   const UUID              = '3d50dbb0-715e-11e2-bcfd-0800200c9a66';
   const NAME              = 'Able Polecat Service Bus';
   
+  const REQUEST           = 'request';
+  const RESPONSE          = 'response';
+  
   /**
    * @var object Singleton instance
    */
@@ -32,6 +35,16 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
    * @var Array Web service clients.
    */
   protected $Clients;
+  
+  /**
+   * @todo: message queue
+   */
+  protected $Messages;
+  
+  /**
+   * @todo: transaction log
+   */
+  protected $Transactions;
   
   /**
    * Return unique, system-wide identifier for security resource.
@@ -58,6 +71,38 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
    */
   protected function initialize() {
     $this->Clients = array();
+    
+    //
+    // Register all message types
+    //
+    $ClassRegistry = AblePolecat_Server::getClassRegistry();
+    if (isset($ClassRegistry)) {
+       $ClassRegistry->registerLoadableClass(
+        'AblePolecat_Message_Request_Delete',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Delete.php')),
+        'create'
+      );
+       $ClassRegistry->registerLoadableClass(
+        'AblePolecat_Message_Request_Get',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Get.php')),
+        'create'
+      );
+      $ClassRegistry->registerLoadableClass(
+        'AblePolecat_Message_Request_Post',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Post.php')),
+        'create'
+      );
+      $ClassRegistry->registerLoadableClass(
+        'AblePolecat_Message_Request_Put',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Put.php')),
+        'create'
+      );
+      $ClassRegistry->registerLoadableClass(
+        'AblePolecat_Message_Response',
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Response.php')),
+        'create'
+      );
+    }
   }
   
   /**
@@ -92,6 +137,78 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
         }
       }
     }
+  }
+  
+  /**
+   * Add a message to the queue.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent with access to requested service.
+   * @param AblePolecat_MessageInterface $Message
+   */
+  public function dispatch(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_MessageInterface $Message) {
+    
+    //
+    // Prepare response
+    //
+    $Response = AblePolecat_Server::getClassRegistry()->
+      loadClass('AblePolecat_Message_Response');
+    
+    //
+    // Is it request or response?
+    //
+    $subclass = FALSE;
+    if (is_a($Message, 'AblePolecat_Message_RequestInterface')) {
+      $subclass = self::REQUEST;
+    }
+    else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
+      $subclass = self::RESPONSE;
+    }
+    
+    //
+    // @todo: serialize message to log.
+    // Log is used to reload unhandled messages in event of unexpected shutdown.
+    //
+    
+    //
+    // Determine target client
+    //
+    $clientId = NULL;
+    switch ($subclass) {
+      default:
+        break;
+      case self::REQUEST:
+        $clientId = $Message->getResource();
+        break;
+      case self::RESPONSE:
+        break;
+    }
+    $Client = $this->getClient($clientId);
+    
+    //
+    // @todo: dispatch the message.
+    //
+    if (isset($Client)) {
+      try { 
+        $Response = $Client->prepare($Agent, $Message)->dispatch(); 
+      } 
+      catch(AblePolecat_Service_Client_Exception $Exception) {
+        //
+        // @todo: this will only happen if client cannot dispatch message
+        // 1. see if problem is with message, if yes return error response
+        // 2. otherwise client is busy, queue message for later dispatch
+        //
+      }
+      if (isset($Response)) {
+        //
+        // @todo: handle response
+        //
+      }
+    }
+    
+    //
+    // Send response.
+    //
+    return $Response;
   }
   
   /**
@@ -167,5 +284,9 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
       
     }					
     return self::$ServiceBus;
+  }
+  
+  final protected function __construct() {
+    $this->initialize();
   }
 }
