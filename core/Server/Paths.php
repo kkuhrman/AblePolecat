@@ -29,6 +29,14 @@ if (!defined('ABLE_POLECAT_CONF_PATH')) {
 }
 
 //
+// Path to Able Polecat data directory.
+//
+if (!defined('ABLE_POLECAT_DATA_PATH')) {
+  $ABLE_POLECAT_DATA_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'data';
+  define('ABLE_POLECAT_DATA_PATH', $ABLE_POLECAT_DATA_PATH);
+}
+
+//
 // Path to Able Polecat development tools.
 //
 if (!defined('ABLE_POLECAT_DEV_PATH')) {
@@ -123,21 +131,31 @@ class AblePolecat_Server_Paths {
   /**
    * Attempt to create configurable directory if it does not exist.
    *
-   * @param string $path Full (unsanitized) path of directory to create.
+   * @param string $path Full (unsanitized) path of directory or regular file to create.
+   * @param bool $dir If true, check for directory; otherwise check for regular file.
    * @param octal $mode Access restrictions for creating directory.
    *
    * @return mixed Full path if created or exists, otherwise FALSE.
    * @throw AblePolecat_Server_Paths_Exception if absent directory could not be created.
    */
-  public static function touch($path, $mode = 0644) {
+  public static function touch($path, $dir = TRUE, $mode = 0644) {
     
     $full_path = FALSE;
     $sanitized_path = self::sanitizePath($path);
-    if (file_exists($sanitized_path)) {
+    if (file_exists($sanitized_path) && ($dir == is_dir($sanitized_path))) {
       $full_path = $sanitized_path;
     }
     else {
-      $made = @mkdir($sanitized_path, 0644);
+      $made = FALSE;
+      switch ($dir) {
+        case TRUE:
+          $made = @mkdir($sanitized_path, $mode);
+          break;
+        case FALSE;
+          $made = fopen($sanitized_path, 'r');
+          break;
+      }
+      
       if ($made) {
         $full_path = $sanitized_path;
       }

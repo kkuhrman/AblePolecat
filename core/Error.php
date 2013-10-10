@@ -32,6 +32,7 @@ class AblePolecat_Error {
   const ACCESS_SYSLOG_FAIL    = 10090;
   const LOAD_RESOURCE_FAIL    = 10095;
   const SVC_CLIENT_FAIL       = 10100;
+  const SVC_CLIENT_BUSY       = 10101;
   const SVC_CLIENT_ERROR      = 10105;
   const SVC_CLIENT_QUERY_ERR  = 10110;
   const DB_CONNECT_FAIL       = 10115;
@@ -113,6 +114,9 @@ class AblePolecat_Error {
         break;
       case self::SVC_CLIENT_FAIL:
         $message = 'Failed to establish client connection to web service.';
+        break;
+      case self::SVC_CLIENT_BUSY:
+        $message = 'Web service client is busy and cannot dispatch request.';
         break;
       case self::SVC_CLIENT_ERROR:
         $message = 'Web service client generated a communications error.';

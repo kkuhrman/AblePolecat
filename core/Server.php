@@ -296,6 +296,15 @@ class AblePolecat_Server {
       // 2. Cookies
       // 3. Other stored user settings (database).
       //
+      
+      //
+      // Register some other core classes.
+      //
+      require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Url.php'); // not loadable
+      // self::getClassRegistry()->registerLoadableClass($class_name,
+        // $path_to_include,
+        // $create_method
+      // );
     }
     return self::$Server;
   }

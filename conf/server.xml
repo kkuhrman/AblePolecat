@@ -2,13 +2,13 @@
 <config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
   <paths>
     <path name="libs">
-      C:\wamp\www\Private\AblePolecat\libs
+      C:\path\to\AblePolecat\libs
     </path>
     <path name="logs">
-      C:\wamp\www\Private\AblePolecat\logs
+      C:\path\to\AblePolecat\logs
     </path>
     <path name="mods">
-      C:\wamp\www\Private\AblePolecat\mods
+      C:\path\to\AblePolecat\mods
     </path>
   </paths>
 </config>

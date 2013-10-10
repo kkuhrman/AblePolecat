@@ -9,7 +9,7 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
 class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
   
   const UUID              = 'fff28c77-3e91-4f3b-98d1-1e3a5347f1df';
-  const NAME              = 'Able Polecat Module Configuration';
+  const NAME              = 'module.xml';
   
   const ATTRIBUTE_NAME    = 'name';
   const ATTRIBUTE_DESC    = 'decsription';

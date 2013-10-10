@@ -17,6 +17,34 @@ abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_CacheObjec
    * @var object Instance of PHP client.
    */
   protected $Client;
+  
+  /**
+   * @var bool Internal lock. Prevents concurrent dispatching of requests.
+   */
+  private $lock;
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize properties.
+   */
+  protected function initialize() {
+    $this->lock = FALSE;
+  }
+  
+  /**
+   * @return bool TRUE if lock on client is set, otherwise FALSE.
+   */
+  protected function isLocked() {
+    return $this->lock;
+  }
+  
+  /**
+   * @param bool $lock Prevents concurrent dispatching of requests.
+   */
+  protected function setLock($lock = TRUE) {
+    $this->lock = $lock;
+  }
 }
 
 /**

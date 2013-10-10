@@ -10,7 +10,7 @@ include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
 class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
   
   const UUID              = 'fba4f890-60eb-11e2-bcfd-0800200c9a66';
-  const NAME              = 'Server Able Polecat Configuration';
+  const NAME              = 'server.xml';
   
   /**
    * Extends __construct().
@@ -20,12 +20,43 @@ class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
   }
   
   /**
-   * @return string Default name of sub-directory for conf file based on server mode.
+   * @return string Default name of directory where conf file should be located.
    */
-  public static function getDefaultSubDir() {
-    return AblePolecat_Server::getBootMode();
+  public static function getDefaultDir() {
+    return ABLE_POLECAT_CONF_PATH;
   }
   
+  /**
+   * Returns location of the of conf file based on server mode.
+   *
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface or FALSE.
+   */
+  public static function getResourceLocater() {
+    
+    $Locater = FALSE;
+    
+    //
+    // Conf files are stored in one of two ways:
+    // 1. One file for all modes ./root/conf/filename.xml
+    // 2. Different files for specific modes ./root/conf/[mode]/filename.xml
+    // If no mode specific file is found, #1 is used.
+    //
+    $path = self::getDefaultDir() . DIRECTORY_SEPARATOR . self::getName();
+    if (!file_exists($path)) {
+      $subdir = AblePolecat_Server::getBootMode();
+      $path = self::getDefaultDir() . DIRECTORY_SEPARATOR . $subdir . DIRECTORY_SEPARATOR . self::getName();
+      if (file_exists($path)) {
+        $Locater = AblePolecat_AccessControl_Resource_Locater::create($subdir . DIRECTORY_SEPARATOR . self::getName(), 
+          self::getDefaultDir());
+      }
+    }
+    else {
+      $Locater = AblePolecat_AccessControl_Resource_Locater::create(self::getName(), self::getDefaultDir());
+    }
+    
+    return $Locater;
+  }
+    
   /**
    * Return unique, system-wide identifier for security resource.
    *

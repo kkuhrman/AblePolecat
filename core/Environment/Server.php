@@ -103,7 +103,8 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         'touch'
       );
       $Config = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Server');
-      if (isset($Config)) {
+      $ConfigUrl = AblePolecat_Conf_Server::getResourceLocater();
+      if (isset($Config) && $ConfigUrl) {
         //
         // Grant open permission on config file to agent.
         //
@@ -113,10 +114,6 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         //
         // Set configuration file/path.
         //
-        $conf_path = NULL;
-        $filename = 'server.xml';
-        $conf_path = AblePolecat_Conf_Server::getDefaultSubDir() . DIRECTORY_SEPARATOR . $filename;
-        $ConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($conf_path, ABLE_POLECAT_CONF_PATH);
         $Environment->setConf($Config, $ConfigUrl);
       }
       else {

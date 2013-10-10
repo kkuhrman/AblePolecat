@@ -217,17 +217,27 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
    * Get instance of given class.
    *
    * @param string $class_name The name of class to instantiate.
+   * @param mixed $param Zero or more optional parameters to be passed to creational method.
    * 
    * @return object Instance of given class or NULL.
    */
-  public function loadClass($class_name) {
+  public function loadClass($class_name, $param = NULL) {
     
     $Instance = NULL;
     $info = $this->isLoadable($class_name);
     if (isset($info[self::CLASS_REG_METHOD])) {
+      //
+      // Get any parameters passed.
+      //
+      $parameters = array();
+      if (isset($param)) {
+        $args = func_get_args();
+        array_shift($args);
+        $parameters = $args;
+      }
       switch ($info[self::CLASS_REG_METHOD]) {
         default:
-          $Instance = call_user_func(array($class_name, $info[self::CLASS_REG_METHOD]));
+          $Instance = call_user_func_array(array($class_name, $info[self::CLASS_REG_METHOD]), $parameters);
           break;
         case '__construct':
           $Instance = new $class_name;

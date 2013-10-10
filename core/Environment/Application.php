@@ -73,7 +73,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
           $conf_path = $test_path;
         }
         else {
-          $context_dir = AblePolecat_Conf_Server::getDefaultSubDir();
+          $context_dir = AblePolecat_Server::getBootMode();
           $test_path = implode(DIRECTORY_SEPARATOR, array($full_path, 'conf', $context_dir, 'module.xml'));
           if (file_exists($test_path)) {
             //
