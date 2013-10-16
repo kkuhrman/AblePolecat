@@ -56,8 +56,7 @@ abstract class AblePolecat_Message_NodeAbstract implements AblePolecat_Message_N
    * Sub-classes should override to initialize properties.
    */
   abstract protected function initialize();
-
-
+  
   public function __set($name, $value) {
     if (is_a($value, 'AblePolecat_Message_NodeInterface')) {
       $child = $value;
