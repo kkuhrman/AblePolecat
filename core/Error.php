@@ -31,12 +31,15 @@ class AblePolecat_Error {
   const SESSION_DECODE_FAIL   = 10085;
   const ACCESS_SYSLOG_FAIL    = 10090;
   const LOAD_RESOURCE_FAIL    = 10095;
+  const SVC_SERVER_ERROR      = 10099;
   const SVC_CLIENT_FAIL       = 10100;
   const SVC_CLIENT_BUSY       = 10101;
   const SVC_CLIENT_ERROR      = 10105;
   const SVC_CLIENT_QUERY_ERR  = 10110;
   const DB_CONNECT_FAIL       = 10115;
   const INVALID_MSG_FMT       = 10120;
+  const INVALID_HTTP_RESPONSE = 10130;
+  const INVALID_HTTP_REQUEST  = 10135;
   
   
   /**
@@ -112,6 +115,9 @@ class AblePolecat_Error {
       case self::LOAD_RESOURCE_FAIL:
         $message = 'Failed to load contributed resource.';
         break;
+      case self::SVC_SERVER_ERROR:
+        $message = 'Service internal error.';
+        break;
       case self::SVC_CLIENT_FAIL:
         $message = 'Failed to establish client connection to web service.';
         break;
@@ -129,6 +135,12 @@ class AblePolecat_Error {
         break;
       case self::INVALID_MSG_FMT:
         $message = 'Message is improperly formatted.';
+        break;
+      case self::INVALID_HTTP_RESPONSE:
+        $message = 'HTTP response is invalid.';
+        break;
+      case self::INVALID_HTTP_REQUEST:
+        $message = 'HTTP request is invalid.';
         break;
     }
     return $message;

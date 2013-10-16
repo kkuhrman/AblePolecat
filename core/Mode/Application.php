@@ -1,7 +1,7 @@
 <?php
 /**
  * @file: Application.php
- * Base class for Application modes (most protected).
+ * Base class for Application modes (second most protected).
  */
 
 /**
@@ -34,7 +34,7 @@ if (!defined('ABLE_POLECAT_LOGS_PATH')) {
   define('ABLE_POLECAT_LOGS_PATH', $ABLE_POLECAT_LOGS_PATH);
 }
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Mode.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Application.php')));
 
 class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {

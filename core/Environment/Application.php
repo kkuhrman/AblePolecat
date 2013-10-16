@@ -4,9 +4,9 @@
  * Environment for Able Polecat Application Mode.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Conf.php')));
 
-class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstract {
+class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAbstract {
   
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
@@ -31,10 +31,10 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
     // Needed for module registration.
     //
     AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        'AblePolecat_Conf_Module',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Conf', 'Module.php')),
-        'touch'
-      );
+      'AblePolecat_Conf_Module',
+      implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Conf', 'Module.php')),
+      'touch'
+    );
   }
   
   /**
@@ -300,7 +300,9 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
    * @return AblePolecat_Environment_Application or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
     $Environment = self::$Environment;
+    
     if (!isset($Environment)) {
       //
       // Create environment object.

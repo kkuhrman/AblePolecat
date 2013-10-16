@@ -272,7 +272,7 @@ class AblePolecat_Server {
       //
       // Protection ring 1, Application mode.
       //
-      self::$Resources[1] = array();
+      self::$Resources[self::RING_APPLICATION_MODE] = array();
       require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Application.php')));
       $ApplicationMode = AblePolecat_Mode_Application::wakeup(self::$Session);
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
@@ -288,15 +288,18 @@ class AblePolecat_Server {
       self::getServiceBus()->registerClients();
       
       //
-      // @todo: 
-      // Implement AblePolecat_EnvironmentInterface for User
-      // AblePolecat_Mode_User::wakeup();
-      // @see:  AblePolecat_Environment_User::wakeup();
-      // 1. Session management
-      // 2. Cookies
-      // 3. Other stored user settings (database).
+      // @todo: Extract USER data from session
       //
+      $UserSession = self::$Session;
       
+      //
+      // User mode.
+      //
+      self::$Resources[self::RING_USER_MODE] = array();
+      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'User.php')));
+      $UserMode = AblePolecat_Mode_User::wakeup($UserSession);
+      self::setResource(self::RING_USER_MODE, self::NAME_USER_MODE, $UserMode);
+            
       //
       // Register some other core classes.
       //
@@ -349,6 +352,13 @@ class AblePolecat_Server {
    */
   public static function getServiceBus() {
     return self::getResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS);
+  }
+  
+  /**
+   * @return AblePolecat_Mode_User or NULL.
+   */
+  public static function getUserMode() {
+    return self::getResource(self::RING_USER_MODE, self::NAME_USER_MODE);
   }
   
   /**

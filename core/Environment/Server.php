@@ -4,9 +4,9 @@
  * Environment for Able Polecat Server Mode.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Conf.php')));
 
-class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
+class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstract {
   
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
