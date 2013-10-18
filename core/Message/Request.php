@@ -2,6 +2,7 @@
 /**
  * @file: Request.php
  * Base class for all request messages in Able Polecat.
+ *
  */
 
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Message.php');

@@ -31,14 +31,6 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
-    // $args = func_get_args();
-    // var_dump($args);
-    // if (isset($args[0])) {
-      // isset($args[0][self::STATUS_CODE])  ? $status_code = $args[0][self::STATUS_CODE] : $status_code = 0;
-      // isset($args[0][self::REASON_PHRASE]) ? $reason_phrase = $args[0][self::REASON_PHRASE] : $reason_phrase = '';
-    // }
-    // $this->m_status_code = $status_code;
-    // $this->m_reason_phrase = $reason_phrase;
     $this->m_status_code = 0;
     $this->m_reason_phrase = '';
     // AblePolecat_Error::INVALID_HTTP_RESPONSE
