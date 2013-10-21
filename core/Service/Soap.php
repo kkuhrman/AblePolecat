@@ -9,6 +9,11 @@ require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
 abstract class AblePolecat_Service_SoapAbstract implements AblePolecat_Service_Interface {
   
   /**
+   * @var Access control agent.
+   */
+  private $Agent;
+  
+  /**
    * @var WSDL path.
    */
   private $wsdl_path;
@@ -18,6 +23,13 @@ abstract class AblePolecat_Service_SoapAbstract implements AblePolecat_Service_I
    * Sub-classes initialize properties here.
    */
   abstract protected function initialize();
+  
+  /**
+   * @return AblePolecat_AccessControl_Agent_User.
+   */
+  protected function getAgent() {
+    return $this->Agent;
+  }
   
   /**
    * Process request passed as object by mapping to appropriate class method.
@@ -44,6 +56,7 @@ abstract class AblePolecat_Service_SoapAbstract implements AblePolecat_Service_I
   }
   
   final protected function __construct() {
+    $this->Agent = AblePolecat_Server::getUserMode()->getEnvironment()->getAgent();
     $this->wsdl_path = NULL;
     $this->initialize();
     if (!isset($this->wsdl_path)) {

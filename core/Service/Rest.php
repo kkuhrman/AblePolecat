@@ -9,10 +9,22 @@ require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
 abstract class AblePolecat_Service_RestAbstract implements AblePolecat_Service_Interface {
   
   /**
+   * @var Access control agent.
+   */
+  private $Agent;
+  
+  /**
    * Extends __construct().
    * Sub-classes initialize properties here.
    */
   abstract protected function initialize();
+  
+  /**
+   * @return AblePolecat_AccessControl_Agent_User.
+   */
+  protected function getAgent() {
+    return $this->Agent;
+  }
   
   /**
    * Process request passed as object by mapping to appropriate class method.
@@ -28,6 +40,7 @@ abstract class AblePolecat_Service_RestAbstract implements AblePolecat_Service_I
    * @see initialize()
    */
   final protected function __construct() {
+    $this->Agent = AblePolecat_Server::getUserMode()->getEnvironment()->getAgent();
     $this->initialize();
   }
   
