@@ -149,16 +149,20 @@ class AblePolecat_Server {
     self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
     
     //
+    // Wakeup default log file.
+    //
+    $DefaultLog = AblePolecat_Log_Csv::wakeup(self::$Session);
+    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
+    
+    //
     // Server environment initialized.
     // Set configurable system paths.
     //
     $paths = $ServerMode->getEnvironment()->getConf('paths');
-    if (isset($paths->path) && is_subclass_of($paths->path, 'iterator')) {
-      foreach($paths->path as $key => $path) {
-        $pathAttributes = $path->attributes();
-        if (isset($pathAttributes['name'])) {
-          AblePolecat_Server_Paths::setFullPath($pathAttributes['name'], $path->__toString());
-        }
+    foreach($paths->path as $key => $path) {
+      $pathAttributes = $path->attributes();
+      if (isset($pathAttributes['name'])) {
+        AblePolecat_Server_Paths::setFullPath($pathAttributes['name']->__toString(), $path->__toString());
       }
     }
     
@@ -166,12 +170,6 @@ class AblePolecat_Server {
     // Verify user/configurable directories.
     //
     AblePolecat_Server_Paths::verifyConfDirs();
-    
-    //
-    // Wakeup default log file.
-    //
-    $DefaultLog = AblePolecat_Log_Csv::wakeup(self::$Session);
-    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
     
     //
     // Service Bus
@@ -232,7 +230,7 @@ class AblePolecat_Server {
    * @param mixed  $message Message body.
    * @param int    $code Error code.
    */
-  protected function writeToDefaultLog($severity, $message, $code = NULL) {
+  protected static function writeToDefaultLog($severity, $message, $code = NULL) {
     $DefaultLog = self::getDefaultLog();
     switch ($severity) {
       default:
@@ -399,23 +397,23 @@ class AblePolecat_Server {
    */
   public static function log($severity, $message, $code = NULL) {
 
+    //
+    // Default log.
+    //
+    $type = AblePolecat_LogInterface::INFO;
+    switch ($severity) {
+      default:
+        break;
+      case AblePolecat_LogInterface::STATUS:
+      case AblePolecat_LogInterface::WARNING:
+      case AblePolecat_LogInterface::ERROR:
+      case AblePolecat_LogInterface::DEBUG:
+        $type = $severity;
+        break;
+    }
+    self::writeToDefaultLog($type, $message, $code);
+    
     if (isset(self::$Server)) {
-      //
-      // Default log.
-      //
-      $type = AblePolecat_LogInterface::INFO;
-      switch ($severity) {
-        default:
-          break;
-        case AblePolecat_LogInterface::STATUS:
-        case AblePolecat_LogInterface::WARNING:
-        case AblePolecat_LogInterface::ERROR:
-        case AblePolecat_LogInterface::DEBUG:
-          $type = $severity;
-          break;
-      }
-      self::$Server->writeToDefaultLog($type, $message, $code);
-      
       //
       // Application (contributed) logs
       //

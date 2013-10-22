@@ -1,14 +1,9 @@
 <?xml version='1.0' standalone='yes'?>
 <config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
   <paths>
-    <path name="libs">
-      C:\path\to\AblePolecat\libs
-    </path>
-    <path name="logs">
-      C:\path\to\AblePolecat\logs
-    </path>
-    <path name="mods">
-      C:\path\to\AblePolecat\mods
+    <!-- User configurable sub-directories -->
+    <path name="myDir">
+      C:\path\to\AblePolecat\myDir
     </path>
   </paths>
 </config>

@@ -30,6 +30,21 @@
 // define('ABLE_POLECAT_DEV_PATH', ABLE_POLECAT_LOCAL . DIRECTORY_SEPARATOR . 'dev');
 
 //
+// Path to third party class libraries.
+//
+// define('ABLE_POLECAT_LIBS_PATH', ABLE_POLECAT_LOCAL . DIRECTORY_SEPARATOR . 'libs');
+
+//
+// Log files directory.
+//
+// define('ABLE_POLECAT_LOGS_PATH', ABLE_POLECAT_LOCAL . DIRECTORY_SEPARATOR . 'logs');
+
+//
+// Path to contributed modules directory.
+//
+// define('ABLE_POLECAT_MODS_PATH', ABLE_POLECAT_LOCAL . DIRECTORY_SEPARATOR . 'mods');
+
+//
 // Define location of Able Polecat unit test and qa directory.
 //
 // define('ABLE_POLECAT_QA_PATH', ABLE_POLECAT_LOCAL . DIRECTORY_SEPARATOR . 'qa');
