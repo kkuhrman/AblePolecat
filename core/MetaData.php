@@ -47,7 +47,7 @@ class AblePolecat_MetaData extends AblePolecat_ArgsListAbstract implements AbleP
   /**
    * Marshall numeric-indexed array of variable method arguments.
    *
-   * @param string $method_name __METHOD__ is good enough.
+   * @param string $method_name __METHOD__ will render className::methodName; __FUNCTION__ is probably good enough.
    * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
    * @param mixed $options Reserved for future use.
    *
