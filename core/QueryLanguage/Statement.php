@@ -11,3 +11,6 @@ interface AblePolecat_QueryLanguage_StatementInterface {
    */
   public function __toString();
 }
+
+class AblePolecat_QueryLanguage_Exception extends AblePolecat_Exception {
+}

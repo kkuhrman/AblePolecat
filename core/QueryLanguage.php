@@ -29,6 +29,3 @@ interface AblePolecat_QueryLanguageInterface {
    */
   public static function prepareStatement(AblePolecat_Message_RequestInterface $Request);
 }
-
-class AblePolecat_QueryLanguage_Exception extends AblePolecat_Exception {
-}

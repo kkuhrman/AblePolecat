@@ -14,6 +14,7 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
     /**
      * SQL syntax element properties.
      */
+    const DML         = 'dml';
     const TABLES      = 'tables';
     const COLUMNS     = 'columns';
     const WHERE       = 'where_condition';
@@ -27,14 +28,602 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
     /**
      * Verifies if given syntax element is supported.
      *
+     * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
      * @param string $element One of the predefined SQL syntax element constants.
      *
      * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
      */
-    public static function supportsSyntax($element);
+    public static function supportsSyntax($dml, $element = NULL);
 }
 
 abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolecat_ArgsListAbstract implements AblePolecat_QueryLanguage_Statement_Sql_Interface {
+  
+  /**
+   * Supported DML ops (default).
+   */
+  const SELECT    = 'SELECT';
+  const INSERT    = 'INSERT';
+  const UPDATE    = 'UPDATE';
+  const DELETE    = 'DELETE';
+  
+  /**
+   * Other constants.
+   */
+  const LIST_DELIMITER = ', ';
+  
+  /**
+   * @var string DML operation such as SELECT, INSERT, and so on. Cannot be reset without erasing all properties.
+   */
+  private $DmlOp;
+  
+  /**
+   * @var supported sql syntax.
+   */
+  private static $supportedSql = NULL;
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize arguments.
+   */
+  protected function initialize() {
+    //
+    // Initialize SQL support settings (for static method calls).
+    //
+    self::setSqlSyntaxSupport();
+  }
+  
+  /**
+   * Initialize class from creational method variable args list.
+   * 
+   * @param AblePolecat_ArgsListInterface $ArgsList
+   * @see unmarshallArgsList().
+   */
+  protected function populateFromArgsList(AblePolecat_ArgsListInterface $ArgsList) {
+    
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::DML}) ? $this->setDmlOp($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::DML}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES}) ? $this->setTables($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS}) ? $this->setColumns($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE}) ? $this->setWhereCondition($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY}) ? $this->setOrderByExpression($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES}) ? $this->setValues($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT}) ? $this->setLimit($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET}) ? $this->setOffset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY}) ? $this->setGroupByExpression($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY}) : NULL;
+    isset($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING}) ? $this->setHavingCondition($ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING}) : NULL;
+  }
+  
+  /**
+   * Initialize SQL syntax support or override a specific feature.
+   *
+   * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
+   * @param string $element One of the predefined SQL syntax element constants.
+   * @param bool $supported Indicates if given element is supported by class.
+   */
+  protected static function setSqlSyntaxSupport($dml = NULL, $element = NULL, $supported = TRUE) {
+    
+    if (!isset(self::$supportedSql)) {
+      self::$supportedSql = array(
+        self::SELECT => array(
+          self::TABLES => TRUE,
+          self::COLUMNS => TRUE,
+          self::WHERE => TRUE,
+          self::GROUPBY => TRUE,
+          self::HAVING => TRUE,
+          self::ORDERBY => TRUE,
+          self::LIMIT => TRUE,
+          self::OFFSET => TRUE,
+        ),
+        self::INSERT => array(
+          self::TABLES => TRUE,
+          self::COLUMNS => TRUE,
+          self::VALUES => TRUE,
+        ),
+        self::UPDATE => array(
+          self::TABLES => TRUE,
+          self::COLUMNS => TRUE,
+          self::WHERE => TRUE,
+          self::ORDERBY => TRUE,
+          self::LIMIT => TRUE,
+          self::OFFSET => TRUE,
+          self::VALUES => TRUE,
+        ),
+        self::DELETE => array(
+          self::TABLES => TRUE,
+          self::WHERE => TRUE,
+          self::ORDERBY => TRUE,
+          self::LIMIT => TRUE,
+          self::OFFSET => TRUE,
+        ),
+      );
+    }
+    if (isset($dml)) {
+      !isset(self::$supportedSql[$dml]) ? self::$supportedSql[$dml] = array() : NULL;
+      if (isset($element)) {
+        $supported ? self::$supportedSql[$dml][$element] = TRUE : self::$supportedSql[$dml][$element] = FALSE;
+      }
+    }
+  }
+  
+  /**
+   * @todo: lots on this one, more of a placeholder for now.
+   * Used to express literal values in DML (for example quotes around strings etc).
+   *
+   * @param mixed $literal The value of the literal being expressed.
+   * @param string $type Data type to override default evaluation.
+   *
+   * @return string Value of literal expressed in encapsulated SQL DML syntax.
+   */
+  public static function getLiteralExpression($literal, $type = NULL) {
+    
+    //
+    // @todo: handle NULL values
+    //
+    $expression = '';
+    
+    //
+    // @todo: handle non-scalar types.
+    //
+    if (isset($literal) && is_scalar($literal)) {
+      switch (gettype($literal)) {
+        default:
+          //
+          // @todo NULL?
+          //
+          break;
+         case 'boolean':
+          $literal ? $expression = 'TRUE' : $expression = 'FALSE';
+          break;
+        case 'integer':
+          $expression = strval($literal);
+          break;
+        case 'double':
+          //
+          // NOTE: gettype() returns "double" in case of a float, and not simply "float"
+          // @todo: obviously must be formatted scale, precision etc.
+          //
+          $expression = strval($literal);
+          break;
+        case 'string':
+          //
+          // @todo: syntax/engine specific escaping
+          //
+          $expression = "'$literal'";
+          break;
+        case 'NULL':
+          //
+          // @todo
+          //
+          break;
+      }
+    }
+    return $expression;
+  }
+  
+  /**
+   * Verifies if given syntax element is supported.
+   *
+   * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
+   * @param string $element One of the predefined SQL syntax element constants.
+   *
+   * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
+   */
+  public static function supportsSyntax($dml, $element = NULL) {
+    
+    $Supported = FALSE;
+    
+    //
+    // Initialize SQL support settings (for static method calls).
+    //
+    self::setSqlSyntaxSupport();
+    
+    if (isset($element)) {
+      isset(self::$supportedSql[$dml][$element]) ? $Supported = self::$supportedSql[$dml][$element] : $Supported = FALSE;
+    }
+    else {
+      $Supported = isset(self::$supportedSql[$dml]);
+    }
+    return $Supported;
+  }
+  
+  /**
+   * @return string DML operation.
+   */
+  public function getDmlOp() {
+    return $this->DmlOp;
+  }
+  
+  /**
+   * @return string Table references.
+   */
+  public function getTables() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES, NULL);
+  }
+  
+  /**
+   * @return string Column list.
+   */
+  public function getColumns() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS, NULL);
+  }
+  
+  /**
+   * @return string WHERE condition.
+   */
+  public function getWhereCondition() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE, NULL);
+  }
+  
+  /**
+   * @return string HAVING condition.
+   */
+  public function getHavingCondition() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING, NULL);
+  }
+  
+  /**
+   * @return string GROUP BY expression.
+   */
+  public function getGroupByExpression() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY, NULL);
+  }
+  
+  /**
+   * @return string ORDER BY expression.
+   */
+  public function getOrderByExpression() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY, NULL);
+  }
+  
+  /**
+   * @return string LIMIT.
+   */
+  public function getLimit() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT, NULL);
+  }
+  
+  /**
+   * @return string Proper syntax for LIMIT/OFFSET.
+   */
+  public function getLimitOffsetSyntax() {
+    
+    $Syntax = NULL;
+    $Limit = $this->getLimit();
+    $Offset = $this->getOffset();
+    if (isset($Limit)) {
+      $Syntax = "LIMIT $Limit";
+      isset($Offset) ? $Syntax .= " OFFSET $Offset" : NULL;
+    }
+    return $Syntax;
+  }
+  
+  /**
+   * @return string OFFSET.
+   */
+  public function getOffset() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET, NULL);
+  }
+  
+  /**
+   * @return string VALUES.
+   */
+  public function getValues() {
+    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES, NULL);
+  }
+  
+  /**
+   * Override base class implementation of __set() magic method so as to use syntax checking.
+   */
+  public function __set($name, $value) {
+    
+    switch ($name) {
+      default:
+        parent::__set($name, $value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::DML:
+        $this->setDmlOp($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES:
+        $this->setTables($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS:
+        $this->setColumns($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE:
+        $this->setWhereCondition($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING:
+        $this->setHavingCondition($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY:
+        $this->setGroupByExpression($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY:
+        $this->setOrderByExpression($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT:
+        $this->setLimit($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET:
+        $this->setOffset($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES:
+        $this->setValues($value);
+        break;
+    }
+  }
+  
+  /**
+   * Set DML operation.
+   * 
+   * @param string $DmlOp DML operation.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setDmlOp($DmlOp) {
+    
+    if ($this->supportsSyntax($DmlOp) && !isset($this->DmlOp)) {
+      $this->DmlOp = $DmlOp;
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set Table references.
+   *
+   * @param string $Tables Table references.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setTables($Tables) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      //
+      // @todo: handle aliasing
+      //
+      if (is_array($Tables)) {
+        switch ($DmlOp) {
+          default:
+            parent::__set($Element, implode(self::LIST_DELIMITER, $Tables));
+            break;
+          case self::INSERT:
+          case self::DELETE:
+            //
+            // If parameter is single-element array, allow use of first element.
+            // Otherwise, complain...
+            //
+            if (count($Tables) == 1) {
+              parent::__set($Element, strval($Tables[0]));
+            }
+            else {
+              throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp]. Only one table can be referenced. " . count($Tables) . " given.",
+                AblePolecat_Error::INVALID_SYNTAX);
+            }
+            break;
+        }
+      }
+      else {
+        parent::__set($Element, strval($Tables));
+      }
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set Column list.
+   *
+   * @param string Columns Column list.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setColumns($Columns) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      if (is_array($Columns)) {
+        parent::__set($Element, implode(self::LIST_DELIMITER, $Columns));
+      }
+      else {
+        parent::__set($Element, strval($Columns));
+      }
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set WHERE condition.
+   *
+   * @param string $WhereCondition WHERE condition.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setWhereCondition($WhereCondition) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, strval($WhereCondition));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set HAVING condition.
+   *
+   * @param string $HavingCondition HAVING condition.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setHavingCondition($HavingCondition) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, strval($HavingCondition));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set GROUP BY expression.
+   *
+   * @param string $GroupByExpression GROUP BY expression.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setGroupByExpression($GroupByExpression) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, strval($GroupByExpression));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set ORDER BY expression.
+   *
+   * @param string $OrderByExpression ORDER BY expression.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setOrderByExpression($OrderByExpression) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, strval($OrderByExpression));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set LIMIT.
+   *
+   * @param string $Limit LIMIT.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setLimit($Limit) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, intval($Limit));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set OFFSET.
+   *
+   * @param string $Offset OFFSET.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setOffset($Offset) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, intval($Offset));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set VALUES.
+   *
+   * @param string $Values VALUES.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setValues($Values) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      if (is_array($Values)) {
+        switch ($DmlOp) {
+          default:
+            parent::__set($Element, implode(self::LIST_DELIMITER, $Values));
+            break;
+          case self::UPDATE:
+            //
+            // This parameter may be used for UPDATE operations to pass
+            // column names and set values as separate arrays.
+            //
+            $columns = explode(self::LIST_DELIMITER, $this->getColumns());
+            
+            //
+            // Column names and values counts must match
+            //
+            if (count($columns) === count($Values)) {
+              //
+              // Render column SET expressions
+              //
+              $setExpr = array();
+              foreach($columns as $key => $name) {
+                //
+                // @todo: handle quoting
+                //
+                $setExpr[] = sprintf("%s = %s",
+                  $name,
+                  $this->getLiteralExpression($Values[$key])
+                );
+              }
+              //
+              // Overwrite column names
+              //
+              $this->setColumns($setExpr);
+            }
+            else {
+              throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element]. Number of SET values must match number of UPDATE columns.",
+                AblePolecat_Error::INVALID_SYNTAX);
+            }
+            break;
+        }
+      }
+      else {
+        parent::__set($Element, strval($Values));
+      }
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
   
   /**
    * Marshall numeric-indexed array of variable method arguments.
@@ -53,30 +642,119 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       switch ($method_name) {
         default:
           break;
-        case '__construct':
+        case 'create':
           switch($key) {
             case 0:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES} = $value;
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::DML} = $value;
               break;
             case 1:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS} = $value;
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES} = $value;
               break;
             case 2:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE} = $value;
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS} = $value;
               break;
             case 3:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY} = $value;
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE} = $value;
               break;
             case 4:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES} = $value;
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY} = $value;
               break;
             case 5:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES} = $value;
+              break;
+            case 6:
               $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT} = $value;
+              break;
+            case 7:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET} = $value;
+              break;
+            case 8:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY} = $value;
+              break;
+            case 9:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING} = $value;
               break;
           }
           break;
       }
     }
     return $ArgsList;
+  }
+  
+  /**
+   * @return query langauge statement as a string.
+   */
+  public function __toString() {
+    
+    $sqlStatement = '';
+    $tokens = array($this->getDmlOp());
+    switch($this->getDmlOp()) {
+      default:
+        break;
+      case self::SELECT:
+        $tokens[] = $this->getColumns();
+        if ($this->getTables()) {
+          $tokens[] = 'FROM';
+          $tokens[] = $this->getTables();
+        }
+        if ($this->getWhereCondition()) {
+          $tokens[] = 'WHERE';
+          $tokens[] = $this->getWhereCondition();
+        }
+        if ($this->getGroupByExpression()) {
+          $tokens[] = 'GROUP BY';
+          $tokens[] = $this->getGroupByExpression();
+        }
+        if ($this->getHavingCondition()) {
+          $tokens[] = 'HAVING';
+          $tokens[] = $this->getHavingCondition();
+        }
+        if ($this->getOrderByExpression()) {
+          $tokens[] = 'ORDER BY';
+          $tokens[] = $this->getOrderByExpression();
+        }
+        $tokens[] = $this->getLimitOffsetSyntax();
+        break;
+      case self::INSERT:
+        if ($this->getTables()) {
+          $tokens[] = 'INTO';
+          $tokens[] = $this->getTables();
+        }
+        $tokens[] = '(' . $this->getColumns() . ')';
+        $tokens[] = 'VALUES (' . $this->getValues() . ')';
+        break;
+      case self::UPDATE:
+        $tokens[] = $this->getTables();
+        $tokens[] = 'SET';
+        $tokens[] = $this->getColumns();
+        if ($this->getWhereCondition()) {
+          $tokens[] = 'WHERE';
+          $tokens[] = $this->getWhereCondition();
+        }
+        if ($this->getOrderByExpression()) {
+          $tokens[] = 'ORDER BY';
+          $tokens[] = $this->getOrderByExpression();
+        }
+        $tokens[] = $this->getLimitOffsetSyntax();
+        break;
+      case self::DELETE:
+        if ($this->getTables()) {
+          $tokens[] = 'FROM';
+          $tokens[] = $this->getTables();
+        }
+        if ($this->getWhereCondition()) {
+          $tokens[] = 'WHERE';
+          $tokens[] = $this->getWhereCondition();
+        }
+        if ($this->getOrderByExpression()) {
+          $tokens[] = 'ORDER BY';
+          $tokens[] = $this->getOrderByExpression();
+        }
+        $tokens[] = $this->getLimitOffsetSyntax();
+        break;
+    }
+    // var_dump($tokens);
+    $sqlStatement = implode(' ', $tokens);
+    return $sqlStatement;
   }
 }

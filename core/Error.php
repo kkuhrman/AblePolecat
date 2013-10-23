@@ -40,6 +40,7 @@ class AblePolecat_Error {
   const INVALID_MSG_FMT       = 10120;
   const INVALID_HTTP_RESPONSE = 10130;
   const INVALID_HTTP_REQUEST  = 10135;
+  const INVALID_SYNTAX        = 10140;
   
   
   /**
@@ -141,6 +142,9 @@ class AblePolecat_Error {
         break;
       case self::INVALID_HTTP_REQUEST:
         $message = 'HTTP request is invalid.';
+        break;
+      case self::INVALID_SYNTAX:
+        $message = 'Invalid syntax.';
         break;
     }
     return $message;
