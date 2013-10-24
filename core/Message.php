@@ -18,3 +18,9 @@ abstract class AblePolecat_MessageAbstract extends AblePolecat_Message_NodeAbstr
     return sprintf("%c%c", 13, 10);
   }
 }
+
+/**
+  * Exceptions thrown by Able Polecat message sub-classes.
+  */
+class AblePolecat_Message_Exception extends AblePolecat_Exception {
+}

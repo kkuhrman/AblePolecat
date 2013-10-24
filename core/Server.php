@@ -15,7 +15,6 @@
 // These are listed in the order they are created in initialize() and bootstrap()
 //
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Session.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Http', 'Message', 'Request.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Log', 'Csv.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Bus.php')));
@@ -95,7 +94,7 @@ class AblePolecat_Server {
     // cookie, server will boot in cookie mode. Otherwise, the server will 
     // boot in normal mode.
     //
-    $run_var = AblePolecat_Http_Message_Request::getVariable('run');
+    $run_var = self::getRequestVariable('run');
     if (!isset($run_var)) {
       //
       // If runtime context was saved in a cookie, use that until agent
@@ -357,6 +356,21 @@ class AblePolecat_Server {
    */
   public static function getUserMode() {
     return self::getResource(self::RING_USER_MODE, self::NAME_USER_MODE);
+  }
+  
+  /**
+   * Helper function returns given $_REQUEST variable.
+   *
+   * @param string $var Name of requested query string variable.
+   *
+   * @return mixed Value of requested variable or NULL.
+   */
+  public static function getRequestVariable($var) {
+    $value = NULL;
+    if (isset($var) && isset($_REQUEST[$var])) {
+      $value = $_REQUEST[$var];
+    }
+    return $value;
   }
   
   /**
