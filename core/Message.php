@@ -4,12 +4,12 @@
  * Interface for all Able Polecat messages passed to service bus.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Node.php')));
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 
-interface AblePolecat_MessageInterface extends AblePolecat_Message_NodeInterface {
+interface AblePolecat_MessageInterface extends AblePolecat_DynamicObjectInterface {
 }
 
-abstract class AblePolecat_MessageAbstract extends AblePolecat_Message_NodeAbstract implements AblePolecat_MessageInterface {
+abstract class AblePolecat_MessageAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_MessageInterface {
   
   /**
    * Helper funciton for outputting message as text.
