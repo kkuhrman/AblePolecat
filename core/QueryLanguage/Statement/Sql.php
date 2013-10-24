@@ -5,9 +5,10 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'QueryLanguage', 'Statement.php')));
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Overloadable.php');
 
-interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_ArgsListInterface, 
+interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_DynamicObjectInterface, 
   AblePolecat_OverloadableInterface, 
   AblePolecat_QueryLanguage_StatementInterface {
     
@@ -36,7 +37,7 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
     public static function supportsSyntax($dml, $element = NULL);
 }
 
-abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolecat_ArgsListAbstract implements AblePolecat_QueryLanguage_Statement_Sql_Interface {
+abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_QueryLanguage_Statement_Sql_Interface {
   
   /**
    * Supported DML ops (default).
@@ -636,7 +637,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    */
   public static function unmarshallArgsList($method_name, $args, $options = NULL) {
     
-    $ArgsList = AblePolecat_ArgsList_Overloaded::create();
+    $ArgsList = AblePolecat_ArgsList::create();
     
     foreach($args as $key => $value) {
       switch ($method_name) {

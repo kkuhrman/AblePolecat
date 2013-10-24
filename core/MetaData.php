@@ -55,7 +55,7 @@ class AblePolecat_MetaData extends AblePolecat_ArgsListAbstract implements AbleP
    */
   public static function unmarshallArgsList($method_name, $args, $options = NULL) {
     
-    $ArgsList = AblePolecat_ArgsList_Overloaded::create();
+    $ArgsList = AblePolecat_ArgsList::create();
     
     foreach($args as $key => $value) {
       switch ($method_name) {

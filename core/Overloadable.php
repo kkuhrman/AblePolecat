@@ -4,7 +4,7 @@
  * Must define methods for marshalling variable argument lists passed to methods.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'ArgsList', 'Overloaded.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'ArgsList.php')));
 
 interface AblePolecat_OverloadableInterface {
   

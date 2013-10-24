@@ -59,6 +59,23 @@ abstract class AblePolecat_DynamicObjectAbstract implements AblePolecat_DynamicO
     );
     return null;
   }
+  
+  /**
+   * Returns assigned or default value and will not trigger an error.
+   * 
+   * @param string $name Name of property.
+   * @param mixed $default Default value to return if not assigned.
+   *
+   * @return mixed Assigned value of property given by $name if assigned, otherwise $default.
+   */
+  public function getPropertySafe($name, $default = NULL) {
+    
+    $property = $default;
+    if (isset($this->properties[$name])) {
+      $property = $this->properties[$name];
+    }
+    return $property;
+  }
 
   public function __isset($name) {
     return isset($this->properties[$name]);
