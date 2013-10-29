@@ -19,6 +19,11 @@ abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_CacheObjec
   protected $Client;
   
   /**
+   * @var Prepared requests, ready to dispatch. FIFO.
+   */
+  private $PreparedRequests;
+  
+  /**
    * @var bool Internal lock. Prevents concurrent dispatching of requests.
    */
   private $lock;
@@ -29,7 +34,26 @@ abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_CacheObjec
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
+    $this->PreparedRequests = array();
     $this->lock = FALSE;
+  }
+  
+  /**
+   * Return next request prepared for dispatch.
+   *
+   * @return mixed Next request or NULL.
+   */
+  protected function getNextPreparedRequest() {
+    return array_shift($this->PreparedRequests);
+  }
+  
+  /**
+   * Pushes a prepared request to the end of the list.
+   *
+   * @param mixed $Request.
+   */
+  protected function pushPreparedRequest($Request) {
+    return array_push($this->PreparedRequests, $Request);
   }
   
   /**

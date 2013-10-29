@@ -27,19 +27,6 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
     const VALUES      = 'values';
     
     /**
-     * Verifies if given syntax element is supported.
-     *
-     * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
-     * @param string $element One of the predefined SQL syntax element constants.
-     *
-     * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
-     */
-    public static function supportsSyntax($dml, $element = NULL);
-}
-
-abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_QueryLanguage_Statement_Sql_Interface {
-  
-  /**
    * Supported DML ops (default).
    */
   const SELECT    = 'SELECT';
@@ -51,6 +38,19 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    * Other constants.
    */
   const LIST_DELIMITER = ', ';
+    
+    /**
+     * Verifies if given syntax element is supported.
+     *
+     * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
+     * @param string $element One of the predefined SQL syntax element constants.
+     *
+     * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
+     */
+    public static function supportsSyntax($dml, $element = NULL);
+}
+
+abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_QueryLanguage_Statement_Sql_Interface {
   
   /**
    * @var string DML operation such as SELECT, INSERT, and so on. Cannot be reset without erasing all properties.
@@ -105,36 +105,36 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     
     if (!isset(self::$supportedSql)) {
       self::$supportedSql = array(
-        self::SELECT => array(
-          self::TABLES => TRUE,
-          self::COLUMNS => TRUE,
-          self::WHERE => TRUE,
-          self::GROUPBY => TRUE,
-          self::HAVING => TRUE,
-          self::ORDERBY => TRUE,
-          self::LIMIT => TRUE,
-          self::OFFSET => TRUE,
+        AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT => array(
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET => TRUE,
         ),
-        self::INSERT => array(
-          self::TABLES => TRUE,
-          self::COLUMNS => TRUE,
-          self::VALUES => TRUE,
+        AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT => array(
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES => TRUE,
         ),
-        self::UPDATE => array(
-          self::TABLES => TRUE,
-          self::COLUMNS => TRUE,
-          self::WHERE => TRUE,
-          self::ORDERBY => TRUE,
-          self::LIMIT => TRUE,
-          self::OFFSET => TRUE,
-          self::VALUES => TRUE,
+        AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE => array(
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES => TRUE,
         ),
-        self::DELETE => array(
-          self::TABLES => TRUE,
-          self::WHERE => TRUE,
-          self::ORDERBY => TRUE,
-          self::LIMIT => TRUE,
-          self::OFFSET => TRUE,
+        AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE => array(
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET => TRUE,
         ),
       );
     }
@@ -390,10 +390,10 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       if (is_array($Tables)) {
         switch ($DmlOp) {
           default:
-            parent::__set($Element, implode(self::LIST_DELIMITER, $Tables));
+            parent::__set($Element, implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Tables));
             break;
-          case self::INSERT:
-          case self::DELETE:
+          case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
+          case AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE:
             //
             // If parameter is single-element array, allow use of first element.
             // Otherwise, complain...
@@ -431,7 +431,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS;
     if ($this->supportsSyntax($DmlOp, $Element)) {
       if (is_array($Columns)) {
-        parent::__set($Element, implode(self::LIST_DELIMITER, $Columns));
+        parent::__set($Element, implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Columns));
       }
       else {
         parent::__set($Element, strval($Columns));
@@ -578,14 +578,14 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       if (is_array($Values)) {
         switch ($DmlOp) {
           default:
-            parent::__set($Element, implode(self::LIST_DELIMITER, $Values));
+            parent::__set($Element, implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Values));
             break;
-          case self::UPDATE:
+          case AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE:
             //
             // This parameter may be used for UPDATE operations to pass
             // column names and set values as separate arrays.
             //
-            $columns = explode(self::LIST_DELIMITER, $this->getColumns());
+            $columns = explode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $this->getColumns());
             
             //
             // Column names and values counts must match
@@ -692,7 +692,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     switch($this->getDmlOp()) {
       default:
         break;
-      case self::SELECT:
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
         $tokens[] = $this->getColumns();
         if ($this->getTables()) {
           $tokens[] = 'FROM';
@@ -716,7 +716,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         }
         $tokens[] = $this->getLimitOffsetSyntax();
         break;
-      case self::INSERT:
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
         if ($this->getTables()) {
           $tokens[] = 'INTO';
           $tokens[] = $this->getTables();
@@ -724,7 +724,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         $tokens[] = '(' . $this->getColumns() . ')';
         $tokens[] = 'VALUES (' . $this->getValues() . ')';
         break;
-      case self::UPDATE:
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE:
         $tokens[] = $this->getTables();
         $tokens[] = 'SET';
         $tokens[] = $this->getColumns();
@@ -738,7 +738,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         }
         $tokens[] = $this->getLimitOffsetSyntax();
         break;
-      case self::DELETE:
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE:
         if ($this->getTables()) {
           $tokens[] = 'FROM';
           $tokens[] = $this->getTables();
@@ -758,35 +758,18 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     $sqlStatement = implode(' ', $tokens);
     return $sqlStatement;
   }
-}
-
-/**
- * A vanialla-type SQL wrapper with several helper methods.
- */
-function __SQL() {
-  $Query = AblePolecat_Sql::create();
-  return $Query;
-}
-
-class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
   
   /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize arguments.
+   * Helper functions.
    */
-  protected function initialize() {
-    parent::initialize();
-  }
-  
   public function delete() {
-    $this->setDmlOp(self::DELETE);
+    $this->setDmlOp(AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE);
     return $this;
   }
   
   public function select() {
     $Columns = func_get_args();
-    $this->setDmlOp(self::SELECT);
+    $this->setDmlOp(AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT);
     $this->setColumns($Columns);
     return $this;
   }
@@ -799,7 +782,7 @@ class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
   
   public function insert() {
     $Columns = func_get_args();
-    $this->setDmlOp(self::INSERT);
+    $this->setDmlOp(AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT);
     $this->setColumns($Columns);
     return $this;
   }
@@ -812,7 +795,7 @@ class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
   
   public function update() {
     $Tables = func_get_args();
-    $this->setDmlOp(self::UPDATE);
+    $this->setDmlOp(AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE);
     $this->setTables($Tables);
     return $this;
   }
@@ -871,9 +854,42 @@ class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
     $this->setValues($Values);
     return $this;
   }
+}
+
+/**
+ * A vanialla-type SQL wrapper with several helper methods.
+ */
+function __SQL() {
+  $Query = AblePolecat_Sql::create();
+  return $Query;
+}
+
+class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize arguments.
+   */
+  protected function initialize() {
+    parent::initialize();
+  }
   
   public static function create() {
+    //
+    // Create a new query object.
+    //
     $Query = new AblePolecat_Sql();
+    
+    //
+    // Unmarshall (from numeric keyed index to named properties) variable args list.
+    //
+    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
+    $Query->populateFromArgsList($ArgsList);
+    
+    //
+    // Return initialized object.
+    //
     return $Query;
   }
 }

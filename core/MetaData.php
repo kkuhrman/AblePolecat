@@ -22,9 +22,10 @@
  * offsets and so on.
  */
  
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Overloadable.php');
  
-interface AblePolecat_MetaDataInterface extends AblePolecat_ArgsListInterface, AblePolecat_OverloadableInterface {
+interface AblePolecat_MetaDataInterface extends AblePolecat_DynamicObjectInterface, AblePolecat_OverloadableInterface {
   
   const CLIENT_ID       = 'client_id';
   const SUBJECT         = 'subject';
@@ -34,7 +35,7 @@ interface AblePolecat_MetaDataInterface extends AblePolecat_ArgsListInterface, A
   const OPTIONS         = 'options';
 }
 
-class AblePolecat_MetaData extends AblePolecat_ArgsListAbstract implements AblePolecat_MetaDataInterface {
+class AblePolecat_MetaData extends AblePolecat_DynamicObjectAbstract implements AblePolecat_MetaDataInterface {
   
   /**
    * Extends __construct().
