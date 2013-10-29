@@ -759,3 +759,121 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     return $sqlStatement;
   }
 }
+
+/**
+ * A vanialla-type SQL wrapper with several helper methods.
+ */
+function __SQL() {
+  $Query = AblePolecat_Sql::create();
+  return $Query;
+}
+
+class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize arguments.
+   */
+  protected function initialize() {
+    parent::initialize();
+  }
+  
+  public function delete() {
+    $this->setDmlOp(self::DELETE);
+    return $this;
+  }
+  
+  public function select() {
+    $Columns = func_get_args();
+    $this->setDmlOp(self::SELECT);
+    $this->setColumns($Columns);
+    return $this;
+  }
+  
+  public function from() {
+    $Tables = func_get_args();
+    $this->setTables($Tables);
+    return $this;
+  }
+  
+  public function insert() {
+    $Columns = func_get_args();
+    $this->setDmlOp(self::INSERT);
+    $this->setColumns($Columns);
+    return $this;
+  }
+  
+  public function into() {
+    $Tables = func_get_args();
+    $this->setTables($Tables);
+    return $this;
+  }
+  
+  public function update() {
+    $Tables = func_get_args();
+    $this->setDmlOp(self::UPDATE);
+    $this->setTables($Tables);
+    return $this;
+  }
+  
+  public function set() {
+    $Columns = func_get_args();
+    $this->setColumns($Columns);
+    return $this;
+  }
+  
+  public function where() {
+    $WhereCondition = NULL;
+    foreach(func_get_args() as $key => $arg) {
+      $WhereCondition .= $arg;
+    }
+    $this->setWhereCondition($WhereCondition);
+    return $this;
+  }
+  
+  public function order_by() {
+    $OrderByExpression = NULL;
+    foreach(func_get_args() as $key => $arg) {
+      $OrderByExpression .= $arg;
+    }
+    $this->setOrderByExpression($OrderByExpression);
+    return $this;
+  }
+  
+  public function limit() {
+    $args = func_get_args();
+    isset($args[0]) ? $this->setLimit($args[0]) : NULL;
+    isset($args[1]) ? $this->setOffset($args[1]) : NULL;
+    return $this;
+  }
+    
+  public function group_by() {
+    $GroupByExpression = NULL;
+    foreach(func_get_args() as $key => $arg) {
+      $GroupByExpression .= $arg;
+    }
+    $this->setGroupByExpression($GroupByExpression);
+    return $this;
+  }
+  
+  public function having() {
+    $HavingCondition = NULL;
+    foreach(func_get_args() as $key => $arg) {
+      $HavingCondition .= $arg;
+    }
+    $this->setHavingCondition($HavingCondition);
+    return $this;
+  }
+  
+  public function values() {
+    $Values = func_get_args();
+    $this->setValues($Values);
+    return $this;
+  }
+  
+  public static function create() {
+    $Query = new AblePolecat_Sql();
+    return $Query;
+  }
+}
