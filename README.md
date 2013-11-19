@@ -1,9 +1,8 @@
 About Able Polecat
 --------------------------------------------------------------------------------
-Able Polecat is a PHP class library and stub application for integrating legacy 
-business systems with more modern cloud-based services, such as Google Apps and 
-Salesforce.com. It is intended mainly for small to medium size businesses as an 
-affordable and effective alternative to enterprise middleware and EAI solutions.
+Able Polecat is a PHP class library intended to provide small to medium size 
+businesses an affordable and effective alternative to enterprise middleware and 
+EAI solutions.
 
 Background and Acknowledgements
 --------------------------------------------------------------------------------
