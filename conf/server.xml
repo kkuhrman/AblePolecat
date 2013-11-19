@@ -1,0 +1,9 @@
+<?xml version='1.0' standalone='yes'?>
+<config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
+  <paths>
+    <!-- User configurable sub-directories -->
+    <path name="myDir">
+      C:\path\to\AblePolecat\myDir
+    </path>
+  </paths>
+</config>
