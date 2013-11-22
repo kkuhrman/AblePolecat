@@ -41,6 +41,7 @@ class AblePolecat_Error {
   const INVALID_HTTP_RESPONSE = 10130;
   const INVALID_HTTP_REQUEST  = 10135;
   const INVALID_SYNTAX        = 10140;
+  const INVALID_TYPE_CAST     = 10145;
   
   
   /**
@@ -145,6 +146,9 @@ class AblePolecat_Error {
         break;
       case self::INVALID_SYNTAX:
         $message = 'Invalid syntax.';
+        break;
+      case self::INVALID_TYPE_CAST:
+        $message = 'Invalid type cast.';
         break;
     }
     return $message;
