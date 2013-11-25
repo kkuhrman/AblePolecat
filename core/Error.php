@@ -9,39 +9,45 @@ class AblePolecat_Error {
   /**
    * Able Polecat core error codes.
    */
-  const NO_ERROR_CODE_GIVEN   = 10000;
-  const UNSUPPORTED_PHP_VER   = 10001;
-  const BOOT_SEQ_VIOLATION    = 10005;
-  const SYS_PATH_ERROR        = 10010;
-  const BOOT_PATH_INVALID     = 10015;
-  const BOOTSTRAP_CLASS_REG   = 10020;
-  const BOOTSTRAP_LOGGER      = 10025;
-  const BOOTSTRAP_AGENT       = 10030;
-  const BOOTSTRAP_CONFIG      = 10035;
-  const BOOTSTRAP_SESSION     = 10040;
-  const BOOTSTRAP_DB          = 10045;
-  const BOOTSTRAP_BUS         = 10050;
-  const NO_ENVIRONMENT_CONFIG = 10055;
-  const MKDIR_FAIL            = 10061;
-  const ACCESS_INVALID_OBJECT = 10060;
-  const LIBS_PATH_INVALID     = 10065;
-  const LOGS_PATH_INVALID     = 10070;
-  const MODS_PATH_INVALID     = 10075;
-  const UNSUPPORTED_INTERFACE = 10080;
-  const SESSION_DECODE_FAIL   = 10085;
-  const ACCESS_SYSLOG_FAIL    = 10090;
-  const LOAD_RESOURCE_FAIL    = 10095;
-  const SVC_SERVER_ERROR      = 10099;
-  const SVC_CLIENT_FAIL       = 10100;
-  const SVC_CLIENT_BUSY       = 10101;
-  const SVC_CLIENT_ERROR      = 10105;
-  const SVC_CLIENT_QUERY_ERR  = 10110;
-  const DB_CONNECT_FAIL       = 10115;
-  const INVALID_MSG_FMT       = 10120;
-  const INVALID_HTTP_RESPONSE = 10130;
-  const INVALID_HTTP_REQUEST  = 10135;
-  const INVALID_SYNTAX        = 10140;
-  const INVALID_TYPE_CAST     = 10145;
+  const NO_ERROR_CODE_GIVEN           = 10000;
+  const UNSUPPORTED_PHP_VER           = 10001;
+  const BOOT_SEQ_VIOLATION            = 10005;
+  const SYS_PATH_ERROR                = 10010;
+  const BOOT_PATH_INVALID             = 10015;
+  const BOOTSTRAP_CLASS_REG           = 10020;
+  const BOOTSTRAP_LOGGER              = 10025;
+  const BOOTSTRAP_AGENT               = 10030;
+  const BOOTSTRAP_CONFIG              = 10035;
+  const BOOTSTRAP_SESSION             = 10040;
+  const BOOTSTRAP_DB                  = 10045;
+  const BOOTSTRAP_BUS                 = 10050;
+  const NO_ENVIRONMENT_CONFIG         = 10055;
+  const MKDIR_FAIL                    = 10061;
+  const ACCESS_INVALID_OBJECT         = 10060;
+  const LIBS_PATH_INVALID             = 10065;
+  const LOGS_PATH_INVALID             = 10070;
+  const MODS_PATH_INVALID             = 10075;
+  const UNSUPPORTED_INTERFACE         = 10080;
+  const SESSION_DECODE_FAIL           = 10085;
+  const ACCESS_SYSLOG_FAIL            = 10090;
+  const LOAD_RESOURCE_FAIL            = 10095;
+  const SVC_SERVER_ERROR              = 10099;
+  const SVC_CLIENT_FAIL               = 10100;
+  const SVC_CLIENT_BUSY               = 10101;
+  const SVC_CLIENT_ERROR              = 10105;
+  const SVC_CLIENT_QUERY_ERR          = 10110;
+  const DB_CONNECT_FAIL               = 10115;
+  const INVALID_MSG_FMT               = 10120;
+  const INVALID_HTTP_RESPONSE         = 10130;
+  const INVALID_HTTP_REQUEST          = 10135;
+  const INVALID_SYNTAX                = 10140;
+  const INVALID_TYPE_CAST             = 10145;
+  const INVALID_OBJECT_KEY            = 10150;
+  const INVALID_OBJECT_PROPERTY_NAME  = 10155;
+  const INVALID_OBJECT_DATA_SOURCE    = 10160;
+  const INVALID_EXCHANGE_MAPPING      = 10165;
+  const INCOMPLETE_INPUT_DATA         = 10170;
+  const INVALID_TXFR_CLASS_NAME       = 10175;
   
   
   /**
@@ -149,6 +155,24 @@ class AblePolecat_Error {
         break;
       case self::INVALID_TYPE_CAST:
         $message = 'Invalid type cast.';
+        break;
+      case self::INVALID_OBJECT_KEY:
+        $message = 'Invalid object key';
+        break;
+      case self::INVALID_OBJECT_PROPERTY_NAME:
+        $message = 'Invalid object property name';
+        break;
+      case self::INVALID_OBJECT_DATA_SOURCE:
+        $message = 'Invalid object data source';
+        break;
+      case self::INVALID_EXCHANGE_MAPPING:
+        $message = 'Invalid exchange mapping';
+        break;
+      case self::INCOMPLETE_INPUT_DATA:
+        $message = 'Incomplete input data';
+        break;
+      case self::INVALID_TXFR_CLASS_NAME:
+        $message = 'Invalid transfer class name';
         break;
     }
     return $message;
