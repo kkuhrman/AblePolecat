@@ -1,8 +1,47 @@
 About Able Polecat
 --------------------------------------------------------------------------------
-Able Polecat is a PHP class library intended to provide small to medium size 
-businesses an affordable and effective alternative to enterprise middleware and 
-EAI solutions.
+Able Polecat is a message-based middleware solution written in PHP intended to 
+provide an affordable and effective means of integrating small to medium size 
+businesses information systems.
+
+The goal of Able Polecat is to give developers the ability to quickly implement 
+integration solutions as web services written in PHP.
+
+The core Able Polecat class library comprises:
+1. Enterprise Service Bus (ESB)
+2. Role-based Access Control
+3. Message Queue
+4. Transaction Management
+5. Data Transformation and Exchange (DTX) Tools
+6. A PHP class registry and lazy loader.
+7. Tools for logging, exception and error handling
+6. Framework for extending functionality
+
+Extending Able Polecat
+--------------------------------------------------------------------------------
+As with any software framework, best practices discourage modifications to the 
+Able Polecat core. Instead developers should extend functionality by writing 
+modules, web services or server-side scripts.
+
+An Able Polecat 'module' is an implementation of one or more core interfaces. 
+Able Polecat modules are the primary means of extending core functionality.
+Best practices encourage contributing added functionality to Able Polecat by 
+releasing modules as open-source code for review and reuse by other developers. 
+A few examples of contributed third-party Able Polecat modules include a logger 
+for FireBug, which encapsulates the FirePHP class library; and a service client, 
+which encapsulates the Google API class library for PHP.
+
+A web service may also implement Able Polecat interfaces but, true to the name,
+delivers a service over the web.
+
+All PHP scripts are server-side by design. But Able Polecat uses the term to 
+categorize any implementation of a core interface, which is not part of a module
+or web service.
+
+ 
+Core System Requirements
+--------------------------------------------------------------------------------
+PHP 5.2.x
 
 Background and Acknowledgements
 --------------------------------------------------------------------------------
@@ -22,18 +61,6 @@ Able Polecat draws additional inspiration from the fabled "Skunk Works" R&D at
 Lockheed Martin and also the fact that the initial staffing of this project was 
 limited to a single software architect (the "lonesome polecat").
 
-Core System Requirements
---------------------------------------------------------------------------------
-PHP 5.2.x
-
-Data Transformation and Exchange
---------------------------------------------------------------------------------
-Able Polecat is designed to handle different types of data exchange between 
-business applications; from scheduled bulk data exchanges, to on-demand ACID 
-transactions and field-level read-only refreshes.
-
-Able Polecat provides three points of entry. The default is CLI or web browser. 
-Otherwise, routines can be scheduled as Cron tasks or exposed as web services.
 
 Coding Standards
 --------------------------------------------------------------------------------

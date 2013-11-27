@@ -48,6 +48,7 @@ class AblePolecat_Error {
   const INVALID_EXCHANGE_MAPPING      = 10165;
   const INCOMPLETE_INPUT_DATA         = 10170;
   const INVALID_TXFR_CLASS_NAME       = 10175;
+  const DTX_ERROR                     = 10180;
   
   
   /**
@@ -173,6 +174,9 @@ class AblePolecat_Error {
         break;
       case self::INVALID_TXFR_CLASS_NAME:
         $message = 'Invalid transfer class name';
+        break;
+      case self::DTX_ERROR:
+        $message = 'Data transformation/exchange error. See log for more information.';
         break;
     }
     return $message;

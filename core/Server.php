@@ -14,6 +14,7 @@
 //
 // These are listed in the order they are created in initialize() and bootstrap()
 //
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Clock.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Session.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Log', 'Csv.php')));
@@ -262,6 +263,12 @@ class AblePolecat_Server {
     //
     if (!isset(self::$Server)) {
       //
+      // For performance monitoring
+      //
+      $Clock = new AblePolecat_Clock();
+      $Clock->start();
+      
+      //
       // Create instance of Singleton.
       //
       self::$Server = new self();
@@ -305,6 +312,15 @@ class AblePolecat_Server {
         // $path_to_include,
         // $create_method
       // );
+      
+      //
+      // Log bootstrap time
+      //
+      $msg = sprintf("Able Polecat server is ready in %s mode. Bootstrap completed in %s.",
+        self::$Server->getBootMode(), 
+        $Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, TRUE)
+      );
+      self::log(AblePolecat_LogInterface::DEBUG, $msg);
     }
     return self::$Server;
   }

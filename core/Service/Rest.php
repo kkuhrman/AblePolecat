@@ -78,8 +78,14 @@ abstract class AblePolecat_Service_RestAbstract implements AblePolecat_Service_I
           $Request = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Message_Request_Delete');
           break;
       }
+      
+      //
+      // @todo: get request HEAD
+      // @todo: get request BODY
+      //
     }
     $Response = $this->route($Request);
+    
     return $Response;
   }
 }

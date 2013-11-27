@@ -29,6 +29,15 @@ abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_CacheObjec
   private $lock;
   
   /**
+   * Handle a prepared request.
+   *
+   * @param mixed $Request.
+   *
+   * @return mixed Data returned by client in response to request.
+   */
+  abstract protected function handlePreparedRequest($Request);
+  
+  /**
    * Extends __construct().
    *
    * Sub-classes should override to initialize properties.
@@ -68,6 +77,36 @@ abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_CacheObjec
    */
   protected function setLock($lock = TRUE) {
     $this->lock = $lock;
+  }
+  
+  /**
+   * Dispatch a prepared request to a service.
+   *
+   * @return bool TRUE if the request was dispatched, otherwise FALSE.
+   */
+  public function dispatch() {
+    
+    //
+    // Set lock.
+    //
+    $this->setLock();
+    
+    //
+    // Prepare response.
+    //
+    $Response = AblePolecat_Message_Response::create(200, 'OK');    
+    
+    //
+    // Handle next prepared request.
+    //
+    $PreparedRequest = $this->getNextPreparedRequest();
+    $Response->data = $this->handlePreparedRequest($PreparedRequest);
+    
+    //
+    // Release lock and return response.
+    //
+    $this->setLock(FALSE);
+    return $Response;
   }
 }
 

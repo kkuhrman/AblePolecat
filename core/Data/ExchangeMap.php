@@ -92,7 +92,7 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
       if (!isset($name) && !is_string($name)) {
         $type = gettype($name);
         throw new AblePolecat_Data_ExchangeMap_Exception("Object property name must be string, $type provided",
-          AblePolecat_Error::ERROR_INVALID_OBJECT_PROPERTY_NAME);
+          AblePolecat_Error::INVALID_OBJECT_PROPERTY_NAME);
       }
       switch ($source)
       {
@@ -101,13 +101,13 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
           // complain!
           //
           throw new AblePolecat_Data_ExchangeMap_Exception("Object data source for $key.$name is not valid.",
-            AblePolecat_Error::ERROR_INVALID_OBJECT_DATA_SOURCE);
+            AblePolecat_Error::INVALID_OBJECT_DATA_SOURCE);
           break;
         case self::OUTPUT_VALUE_ASSIGNED:
           if (!is_scalar($value)) {
             $type = gettype($value);
             throw new AblePolecat_Data_ExchangeMap_Exception("Assigned output values must be scalar literals, $type provided.",
-              AblePolecat_Error::ERROR_INVALID_EXCHANGE_MAPPING);
+              AblePolecat_Error::INVALID_EXCHANGE_MAPPING);
           }
           break;
         case self::OUTPUT_VALUE_FOREIGN_KEY:
@@ -117,13 +117,13 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
             is_scalar($value[self::FK_VALUE]);
           if (!$fkDef) {
             throw new AblePolecat_Data_ExchangeMap_Exception("Invalid foreign key lookup definition given for output value $key.$name.",
-              AblePolecat_Error::ERROR_INVALID_EXCHANGE_MAPPING);
+              AblePolecat_Error::INVALID_EXCHANGE_MAPPING);
           }
           break;
         case self::OUTPUT_VALUE_TRANSFORMATION:
           if (!isset($this->fieldMap[$value])) {
-            throw new AblePolecat_Data_ExchangeMap_Exception("Input field name for output value of $key.$name is not valid.",
-              AblePolecat_Error::ERROR_INVALID_EXCHANGE_MAPPING);
+            throw new AblePolecat_Data_ExchangeMap_Exception("Input field name for output value of $key.$name is not valid. @see AblePolecat_Data_ExchangeMapAbstract::mapInputField().",
+              AblePolecat_Error::INVALID_EXCHANGE_MAPPING);
           }
           break;
       }
@@ -143,7 +143,7 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
     }
     else {
       throw new AblePolecat_Data_ExchangeMap_Exception("No object defined for key value $key",
-        AblePolecat_Error::ERROR_INVALID_OBJECT_KEY);
+        AblePolecat_Error::INVALID_OBJECT_KEY);
     }
   }
   
@@ -174,7 +174,7 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
       }
       else {
           throw new AblePolecat_Data_ExchangeMap_Exception("$txfr_class_name must implement AblePolecat_Data_ExchangeMapInterface",
-            AblePolecat_Error::ERROR_INVALID_TXFR_CLASS_NAME);
+            AblePolecat_Error::INVALID_TXFR_CLASS_NAME);
         }
     }
   }
@@ -223,7 +223,7 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
               }
               else {
                 throw new AblePolecat_Data_ExchangeMap_Exception("No input was provided for required field $field_name.",
-                  AblePolecat_Error::ERROR_INCOMPLETE_INPUT_DATA);
+                  AblePolecat_Error::INCOMPLETE_INPUT_DATA);
               }
               break;
           }
