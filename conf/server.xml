@@ -6,4 +6,13 @@
       C:\path\to\AblePolecat\myDir
     </path>
   </paths>
+  <databases>
+    <!-- application database(s) -->
+    <database name="polecat">
+      <!-- PDO database -->
+      <dsn>mysql://user:pass@localhost/example</dsn>
+      <classname>AblePolecat_Database_Pdo</classname>
+      <modulename>core</modulename>
+    </database>
+  </databases>
 </config>

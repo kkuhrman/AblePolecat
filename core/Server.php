@@ -26,12 +26,14 @@ class AblePolecat_Server {
   // protection ring 0, Server Mode.
   //
   const RING_BOOT_MODE        = 0;
+  const RING_DATABASES        = 0;
   const RING_DEFAULT_LOG      = 0;
   const RING_CLASS_REGISTRY   = 0;
   const RING_SERVER_MODE      = 0;
   const RING_SERVICE_BUS      = 0;
   
   const NAME_BOOT_MODE        = 'boot mode';
+  const NAME_DATABASES        = 'databases';
   const NAME_DEFAULT_LOG      = 'default log';
   const NAME_CLASS_REGISTRY   = 'class registry';
   const NAME_SERVER_MODE      = 'server mode';
@@ -170,6 +172,66 @@ class AblePolecat_Server {
     // Verify user/configurable directories.
     //
     AblePolecat_Server_Paths::verifyConfDirs();
+    
+    //
+    // Load any core library database classes.
+    //
+    $databases = array(
+        self::NAME_DATABASES => array(),
+        'id' => array(),
+        'name' => array(),
+    );
+    $dbconf = $ServerMode->getEnvironment()->getConf('databases');
+    $dbkey = 0;
+    foreach($dbconf as $element_name => $db) {
+      $dbattr = $db->attributes();
+      isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
+      isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
+      isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
+      
+      if (!isset($dbname) && !isset($dbid)) {
+        self::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
+      }
+      else {
+        //
+        // If module is not core, wait until application mode.
+        //
+        if (isset($dbmodulename) && ($dbmodulename === 'core')) {
+          isset($db->classname) ? $dbclassname = $db->classname->__toString() : $dbclassname = NULL;
+          if (isset($db->classname)) {
+            //
+            // Register and load the database class.
+            //
+            self::getClassRegistry()->registerLoadableClass($dbclassname, NULL, 'wakeup');
+            $Database = self::getClassRegistry()->loadClass($dbclassname);
+            
+            //
+            // Open the database connection.
+            //
+            $DbAgent = $ServerMode->getEnvironment()->getAgent();            
+            $Database->setPermission($DbAgent, AblePolecat_AccessControl_Constraint_Open::getId());
+            isset($db->dsn) ? $dbdsn = $db->dsn->__toString() : $dbdsn = NULL;
+            $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
+            $Database->open($DbAgent, $DbUrl);
+            
+            //
+            // Add the database to server.
+            //
+            $databases[self::NAME_DATABASES][$dbkey] = $Database;
+            isset($dbid) ? $databases['id'][$dbid] = $dbkey : NULL;
+            isset($dbname) ? $databases['name'][$dbname] = $dbkey : NULL;
+          }
+          else {
+            self::log(AblePolecat_LogInterface::WARNING, sprintf("no class name given for database %s in conf.", $dbname));
+          }
+        }
+        else {
+          self::log(AblePolecat_LogInterface::WARNING, sprintf("no module name given for database %s in conf.", $dbname));
+        }
+      }
+      $dbkey++;
+    }
+    self::setResource(self::RING_DATABASES, self::NAME_DATABASES, $databases);
     
     //
     // Service Bus
@@ -344,6 +406,31 @@ class AblePolecat_Server {
    */
   public static function getClassRegistry() {
     return self::getResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY);
+  }
+  
+  /**
+   * @param string $id Id or name of registered database.
+   *
+   * @return AblePolecat_DatabaseInterface.
+   */
+  public static function getDatabase($id) {
+    $Database = NULL;
+    $databases = self::getResource(self::RING_DATABASES, self::NAME_DATABASES);
+    $key = NULL;
+    if (isset($databases['id'][$id])) {
+      $key = $databases['id'][$id];
+    }
+    else if (isset($databases['name'][$id])) {
+      $key = $databases['name'][$id];
+    }
+    if (isset($databases[self::NAME_DATABASES][$key])) {
+      $Database = $databases[self::NAME_DATABASES][$key];
+    }
+    else {
+      throw new AblePolecat_Server_Exception("Could not access database $id. No such object registered.",
+        AblePolecat_Error::ACCESS_INVALID_OBJECT);
+    }
+    return $Database;
   }
   
   /**

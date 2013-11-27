@@ -257,14 +257,19 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     
     $registered = FALSE;
     
-    if (isset($path)) {
-      if (is_file($path)) {
-        include_once($path);
-      }
-      else {
-        AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOT_PATH_INVALID,
-          "Invalid include path for $class_name: $path");
-      }
+    if (!isset($path)) {
+      //
+      // Attempt to define path based on core class naming convention.
+      //
+      $path = str_replace(array('AblePolecat', '_'), array(ABLE_POLECAT_PATH, DIRECTORY_SEPARATOR), $class_name);
+      $path .= '.php';
+    }
+    if (is_file($path)) {
+      include_once($path);
+    }
+    else {
+      AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOT_PATH_INVALID,
+        "Invalid include path for $class_name: $path");
     }
     
     $methods = get_class_methods($class_name);
