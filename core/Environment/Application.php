@@ -107,8 +107,8 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
     
     $mod_register_directive = FALSE;
     
-    $modConfig->open($this->Agent, $modPath);
-    $modConfSxElement = $modConfig->read($this->Agent);
+    $modConfig->open($this->getAgent(), $modPath);
+    $modConfSxElement = $modConfig->read($this->getAgent());
     $moduleAttributes = $modConfSxElement->attributes();
     if (isset($moduleAttributes['register'])) {
       switch($moduleAttributes['register']) {
@@ -154,46 +154,40 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
     //
     // Application agent must be assigned already or all shall fail... oh woe!
     //
-    if (isset($this->Agent)) {
-      if (count($this->m_registered_modules) === 0) {
-        // @todo: won't get here if these paths don't exists
-        if (file_exists(ABLE_POLECAT_MODS_PATH) && is_dir(ABLE_POLECAT_MODS_PATH)) {
-          $h_mods_dir = opendir(ABLE_POLECAT_MODS_PATH);
-          if ($h_mods_dir) {
-            while (false !== ($current_file = readdir($h_mods_dir))) {
-              $module_conf_path = $this->findModuleConfigurationFile($current_file);
-              if (isset($module_conf_path)) {
-                $ModConfig = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Module');
-                if (isset($ModConfig)) {
-                  //
-                  // Grant open permission on config file to agent.
-                  //
-                  $ModConfig->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
-                  $ModConfig->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Read::getId());              
-                  $ModConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($module_conf_path);
-                  
-                  //
-                  // Process module conf file if <module register> is set to a supported registration directive.
-                  //
-                  $mod_register_directive = $this->getModuleRegisterDirective($ModConfig, $ModConfigUrl);
-                  if ($mod_register_directive) {
-                    $this->registerModule($ModConfig, $ModConfigUrl);
-                  }
+    if (count($this->m_registered_modules) === 0) {
+      // @todo: won't get here if these paths don't exists
+      if (file_exists(ABLE_POLECAT_MODS_PATH) && is_dir(ABLE_POLECAT_MODS_PATH)) {
+        $h_mods_dir = opendir(ABLE_POLECAT_MODS_PATH);
+        if ($h_mods_dir) {
+          while (false !== ($current_file = readdir($h_mods_dir))) {
+            $module_conf_path = $this->findModuleConfigurationFile($current_file);
+            if (isset($module_conf_path)) {
+              $ModConfig = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Module');
+              if (isset($ModConfig)) {
+                //
+                // Grant open permission on config file to agent.
+                //
+                $ModConfig->setPermission($this->getAgent(), AblePolecat_AccessControl_Constraint_Open::getId());
+                $ModConfig->setPermission($this->getAgent(), AblePolecat_AccessControl_Constraint_Read::getId());              
+                $ModConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($module_conf_path);
+                
+                //
+                // Process module conf file if <module register> is set to a supported registration directive.
+                //
+                $mod_register_directive = $this->getModuleRegisterDirective($ModConfig, $ModConfigUrl);
+                if ($mod_register_directive) {
+                  $this->registerModule($ModConfig, $ModConfigUrl);
                 }
               }
             }
-            closedir($h_mods_dir);
           }
-        }
-        else {
-          throw new AblePolecat_Environment_Exception(AblePolecat_Error::defaultMessage(AblePolecat_Error::MODS_PATH_INVALID), 
-            AblePolecat_Error::BOOT_SEQ_VIOLATION);
+          closedir($h_mods_dir);
         }
       }
-    }
-    else {
-      throw new AblePolecat_Environment_Exception('Cannot register modules before application agent is assigned.', 
-        AblePolecat_Error::BOOT_SEQ_VIOLATION);
+      else {
+        throw new AblePolecat_Environment_Exception(AblePolecat_Error::defaultMessage(AblePolecat_Error::MODS_PATH_INVALID), 
+          AblePolecat_Error::BOOT_SEQ_VIOLATION);
+      }
     }
   }
   
@@ -215,11 +209,11 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
     if (!isset($registration_directive)) {
       $registration_directive = $this->getModuleRegisterDirective($modConfig, $modPath);
     }
-    if ($registration_directive && $modConfig->open($this->Agent, $modPath)) {
-      $moduleAttributes = $modConfig->getModuleAttributes($this->Agent);
+    if ($registration_directive && $modConfig->open($this->getAgent(), $modPath)) {
+      $moduleAttributes = $modConfig->getModuleAttributes($this->getAgent());
       $moduleName = $moduleAttributes[AblePolecat_Conf_Module::ATTRIBUTE_NAME];
       isset($moduleAttributes[AblePolecat_Conf_Module::ATTRIBUTE_PATH]) ? $moduleFullpath = trim($moduleAttributes[AblePolecat_Conf_Module::ATTRIBUTE_PATH], '/') : $moduleFullpath = '';
-      $moduleClasses = $modConfig->getModuleClasses($this->Agent);
+      $moduleClasses = $modConfig->getModuleClasses($this->getAgent());
       foreach($moduleClasses as $className => $classConfig) {
         AblePolecat_Server::getClassRegistry()->registerModuleClass($moduleName, $classConfig);
       }
@@ -250,10 +244,10 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
   public function getModuleConf($moduleName, $start = NULL, $end = NULL) {
     
     $modConf = NULL;
-    if (isset($this->Agent) && isset($this->m_registered_modules[$moduleName])) {
+    if (isset($this->m_registered_modules[$moduleName])) {
       if (isset($this->m_registered_modules[$moduleName]['conf'])) {
         $modConf = $this->m_registered_modules[$moduleName]['conf']->
-          read($this->Agent, $start, $end);
+          read($this->getAgent(), $start, $end);
       }
     }
     return $modConf;
@@ -269,7 +263,7 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
   public function getModulePath($moduleName) {
     
     $modPath = FALSE;
-    if (isset($this->Agent) && isset($this->m_registered_modules[$moduleName])) {
+    if (isset($this->m_registered_modules[$moduleName])) {
       isset($this->m_registered_modules[$moduleName]['path']) ? $modPath = $this->m_registered_modules[$moduleName]['path'] : NULL;
     }
     return $modPath;
@@ -312,11 +306,7 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
       //
       // Initialize access control for application environment settings.
       //
-      $Agent = $Environment->loadAccessControlAgent(
-        'AblePolecat_AccessControl_Agent_Application',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Application.php')),
-        'wakeup'
-      );
+      $Agent = $Environment->getAgent();
       
       //
       // Register and load contributed classes

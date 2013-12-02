@@ -83,11 +83,7 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
       //
       // Initialize server access control.
       //
-      $Agent = $Environment->loadAccessControlAgent(
-        'AblePolecat_AccessControl_Agent_Server',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'Server.php')),
-        'wakeup'
-      );
+      $Agent = $Environment->getAgent();
 
       //
       // Load application configuration settings.

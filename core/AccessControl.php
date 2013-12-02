@@ -4,17 +4,29 @@
  * Manages access control for Able Polecat server.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role.php')));
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role.php')));
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
+// include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
+// include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
 
 class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
+  
+  /**
+   * @var AblePolecat_AccessControl Instance of singleton.
+   */
+  private static $AccessControl;
+  
+  /**
+   * @var Array() Registry of active access control agents.
+   */
+  private $Agents;
   
   /**
    * Extends __construct().
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
+    $this->Agents = array();
   }
   
   /**
@@ -46,6 +58,46 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
     //
     return TRUE;
    }
+   
+  /**
+   * Return access control agent for given environment context.
+   *
+   * @param AblePolecat_EnvironmentInterface The environment in context.
+   *
+   * @return AblePolecat_AccessControl_AgentInterface.
+   */
+  public function getAgent(AblePolecat_EnvironmentInterface $Environment) {
+    
+    $Agent = NULL;
+    $class_name = get_class($Environment);
+    
+    if (isset($this->Agents[$class_name])) {
+      $Agent = $this->Agents[$class_name];
+    }
+    else {
+      switch ($class_name) {
+        default:
+          break;
+        case 'AblePolecat_Environment_Server':
+          $agentClassName = 'AblePolecat_AccessControl_Agent_Server';
+          break;
+        case 'AblePolecat_Environment_Application':
+          $agentClassName = 'AblePolecat_AccessControl_Agent_Application';
+          break;
+        case 'AblePolecat_Environment_User':
+          $agentClassName = 'AblePolecat_AccessControl_Agent_User';
+          break;
+      }
+      $reg = AblePolecat_Server::getClassRegistry()->registerLoadableClass($agentClassName, NULL, 'wakeup');
+      $Agent = AblePolecat_Server::getClassRegistry()->loadClass($agentClassName);
+      isset($Agent) ? $this->Agents[$class_name] = $Agent : NULL;
+    }
+    if (!isset($Agent)) {
+      $error_msg = sprintf("No access control agent defined for %s.", get_class($Environment));
+      throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
+    }
+    return $Agent;
+  }
    
    /**
    * Grants permission (removes constraint) to given agent or role.
@@ -82,8 +134,13 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
    * @return AblePolecat_AccessControl Initialized access control service or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $AccessControl = new AblePolecat_AccessControl();
-    return $AccessControl;
+    if (!isset(self::$AccessControl)) {
+      self::$AccessControl = new AblePolecat_AccessControl();
+      //
+      // @todo: load access control matrix
+      //
+    }
+    return self::$AccessControl;
   }
 }
 
@@ -91,10 +148,4 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
  * Exceptions thrown by Able Polecat Access Control objects.
  */
 class AblePolecat_AccessControl_Exception extends AblePolecat_Exception {
-  /**
-   * Error codes for access control.
-   */
-  const ERROR_ACCESS_DENIED             = 0x00000001; // Catch-all, non-specific access denied error.
-  const ERROR_ACCESS_ROLE_NOT_AUTH      = 0x00000010; // Agent could not be assigned to given role.
-  const ERROR_ACCESS_ROLE_DENIED        = 0x00000020; // Role denied access to resource.
 }

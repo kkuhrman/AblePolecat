@@ -4,9 +4,9 @@
  * Environment for Able Polecat User Mode.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
 
-class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
+class AblePolecat_Environment_User extends AblePolecat_CacheObjectAbstract implements AblePolecat_EnvironmentInterface {
   
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
@@ -19,7 +19,15 @@ class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
    * Sub-classes can override to initialize members prior to load.
    */
   protected function initialize() {
-    parent::initialize();
+  }
+  
+  /**
+   * Return access control agent.
+   *
+   * @return AblePolecat_AccessControl_AgentInterface.
+   */
+  public function getAgent() {
+    return AblePolecat_AccessControl::wakeup()->getAgent($this);
   }
   
   /**
@@ -50,11 +58,7 @@ class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
       //
       // Initialize access control for application environment settings.
       //
-      $Agent = $Environment->loadAccessControlAgent(
-        'AblePolecat_AccessControl_Agent_User',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent', 'User.php')),
-        'wakeup'
-      );
+      $Agent = $Environment->getAgent();
       
       //
       // Initialize singleton instance.

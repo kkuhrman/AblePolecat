@@ -9,6 +9,9 @@ class AblePolecat_Error {
   /**
    * Able Polecat core error codes.
    */
+  const ACCESS_DENIED                 = 9000; // Catch-all, non-specific access denied error.
+  const ACCESS_ROLE_NOT_AUTH          = 9100; // Agent could not be assigned to given role.
+  const ACCESS_ROLE_DENIED            = 9200; // Role denied access to resource.
   const NO_ERROR_CODE_GIVEN           = 10000;
   const UNSUPPORTED_PHP_VER           = 10001;
   const BOOT_SEQ_VIOLATION            = 10005;
@@ -37,6 +40,7 @@ class AblePolecat_Error {
   const SVC_CLIENT_ERROR              = 10105;
   const SVC_CLIENT_QUERY_ERR          = 10110;
   const DB_CONNECT_FAIL               = 10115;
+  const DB_NO_CONNECTION              = 10116;
   const INVALID_MSG_FMT               = 10120;
   const INVALID_HTTP_RESPONSE         = 10130;
   const INVALID_HTTP_REQUEST          = 10135;
@@ -60,6 +64,15 @@ class AblePolecat_Error {
     
     switch ($code) {
       default:
+        break;
+      case self::ACCESS_DENIED:
+        $message = 'Access denied.';
+        break;
+      case self::ACCESS_ROLE_NOT_AUTH:
+        $message = 'Agent could not be assigned to given role.';
+        break;
+      case self::ACCESS_ROLE_DENIED:
+        $message = 'Role denied access to resource.';
         break;
       case self::UNSUPPORTED_PHP_VER:
         $message = 'PHP version not supported by Able Polecat';
@@ -141,6 +154,9 @@ class AblePolecat_Error {
         break;
       case self::DB_CONNECT_FAIL:
         $message = 'Database connection failed.';
+        break;
+      case self::DB_NO_CONNECTION:
+        $message = 'No database connection exists.';
         break;
       case self::INVALID_MSG_FMT:
         $message = 'Message is improperly formatted.';

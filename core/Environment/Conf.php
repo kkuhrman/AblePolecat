@@ -4,9 +4,10 @@
  * Base class for Environment which uses a conf file to store some settings.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
+require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
 
-abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_EnvironmentAbstract {
+abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_EnvironmentInterface {
   
   /**
    * @var Environment configuration data.
@@ -19,8 +20,16 @@ abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_Environm
    * Sub-classes can override to initialize members prior to wakeup().
    */
   protected function initialize() {
-    parent::initialize();
     $this->Config = NULL;
+  }
+  
+  /**
+   * Return access control agent.
+   *
+   * @return AblePolecat_AccessControl_AgentInterface.
+   */
+  public function getAgent() {
+    return AblePolecat_AccessControl::wakeup()->getAgent($this);
   }
   
   /**
@@ -34,8 +43,8 @@ abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_Environm
   public function getConf($start = NULL, $end = NULL) {
     
     $Conf = array();
-    if (isset($this->Agent) && isset($this->Config)) {
-      $Conf = $this->Config->read($this->Agent, $start, $end);
+    if (isset($this->Config)) {
+      $Conf = $this->Config->read($this->getAgent(), $start, $end);
     }
     return $Conf;
   }
@@ -47,7 +56,7 @@ abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_Environm
    */
   public function getConfResource() {
     $Conf = NULL;
-    if (isset($this->Agent) && isset($this->Config)) {
+    if (isset($this->Config)) {
       $Conf = $this->Config;
     }
     return $Conf;
@@ -64,10 +73,8 @@ abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_Environm
     //
     // Application configuration file
     //
-    if (isset($this->Agent)) {
-      if ($Config->open($this->Agent, $Url)) {
-        $this->Config = $Config;
-      }
+    if ($Config->open($this->getAgent(), $Url)) {
+      $this->Config = $Config;
     }
   }
 }
