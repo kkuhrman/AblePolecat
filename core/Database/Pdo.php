@@ -62,6 +62,9 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       is_a($statement, 'AblePolecat_QueryLanguage_StatementInterface') ? $sql = $statement->__toString() : NULL;
       $PreparedStatement = $this->DatabaseConnection->prepare($sql, $driver_options);
     }
+    else {
+      throw new AblePolecat_Database_Exception('No database connection.', AblePolecat_Error::DB_NO_CONNECTION);
+    }
     return $PreparedStatement;
   }
   
@@ -96,7 +99,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
           $this->DatabaseConnection = new PDO($dsn, $user, $password);
           $this->setLocater($Url);
         } catch (PDOException $e) {
-          $this->logErrorMessage('Connection failed: ' . $e->getMessage());
+          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, 'Connection failed: ' . $e->getMessage());
         }
       }
       $open = isset($this->DatabaseConnection);
