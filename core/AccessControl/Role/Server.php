@@ -18,7 +18,6 @@ class AblePolecat_AccessControl_Role_Server extends AblePolecat_AccessControl_Ro
    * Extends __construct().
    */
   protected function initialize() {
-    parent::initialize();
   }
   
   /**

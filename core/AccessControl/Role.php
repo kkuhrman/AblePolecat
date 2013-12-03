@@ -7,7 +7,7 @@
 include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent.php')));
 include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
 
-interface AblePolecat_AccessControl_RoleInterface extends AblePolecat_AccessControl_SubjectInterface {
+interface AblePolecat_AccessControl_RoleInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
 }
 
 abstract class AblePolecat_AccessControl_RoleAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_SubjectInterface {

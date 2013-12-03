@@ -1,18 +1,18 @@
 <?php
 /**
- * @file: Application.php
- * Default access control role assigned to web applications.
+ * @file: OAuth2.php
+ * Role reserved for anonymous agent (user).
  */
  
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Role.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role', 'User', 'Authenticated.php')));
 
-class AblePolecat_AccessControl_Role_Application extends AblePolecat_AccessControl_RoleAbstract {
+class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2 extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_Role_User_AuthenticatedInterface {
   
   /**
    * Constants.
    */
-  const UUID = 'de09d5b0-60c0-11e2-bcfd-0800200c9a66';
-  const NAME = 'Application';
+  const UUID = 'a8bbf8b0-5bbb-11e3-949a-0800200c9a66';
+  const NAME = 'OAuth 2.0 authenticated user role.';
   
   /**
    * Extends __construct().
@@ -54,7 +54,7 @@ class AblePolecat_AccessControl_Role_Application extends AblePolecat_AccessContr
    * @return AblePolecat_CacheObjectInterface or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $Role = new AblePolecat_AccessControl_Role_Application();
+    $Role = new AblePolecat_AccessControl_Role_User_Authenticated_OAuth2();
     return $Role;
   }
 }

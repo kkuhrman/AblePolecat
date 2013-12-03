@@ -15,7 +15,7 @@
 // These are listed in the order they are created in initialize() and bootstrap()
 //
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Clock.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Session.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Log', 'Csv.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Bus.php')));
@@ -25,6 +25,7 @@ class AblePolecat_Server {
   //
   // protection ring 0, Server Mode.
   //
+  const RING_ACCESS_CONTROL   = 0;
   const RING_BOOT_MODE        = 0;
   const RING_DATABASES        = 0;
   const RING_DEFAULT_LOG      = 0;
@@ -32,6 +33,7 @@ class AblePolecat_Server {
   const RING_SERVER_MODE      = 0;
   const RING_SERVICE_BUS      = 0;
   
+  const NAME_ACCESS_CONTROL   = 'access control';
   const NAME_BOOT_MODE        = 'boot mode';
   const NAME_DATABASES        = 'databases';
   const NAME_DEFAULT_LOG      = 'default log';
@@ -69,11 +71,6 @@ class AblePolecat_Server {
    * They are stored as Array([zero-based protection ring number] => [internal resource name]);
    */
   private static $Resources = NULL;
-  
-  /**
-   * @var encapsulates session data.
-   */
-  private static $Session = NULL;
     
   /**
    * Initialize resources in protection ring '0' (e.g. kernel).
@@ -81,14 +78,15 @@ class AblePolecat_Server {
   protected function initialize() {
     
     //
-    // Session is very first access control agent.
-    //
-    self::$Session = AblePolecat_Session::wakeup();
-    
-    //
     // 'Kernel' resources container.
     //
     self::$Resources[0] = array();
+    
+    //
+    // Wakeup access control service with current session.
+    //
+    $AccessControl = AblePolecat_AccessControl::wakeup();
+    self::setResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL, $AccessControl);
     
     //
     // This code checks query string for a boot mode parameter named 'run'.
@@ -123,7 +121,7 @@ class AblePolecat_Server {
     //
     // Wakeup class registry.
     //
-    $ClassRegistry = AblePolecat_ClassRegistry::wakeup(self::$Session);
+    $ClassRegistry = AblePolecat_ClassRegistry::wakeup($AccessControl->getSession());
     self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
     
     //
@@ -137,15 +135,15 @@ class AblePolecat_Server {
     switch(self::getBootMode()) {
       default:
         require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Normal.php')));
-        $ServerMode = AblePolecat_Mode_Normal::wakeup(self::$Session);
+        $ServerMode = AblePolecat_Mode_Normal::wakeup($AccessControl->getSession());
         break;
       case 'dev':
         require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Dev.php')));
-        $ServerMode = AblePolecat_Mode_Dev::wakeup(self::$Session);
+        $ServerMode = AblePolecat_Mode_Dev::wakeup($AccessControl->getSession());
         break;
       case 'qa':
         require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Qa.php')));
-        $ServerMode = AblePolecat_Mode_Qa::wakeup(self::$Session);
+        $ServerMode = AblePolecat_Mode_Qa::wakeup($AccessControl->getSession());
         break;
     }
     self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
@@ -153,7 +151,7 @@ class AblePolecat_Server {
     //
     // Wakeup default log file.
     //
-    $DefaultLog = AblePolecat_Log_Csv::wakeup(self::$Session);
+    $DefaultLog = AblePolecat_Log_Csv::wakeup($AccessControl->getSession());
     self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
     
     //
@@ -236,7 +234,7 @@ class AblePolecat_Server {
     //
     // Service Bus
     //
-    $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Session);
+    $ServiceBus = AblePolecat_Service_Bus::wakeup($AccessControl->getSession());
     self::setResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $ServiceBus);
   }
   
@@ -336,11 +334,16 @@ class AblePolecat_Server {
       self::$Server = new self();
       
       //
+      // Get access control resource
+      //
+      $AccessControl = self::getResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL);
+      
+      //
       // Protection ring 1, Application mode.
       //
       self::$Resources[self::RING_APPLICATION_MODE] = array();
       require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Application.php')));
-      $ApplicationMode = AblePolecat_Mode_Application::wakeup(self::$Session);
+      $ApplicationMode = AblePolecat_Mode_Application::wakeup($AccessControl->getSession());
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
       
       //
@@ -356,7 +359,7 @@ class AblePolecat_Server {
       //
       // @todo: Extract USER data from session
       //
-      $UserSession = self::$Session;
+      $UserSession = $AccessControl->getSession();
       
       //
       // User mode.
@@ -385,6 +388,13 @@ class AblePolecat_Server {
       self::log(AblePolecat_LogInterface::DEBUG, $msg);
     }
     return self::$Server;
+  }
+  
+  /**
+   * @return AblePolecat_AccessControl.
+   */
+  public static function getAccessControl() {
+    return self::getResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL);
   }
   
   /**
