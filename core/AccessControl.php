@@ -169,7 +169,7 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
               $result = $PreparedStatement->execute();
               if ($result) {
                 $reg = AblePolecat_Server::getClassRegistry()->registerLoadableClass('AblePolecat_AccessControl_Role_User_Anonymous', NULL, 'wakeup');
-                $Role = AblePolecat_AccessControl_Role_User_Anonymous::wakeup($this->getSession()->getId());
+                $Role = AblePolecat_AccessControl_Role_User_Anonymous::wakeup($this->getSession());
                 $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
               }
               else {

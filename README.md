@@ -52,7 +52,14 @@ This was later replaced with a Drupal module, but still tightly coupled.
 
 The current class library is heavily influenced by its Zend and Drupal roots. The 
 coding convention and file organization owe a debt to Zend, as Able Polecat began
-as a Zend module. Both Zend and Drupal influenced its modular design. 
+as a Zend module. Both Zend and Drupal influenced its modular design.
+
+However, though Able Polecat owes a debt to both projects when it comes to design 
+patterns, software coding conventions and practices, neither was designed from the 
+ground up to be a message-based middleware solution within a SOA. Zend was designed 
+to be an MVC web application framework and Drupal was designed to be a web content 
+management framework. Able Polecat, is designed to provide a message-based middleware
+solution on a web server.
 
 The name of the project draws its inspiration from an offensive system developed 
 for American football by Glenn Ellison in the 1950s: 'Lonesome Polecat', which is 
