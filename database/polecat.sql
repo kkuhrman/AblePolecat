@@ -19,6 +19,17 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `class`
+--
+
+CREATE TABLE IF NOT EXISTS `class` (
+  `name` varchar(255) NOT NULL COMMENT 'Name of concrete class',
+  `path` varchar(255) NOT NULL COMMENT 'Full registered path to class definition',
+  `method` varchar(255) NOT NULL DEFAULT '__construct' COMMENT 'Creational method',
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Able Polecat class registry';
+
+--
 -- Table structure for table `locks`
 --
 
