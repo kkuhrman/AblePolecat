@@ -349,6 +349,31 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      $Database = AblePolecat_Server::getDatabase("polecat");
+      foreach($this->registeredClasses as $class_name => $class_info) {
+        $result = FALSE;
+        isset($class_info[self::CLASS_REG_PATH]) ? $path = $class_info[self::CLASS_REG_PATH] : $path = NULL; 
+        isset($class_info[self::CLASS_REG_METHOD]) ? $method = $class_info[self::CLASS_REG_METHOD] : $method = NULL;
+        if (isset($path) && isset($method)) {
+          //
+          // Insert new or update existing entry
+          //
+          $sql = __SQL()->          
+            replace('name', 'path', 'method')->
+            into('class')->
+            values($class_name, $path, $method);
+          $Stmt = $Database->prepareStatement($sql);
+          $result = $Stmt->execute();
+        }
+        if (!$result) {
+          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Failed to save $class_name registry");
+        }
+      }
+    }
+    catch (Exception $Exception) {
+      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, 'Failed to persist class registry. ' . $Exception->getMessage());
+    }
   }
   
   /**

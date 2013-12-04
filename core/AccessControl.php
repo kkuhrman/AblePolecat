@@ -131,57 +131,100 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
     
     $AgentRoles = array();
     
+    //
+    // At present only user roles can be customized.
+    //
     if (is_a($Agent, 'AblePolecat_AccessControl_Agent_User')) {
-      if (isset($this->AgentRoles['AblePolecat_AccessControl_Agent_User'])) {
-        $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
-      }
-      else {
+      try {
         //
-        // load user roles
+        // Calls to getAgentRoles() before database is active will throw exception.
         //
         $Database = AblePolecat_Server::getDatabase("polecat");
-        $sql = __SQL()->
-          select('session_id', 'interface', 'userId', 'session_data')->
-          from('role')->
-          where(sprintf("session_id = '%s'", $this->getSession()->getId()));
-        $PreparedStatement = $Database->prepareStatement($sql);
-        $result = $PreparedStatement->execute();
-        if (!$result) {
-          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, serialize($PreparedStatement->errorInfo()));
+      
+        if (isset($this->AgentRoles['AblePolecat_AccessControl_Agent_User'])) {
+          $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
         }
         else {
-          $results = $PreparedStatement->fetchAll();
-          if (count($results) == 0) {
-            $sql = __SQL()->
-              insert('session_id', 'interface')->
-              into ('role')->
-              values(sprintf("'%s'", $this->getSession()->getId()), "'AblePolecat_AccessControl_Role_User_Anonymous'");
-            $PreparedStatement = $Database->prepareStatement($sql);
-            $result = $PreparedStatement->execute();
-            if ($result) {
-              $reg = AblePolecat_Server::getClassRegistry()->registerLoadableClass('AblePolecat_AccessControl_Role_User_Anonymous', NULL, 'wakeup');
-              $Role = AblePolecat_AccessControl_Role_User_Anonymous::wakeup($this->getSession()->getId());
-              $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
-            }
-            else {
-              AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, serialize($PreparedStatement->errorInfo()));
-            }
+          //
+          // load user roles
+          //
+          $this->AgentRoles['AblePolecat_AccessControl_Agent_User'] = array();
+          $sql = __SQL()->
+            select('session_id', 'interface', 'userId', 'session_data')->
+            from('role')->
+            where(sprintf("session_id = '%s'", $this->getSession()->getId()));
+          $PreparedStatement = $Database->prepareStatement($sql);
+          $result = $PreparedStatement->execute();
+          if (!$result) {
+            AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, serialize($PreparedStatement->errorInfo()));
           }
           else {
-            foreach($results as $key => $role) {
-              //
-              // @todo: assign roles to agent
-              //
-              $roleClassName = $role['interface'];
-              $reg = AblePolecat_Server::getClassRegistry()->registerLoadableClass($roleClassName, NULL, 'wakeup');
-              $Role = $roleClassName::wakeup($this->getSession());
-              $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
+            $results = $PreparedStatement->fetchAll();
+            if (count($results) == 0) {
+              $sql = __SQL()->
+                insert('session_id', 'interface')->
+                into ('role')->
+                values($this->getSession()->getId(), 'AblePolecat_AccessControl_Role_User_Anonymous');
+              $PreparedStatement = $Database->prepareStatement($sql);
+              $result = $PreparedStatement->execute();
+              if ($result) {
+                $reg = AblePolecat_Server::getClassRegistry()->registerLoadableClass('AblePolecat_AccessControl_Role_User_Anonymous', NULL, 'wakeup');
+                $Role = AblePolecat_AccessControl_Role_User_Anonymous::wakeup($this->getSession()->getId());
+                $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
+              }
+              else {
+                AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, serialize($PreparedStatement->errorInfo()));
+              }
+            }
+            else {
+              try {
+                foreach($results as $key => $role) {
+                  //
+                  // assign roles to agent
+                  //
+                  $roleClassName = $role['interface'];
+                  
+                  if (!AblePolecat_Server::getClassRegistry()->isLoadable($roleClassName)) {
+                    $sql = __SQL()->
+                      select('path', 'method')->
+                      from('class')->
+                      where(__SQLEXPR('name', '=', $roleClassName));
+                    $pathStmt = $Database->prepareStatement($sql);
+                    if ($pathStmt->execute()) {
+                      $result = $pathStmt->fetch();
+                      isset($result['path']) ? $path = $result['path'] : $path = NULL;
+                      isset($result['method']) ? $method = $result['method'] : $method = 'wakeup';
+                      $reg = AblePolecat_Server::getClassRegistry()->registerLoadableClass($roleClassName, $path, $method);
+                    }
+                  }
+                  $Role = AblePolecat_Server::getClassRegistry()->loadClass($roleClassName, $this->getSession());
+                  // $Role = $roleClassName::wakeup($this->getSession());
+                  if (isset($Role)) {
+                    $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
+                  }
+                  else {
+                    //
+                    // @todo: complain
+                    //
+                    AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Failed to load user role $roleClassName.");
+                  }
+                }
+              }
+              catch (AblePolecat_Exception $Exception) {
+                AblePolecat_Server::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
+              }
             }
           }
+          $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
         }
-        $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
+      }
+      catch (AblePolecat_Exception $Exception) {
+        throw new AblePolecat_AccessControl_Exception('Attempt to load agent roles prior to user mode being activated.',
+          AblePolecat_Error::BOOT_SEQ_VIOLATION
+        );
       }
     }
+    
     return $AgentRoles;
   }
   
