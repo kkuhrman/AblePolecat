@@ -6,36 +6,161 @@
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role', 'User', 'Authenticated.php')));
 
-class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2 extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_Role_User_AuthenticatedInterface {
+interface AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Interface extends AblePolecat_AccessControl_Role_User_AuthenticatedInterface {
   
   /**
-   * Constants.
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface OAuth 2.0 authentication URL.
    */
-  const UUID = 'a8bbf8b0-5bbb-11e3-949a-0800200c9a66';
-  const NAME = 'OAuth 2.0 authenticated user role.';
+  public function getAuthenticationUrl();
+  
+  /**
+   * @return string OAuth 2.0 client secret.
+   */
+  public function getClientSecret();
+  
+  /**
+   * Returns name of authenticating service provider.
+   *
+   * @return string Name of OAuth 2.0 authentication authority.
+   */
+  public function getProviderName();
+  
+  /**
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface OAuth 2.0 redirect URI.
+   */
+  public function getRedirectUri();
+  
+  /**
+   * Save current session OAuth 2.0 access token to application database.
+   *
+   * @param object $token OAuth 2.0 access token.
+   *
+   * @return mixed ID of saved token otherwise FALSE.
+   */
+  public function saveToken($token);
+  
+  /**
+   * Retrieve current session OAuth 2.0 access token from application database.
+   *
+   * @return object $token OAuth 2.0 access token.
+   */
+  public function loadToken();
+  
+  /**
+   * Delete current session OAuth 2.0 access token from application database.
+   */
+  public function deleteToken();
+}
+
+abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Interface {
+  
+  /**
+   * @var object OAuth 2.0 token.
+   */
+  private $token;
   
   /**
    * Extends __construct().
    */
   protected function initialize() {
+    $this->token = NULL;
   }
   
   /**
-   * Return unique, system-wide identifier for agent.
+   * Save current session OAuth 2.0 access token to application database.
    *
-   * @return string Role identifier.
+   * @param object $token OAuth 2.0 access token.
+   *
+   * @return bool TRUE if token was saved otherwise FALSE.
    */
-  public static function getId() {
-    return self::UUID;
+  public function saveToken($token) {
+    
+    $result = FALSE;
+    
+    if (isset($token)) {
+      $interface = get_class($this);
+      $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+      $session_data = serialize($token);    
+      $Database = AblePolecat_Server::getDatabase("polecat");
+      $sql = NULL;
+      
+      if (!isset($this->token)) {
+        $this->token = $token;
+        $sql = __SQL()->
+          insert('session_id', 'interface', 'session_data')->
+          into ('role')->
+          values($session_id, $interface, $session_data);
+      }
+      else if ($this->token !== $token) {
+        //
+        // token was updated lazily
+        //
+        $this->token = $token;
+        $sql = __SQL()->
+          update('role')->
+          set('session_data')->
+          values($session_data)->
+          where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
+      }
+      
+      if (isset($sql)) {
+        $PreparedStatement = $Database->prepareStatement($sql);
+        $result = $PreparedStatement->execute();
+        if (!$result) {
+          $this->token = NULL;
+          $Database->logErrorInfo();
+        }
+      }
+    }
+    
+    return $result;
   }
   
   /**
-   * Return common name for role.
+   * Retrieve current session OAuth 2.0 access token from application database.
    *
-   * @return string Role name.
+   * @return object $token OAuth 2.0 access token or NULL.
    */
-  public static function getName() {
-    return self::NAME;
+  public function loadToken() {
+    
+    $interface = get_class($this);
+    $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+    // $session_data = serialize($this->token);    
+    $Database = AblePolecat_Server::getDatabase("polecat");
+    $sql = __SQL()->
+      select('session_data')->
+      from('role')->
+      where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
+    $PreparedStatement = $Database->prepareStatement($sql);
+    $result = $PreparedStatement->execute();
+    if ($result) {
+      $data = $PreparedStatement->fetch();
+      isset($data['session_data']) ? $this->token = unserialize($data['session_data']) : $this->token = NULL;
+    }
+    else {
+      $this->token = NULL;
+      $Database->logErrorInfo();
+    }
+    return $this->token;
+  }
+  
+  /**
+   * Delete current session OAuth 2.0 access token from application database.
+   */
+  public function deleteToken() {
+    $interface = get_class($this);
+    $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+    $Database = AblePolecat_Server::getDatabase("polecat");
+    $sql = __SQL()->
+      delete()->
+      from('role')->
+      where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
+    $PreparedStatement = $Database->prepareStatement($sql);
+    $result = $PreparedStatement->execute();
+    if (!$result) {
+      $Database->logErrorInfo();
+    }
+    $this->token = NULL;
   }
   
   /**
@@ -44,17 +169,6 @@ class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2 extends AblePolec
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_CacheObjectInterface or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $Role = new AblePolecat_AccessControl_Role_User_Authenticated_OAuth2();
-    return $Role;
+    $this->saveToken($this->token);
   }
 }
