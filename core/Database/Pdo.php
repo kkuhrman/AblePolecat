@@ -47,6 +47,65 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   }
   
   /**
+   * Returns an SQLSTATE, a five characters alphanumeric identifier defined in ANSI SQL-92 standard.
+   *
+   * @return mixed SQLSTATE or NULL.
+   */
+  public function getErrorCode() {
+    
+    $code = NULL;
+    
+    if (isset($this->DatabaseConnection)) {
+      $code = $this->DatabaseConnection->errorCode();
+    }
+    return $code;
+  }
+  
+  /**
+   * Returns error information about last operation performed by this database handle.
+   *
+   * @return mixed Array of error information or NULL.
+   */
+  public function getErrorInfo() {
+    
+    $info = NULL;
+    
+    if (isset($this->DatabaseConnection)) {
+      $info = $this->DatabaseConnection->errorInfo();
+    }
+    return $info;
+  }
+  
+  /**
+   * @return mixed ID of the last inserted row or NULL.
+   */
+  public function getLastInsertId() {
+    
+    $id = NULL;
+    try {
+      if (isset($this->DatabaseConnection)) {
+        $id = $this->DatabaseConnection->lastInsertId();
+      }
+    }
+    catch (PDOException $Exception) {
+      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, __METHOD__ . ' failed: ' . $e->getMessage());
+    }
+    return $id;
+  }
+  
+  /**
+   * Writes error information about last operation performed by this database handle to log.
+   */
+  public function logErrorInfo() {
+    if (isset($this->DatabaseConnection)) {
+      $info = $this->DatabaseConnection->errorInfo();
+      foreach($info as $key => $value) {
+        AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, strval($value));
+      }
+    }
+  }
+  
+  /**
    * Prepares a SQL statement for execution.
    *
    * @param string $statement SQL statement to prepare.
@@ -105,6 +164,19 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       $open = isset($this->DatabaseConnection);
     }
     return $open;
+  }
+  
+  /**
+   * Places quotes around and escapes special characters within input string (if required).
+   * 
+   * @param string $input.
+   *
+   * @return mixed Quoted string that is theoretically safe to pass into an SQL statement or FALSE.
+   */
+  public function quote($input) {
+    
+    isset($this->DatabaseConnection) ? $output = $this->DatabaseConnection->quote($input) : $output = FALSE;
+    return $output;
   }
   
   /**

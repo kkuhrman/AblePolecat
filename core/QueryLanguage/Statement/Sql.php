@@ -31,6 +31,7 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
    */
   const SELECT    = 'SELECT';
   const INSERT    = 'INSERT';
+  const REPLACE   = 'REPLACE';
   const UPDATE    = 'UPDATE';
   const DELETE    = 'DELETE';
   
@@ -68,6 +69,22 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    * Sub-classes should override to initialize arguments.
    */
   protected function initialize() {
+    
+    if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
+      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
+        '__construct'
+      );
+    }
+    if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
+      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        'AblePolecat_Data_Scalar_String', 
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Scalar', 'String.php')),
+        'typeCast'
+      );
+    }
+    
     //
     // Initialize SQL support settings (for static method calls).
     //
@@ -116,6 +133,11 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
           AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET => TRUE,
         ),
         AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT => array(
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES => TRUE,
+        ),
+        AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE => array(
           AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
           AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS => TRUE,
           AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES => TRUE,
@@ -176,7 +198,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
           $literal ? $expression = 'TRUE' : $expression = 'FALSE';
           break;
         case 'integer':
-          $expression = strval($literal);
+          $expression = intval($literal);
           break;
         case 'double':
           //
@@ -187,9 +209,10 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
           break;
         case 'string':
           //
-          // @todo: syntax/engine specific escaping
+          // NOTE: call to values() handles quotes
+          // @see values().
           //
-          $expression = "'$literal'";
+          $expression = strval($literal);
           break;
         case 'NULL':
           //
@@ -393,6 +416,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
             parent::__set($Element, implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Tables));
             break;
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
+          case AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE:
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE:
             //
             // If parameter is single-element array, allow use of first element.
@@ -724,6 +748,14 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         $tokens[] = '(' . $this->getColumns() . ')';
         $tokens[] = 'VALUES (' . $this->getValues() . ')';
         break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE:
+        if ($this->getTables()) {
+          $tokens[] = 'INTO';
+          $tokens[] = $this->getTables();
+        }
+        $tokens[] = '(' . $this->getColumns() . ')';
+        $tokens[] = 'VALUES (' . $this->getValues() . ')';
+        break;
       case AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE:
         $tokens[] = $this->getTables();
         $tokens[] = 'SET';
@@ -756,7 +788,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     }
     // var_dump($tokens);
     $sqlStatement = implode(' ', $tokens);
-    return $sqlStatement;
+    return trim($sqlStatement);
   }
   
   /**
@@ -787,6 +819,13 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     return $this;
   }
   
+  public function replace() {
+    $Columns = func_get_args();
+    $this->setDmlOp(AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE);
+    $this->setColumns($Columns);
+    return $this;
+  }
+  
   public function into() {
     $Tables = func_get_args();
     $this->setTables($Tables);
@@ -807,11 +846,26 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   }
   
   public function where() {
+    
     $WhereCondition = NULL;
+    
     foreach(func_get_args() as $key => $arg) {
-      $WhereCondition .= $arg;
+      try{
+        $strvalue = AblePolecat_Data_Scalar_String::typeCast($arg);
+        !isset($WhereCondition) ? $WhereCondition = array() : NULL;
+        $WhereCondition[] = $strvalue;
+      }
+      catch (AblePolecat_Data_Exception $Exception) {
+        throw new AblePolecat_QueryLanguage_Exception(
+          sprintf("%s WHERE parameter must be scalar or implement __toString(). %s passed.", 
+            get_class($this), 
+            gettype($arg)
+          ), 
+          AblePolecat_Error::INVALID_TYPE_CAST
+        );
+      }
     }
-    $this->setWhereCondition($WhereCondition);
+    $this->setWhereCondition(implode(' ', $WhereCondition));
     return $this;
   }
   
@@ -851,7 +905,12 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   
   public function values() {
     $Values = func_get_args();
-    $this->setValues($Values);
+    $ValuesQuotes = array();
+    $Database = AblePolecat_Server::getDatabase("polecat");
+    foreach($Values as $key => $value) {
+      $ValuesQuotes[] = $Database->quote($value);
+    }
+    $this->setValues($ValuesQuotes);
     return $this;
   }
 }
@@ -862,6 +921,35 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
 function __SQL() {
   $Query = AblePolecat_Sql::create();
   return $Query;
+}
+
+/**
+ * Helper function - create a SQL expression.
+ */
+function __SQLEXPR() {
+  
+  $num = func_num_args();
+  $Expression = NULL;
+  
+  switch ($num) {
+    default:
+      break;
+    case 3:
+      $args = func_get_args();
+      $Expression = new AblePolecat_QueryLanguage_Expression_Binary_Sql($args[0], $args[1], $args[2]);
+      break;
+  }
+  return $Expression;
+}
+
+/**
+ * Helper function - put parameters in quotes.
+ */
+function __SQLQUOTE($string) {
+  if (isset($string) && is_scalar($string)) {
+    $string = AblePolecat_Server::getDatabase("polecat")->quote($string);
+  }
+  return $string;
 }
 
 class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
