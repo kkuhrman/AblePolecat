@@ -13,7 +13,7 @@ class AblePolecat_Server_Check_Paths extends AblePolecat_Server_CheckAbstract {
    */
   public static function go() {
     
-    $pathsAreGo = TRUE;
+    $go = TRUE;
     
     $dirs = array(
       AblePolecat_Server_Paths::root,
@@ -36,13 +36,13 @@ class AblePolecat_Server_Check_Paths extends AblePolecat_Server_CheckAbstract {
       if (!self::directoryExists($dir)) {
         self::$error_code = AblePolecat_Error::SYS_PATH_ERROR;
         self::$error_message = "Invalid system path encountered: $dir";
-        $pathsAreGo = FALSE;
+        $go = FALSE;
         goto ABLE_POLECAT_CHECK_FAIL;
       }
     }
     
 ABLE_POLECAT_CHECK_FAIL:
-    return $pathsAreGo;
+    return $go;
   }
   
   /**
