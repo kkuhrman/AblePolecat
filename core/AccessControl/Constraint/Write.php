@@ -4,7 +4,7 @@
  * Base class for constraint on writing to an access controlled resource.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Constraint.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint.php')));
 
 class AblePolecat_AccessControl_Constraint_Write implements AblePolecat_AccessControl_ConstraintInterface {
   

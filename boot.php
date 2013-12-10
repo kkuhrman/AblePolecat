@@ -5,7 +5,6 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'core_require.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'core', 'Server.php')));
 
 //
 // Additional user-defined constants etc. prior to bootstrap
@@ -17,4 +16,3 @@ AblePolecat_Server_Paths::setFullPath('session', ABLE_POLECAT_DATA_PATH . DIRECT
 //
 // Bootstrap Able Polecat server.
 //
-AblePolecat_Server::bootstrap();

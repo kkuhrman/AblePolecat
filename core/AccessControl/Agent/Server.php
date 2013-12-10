@@ -1,11 +1,11 @@
 <?php
 /**
  * @file: Server.php
- * Base class for access control for applications using Able Polecat.
+ * The server access control agent is the super administrator within Able Polecat.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role', 'Server.php')));
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Agent.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role', 'Server.php')));
 
 class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_AgentAbstract {
   
@@ -55,7 +55,16 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $Agent = new AblePolecat_AccessControl_Agent_Server();
+    
+    $Agent = NULL;
+    if (is_a($Subject, 'AblePolecat_Server')) {
+      $Agent = new AblePolecat_AccessControl_Agent_Server();
+    }
+    else {
+      $msg = "Access denied to server agent.";
+      isset($Subject) ? $msg .= ' ' . get_class($Subject) . ' does not have sufficient privilege.' : NULL;
+      throw new AblePolecat_AccessControl_Exception($msg, AblePolecat_Error::ACCESS_DENIED);
+    }
     return $Agent;
   }
 }

@@ -4,8 +4,8 @@
  * Encapsulates configuration file for server mode.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Server.php');
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Server.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Conf.php');
 
 class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
   
@@ -23,7 +23,7 @@ class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
    * @return string Default name of directory where conf file should be located.
    */
   public static function getDefaultDir() {
-    return ABLE_POLECAT_CONF_PATH;
+    return AblePolecat_Server_Paths::getFullPath('conf');
   }
   
   /**
@@ -43,7 +43,7 @@ class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
     //
     $path = self::getDefaultDir() . DIRECTORY_SEPARATOR . self::getName();
     if (!file_exists($path)) {
-      $subdir = AblePolecat_Server::getBootMode();
+      $subdir = AblePolecat_Server::getBootDirective(AblePolecat_Server::BOOT_MODE);
       $path = self::getDefaultDir() . DIRECTORY_SEPARATOR . $subdir . DIRECTORY_SEPARATOR . self::getName();
       if (file_exists($path)) {
         $Locater = AblePolecat_AccessControl_Resource_Locater::create($subdir . DIRECTORY_SEPARATOR . self::getName(), 
@@ -53,7 +53,6 @@ class AblePolecat_Conf_Server extends AblePolecat_ConfAbstract {
     else {
       $Locater = AblePolecat_AccessControl_Resource_Locater::create(self::getName(), self::getDefaultDir());
     }
-    
     return $Locater;
   }
     

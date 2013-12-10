@@ -4,9 +4,13 @@
  * Environment for Able Polecat Application Mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Conf.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Conf.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Module.php')));
 
 class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAbstract {
+  
+  const UUID = 'df5e0c10-5f4d-11e3-949a-0800200c9a66';
+  const NAME = 'Able Polecat Application Environment';
   
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
@@ -26,15 +30,6 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
   protected function initialize() {
     parent::initialize();
     $this->m_registered_modules = array();
-    
-    //
-    // Needed for module registration.
-    //
-    AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-      'AblePolecat_Conf_Module',
-      implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Conf', 'Module.php')),
-      'touch'
-    );
   }
   
   /**
@@ -58,7 +53,7 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
    *
    * @return string Full path name of module configuration file or NULL if not found.
    */
-  protected function findModuleConfigurationFile($search_directory, $parent_directory = ABLE_POLECAT_MODS_PATH) {
+  protected function findModuleConfigurationFile($search_directory, $parent_directory) {
     
     $conf_path = NULL;
     
@@ -155,12 +150,12 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
     // Application agent must be assigned already or all shall fail... oh woe!
     //
     if (count($this->m_registered_modules) === 0) {
-      // @todo: won't get here if these paths don't exists
-      if (file_exists(ABLE_POLECAT_MODS_PATH) && is_dir(ABLE_POLECAT_MODS_PATH)) {
-        $h_mods_dir = opendir(ABLE_POLECAT_MODS_PATH);
+      $mods_dir = AblePolecat_Server_Paths::getFullPath('mods');      
+      if (AblePolecat_Server_Paths::verifyDirectory($mods_dir)) {
+        $h_mods_dir = opendir($mods_dir);
         if ($h_mods_dir) {
           while (false !== ($current_file = readdir($h_mods_dir))) {
-            $module_conf_path = $this->findModuleConfigurationFile($current_file);
+            $module_conf_path = $this->findModuleConfigurationFile($current_file, $mods_dir);
             if (isset($module_conf_path)) {
               $ModConfig = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Module');
               if (isset($ModConfig)) {
@@ -233,6 +228,24 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
   }
   
   /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /**
    * Return configuration file for a registered module.
    * 
    * @param string $moduleName Name of a registered module.
@@ -295,29 +308,17 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Environment = self::$Environment;
-    
-    if (!isset($Environment)) {
-      //
-      // Create environment object.
-      //
-      $Environment = new AblePolecat_Environment_Application();
-      
-      //
-      // Initialize access control for application environment settings.
-      //
-      $Agent = $Environment->getAgent();
-      
-      //
-      // Register and load contributed classes
-      //
-      $Environment->registerModules();
-      // $Environment->loadModules();
-      
+    if (!isset(self::$Environment)) {
       //
       // Initialize singleton instance.
       //
-      self::$Environment = $Environment;
+      self::$Environment = new AblePolecat_Environment_Application();
+            
+      //
+      // Register and load contributed classes
+      //
+      self::$Environment->registerModules();
+      // $Environment->loadModules();
     }
     return self::$Environment;
   }

@@ -4,7 +4,7 @@
  * Default class for Able Polecat user sessions.
  */
 
-require_once(ABLE_POLECAT_PATH. DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');
 
 //
 // @todo: PHP 5.4 support for SessionHandlerInterface

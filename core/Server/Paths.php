@@ -1,104 +1,8 @@
 <?php 
 /**
  * @file: Paths.php
- * Encapsulates Able Polecat system path definitions and rules.
+ * Encapsulates Able Polecat server, application and user path utilities.
  */
-
-//
-// Root directory.
-//
-if (!defined('ABLE_POLECAT_ROOT')) {
-  $ABLE_POLECAT_ROOT = dirname(dirname(__DIR__));
-  define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
-}
-
-//
-// Path to Able Polecat core class library.
-//
-if (!defined('ABLE_POLECAT_PATH')) {
-  $ABLE_POLECAT_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core';
-  define('ABLE_POLECAT_PATH', $ABLE_POLECAT_PATH);
-}
-
-//
-// Path to Able Polecat system configuration files.
-//
-if (!defined('ABLE_POLECAT_CONF_PATH')) {
-  $ABLE_POLECAT_CONF_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'conf';
-  define('ABLE_POLECAT_CONF_PATH', $ABLE_POLECAT_CONF_PATH);
-}
-
-//
-// Path to Able Polecat data directory.
-//
-if (!defined('ABLE_POLECAT_DATA_PATH')) {
-  $ABLE_POLECAT_DATA_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'data';
-  define('ABLE_POLECAT_DATA_PATH', $ABLE_POLECAT_DATA_PATH);
-}
-
-//
-// Path to Able Polecat development tools.
-//
-if (!defined('ABLE_POLECAT_DEV_PATH')) {
-  $ABLE_POLECAT_DEV_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'dev';
-  define('ABLE_POLECAT_DEV_PATH', $ABLE_POLECAT_DEV_PATH);
-}
-
-//
-// Path to third party class libraries.
-//
-if (!defined('ABLE_POLECAT_LIBS_PATH')) {
-  $ABLE_POLECAT_LIBS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'libs';
-  define('ABLE_POLECAT_LIBS_PATH', $ABLE_POLECAT_LIBS_PATH);
-}
-
-//
-// Log files directory.
-//
-if (!defined('ABLE_POLECAT_LOGS_PATH')) {
-  $ABLE_POLECAT_LOGS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'logs';
-  define('ABLE_POLECAT_LOGS_PATH', $ABLE_POLECAT_LOGS_PATH);
-}
-
-//
-// Path to contributed modules directory.
-//
-if (!defined('ABLE_POLECAT_MODS_PATH')) {
-  $ABLE_POLECAT_MODS_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'mods';
-  define('ABLE_POLECAT_MODS_PATH', $ABLE_POLECAT_MODS_PATH);
-}
-
-//
-// Path to Able Polecat unit test and qa directory.
-//
-if (!defined('ABLE_POLECAT_QA_PATH')) {
-  $ABLE_POLECAT_QA_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'qa';
-  define('ABLE_POLECAT_QA_PATH', $ABLE_POLECAT_QA_PATH);
-}
-
-//
-// Path to Able Polecat user resource directory.
-//
-if (!defined('ABLE_POLECAT_USER_PATH')) {
-  $ABLE_POLECAT_USER_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'user';
-  define('ABLE_POLECAT_USER_PATH', $ABLE_POLECAT_USER_PATH);
-}
-
-//
-// Path to Able Polecat user sites files.
-//
-if (!defined('ABLE_POLECAT_SITES_PATH')) {
-  $ABLE_POLECAT_SITES_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'user'  . DIRECTORY_SEPARATOR . 'sites';
-  define('ABLE_POLECAT_SITES_PATH', $ABLE_POLECAT_SITES_PATH);
-}
-
-//
-// Path to Able Polecat user services files.
-//
-if (!defined('ABLE_POLECAT_SERVICES_PATH')) {
-  $ABLE_POLECAT_SERVICES_PATH = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'user'  . DIRECTORY_SEPARATOR . 'services';
-  define('ABLE_POLECAT_SERVICES_PATH', $ABLE_POLECAT_SERVICES_PATH);
-}
 
 class AblePolecat_Server_Paths {
 
@@ -108,54 +12,24 @@ class AblePolecat_Server_Paths {
   const root = ABLE_POLECAT_ROOT;
   
   /**
-   * Path to Able Polecat system configuration files.
-   */
-  const conf = ABLE_POLECAT_CONF_PATH;
-  
-  /**
    * Path to main Able Polecat class library.
    */
-  const core = ABLE_POLECAT_PATH;
+  const core = ABLE_POLECAT_CORE;
   
   /**
-   * Path to Able Polecat development tools.
+   * Path to Able Polecat system configuration files.
    */
-  const dev = ABLE_POLECAT_DEV_PATH;
+  const etc = ABLE_POLECAT_ETC;
   
   /**
-   * Path to third party class libraries.
+   * Path to third-pary and custom modules/code.
    */
-  const libs = ABLE_POLECAT_LIBS_PATH;
+  const usr = ABLE_POLECAT_USR;
   
   /**
    * Path to log files directory.
    */
-  const logs = ABLE_POLECAT_LOGS_PATH;
-  
-  /**
-   * Path to contributed modules directory.
-   */
-  const mods = ABLE_POLECAT_MODS_PATH;
-  
-  /**
-   * Path to Able Polecat unit test and qa directory.
-   */
-  const qa = ABLE_POLECAT_QA_PATH;
-  
-  /**
-   * Path to Able Polecat user resource directory.
-   */
-  const user = ABLE_POLECAT_USER_PATH;
-  
-  /**
-   * Path to Able Polecat user sites files.
-   */
-  const sites = ABLE_POLECAT_SITES_PATH;
-  
-  /**
-   * Path to Able Polecat user services files.
-   */
-  const services = ABLE_POLECAT_SERVICES_PATH;
+  const varf = ABLE_POLECAT_VAR;
   
   /**
    * @var Array Directories used for data storage.
@@ -237,36 +111,45 @@ class AblePolecat_Server_Paths {
         case 'root':
           $path = self::root;
           break;
-        case 'conf':
-          $path = self::conf;
+        case 'etc':
+          $path = self::etc;
           break;
         case 'core':
           $path = self::core;
           break;
-        case 'dev':
-          $path = self::dev;
-          break;
-        case 'libs':
-          $path = self::libs;
+        // case 'dev':
+          // $path = self::dev;
+          // break;
+        // case 'libs':
+          // $path = self::libs;
+          // break;
+        case 'conf':
+          $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
           break;
         case 'logs':
-          $path = self::logs;
+          $path = self::varf . DIRECTORY_SEPARATOR . 'logs';
+          break;
+        case 'varf':
+          $path = self::varf;
+          break;
+        case 'usr':
+          $path = self::usr;
           break;
         case 'mods':
-          $path = self::mods;
+          $path = self::usr . DIRECTORY_SEPARATOR . 'mods';
           break;
-        case 'qa':
-          $path = self::qa;
-          break;
-        case 'user':
-          $path = self::user;
-          break;
-        case 'sites':
-          $path = self::sites;
-          break;
-        case 'services':
-          $path = self::services;
-          break;
+        // case 'qa':
+          // $path = self::qa;
+          // break;
+        // case 'user':
+          // $path = self::user;
+          // break;
+        // case 'sites':
+          // $path = self::sites;
+          // break;
+        // case 'services':
+          // $path = self::services;
+          // break;
       }
     }
     return $path;
@@ -290,16 +173,19 @@ class AblePolecat_Server_Paths {
       // Preset sub-directories
       //
       case 'root':
-      case 'conf':
+      case 'etc':
       case 'core':
-      case 'dev':
-      case 'libs':
+      case 'conf';
       case 'logs':
+      // case 'dev':
+      // case 'libs':
+      case 'usr':
+      case 'varf':
       case 'mods':
-      case 'qa':
-      case 'user':
-      case 'sites':
-      case 'services':
+      // case 'qa':
+      // case 'user':
+      // case 'sites':
+      // case 'services':
         break;
     }
     return $reserved;
@@ -349,6 +235,17 @@ class AblePolecat_Server_Paths {
   public static function sanitizePath($path) {
     $sanitized_path = trim($path);
     return $sanitized_path;
+  }
+  
+  /**
+   * Verify that the given path points to an existing, accessible directory.
+   * 
+   * @param string $path
+   *
+   * @return bool TRUE if $path is a valid directory otherwise FALSE.
+   */
+  public static function verifyDirectory($path) {
+    return file_exists($path) && is_dir($path);
   }
   
   /**

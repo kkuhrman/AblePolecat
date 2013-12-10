@@ -1,38 +1,31 @@
 <?php
 /**
- * @file: Csv.php
- * Logs messages to comma separated file.
+ * @file: Pdo.php
+ * Logs messages to application database.
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Log.php');
 
-class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
+class AblePolecat_Log_Pdo extends AblePolecat_LogAbstract {
   
   /**
    * @var resource Handle to log file.
    */
-  private $hFile;
+  private $Database;
   
   /**
    * Extends __construct().
    */
   protected function initialize() {
     //
-    // Default name of log file is YYYY_MM_DD.csv
+    // $safe parameter is FALSE to bypass handleCriticalError().
     //
-    $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . date('Y_m_d', time()) . '.csv';
-    $this->hFile = @fopen($file_name, 'a');
-    if ($this->hFile == FALSE) {
-      $this->hFile = NULL;
-      $msg = sprintf(
-        "Able Polecat attempted to open a CSV log file in the directory given at %s. No such directory exists or it is not writable by web agent.",
-        AblePolecat_Server_Paths::getFullPath('logs')
-      );
+    $this->Database = AblePolecat_Server::getDatabase(FALSE);
+    if (!isset($this->Database)) {
       throw new AblePolecat_Log_Exception(
-        $msg,
+        'Failed to initialize database logger. No connection to application database.',
         AblePolecat_Error::BOOTSTRAP_LOGGER
       );
-      // trigger_error($msg, E_USER_ERROR);
     }
   }
   
@@ -43,7 +36,7 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
    * @param string $msg  Body of message.
    */
   public function putMessage($type, $msg) {
-    if (isset($this->hFile)) {
+    if (isset($this->Database)) {
       !is_string($msg) ? $message = serialize($msg) : $message = $msg;
       switch ($type) {
         default:
@@ -55,12 +48,19 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
         case AblePolecat_LogInterface::DEBUG:
           break;
       }
-      $line = array(
-        $type, 
-        date('H:i:s u e', time()),
-        $message,
-      );
-      fputcsv($this->hFile, $line);
+      try {
+        $sql = __SQL()->
+          insert('user_id', 'event_type', 'event_data')->
+          into('log')->
+          values(1, $type, $message);
+        $Stmt = $this->Database->prepareStatement($sql);
+        $Stmt->execute();
+      }
+      catch(Exception $Exception) {
+        //
+        // @todo: what if log to DB fails?
+        //
+      }
     }
   }
   
@@ -74,7 +74,7 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
   public static function dumpBacktrace($msg = NULL) {
     $debug_backtrace = debug_backtrace();
     try {
-      $Log = new AblePolecat_Log_Csv();
+      $Log = new AblePolecat_Log_Pdo();
       foreach($debug_backtrace as $line => $trace) {
         $Log->putMessage(AblePolecat_LogInterface::DEBUG, print_r($trace, TRUE));
       }
@@ -93,10 +93,6 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (isset($this->hFile)) {
-      fclose($this->hFile);
-      $this->hFile = NULL;
-    }
   }
   
   /**
@@ -104,9 +100,12 @@ class AblePolecat_Log_Csv extends AblePolecat_LogAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_Log_Csv or NULL.
+   * @return AblePolecat_Log_Pdo or NULL.
+   * @throw AblePolecat_Log_Exception if PDO database is not accessible.
+   * @see initialize().
    */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    return new AblePolecat_Log_Csv();
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {   
+    $Log = new AblePolecat_Log_Pdo();
+    return $Log;
   }
 }

@@ -4,9 +4,9 @@
  * Base class for most SQL statement objects.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'QueryLanguage', 'Statement.php')));
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'DynamicObject.php');
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Overloadable.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Statement.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
 
 interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_DynamicObjectInterface, 
   AblePolecat_OverloadableInterface, 
@@ -73,14 +73,14 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
       AblePolecat_Server::getClassRegistry()->registerLoadableClass(
         'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
         '__construct'
       );
     }
     if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
       AblePolecat_Server::getClassRegistry()->registerLoadableClass(
         'AblePolecat_Data_Scalar_String', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Scalar', 'String.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
         'typeCast'
       );
     }
@@ -906,7 +906,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   public function values() {
     $Values = func_get_args();
     $ValuesQuotes = array();
-    $Database = AblePolecat_Server::getDatabase("polecat");
+    $Database = AblePolecat_Server::getDatabase();
     foreach($Values as $key => $value) {
       $ValuesQuotes[] = $Database->quote($value);
     }
@@ -947,7 +947,7 @@ function __SQLEXPR() {
  */
 function __SQLQUOTE($string) {
   if (isset($string) && is_scalar($string)) {
-    $string = AblePolecat_Server::getDatabase("polecat")->quote($string);
+    $string = AblePolecat_Server::getDatabase()->quote($string);
   }
   return $string;
 }

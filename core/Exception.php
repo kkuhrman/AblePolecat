@@ -4,7 +4,7 @@
  * Base class for all Able Polecat Exceptions.
  */
  
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'Error.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Error.php');
 
 /**
  * Default exception thrown in Able Polecat.

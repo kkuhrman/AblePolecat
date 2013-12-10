@@ -1,30 +1,36 @@
 <?php
 /**
  * @file: Mode.php
- * Analogous to OS mode (protected etc) except defines context of web app.
+ * The Mode object encapsulates application environment configuration and
+ * error/exception handling. Able Polecat loads three basic modes sequentially,
+ * similar to OS protection rings: 
+ * Server Mode - handles configuration of core class library
+ * Application Mode - handles configuration of extended functionality (e.g. modules)
+ * Session Mode - handles state of current session.
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Syslog.php')));
 
-interface AblePolecat_ModeInterface extends AblePolecat_CacheObjectInterface {
+interface AblePolecat_ModeInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
   
   /**
    * @return AblePolecat_EnvironmentInterface.
    */
   public function getEnvironment();
-  
-  /**
-   * @return AblePolecat_ModeInterface if encapsulated mode is ready for work, otherwise NULL.
-   */
-  public static function ready();
 }
 
 abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
   
   /**
+   * @var AblePolecat_AccessControl_AgentInterface
+   */
+  private static $Agent;
+  
+  /**
    * @var AblePolecat_EnvironmentInterface.
    */
-  protected $Environment;
+  private $Environment;
   
   /**
    * Extends constructor.
@@ -32,6 +38,86 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
    */
   protected function initialize() {
     $this->Environment = NULL;
+  }
+  
+  /**
+   * @return AblePolecat_AccessControl_AgentInterface
+   */
+  protected static function getAgent() {
+    return self::$Agent;
+  }
+  
+  /**
+   * @param AblePolecat_AccessControl_AgentInterface $Agent
+   */
+  protected static function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
+    self::$Agent = $Agent;
+  }
+  
+  /**
+   * @param AblePolecat_EnvironmentInterface $Environment.
+   */
+  protected function setEnvironment(AblePolecat_EnvironmentInterface $Environment) {
+    $this->Environment = $Environment;
+  }
+  
+  /**
+   * Used to handle errors encountered while running in production mode.
+   */
+  public static function defaultErrorHandler($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
+    
+    $die = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
+    
+    //
+    // Get error information
+    //
+    $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
+    isset($errfile) ? $msg .= " in $errfile" : NULL;
+    isset($errline) ? $msg .= " line $errline" : NULL;
+    
+    //
+    // @todo: perhaps better diagnostics.
+    // serialize() is not supported for all types
+    //
+    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
+    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
+    
+    //
+    // Send error information to syslog
+    //
+    $type = AblePolecat_LogInterface::STATUS;
+    switch($errno) {
+      default:
+        break;
+      case E_USER_ERROR:
+      case E_ERROR:
+        $type = AblePolecat_LogInterface::ERROR;
+        break;
+      case E_USER_WARNING:
+        $type = AblePolecat_LogInterface::WARNING;
+        break;
+    }
+    AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
+    if ($die) {
+      die("Fatal error in Able Polecat ($errstr)");
+    }
+    return $die;
+  }
+  
+  /**
+   * Used to log exceptions thrown before user logger(s) initialized.
+   */
+  public static function defaultExceptionHandler($Exception) {
+    
+    $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
+      $Exception->getCode(),
+      $Exception->getFile(),
+      $Exception->getLine(),
+      $Exception->getMessage()
+    );
+    $message = "$msg ({$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}))";
+    AblePolecat_Log_Syslog::wakeup()->putMessage($type, $message);
+    die($msg);
   }
   
   /**

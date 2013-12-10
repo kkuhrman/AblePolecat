@@ -4,7 +4,7 @@
  * Uses file to store session data.
  */
 
-require_once(ABLE_POLECAT_PATH. DIRECTORY_SEPARATOR . 'Session.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Session.php');
 
 class AblePolecat_Session_File extends AblePolecat_SessionAbstract {
   

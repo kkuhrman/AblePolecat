@@ -11,23 +11,86 @@
  * 5. Load Application Server Environment Settings.
  */
 
+/**
+ * Root directory of the entire Able Polecat core project.
+ */
+if (!defined('ABLE_POLECAT_ROOT')) {
+  $ABLE_POLECAT_ROOT = dirname(__DIR__);
+  define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
+}
+
+/**
+ * Location of Able Polecat core class library.
+ */
+if (!defined('ABLE_POLECAT_CORE')) {
+  $ABLE_POLECAT_CORE = __DIR__;
+  define('ABLE_POLECAT_CORE', $ABLE_POLECAT_CORE);
+}
+
+/**
+ * Location of directory with host-specific system-wide configuration file(s).
+ */
+if (!defined('ABLE_POLECAT_ETC')) {
+  $ABLE_POLECAT_ETC = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'etc';
+  define('ABLE_POLECAT_ETC', $ABLE_POLECAT_ETC);
+}
+
+/**
+ * Secondary directory hierarchy contains third-party modules, custom pages, services, 
+ * utilities, etc.
+ */
+if (!defined('ABLE_POLECAT_USR')) {
+  $ABLE_POLECAT_USR = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'usr';;
+  define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
+}
+
+/**
+ * Variable files directory (e.g. log files).
+ */
+if (!defined('ABLE_POLECAT_VAR')) {
+  $ABLE_POLECAT_VAR = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'var';
+  define('ABLE_POLECAT_VAR', $ABLE_POLECAT_VAR);
+}
+
 //
 // These are listed in the order they are created in initialize() and bootstrap()
 //
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Clock.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Log', 'Csv.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Bus.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
+require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry.php')));
 
-class AblePolecat_Server {
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Csv.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Url.php');
+
+class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
+  
+  const UUID              = '603a37e0-5dec-11e3-949a-0800200c9a66';
+  const NAME              = 'Able Polecat Server';
+  
+  const DBNAME            =  'polecat';
+  
+  //
+  // Boot directives (passed as parameters in request).
+  //
+  const BOOT_MODE         = 'mode';
+  
+  //
+  // Boot modes
+  //
+  const BOOT_MODE_NORMAL  = 'user';
+  const BOOT_MODE_INSTALL = 'install';
+  const BOOT_MODE_UPDATE  = 'update';
   
   //
   // protection ring 0, Server Mode.
   //
   const RING_ACCESS_CONTROL   = 0;
   const RING_BOOT_MODE        = 0;
-  const RING_DATABASES        = 0;
+  const RING_DATABASE         = 0;
   const RING_DEFAULT_LOG      = 0;
   const RING_CLASS_REGISTRY   = 0;
   const RING_SERVER_MODE      = 0;
@@ -35,6 +98,7 @@ class AblePolecat_Server {
   
   const NAME_ACCESS_CONTROL   = 'access control';
   const NAME_BOOT_MODE        = 'boot mode';
+  const NAME_DATABASE         = 'database';
   const NAME_DATABASES        = 'databases';
   const NAME_DEFAULT_LOG      = 'default log';
   const NAME_CLASS_REGISTRY   = 'class registry';
@@ -59,7 +123,7 @@ class AblePolecat_Server {
    * @var AblePolecat_Server Singleton instance.
    */
   private static $Server = NULL;
-    
+  
   /**
    * @var Array $Resources.
    *
@@ -70,7 +134,340 @@ class AblePolecat_Server {
    *
    * They are stored as Array([zero-based protection ring number] => [internal resource name]);
    */
-  private static $Resources = NULL;
+  private $Resources = NULL;
+  
+  /**
+   * @var AblePolecat_AccessControl_Agent_Server
+   */
+  private $Agent;
+  
+  /**
+   * @var AblePolecat_Log_Boot A log file for the boot process.
+   */
+  private $BootLog;
+  
+  /**
+   * @var Array Information about the state of the application database.
+   */
+  private $db_state;
+  
+  /**
+   * functions called in bootstrap().
+   */
+  
+  /**
+   * boot server mode
+   */
+  protected function bootServerMode() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // Server Mode - handles configuration of core class library and error/exception handling
+      //
+      $ServerMode = AblePolecat_Mode_Server::wakeup($this->Agent);
+      self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
+      
+      //
+      // Set the bootstrap Server Mode
+      // (AblePolecat_Mode_Server::wakeup() return type is determined by boot directive.)
+      //
+      $BootMode = self::BOOT_MODE_NORMAL;
+      switch (get_class($ServerMode)) {
+        default:
+          break;
+        case 'AblePolecat_Mode_Server_Install':
+          $BootMode = self::BOOT_MODE_INSTALL;
+          break;
+        case 'AblePolecat_Mode_Server_Update':
+          $BootMode = self::BOOT_MODE_UPDATE;
+          break;
+      }
+      self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, $BootMode);
+      $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Server Mode - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to boot server mode. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * boot function template
+   */
+  protected function bootDatabase() {
+    
+    $errmsg = '';
+    
+    try {
+      $ServerMode = self::getServerMode();
+      
+      //
+      // Load application database for active mode.
+      // @todo: core will only use PDO; move custom class loading to application mode
+      //
+      $dbconf = $ServerMode->getEnvironment()->getConf('databases');
+      foreach($dbconf as $element_name => $db) {
+        $dbattr = $db->attributes();
+        isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
+        isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
+        // isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
+        
+        if (!isset($dbname) && !isset($dbid)) {
+          self::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
+        }
+        else {
+          isset($dbattr['mode']) ? $dbmode = $dbattr['mode']->__toString() : $dbmode = $BootMode;
+          isset($dbattr['use']) ? $dbuse = intval($dbattr['use']->__toString()) : $dbuse = 0;        
+          if (($dbmode = $BootMode) && $dbuse) {
+            //
+            // DSN
+            //
+            isset($db->dsn) ? $dbdsn = $db->dsn->__toString() : $dbdsn = NULL;
+            
+            //
+            // Store info about application database.
+            //
+            $this->db_state = array(
+              'name' => $dbname,
+              'id' => $dbid,
+              'mode' => $dbmode,
+              'use' => $dbuse,
+              'dsn' => $dbdsn,
+              'connected' => FALSE,
+            );
+            
+            //
+            // Attempt a connection.
+            //
+            $Database = AblePolecat_Database_Pdo::wakeup($this->Agent);
+            $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
+            $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
+            $Database->open($this->Agent, $DbUrl);
+            self::setResource(self::RING_DATABASE, self::NAME_DATABASE, $Database);
+            $this->db_state['connected'] = TRUE;
+            $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+            break;
+          }
+        }
+      }
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Application Database - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to boot application database. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * boot function template
+   */
+  protected function bootLog() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // First choice for logger is database, then CSV
+      //
+      if (self::$Server->getDatabaseState('connected')) {
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Pdo.php')));
+        $DefaultLog = AblePolecat_Log_Pdo::wakeup($this->Agent);
+        self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
+      }
+      else {
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Csv.php')));
+        $DefaultLog = AblePolecat_Log_Csv::wakeup($this->Agent);
+        self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
+      }
+      $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Application Log - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to boot application log. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * boot function template
+   */
+  protected function bootClassRegistry() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // First choice for class registry is database, then XML
+      //
+      if (self::$Server->getDatabaseState('connected')) {
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry', 'Pdo.php')));
+        $ClassRegistry = AblePolecat_ClassRegistry_Pdo::wakeup($this->Agent);
+        self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
+      }
+      else {
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry', 'Xml.php')));
+        $ClassRegistry = AblePolecat_ClassRegistry_Xml::wakeup($this->Agent);
+        self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
+      }
+      $this->BootLog->logStatusMessage('Wakeup Class Registry - OK');
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Class Registry - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to boot class registry. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * boot function template
+   */
+  protected function bootAccessControl() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // Wakeup access control service with current session.
+      //
+      if (self::$Server->getDatabaseState('connected')) {
+        $AccessControl = AblePolecat_AccessControl::wakeup();
+        self::setResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL, $AccessControl);
+        $this->BootLog->logStatusMessage('Wakeup Access Control - OK');
+      }
+      else {
+        $this->BootLog->logStatusMessage('Wakeup Access Control (NO DB) - SKIP');
+      }
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Access Control - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to . " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * boot function template
+   */
+  protected function bootServiceBus() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // Service Bus
+      //
+      if (self::$Server->getDatabaseState('connected')) {
+        $ServiceBus = AblePolecat_Service_Bus::wakeup();
+        self::setResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $ServiceBus);
+        $this->BootLog->logStatusMessage('Wakeup Service Bus - OK');
+      }
+      else {
+        $this->BootLog->logStatusMessage('Wakeup Service Bus (NO DB) - SKIP');
+      }
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Service Bus - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to boot service bus. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * Application Mode - handles third party code (modules)
+   */
+  protected function bootApplicationMode() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // Protection ring 1, Application mode.
+      //
+      self::$Server->Resources[self::RING_APPLICATION_MODE] = array();
+      
+      //
+      // Wakeup Application Mode
+      //
+      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
+      $ApplicationMode = AblePolecat_Mode_Application::wakeup(self::getAccessControl()->getSession());
+      self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
+      
+      //
+      // Load application resources from contributed modules.
+      //
+      $ApplicationMode->loadRegisteredResources();
+      
+      //
+      // Register client classes from contributed contributed modules with service bus.
+      //
+      self::getServiceBus()->registerClients();
+      
+      //
+      // Put success messages at bottom in case something up there chokes
+      //
+      $this->BootLog->logStatusMessage('Wakeup Application Mode - OK');
+      $this->BootLog->logStatusMessage('Load third-party resources - OK');
+      $this->BootLog->logStatusMessage('Register third-party clients - OK');
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup Application Mode - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to boot Application Mode. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * User Mode - manages user session, agent and access control roles
+   */
+  protected function bootUserMode() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // User mode.
+      //
+      self::$Server->Resources[self::RING_USER_MODE] = array();
+      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
+      $UserMode = AblePolecat_Mode_User::wakeup(self::getAccessControl()->getSession());
+      self::setResource(self::RING_USER_MODE, self::NAME_USER_MODE, $UserMode);
+      $this->BootLog->logStatusMessage('Wakeup User Mode - OK');
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup User Mode - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to . " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * boot function template
+   */
+  protected function bootTemplate() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // @todo: initialize and cache resource
+      //
+    }
+    catch(Exception $Exception) {
+      $errmsg .= " Failed to . " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
     
   /**
    * Initialize resources in protection ring '0' (e.g. kernel).
@@ -78,164 +475,47 @@ class AblePolecat_Server {
   protected function initialize() {
     
     //
+    // state of the application database.
+    //
+    $this->db_state = NULL;
+    
+    //
     // 'Kernel' resources container.
     //
-    self::$Resources[0] = array();
+    $this->Resources[self::RING_SERVER_MODE] = array();
     
     //
-    // Wakeup access control service with current session.
+    // Only caches messages in memory until end of script
     //
-    $AccessControl = AblePolecat_AccessControl::wakeup();
-    self::setResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL, $AccessControl);
+    $this->BootLog = AblePolecat_Log_Boot::wakeup();
     
     //
-    // This code checks query string for a boot mode parameter named 'run'.
-    // If passed, and mode is authorized for client, server will boot in
-    // requested mode. If parameter is not passed, but mode is stored in a 
-    // cookie, server will boot in cookie mode. Otherwise, the server will 
-    // boot in normal mode.
+    // Access control agent (super user).
     //
-    $run_var = self::getRequestVariable('run');
-    if (!isset($run_var)) {
-      //
-      // If runtime context was saved in a cookie, use that until agent
-      // explicitly unsets with run=user or cookie expires.
-      //
-      if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
-        $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
-        isset($data['context']) ? $run_var = $data['context'] : NULL;
-      }
-    }
-    $BootMode = 'user';
-    switch ($run_var) {
-      default:
-        break;
-      case 'dev':
-      case 'qa':
-      case 'user':
-        $BootMode = $run_var;
-        break;
-    }
-    self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, $BootMode);
+    $this->Agent = AblePolecat_AccessControl_Agent_Server::wakeup($this);
     
-    //
-    // Wakeup class registry.
-    //
-    $ClassRegistry = AblePolecat_ClassRegistry::wakeup($AccessControl->getSession());
-    self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
+    $this->BootLog->logStatusMessage('Server object initialized.');
+  }
+  
+  /**
+   * Get information about state of application database at boot time.
+   *
+   * @param mixed $param If set, a particular parameter.
+   *
+   * @return mixed Array containing all state data, or value of given parameter or FALSE.
+   */
+  protected function getDatabaseState($param = NULL) {
     
-    //
-    // Server mode
-    // 1. Initialize error reporting
-    // 2. Set default error handler
-    // 3. Set default exception handler
-    // 4. Normal | Development | Testing mode
-    //
-    $ServerMode = NULL;
-    switch(self::getBootMode()) {
-      default:
-        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Normal.php')));
-        $ServerMode = AblePolecat_Mode_Normal::wakeup($AccessControl->getSession());
-        break;
-      case 'dev':
-        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Dev.php')));
-        $ServerMode = AblePolecat_Mode_Dev::wakeup($AccessControl->getSession());
-        break;
-      case 'qa':
-        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Server', 'Qa.php')));
-        $ServerMode = AblePolecat_Mode_Qa::wakeup($AccessControl->getSession());
-        break;
-    }
-    self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
-    
-    //
-    // Wakeup default log file.
-    //
-    $DefaultLog = AblePolecat_Log_Csv::wakeup($AccessControl->getSession());
-    self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
-    
-    //
-    // Server environment initialized.
-    // Set configurable system paths.
-    //
-    $paths = $ServerMode->getEnvironment()->getConf('paths');
-    foreach($paths->path as $key => $path) {
-      $pathAttributes = $path->attributes();
-      if (isset($pathAttributes['name'])) {
-        AblePolecat_Server_Paths::setFullPath($pathAttributes['name']->__toString(), $path->__toString());
-      }
-    }
-    
-    //
-    // Verify user/configurable directories.
-    //
-    AblePolecat_Server_Paths::verifyConfDirs();
-    
-    //
-    // Load any core library database classes.
-    //
-    $databases = array(
-        self::NAME_DATABASES => array(),
-        'id' => array(),
-        'name' => array(),
-    );
-    $dbconf = $ServerMode->getEnvironment()->getConf('databases');
-    $dbkey = 0;
-    foreach($dbconf as $element_name => $db) {
-      $dbattr = $db->attributes();
-      isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
-      isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
-      isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
-      
-      if (!isset($dbname) && !isset($dbid)) {
-        self::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
+    $state = FALSE;
+    if (isset($this->db_state)) {
+      if (isset($param) && isset($this->db_state[$param])) {
+        $state = $this->db_state[$param];
       }
       else {
-        //
-        // If module is not core, wait until application mode.
-        //
-        if (isset($dbmodulename) && ($dbmodulename === 'core')) {
-          isset($db->classname) ? $dbclassname = $db->classname->__toString() : $dbclassname = NULL;
-          if (isset($db->classname)) {
-            //
-            // Register and load the database class.
-            //
-            self::getClassRegistry()->registerLoadableClass($dbclassname, NULL, 'wakeup');
-            $Database = self::getClassRegistry()->loadClass($dbclassname);
-            
-            //
-            // Open the database connection.
-            //
-            $DbAgent = $ServerMode->getEnvironment()->getAgent();            
-            $Database->setPermission($DbAgent, AblePolecat_AccessControl_Constraint_Open::getId());
-            isset($db->dsn) ? $dbdsn = $db->dsn->__toString() : $dbdsn = NULL;
-            $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
-            $Database->open($DbAgent, $DbUrl);
-            
-            //
-            // Add the database to server.
-            //
-            $databases[self::NAME_DATABASES][$dbkey] = $Database;
-            isset($dbid) ? $databases['id'][$dbid] = $dbkey : NULL;
-            isset($dbname) ? $databases['name'][$dbname] = $dbkey : NULL;
-          }
-          else {
-            self::log(AblePolecat_LogInterface::WARNING, sprintf("no class name given for database %s in conf.", $dbname));
-          }
-        }
-        else {
-          self::log(AblePolecat_LogInterface::WARNING, sprintf("no module name given for database %s in conf.", $dbname));
-        }
+        $state = $this->db_state;
       }
-      $dbkey++;
     }
-    self::setResource(self::RING_DATABASES, self::NAME_DATABASES, $databases);
-    
-    //
-    // Service Bus
-    //
-    $ServiceBus = AblePolecat_Service_Bus::wakeup($AccessControl->getSession());
-    self::setResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $ServiceBus);
+    return $state;
   }
   
   /**
@@ -252,14 +532,40 @@ class AblePolecat_Server {
   protected static function getResource($ring, $name, $safe = TRUE) {
     
     $resource = NULL;
-    if (isset(self::$Resources[$ring]) && isset(self::$Resources[$ring][$name])) {
-      $resource = self::$Resources[$ring][$name];
+    $errmsg = '';
+    
+    try {
+      $Server = AblePolecat_Server::getServer();
+      if (isset($Server->Resources[$ring]) && isset($Server->Resources[$ring][$name])) {
+        $resource = $Server->Resources[$ring][$name];
+      }
     }
-    else if ($safe) {
-      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, 
-        "Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed.");
+    catch (AblePolecat_Server_Exception $Exception) {
+      $errmsg .= $Exception->getMessage();
+    }
+
+    if (!isset($resource) && $safe) {
+      $errmsg .= $errmsg = " Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed. ";
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
     return $resource;
+  }
+  
+  /**
+   * Get instance of singleton.
+   */
+  protected static function getServer() {
+    
+    if (!isset(self::$Server)) {
+      //
+      // throw exception - prevent use of null object to access property/method
+      //
+      throw new AblePolecat_Server_Exception(
+        'Able Polecat server is not initialized.',
+        AblePolecat_Error::ACCESS_INVALID_OBJECT
+      );
+    }
+    return self::$Server;
   }
   
   /**
@@ -272,14 +578,24 @@ class AblePolecat_Server {
    * @throw Exception if ring is not intialized.
    */
   protected static function setResource($ring, $name, $resource) {
-    if (isset(self::$Resources[$ring]) && is_array(self::$Resources[$ring])) {
-      if (!isset(self::$Resources[$ring][$name])) {
-        self::$Resources[$ring][$name] = $resource;
+    
+    $errmsg = '';
+    $Server = NULL;
+    
+    try {
+      $Server = AblePolecat_Server::getServer();
+      if (isset($Server->Resources[$ring]) && is_array($Server->Resources[$ring])) {
+        if (!isset($Server->Resources[$ring][$name])) {
+          $Server->Resources[$ring][$name] = $resource;
+        }
       }
     }
-    else {
-      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, 
-        "Able Polecat Server rejected attempt to cache resource given by $name at protection ring $ring.");
+    catch (AblePolecat_Server_Exception $Exception) {
+      $errmsg .= $Exception->getMessage();
+    }
+    if (!isset($Server->Resources[$ring][$name])) {
+      $errmsg .= " Able Polecat Server rejected attempt to cache resource given by $name at protection ring $ring.";
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
   }
   
@@ -291,30 +607,31 @@ class AblePolecat_Server {
    * @param int    $code Error code.
    */
   protected static function writeToDefaultLog($severity, $message, $code = NULL) {
-    $DefaultLog = self::getDefaultLog();
-    switch ($severity) {
-      default:
-        $DefaultLog->logStatusMessage($message);
-        break;
-      case AblePolecat_LogInterface::STATUS:
-        $DefaultLog->logStatusMessage($message);
-        break;
-      case AblePolecat_LogInterface::WARNING:
-        $DefaultLog->logWarningMessage($message);
-        break;
-      case AblePolecat_LogInterface::ERROR:
-        $DefaultLog->logErrorMessage($message);
-        break;
-      case AblePolecat_LogInterface::DEBUG:
-        $DefaultLog->logStatusMessage($message);
-        break;
+    
+    $DefaultLog = self::getDefaultLog(FALSE);
+    if (isset($DefaultLog)) {
+      switch ($severity) {
+        default:
+          $DefaultLog->logStatusMessage($message);
+          break;
+        case AblePolecat_LogInterface::STATUS:
+          $DefaultLog->logStatusMessage($message);
+          break;
+        case AblePolecat_LogInterface::WARNING:
+          $DefaultLog->logWarningMessage($message);
+          break;
+        case AblePolecat_LogInterface::ERROR:
+          $DefaultLog->logErrorMessage($message);
+          break;
+        case AblePolecat_LogInterface::DEBUG:
+          $DefaultLog->logStatusMessage($message);
+          break;
+      }
     }
   }
   
   /**
    * Bootstrap procedure for Able Polecat.
-   *
-   * @return AblePolecat_Server Bootstrapped system object.
    */
   public static function bootstrap() {
     
@@ -323,152 +640,223 @@ class AblePolecat_Server {
     //
     if (!isset(self::$Server)) {
       //
-      // For performance monitoring
-      //
-      $Clock = new AblePolecat_Clock();
-      $Clock->start();
-      
-      //
       // Create instance of Singleton.
       //
       self::$Server = new self();
       
       //
-      // Get access control resource
+      // Server environment configuration settings
       //
-      $AccessControl = self::getResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL);
+      self::$Server->bootServerMode();
       
       //
-      // Protection ring 1, Application mode.
+      // Application database
       //
-      self::$Resources[self::RING_APPLICATION_MODE] = array();
-      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'Application.php')));
-      $ApplicationMode = AblePolecat_Mode_Application::wakeup($AccessControl->getSession());
-      self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
+      self::$Server->bootDatabase();
       
       //
-      // Load application resources from contributed modules.
+      // No connection to database.
+      // Could happen if this is a first time install.
+      // But need to rule out any trouble.
       //
-      $ApplicationMode->loadRegisteredResources();
+      if ((self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) && 
+          (self::$Server->getDatabaseState('connected') === FALSE)) {
+          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_VAR, 'html', 'install', 'home.html')));
+      }
       
       //
-      // Register client classes from contributed contributed modules with service bus.
+      // Application log
       //
-      self::getServiceBus()->registerClients();
+      self::$Server->bootLog();
       
       //
-      // @todo: Extract USER data from session
+      // Class registry
       //
-      $UserSession = $AccessControl->getSession();
+      self::$Server->bootClassRegistry();
       
       //
-      // User mode.
+      // Remainder of boot procedure is skipped if this is an install
       //
-      self::$Resources[self::RING_USER_MODE] = array();
-      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Mode', 'User.php')));
-      $UserMode = AblePolecat_Mode_User::wakeup($UserSession);
-      self::setResource(self::RING_USER_MODE, self::NAME_USER_MODE, $UserMode);
+      if (self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) {
+        //
+        // Access control service
+        //
+        self::$Server->bootAccessControl();
+        
+        //
+        // ESB - service bus
+        //
+        self::$Server->bootServiceBus();
+        
+        //
+        // Third-party modules
+        //
+        self::$Server->bootApplicationMode();
+        
+        //
+        // User session and access control management
+        //
+        self::$Server->bootUserMode();
+      }
             
       //
       // Register some other core classes.
       //
-      require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Url.php'); // not loadable
       // self::getClassRegistry()->registerLoadableClass($class_name,
         // $path_to_include,
         // $create_method
       // );
       
       //
-      // Log bootstrap time
+      // Close the boot log file
       //
-      $msg = sprintf("Able Polecat server is ready in %s mode. Bootstrap completed in %s.",
-        self::$Server->getBootMode(), 
-        $Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, TRUE)
-      );
-      self::log(AblePolecat_LogInterface::DEBUG, $msg);
+      if (isset(self::$Server->BootLog)) {
+        self::$Server->BootLog->sleep();
+        self::$Server->BootLog = NULL;
+      }
     }
-    return self::$Server;
   }
   
   /**
+   * Get access to server access control resource.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_AccessControl.
    */
-  public static function getAccessControl() {
-    return self::getResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL);
+  public static function getAccessControl($safe = TRUE) {
+    return self::getResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL, $safe);
   }
   
   /**
+   * Get access to application mode resource.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_Mode_Application.
    */
-  public static function getApplicationMode() {
-    return self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE);
+  public static function getApplicationMode($safe = TRUE) {
+    return self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $safe);
+  }
+  
+  /**
+   * Returns value of given bootstrap directive from request.
+   *
+   * @param string $directive Name of directive.
+   *
+   * @return mixed value of directive.
+   */
+  public static function getBootDirective($directive) {
+    //
+    // This code checks query string for a boot mode parameter named 'run'.
+    // If passed, and mode is authorized for client, server will boot in
+    // requested mode. If parameter is not passed, but mode is stored in a 
+    // cookie, server will boot in cookie mode. Otherwise, the server will 
+    // boot in normal mode.
+    //
+    $value = AblePolecat_Server::getRequestVariable('mode');
+    if (!isset($value)) {
+      //
+      // If runtime context was saved in a cookie, use that until agent
+      // explicitly unsets with run=user or cookie expires.
+      //
+      if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+        $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
+        isset($data[$directive]) ? $value = $data[$directive] : NULL;
+      }
+    }
+    return $value;
   }
   
   /**
    * @return string dev | qa | user.
    */
   public static function getBootMode() {
-    return self::getResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE);
+    return self::getResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, FALSE);
   }
   
   /**
+   * Get access to class registry resource.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_ClassRegistry.
    */
-  public static function getClassRegistry() {
-    return self::getResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY);
+  public static function getClassRegistry($safe = TRUE) {
+    return self::getResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $safe);
   }
   
   /**
-   * @param string $id Id or name of registered database.
+   * Get access to application database.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
    *
    * @return AblePolecat_DatabaseInterface.
    */
-  public static function getDatabase($id) {
-    $Database = NULL;
-    $databases = self::getResource(self::RING_DATABASES, self::NAME_DATABASES);
-    $key = NULL;
-    if (isset($databases['id'][$id])) {
-      $key = $databases['id'][$id];
-    }
-    else if (isset($databases['name'][$id])) {
-      $key = $databases['name'][$id];
-    }
-    if (isset($databases[self::NAME_DATABASES][$key])) {
-      $Database = $databases[self::NAME_DATABASES][$key];
-    }
-    else {
-      throw new AblePolecat_Server_Exception("Could not access database $id. No such object registered.",
-        AblePolecat_Error::ACCESS_INVALID_OBJECT);
-    }
-    return $Database;
+  public static function getDatabase($safe = TRUE) {
+    return self::getResource(self::RING_DATABASE, self::NAME_DATABASE, $safe);
   }
   
   /**
+   * Get access to default log resource.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_LogInterface.
    */
-  public static function getDefaultLog() {
-    return self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG);
+  public static function getDefaultLog($safe = TRUE) {
+    return self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $safe);
   }
   
   /**
+   * Return unique, system-wide identifier for security resource.
+   *
+   * @return string Resource identifier.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name for security resource.
+   *
+   * @return string Resource name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /**
+   * Get access to server mode resource.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_Mode_ServerAbstract or NULL.
    */
-  public static function getServerMode() {
-    return self::getResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE);
+  public static function getServerMode($safe = TRUE) {
+    return self::getResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $safe);
   }
   
   /**
+   * Get access to service bus.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_Service_BusInterface or NULL.
    */
-  public static function getServiceBus() {
-    return self::getResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS);
+  public static function getServiceBus($safe = TRUE) {
+    return self::getResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $safe);
   }
   
   /**
+   * Get access to user mode resource.
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
    * @return AblePolecat_Mode_User or NULL.
    */
-  public static function getUserMode() {
-    return self::getResource(self::RING_USER_MODE, self::NAME_USER_MODE);
+  public static function getUserMode($safe = TRUE) {
+    return self::getResource(self::RING_USER_MODE, self::NAME_USER_MODE, $safe);
   }
   
   /**
@@ -490,29 +878,11 @@ class AblePolecat_Server {
    * Handle critical environment errors depending on runtime context.
    */
   public static function handleCriticalError($error_number, $error_message = NULL) {
-    
+  
     !isset($error_message) ? $error_message = ABLE_POLECAT_EXCEPTION_MSG($error_number) : NULL;
-    if (isset(self::$Server)) {
-      self::log(AblePolecat_LogInterface::ERROR, $error_message, $error_number);
-      $ServerModeClass = get_class(self::getServerMode());
-      switch ($ServerModeClass) {
-        case 'AblePolecat_Mode_Dev':
-          //
-          // Override SEH - trigger error and die.
-          //
-          trigger_error($error_message, E_USER_ERROR);
-          break;
-        default:
-          //
-          // throw exception
-          //
-          throw new AblePolecat_Environment_Exception($error_message, $error_number);
-          break;
-      }
-    }
-    else {
-      trigger_error($error_message, E_USER_ERROR);
-    }
+    // require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Browser.php')));
+    // AblePolecat_Log_Browser::dumpBacktrace($error_message);
+    self::shutdown('error', $error_message, $error_number);
   }
   
   /**
@@ -552,21 +922,86 @@ class AblePolecat_Server {
   }
   
   /**
+   * Handles requests to redirect a request from a web browser.
+   *
+   * @param string $location An absolute URL or a preset Able Polecat page/template.
+   * @param bool $replace Parameter in PHP header() NIU
+   * @param int $http_response_code Parameter in PHP header() NIU
+   */
+  public static function redirect($location = '', $replace = TRUE, $http_response_code = 302) {
+    
+    //
+    // @todo: this is merely a stub, obviously not a solution
+    //
+    $Locater = AblePolecat_AccessControl_Resource_Locater::create($location);
+    $output = file_get_contents($Locater);
+    if ($output) {
+      echo $output;
+    }
+    self::shutdown();
+  }
+  
+  /**
+   * Force shut down of  Able Polecat.
+   * 
+   * @param string $severity error | warning | status | info | debug.
+   * @param mixed  $message Message body.
+   * @param int    $code Error code.
+   */
+  public static function shutdown($severity = NULL, $message = NULL, $code = NULL) {
+  
+  //
+  // Default shutdown code - OK
+  //
+  $exitmsg = 0;
+  
+  //
+  // If no error information provided, bypass logging
+  //
+  if (isset($severity) && isset($message)) {
+    isset($code) ? $codetxt = sprintf("code %d", $code) : $codetxt = "no code";
+      $exitmsg = sprintf("Able Polecat was forced to shutdown. %s condition.  %s. %s",
+        $severity, 
+        $message, 
+        $codetxt
+      );
+      self::writeToDefaultLog($severity, $exitmsg, $code);
+      
+      //
+      // Close the boot log file if it's open
+      //
+      if (isset(self::$Server->BootLog)) {
+        self::$Server->BootLog->logStatusMessage($message);
+        self::$Server->BootLog->sleep();
+        self::$Server->BootLog = NULL;
+      }
+    }
+    
+    //
+    // shut down procedures
+    //
+    try {
+    }
+    catch(Exception $Exception) {
+    }
+      
+    exit($exitmsg);
+  }
+  
+  /**
    * Similar to DOM ready() but for Able Polecat core system.
    *
    * @return AblePolecat_Server or FALSE.
    */
-  public static function ready() {
-    return self::$Server;
-  }
+  // public static function ready() {
+    // return self::$Server;
+  // }
   
   final protected function __construct() {
     
     //
     // Not ready until after initialize().
     //
-    self::$Server = NULL;
-    self::$Resources = array();
     $this->initialize();
   }
 }

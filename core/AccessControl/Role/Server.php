@@ -3,8 +3,8 @@
  * @file: Server.php
  * Default access control role assigned to web applications.
  */
- 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Role.php');
+
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role.php')));
 
 class AblePolecat_AccessControl_Role_Server extends AblePolecat_AccessControl_RoleAbstract {
   

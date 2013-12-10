@@ -4,9 +4,13 @@
  * Environment for Able Polecat Server Mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Conf.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Conf.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Server.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstract {
+  
+  const UUID = '318df280-5def-11e3-949a-0800200c9a66';
+  const NAME = 'Able Polecat Server Environment';
   
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
@@ -18,7 +22,7 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
    */
   protected function initialize() {
     parent::initialize();
-  }
+  }  
   
   /**
    * Helper function uses a cookie to store local dev/test mode settings.
@@ -53,6 +57,24 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
   }
   
   /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /**
    * Serialize object to cache.
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
@@ -61,7 +83,7 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
     //
     // Runtime context may be saved in cookie for local development and testing.
     //
-    $this->setServerModeCookie(AblePolecat_Server::getBootMode());
+    $this->setServerModeCookie(AblePolecat_Server::getBootDirective(AblePolecat_Server::BOOT_MODE));
   }
   
   /**
@@ -73,17 +95,16 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Environment = self::$Environment;
-    if (!isset($Environment)) {
+    if (!isset(self::$Environment)) {
       //
-      // Create environment object.
+      // Initialize singleton instance.
       //
-      $Environment = new AblePolecat_Environment_Server();
+      self::$Environment = new AblePolecat_Environment_Server();
       
       //
       // Initialize server access control.
       //
-      $Agent = $Environment->getAgent();
+      self::$Environment->setAgent($Subject);
 
       //
       // Load application configuration settings.
@@ -93,34 +114,42 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
       // created in #4 to gain access to this. If file does not exist 
       // initialization routine will create it with default settings.
       //
-      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        'AblePolecat_Conf_Server',
-        ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf' . DIRECTORY_SEPARATOR . 'Server.php',
-        'touch'
-      );
-      $Config = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Server');
+      $Config = AblePolecat_Conf_Server::touch();
       $ConfigUrl = AblePolecat_Conf_Server::getResourceLocater();
       if (isset($Config) && $ConfigUrl) {
         //
         // Grant open permission on config file to agent.
         //
-        $Config->setPermission($Agent, AblePolecat_AccessControl_Constraint_Open::getId());
-        $Config->setPermission($Agent, AblePolecat_AccessControl_Constraint_Read::getId());
+        $Config->setPermission($Subject, AblePolecat_AccessControl_Constraint_Open::getId());
+        $Config->setPermission($Subject, AblePolecat_AccessControl_Constraint_Read::getId());
         
         //
         // Set configuration file/path.
+        // This opens the conf file.
         //
-        $Environment->setConf($Config, $ConfigUrl);
+        self::$Environment->setConf($Config, $ConfigUrl);
+        
+        //
+        // Server environment initialized.
+        // Set configurable system paths.
+        //
+        $paths = self::$Environment->getConf('paths');
+        foreach($paths->path as $key => $path) {
+          $pathAttributes = $path->attributes();
+          if (isset($pathAttributes['name'])) {
+            AblePolecat_Server_Paths::setFullPath($pathAttributes['name']->__toString(), $path->__toString());
+          }
+        }
+        
+        //
+        // Verify user/configurable directories.
+        //
+        AblePolecat_Server_Paths::verifyConfDirs();
       }
       else {
         throw new AblePolecat_Environment_Exception("Failure to access/set application configuration.", 
           AblePolecat_Error::BOOTSTRAP_CONFIG);
       }
-
-      //
-      // Initialize singleton instance.
-      //
-      self::$Environment = $Environment;
     }
     return self::$Environment;
   }

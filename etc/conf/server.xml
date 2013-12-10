@@ -1,0 +1,27 @@
+<?xml version='1.0' standalone='yes'?>
+<config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
+  <databases>
+    <!-- 
+    More than one application database can be defined in server conf file. However, only ONE
+    application database can be active per server mode. If 'mode' attribute is empty, polecat 
+    will assume any mode. Otherwise, database is defined for given mode only. The 'use' attribute
+    indicates that the database should be loaded for the respective server mode. Polecat will 
+    scan database definitions until it finds one suitable for the current server mode where the
+    'use' attribute is set. 
+    -->
+    <!-- mySql database
+    <database name="polecat" mode="" use="0">
+      <dsn>mysql://user:pass@localhost/example</dsn>
+      <classname>AblePolecat_Database_Pdo</classname>
+    </database>
+    -->
+  </databases>
+  <paths>
+    <!-- User configurable sub-directories -->
+    <!-- 
+    <path name="myDir">
+      C:\path\to\AblePolecat\myDir 
+    </path>
+    -->
+  </paths>
+</config>

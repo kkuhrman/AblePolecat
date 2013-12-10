@@ -4,7 +4,7 @@
  * Any object, which can be cached to maintain state or improve performance.
  */
  
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Subject.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
  
 interface AblePolecat_CacheObjectInterface {
   
@@ -17,6 +17,18 @@ interface AblePolecat_CacheObjectInterface {
   
   /**
    * Create a new instance of object or restore cached object to previous state.
+   *
+   * Best practice wakeup() will return the object fully initialized and ready to work.
+   * Should anything prevent this, wakeup() should throw an exception so as to prevent
+   * method calls on non objects or objects that are not properly initialized.
+   * Thus, wakeup() should always be called within a try/catch block and chaining is
+   * encouraged. For example:
+   *    try {
+   *        MyObject::wakeup()->myMethod();
+   *    }
+   *    catch(AblePolecat_Exception $Exception) {
+   *       AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+   *    }
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *

@@ -216,14 +216,14 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
    *
    * @return AblePolecat_Service_Bus or FALSE.
    */
-  public static function ready() {
+  // public static function ready() {
     
-    $ready = isset(self::$ServiceBus);
-    if ($ready) {
-      $ready = self::$ServiceBus;
-    }
-    return $ready;
-  }
+    // $ready = isset(self::$ServiceBus);
+    // if ($ready) {
+      // $ready = self::$ServiceBus;
+    // }
+    // return $ready;
+  // }
   
   /**
    * Registers service clients by id => class name.

@@ -4,25 +4,16 @@
  * Handles registration and lazy loading of Able Polecat classes.
  */
 
-//
-// One of the few core files which does not make use of the defined constant
-// 'ABLE_POLECAT_PATH', which is initialized in the first required script.
-//
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'Server', 'Paths.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 
-class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
+abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObjectAbstract {
   
     /**
    * Class registration constants.
    */
   const CLASS_REG_PATH    = 'path';
   const CLASS_REG_METHOD  = 'method';
-  
-  /**
-   * @var AblePolecat_ClassRegistry Singleton instance.
-   */
-  private static $ClassRegistry = NULL;
   
   /**
    * @var List of Able Polecat interfaces.
@@ -66,6 +57,34 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     $AblePolecatInterfaces = self::getAblePolecatInterfaces();
     foreach($AblePolecatInterfaces as $key => $InterfaceName) {
       $this->registeredModules['interface'][$InterfaceName] = array();
+    }
+  }
+  
+  /**
+   * @return Array Volatile (in memory) registry.
+   */
+  protected function getRegisteredClasses() {
+    return $this->registeredClasses;
+  }
+  
+  /**
+   * Add a class to the volatile (in memory) registry.
+   *
+   * This function does not have any of the path guessing and validation functionality of its
+   * public counterpart so as to eliminate unnecessary overhead. It is mainly intended for 
+   * class population in wakeup() and assumes all the path validation work etc. has been done.
+   *
+   * @param string $class_name The name of class to register.
+   * @param string $path Full path of include file if not given elsewhere in script.
+   * @param string $method Method used for creation (default is __construct()).
+   *
+   */
+  protected function setRegisteredClass($class_name, $path, $method) {
+    if (isset($this->registeredClasses)) {
+      $this->registeredClasses[$class_name] = array(
+          self::CLASS_REG_PATH => $path,
+          self::CLASS_REG_METHOD => $method,
+        );
     }
   }
   
@@ -276,10 +295,7 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     if (isset($methods)) {
       if (FALSE !== array_search($method, $methods)) {
         !isset($method) ? $method = '__construct' : NULL;
-        $this->registeredClasses[$class_name] = array(
-          self::CLASS_REG_PATH => $path,
-          self::CLASS_REG_METHOD => $method,
-        );
+        $this->setRegisteredClass($class_name, $path, $method);
         $registered = TRUE;
       }
       else {
@@ -342,51 +358,10 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObjectAbstract {
     }
     return $registerClass;
   }
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    try {
-      $Database = AblePolecat_Server::getDatabase("polecat");
-      foreach($this->registeredClasses as $class_name => $class_info) {
-        $result = FALSE;
-        isset($class_info[self::CLASS_REG_PATH]) ? $path = $class_info[self::CLASS_REG_PATH] : $path = NULL; 
-        isset($class_info[self::CLASS_REG_METHOD]) ? $method = $class_info[self::CLASS_REG_METHOD] : $method = NULL;
-        if (isset($path) && isset($method)) {
-          //
-          // Insert new or update existing entry
-          //
-          $sql = __SQL()->          
-            replace('name', 'path', 'method')->
-            into('class')->
-            values($class_name, $path, $method);
-          $Stmt = $Database->prepareStatement($sql);
-          $result = $Stmt->execute();
-        }
-        if (!$result) {
-          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Failed to save $class_name registry");
-        }
-      }
-    }
-    catch (Exception $Exception) {
-      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, 'Failed to persist class registry. ' . $Exception->getMessage());
-    }
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (!isset(self::$ClassRegistry)) {
-      self::$ClassRegistry = new AblePolecat_ClassRegistry();
-    }
-    return self::$ClassRegistry;
-  }
+}
+
+/**
+ * Exceptions thrown by class registry
+ */
+class AblePolecat_ClassRegistry_Exception extends AblePolecat_Exception {
 }

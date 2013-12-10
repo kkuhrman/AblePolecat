@@ -1,37 +1,49 @@
 <?php
 /**
  * @file: index.php
- * Handles redirection based on runtime context.
- * @todo: URL rewrites
+ * Default point of entry for Able Polecat.
  */
 
-require_once('local.php');
-require_once(ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'boot.php');
+/**
+ * Secondary directory hierarchy contains third-party modules, custom pages, services, 
+ * utilities, etc.
+ */
+if (!defined('ABLE_POLECAT_USR')) {
+  $ABLE_POLECAT_USR = __DIR__  . DIRECTORY_SEPARATOR . 'usr';;
+  define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
+}
+
+/**
+ * Host-specific system-wide configuration files directory.
+ * This constant IS used to locate the server configuration file and must define 
+ * the full path of the conf directory if other than ABLE_POLECAT_ROOT/conf.
+ */
+// if (!defined('ABLE_POLECAT_ETC')) {
+  // $ABLE_POLECAT_ETC = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'conf';
+  // define('ABLE_POLECAT_ETC', $ABLE_POLECAT_ETC);
+// }
+
+/**
+ * Variable files directory.
+ * This constant is used to locate files with content expected to continually change 
+ * during normal operation of the system, such as logs. It must define the full path 
+ * to a directory, for which the web agent has write privilege if other than 
+ * ABLE_POLECAT_ROOT/var.
+ */
+// if (!defined('ABLE_POLECAT_VAR')) {
+  // $ABLE_POLECAT_VAR = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'var';
+  // define('ABLE_POLECAT_VAR', $ABLE_POLECAT_VAR);
+// }
+
+/**
+ * Bootstrap Able Polecat.
+ */
+require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'core', 'Server.php')));
+
+try {
+  AblePolecat_Server::bootstrap();
+}
+catch (AblePolecat_Exception $Exception) {
+  AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_VAR, 'html', 'install', 'home.html')));
+}
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Able Polecat | Runtime Context Error</title>
-</head>
-
-<body>
-  <div id="header" style="opacity:0.8;position:relative;left:12px;width:1020px;height:65px;background-color:grey">
-    <!-- @todo logo -->
-    <h2>Able Polecat &copy; Project</h2>
-    <p>
-      Copyright &copy; 2008-2013 <a href="http://www.abledistributors.com" target="new">Able Distributors Inc.</a>. All rights reserved.
-    </p>
-    <p><?php 
-      $boot_mode = AblePolecat_Server::getBootMode();
-        switch($boot_mode) {
-          default:
-            echo '<p>' . $boot_mode . '</p>';
-            echo '<p>' . AblePolecat_Url::getBase() . '</p>';
-            break;
-        }
-      ?>
-    </p>
-  </div>
-</body>
-</html>

@@ -4,15 +4,20 @@
  * Base class for Environment which uses a conf file to store some settings.
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'AccessControl.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Conf.php');
 
 abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_EnvironmentInterface {
   
   /**
+   * @var AblePolecat_AccessControl_AgentInterface
+   */
+  private $Agent;
+  
+  /**
    * @var Environment configuration data.
    */
-  protected $Config;
+  private $Config;
   
   /**
    * Extends __construct(). 
@@ -21,15 +26,21 @@ abstract class AblePolecat_Environment_ConfAbstract extends AblePolecat_CacheObj
    */
   protected function initialize() {
     $this->Config = NULL;
+    $this->Agent = NULL;
   }
   
   /**
-   * Return access control agent.
-   *
-   * @return AblePolecat_AccessControl_AgentInterface.
+   * @return AblePolecat_AccessControl_AgentInterface
    */
-  public function getAgent() {
-    return AblePolecat_AccessControl::wakeup()->getAgent($this);
+  protected function getAgent() {
+    return $this->Agent;
+  }
+  
+  /**
+   * @param AblePolecat_AccessControl_AgentInterface $Agent
+   */
+  protected function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
+    $this->Agent = $Agent;
   }
   
   /**

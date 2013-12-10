@@ -10,26 +10,23 @@
  * This is best practice in any case rather than using global constants .
  */
  
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Mode.php');
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Application.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Application.php')));
 
 class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
 
-  //
-  // Application resource defs.
-  //
-  const RESOURCE_ALL              = 'all';
+  /**
+   * Constants.
+   */
+  const UUID = 'b306fe20-5f4c-11e3-949a-0800200c9a66';
+  const NAME = 'Able Polecat Application Mode';
+  const RESOURCE_ALL = 'all';
   
   /**
    * @var AblePolecat_Mode_ApplicationAbstract Concrete ApplicationMode instance.
    */
   protected static $ApplicationMode;
-  
-  /**
-   * @var bool Prevents some code from exceuting prior to start().
-   */
-  protected static $ready = FALSE;
-  
+    
   /**
    * @var List of interfaces which can be used as application resources.
    */
@@ -49,7 +46,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   protected function initialize() {
     
     parent::initialize();
-    self::$ApplicationMode = NULL;
     
     //
     // Supported Able Polecat interfaces.
@@ -69,6 +65,24 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     AblePolecat_Server::getDefaultLog();
     AblePolecat_Server::getServerMode();
     AblePolecat_Server::getServiceBus();
+  }
+  
+  /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
   }
   
   /**
@@ -186,8 +200,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    */
   public function loadRegisteredResources() {
   
-    $ApplicationMode = self::ready();
-    if ($ApplicationMode) {
+    if (isset(self::$ApplicationMode)) {
       $registeredClasses = AblePolecat_Server::getClassRegistry()->getModuleClasses('interface');   
       foreach($this->Resources as $interfaceName => $resources) {
         if (isset($registeredClasses[$interfaceName])) {
@@ -238,19 +251,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Similar to DOM ready() but for Able Polecat application mode.
-   *
-   * @return AblePolecat_Mode_ApplicationAbstract or FALSE.
-   */
-  public static function ready() {
-    $ready = self::$ready;
-    if ($ready) {
-      $ready = self::$ApplicationMode;
-    }
-    return $ready;
-  }
-  
-  /**
    * Serialize object to cache.
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
@@ -260,7 +260,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     // @todo: persist
     //
     self::$ApplicationMode = NULL;
-    self::$ready = FALSE;
   }
   
   /**
@@ -272,31 +271,117 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $ApplicationMode = self::ready();
-    if (!$ApplicationMode) {
+    if (!isset(self::$ApplicationMode)) {
       //
       // Create instance of application mode
       //
-      $ApplicationMode = new AblePolecat_Mode_Application();
+      self::$ApplicationMode = new AblePolecat_Mode_Application();
       
       //
       // Load environment settings
       //
       $Environment = AblePolecat_Environment_Application::wakeup();
       if (isset($Environment)) {
-        $ApplicationMode->Environment = $Environment;
+        self::$ApplicationMode->Environment = $Environment;
       }
       else {
         throw new AblePolecat_Environment_Exception('Failed to load Able Polecat application environment.',
           AblePolecat_Error::BOOT_SEQ_VIOLATION);
       }
-      
-      //
-      // wakeup() completed successfully
-      //
-      self::$ApplicationMode = $ApplicationMode;
-      self::$ready = TRUE;
     }
     return self::$ApplicationMode;
+  }
+  
+  protected function loadModuleDatabases() {
+    //
+    // Load application database for active mode.
+    // @todo: core will only use PDO; move custom class loading to application mode
+    //
+    $databases = array(
+        self::NAME_DATABASES => array(),
+        'id' => array(),
+        'name' => array(),
+    );
+    
+    //
+    // @todo???
+    //
+    // $dbconf = $ServerMode->getEnvironment()->getConf('databases');
+    $dbconf = array();
+    
+    $dbkey = 0;
+    foreach($dbconf as $element_name => $db) {
+      $dbattr = $db->attributes();
+      isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
+      isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
+      isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
+      
+      if (!isset($dbname) && !isset($dbid)) {
+        AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
+      }
+      else {        
+        //
+        // If module is not core, wait until application mode.
+        //
+        if (isset($dbmodulename) && ($dbmodulename !== 'core')) {
+          isset($db->classname) ? $dbclassname = $db->classname->__toString() : $dbclassname = NULL;
+          if (isset($db->classname)) {
+            //
+            // Register and load the database class.
+            //
+            AblePolecat_Server::getClassRegistry()->registerLoadableClass($dbclassname, NULL, 'wakeup');
+            $Database = AblePolecat_Server::getClassRegistry()->loadClass($dbclassname);
+            
+            //
+            // Open the database connection.
+            //
+            $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
+            isset($db->dsn) ? $dbdsn = $db->dsn->__toString() : $dbdsn = NULL;
+            $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
+            $Database->open($this->Agent, $DbUrl);
+            
+            //
+            // Add the database to server.
+            //
+            $databases[AblePolecat_Server::NAME_DATABASES][$dbkey] = $Database;
+            isset($dbid) ? $databases['id'][$dbid] = $dbkey : NULL;
+            isset($dbname) ? $databases['name'][$dbname] = $dbkey : NULL;
+          }
+          else {
+            AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, sprintf("no class name given for database %s in conf.", $dbname));
+          }
+        }
+        else {
+          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, sprintf("no module name given for database %s in conf.", $dbname));
+        }
+      }
+      $dbkey++;
+    }
+    self::setResource($dbclassname, $dbmodulename, $databases);
+  }
+  
+  /**
+   * @param string $id Id or name of registered database.
+   *
+   * @return AblePolecat_DatabaseInterface.
+   */
+  public static function getDatabase($id) {
+    $Database = NULL;
+    // $databases = self::getResource(self::RING_DATABASES, self::NAME_DATABASES);
+    $key = NULL;
+    if (isset($databases['id'][$id])) {
+      $key = $databases['id'][$id];
+    }
+    else if (isset($databases['name'][$id])) {
+      $key = $databases['name'][$id];
+    }
+    if (isset($databases[AblePolecat_Server::NAME_DATABASES][$key])) {
+      $Database = $databases[AblePolecat_Server::NAME_DATABASES][$key];
+    }
+    else {
+      throw new AblePolecat_Server_Exception("Could not access database $id. No such object registered.",
+        AblePolecat_Error::ACCESS_INVALID_OBJECT);
+    }
+    return $Database;
   }
 }

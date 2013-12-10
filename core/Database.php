@@ -4,8 +4,8 @@
  * Base class for Able Polecat database clients.
  */
 
-require_once(ABLE_POLECAT_PATH. DIRECTORY_SEPARATOR . 'CacheObject.php');
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Resource.php')));
+require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
 
 interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
 }

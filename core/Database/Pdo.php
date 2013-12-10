@@ -4,8 +4,8 @@
  * Encapsulates a PDO database connection.
  */
  
-require_once(ABLE_POLECAT_PATH. DIRECTORY_SEPARATOR . 'Database.php');
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'QueryLanguage', 'Statement', 'Sql.php')));
+require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Statement', 'Sql.php')));
 
 class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements AblePolecat_DatabaseInterface {
   

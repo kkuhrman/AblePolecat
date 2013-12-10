@@ -77,40 +77,45 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     
     $result = FALSE;
     
-    if (isset($token)) {
-      $interface = get_class($this);
-      $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
-      $session_data = serialize($token);    
-      $Database = AblePolecat_Server::getDatabase("polecat");
-      $sql = NULL;
-      
-      if (!isset($this->token)) {
-        $this->token = $token;
-        $sql = __SQL()->
-          insert('session_id', 'interface', 'session_data')->
-          into ('role')->
-          values($session_id, $interface, $session_data);
-      }
-      else if ($this->token !== $token) {
-        //
-        // token was updated lazily
-        //
-        $this->token = $token;
-        $sql = __SQL()->
-          update('role')->
-          set('session_data')->
-          values($session_data)->
-          where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
-      }
-      
-      if (isset($sql)) {
-        $PreparedStatement = $Database->prepareStatement($sql);
-        $result = $PreparedStatement->execute();
-        if (!$result) {
-          $this->token = NULL;
-          $Database->logErrorInfo();
+    try {
+      if (isset($token)) {
+        $interface = get_class($this);
+        $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+        $session_data = serialize($token);    
+        $Database = AblePolecat_Server::getDatabase();
+        $sql = NULL;
+        
+        if (!isset($this->token)) {
+          $this->token = $token;
+          $sql = __SQL()->
+            insert('session_id', 'interface', 'session_data')->
+            into ('role')->
+            values($session_id, $interface, $session_data);
+        }
+        else if ($this->token !== $token) {
+          //
+          // token was updated lazily
+          //
+          $this->token = $token;
+          $sql = __SQL()->
+            update('role')->
+            set('session_data')->
+            values($session_data)->
+            where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
+        }
+        
+        if (isset($sql)) {
+          $PreparedStatement = $Database->prepareStatement($sql);
+          $result = $PreparedStatement->execute();
+          if (!$result) {
+            $this->token = NULL;
+            $Database->logErrorInfo();
+          }
         }
       }
+    }
+    catch (AblePolecat_Exception $Exception) {
+      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
     }
     
     return $result;
@@ -123,24 +128,31 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
    */
   public function loadToken() {
     
-    $interface = get_class($this);
-    $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
-    // $session_data = serialize($this->token);    
-    $Database = AblePolecat_Server::getDatabase("polecat");
-    $sql = __SQL()->
-      select('session_data')->
-      from('role')->
-      where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
-    $PreparedStatement = $Database->prepareStatement($sql);
-    $result = $PreparedStatement->execute();
-    if ($result) {
-      $data = $PreparedStatement->fetch();
-      isset($data['session_data']) ? $this->token = unserialize($data['session_data']) : $this->token = NULL;
+    try {
+      $interface = get_class($this);
+      $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+      // $session_data = serialize($this->token);    
+      $Database = AblePolecat_Server::getDatabase();
+      $sql = __SQL()->
+        select('session_data')->
+        from('role')->
+        where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
+      $PreparedStatement = $Database->prepareStatement($sql);
+      $result = $PreparedStatement->execute();
+      if ($result) {
+        $data = $PreparedStatement->fetch();
+        isset($data['session_data']) ? $this->token = unserialize($data['session_data']) : $this->token = NULL;
+      }
+      else {
+        $this->token = NULL;
+        $Database->logErrorInfo();
+      }
     }
-    else {
+    catch (AblePolecat_Exception $Exception) {
       $this->token = NULL;
-      $Database->logErrorInfo();
+      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
     }
+    
     return $this->token;
   }
   
@@ -148,19 +160,26 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
    * Delete current session OAuth 2.0 access token from application database.
    */
   public function deleteToken() {
-    $interface = get_class($this);
-    $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
-    $Database = AblePolecat_Server::getDatabase("polecat");
-    $sql = __SQL()->
-      delete()->
-      from('role')->
-      where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
-    $PreparedStatement = $Database->prepareStatement($sql);
-    $result = $PreparedStatement->execute();
-    if (!$result) {
-      $Database->logErrorInfo();
+    
+    try {
+      $interface = get_class($this);
+      $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+      $Database = AblePolecat_Server::getDatabase();
+      $sql = __SQL()->
+        delete()->
+        from('role')->
+        where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
+      $PreparedStatement = $Database->prepareStatement($sql);
+      $result = $PreparedStatement->execute();
+      if (!$result) {
+        $Database->logErrorInfo();
+      }
+      $this->token = NULL;
     }
-    $this->token = NULL;
+    catch (AblePolecat_Exception $Exception) {
+      $this->token = NULL;
+      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+    }
   }
   
   /**

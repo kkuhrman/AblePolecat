@@ -4,7 +4,7 @@
  * Interface for a binary query language expression.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'QueryLanguage', 'Expression.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression.php')));
 
 interface AblePolecat_QueryLanguage_Expression_BinaryInterface extends AblePolecat_QueryLanguage_ExpressionInterface {
   
@@ -104,7 +104,7 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
     if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
       AblePolecat_Server::getClassRegistry()->registerLoadableClass(
         'AblePolecat_Data_Scalar_String', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Scalar', 'String.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
         'typeCast'
       );
     }

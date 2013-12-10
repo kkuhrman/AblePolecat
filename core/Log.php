@@ -3,8 +3,7 @@
  * Public interface to Able Polecat Logger.
  */
  
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'CacheObject.php')));
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 
 if (isset($_SERVER['WINDIR'])) {
   define('ABLE_POLECAT_EVENT_ID_ERROR',       LOG_ERR);
@@ -70,6 +69,41 @@ abstract class AblePolecat_LogAbstract implements AblePolecat_LogInterface {
    * Extends __construct(). 
    */
   abstract protected function initialize();
+  
+  /**
+   * Helper function.Writes message to file.
+   * 
+   * @param string $type STATUS | WARNING | ERROR.
+   * @param string $msg  Body of message.
+   */
+  abstract public function putMessage($type, $msg);
+  
+  /**
+   * Log a status message to file.
+   * 
+   * @param variable $msg Variable list of arguments comprising message.
+   */
+  public function logStatusMessage($msg = NULL) {
+    $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
+  }
+  
+  /**
+   * Log a status message to file.
+   * 
+   * @param variable $msg Variable list of arguments comprising message.
+   */
+  public function logWarningMessage($msg = NULL) {
+    $this->putMessage(AblePolecat_LogInterface::WARNING, $msg);
+  }
+  
+  /**
+   * Log a error message to stderr.
+   * 
+   * @param variable $msg Variable list of arguments comprising message.
+   */
+  public function logErrorMessage($msg = NULL) {
+    $this->putMessage(AblePolecat_LogInterface::ERROR, $msg);
+  }
   
   /**
    * Cached objects must be created by wakeup().

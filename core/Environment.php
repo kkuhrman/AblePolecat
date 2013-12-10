@@ -6,16 +6,11 @@
  * Duties of the Environment object:
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));
 
-interface AblePolecat_EnvironmentInterface extends AblePolecat_CacheObjectInterface {
-  
-  /**
-   * Return access control agent.
-   *
-   * @return AblePolecat_AccessControl_AgentInterface.
-   */
-  public function getAgent();
+interface AblePolecat_EnvironmentInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
 }
 
 /**
@@ -23,4 +18,3 @@ interface AblePolecat_EnvironmentInterface extends AblePolecat_CacheObjectInterf
  */
 class AblePolecat_Environment_Exception extends AblePolecat_Exception {
 }
-

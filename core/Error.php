@@ -12,6 +12,8 @@ class AblePolecat_Error {
   const ACCESS_DENIED                 = 9000; // Catch-all, non-specific access denied error.
   const ACCESS_ROLE_NOT_AUTH          = 9100; // Agent could not be assigned to given role.
   const ACCESS_ROLE_DENIED            = 9200; // Role denied access to resource.
+  const SLEEP_FAIL                    = 9300; // Failed to save object state on call to sleep().
+  const WAKEUP_FAIL                   = 9400; // Failed to restore object state on call to wakeup().
   const NO_ERROR_CODE_GIVEN           = 10000;
   const UNSUPPORTED_PHP_VER           = 10001;
   const BOOT_SEQ_VIOLATION            = 10005;
@@ -73,6 +75,12 @@ class AblePolecat_Error {
         break;
       case self::ACCESS_ROLE_DENIED:
         $message = 'Role denied access to resource.';
+        break;
+      case self::SLEEP_FAIL:
+        $message = 'Failed to save object state on call to sleep().';
+        break;
+      case self::WAKEUP_FAIL:
+        $message = 'Failed to restore object state on call to wakeup().';
         break;
       case self::UNSUPPORTED_PHP_VER:
         $message = 'PHP version not supported by Able Polecat';

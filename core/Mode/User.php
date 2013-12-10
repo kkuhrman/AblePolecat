@@ -10,6 +10,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment'
 class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   
   /**
+   * Constants.
+   */
+  const UUID = 'e7f5dd90-5f4c-11e3-949a-0800200c9a66';
+  const NAME = 'Able Polecat User Mode';
+  
+  /**
    * @var Instance of Singleton.
    */
   private static $UserMode;
@@ -38,16 +44,21 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Similar to DOM ready() but for Able Polecat application mode.
+   * Return unique, system-wide identifier.
    *
-   * @return AblePolecat_Mode_ApplicationAbstract or FALSE.
+   * @return UUID.
    */
-  public static function ready() {
-    $ready = FALSE;
-    if (isset(self::$UserMode)) {
-      $ready = self::$UserMode;
-    }
-    return $ready;
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
   }
   
   /**
