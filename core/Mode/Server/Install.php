@@ -1,12 +1,12 @@
 <?php
 /**
- * @file: Dev.php
+ * @file: Install.php
  * Boots Able Polecat server in development mode.
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Server', 'Check', 'Paths.php')));
 
-class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
+class AblePolecat_Mode_Server_Install extends AblePolecat_Mode_Server {
   /**
    * Extends constructor.
    * Sub-classes should override to initialize members.
@@ -29,17 +29,5 @@ class AblePolecat_Mode_Dev extends AblePolecat_Mode_ServerAbstract {
       throw new AblePolecat_Server_Exception(AblePolecat_Server_Check_Paths::getErrorMessage(), 
         AblePolecat_Server_Check_Paths::getErrorCode());
     }
-  }
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // todo: Persist...
-    //
-    self::$ServerMode = NULL;
   }
 }

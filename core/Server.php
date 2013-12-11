@@ -12,6 +12,14 @@
  */
 
 /**
+ * Most current version is loaded from conf file. These are defaults.
+ */
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.2.0');
+define('ABLE_POLECAT_VERSION_MAJOR', '0');
+define('ABLE_POLECAT_VERSION_MINOR', '2');
+define('ABLE_POLECAT_VERSION_REVISION', '0');
+
+/**
  * Root directory of the entire Able Polecat core project.
  */
 if (!defined('ABLE_POLECAT_ROOT')) {
@@ -152,6 +160,11 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   private $db_state;
   
   /**
+   * @var string Version number from server config settings file.
+   */
+  private $version;
+  
+  /**
    * functions called in bootstrap().
    */
   
@@ -168,6 +181,17 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       //
       $ServerMode = AblePolecat_Mode_Server::wakeup($this->Agent);
       self::setResource(self::RING_SERVER_MODE, self::NAME_SERVER_MODE, $ServerMode);
+      
+      //
+      // Get version number from server conf
+      //
+      $versionConf = $ServerMode->getEnvironment()->getConf('version');
+      // var_dump($versionConf);
+      $attr = $versionConf->attributes();
+      isset($attr['name']) ? self::$Server->version['name'] = $attr['name']->__toString() : NULL;
+      isset($versionConf->major) ? self::$Server->version['major'] = $versionConf->major->__toString() : NULL;
+      isset($versionConf->minor) ? self::$Server->version['minor'] = $versionConf->minor->__toString() : NULL;
+      isset($versionConf->revision) ? self::$Server->version['revision'] = $versionConf->revision->__toString() : NULL;
       
       //
       // Set the bootstrap Server Mode
@@ -494,6 +518,16 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     //
     $this->Agent = AblePolecat_AccessControl_Agent_Server::wakeup($this);
     
+    //
+    // Until loaded from conf...
+    // 
+    $this->version = array(
+      'name' => ABLE_POLECAT_VERSION_NAME,
+      'major' => ABLE_POLECAT_VERSION_MAJOR,
+      'minor' => ABLE_POLECAT_VERSION_MINOR,
+      'revision' => ABLE_POLECAT_VERSION_REVISION,
+    );
+    
     $this->BootLog->logStatusMessage('Server object initialized.');
   }
   
@@ -661,7 +695,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       //
       if ((self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) && 
           (self::$Server->getDatabaseState('connected') === FALSE)) {
-          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_VAR, 'html', 'install', 'home.html')));
+          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_VAR, 'tpl', 'main.tpl')));
       }
       
       //
@@ -860,6 +894,47 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
+   * Get version number of server/core.
+   */
+  public static function getVersion($as_str = TRUE) {
+    
+    $version = NULL;
+    
+    if (isset(self::$Server)) {
+      if ($as_str) {
+        $version = sprintf("Version %s.%s.%s (%s)",
+          self::$Server->version['major'],
+          self::$Server->version['minor'],
+          self::$Server->version['revision'],
+          self::$Server->version['name']
+        );
+      }
+      else {
+        $version = self::$Server->version;
+      }
+    }
+    else {
+      if ($as_str) {
+        $version = sprintf("Version %s.%s.%s (%s)",
+          ABLE_POLECAT_VERSION_MAJOR,
+          ABLE_POLECAT_VERSION_MINOR,
+          ABLE_POLECAT_VERSION_REVISION,
+          ABLE_POLECAT_VERSION_NAME
+        );
+      }
+      else {
+        $version = array(
+          'name' => ABLE_POLECAT_VERSION_NAME,
+          'major' => ABLE_POLECAT_VERSION_MAJOR,
+          'minor' => ABLE_POLECAT_VERSION_MINOR,
+          'revision' => ABLE_POLECAT_VERSION_REVISION,
+        );
+      }
+    }
+    return $version;
+  }
+  
+  /**
    * Helper function returns given $_REQUEST variable.
    *
    * @param string $var Name of requested query string variable.
@@ -936,6 +1011,26 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     $Locater = AblePolecat_AccessControl_Resource_Locater::create($location);
     $output = file_get_contents($Locater);
     if ($output) {
+      $dbstate = 'The connection to the application database is ';
+      switch (self::$Server->getDatabaseState('connected')) {
+        default:
+          $dbstate .= 'active.';
+          break;
+        case FALSE:
+          $dbstate .= 'NOT active.';
+          break;
+      }
+      $output = str_replace(
+        array(
+          '{POLECAT_VERSION}',
+          '{POLECAT_DBSTATE}',
+        ),
+        array(
+          '<em>' . AblePolecat_Server::getVersion() . '</em>', 
+          '<em>' . $dbstate . '</em>', 
+        ),
+        $output
+      );
       echo $output;
     }
     self::shutdown();

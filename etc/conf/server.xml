@@ -1,5 +1,13 @@
 <?xml version='1.0' standalone='yes'?>
 <config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
+  <!-- 
+    The Able Polecat version number is strictly informational and has no bearing on behaviour. 
+  -->
+  <version name="DEV-0.2.1">
+    <major>0</major>
+    <minor>2</minor>
+    <revision>1</revision>
+  </version>
   <databases>
     <!-- 
     More than one application database can be defined in server conf file. However, only ONE
