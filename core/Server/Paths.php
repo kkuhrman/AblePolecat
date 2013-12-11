@@ -29,7 +29,7 @@ class AblePolecat_Server_Paths {
   /**
    * Path to log files directory.
    */
-  const varf = ABLE_POLECAT_VAR;
+  const files = ABLE_POLECAT_FILES;
   
   /**
    * @var Array Directories used for data storage.
@@ -127,10 +127,10 @@ class AblePolecat_Server_Paths {
           $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
           break;
         case 'logs':
-          $path = self::varf . DIRECTORY_SEPARATOR . 'logs';
+          $path = self::files . DIRECTORY_SEPARATOR . 'logs';
           break;
-        case 'varf':
-          $path = self::varf;
+        case 'files':
+          $path = self::files;
           break;
         case 'usr':
           $path = self::usr;
@@ -180,7 +180,7 @@ class AblePolecat_Server_Paths {
       // case 'dev':
       // case 'libs':
       case 'usr':
-      case 'varf':
+      case 'files':
       case 'mods':
       // case 'qa':
       // case 'user':

@@ -55,9 +55,9 @@ if (!defined('ABLE_POLECAT_USR')) {
 /**
  * Variable files directory (e.g. log files).
  */
-if (!defined('ABLE_POLECAT_VAR')) {
-  $ABLE_POLECAT_VAR = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'var';
-  define('ABLE_POLECAT_VAR', $ABLE_POLECAT_VAR);
+if (!defined('ABLE_POLECAT_FILES')) {
+  $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
+  define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
 }
 
 //
@@ -695,7 +695,17 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       //
       if ((self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) && 
           (self::$Server->getDatabaseState('connected') === FALSE)) {
-          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_VAR, 'tpl', 'main.tpl')));
+          //
+          // Verify variable file paths exist
+          //
+          try {
+            $logs_path = AblePolecat_Server_Paths::getFullPath('logs');
+            AblePolecat_Server_Paths::touch($logs_path);
+          }
+          catch (AblePolecat_Server_Paths_Exception $Exception) {
+            self::shutdown($Exception->getMessage());
+          }
+          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'tpl', 'main.tpl')));
       }
       
       //

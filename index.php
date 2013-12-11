@@ -28,11 +28,11 @@ if (!defined('ABLE_POLECAT_USR')) {
  * This constant is used to locate files with content expected to continually change 
  * during normal operation of the system, such as logs. It must define the full path 
  * to a directory, for which the web agent has write privilege if other than 
- * ABLE_POLECAT_ROOT/var.
+ * ABLE_POLECAT_ROOT/files.
  */
-// if (!defined('ABLE_POLECAT_VAR')) {
-  // $ABLE_POLECAT_VAR = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'var';
-  // define('ABLE_POLECAT_VAR', $ABLE_POLECAT_VAR);
+// if (!defined('ABLE_POLECAT_FILES')) {
+  // $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
+  // define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
 // }
 
 /**
@@ -44,6 +44,6 @@ try {
   AblePolecat_Server::bootstrap();
 }
 catch (AblePolecat_Exception $Exception) {
-  AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_VAR, 'html', 'install', 'home.html')));
+  AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'html', 'install', 'home.html')));
 }
 ?>
