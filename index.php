@@ -2,6 +2,9 @@
 /**
  * @file: index.php
  * Default point of entry for Able Polecat.
+ *
+ * All Able Polecat Project software is released under the BSD 2 License.
+ * @see: LICENSE.md.
  */
 
 /**

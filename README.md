@@ -1,3 +1,8 @@
+All Able Polecat Project software is released under the BSD 2 License.
+Copyright (c) 2008-2013 by Karl Kuhrman. All rights reserved.
+
+@see: LICENSE.md
+
 About Able Polecat
 --------------------------------------------------------------------------------
 Able Polecat is a message-based middleware solution written in PHP intended to 
@@ -41,7 +46,19 @@ or web service.
  
 Core System Requirements
 --------------------------------------------------------------------------------
-PHP 5.2.x
+Apache HTTP Server (2.2.17+ recommended)
+PHP 5.3.5+
+PHP pdo_mysql
+MySql 5.5.8+
+
+Basic Installation Instructions
+--------------------------------------------------------------------------------
+1. Clone Able Polecat core from Git (https://github.com/kkuhrman/AblePolecat)
+   in target directory (DOCUMENT_ROOT == POLECAT_ROOT)
+2. Make [POLECAT_ROOT]/files directory writeable (e.g. chmod a+w files)
+3. Create application database and database user (see POLECAT_ROOT/database)
+4. Enter database configuration to POLECAT_ROOT/etc/conf/server.xml
+5. HTTP request to POLECAT_ROOT should show state of install.
 
 Background and Acknowledgements
 --------------------------------------------------------------------------------
@@ -67,6 +84,12 @@ often  is credited with providing the foundation for the modern spread offense.
 Able Polecat draws additional inspiration from the fabled "Skunk Works" R&D at 
 Lockheed Martin and also the fact that the initial staffing of this project was 
 limited to a single software architect (the "lonesome polecat").
+
+The Zend Framework (http://http://framework.zend.com/) is released under the 
+New BSD License.
+
+The Drupal Comtent Management Framework (https://drupal.org/) is released under
+the GNU GPL v2 License.
 
 
 Coding Standards
