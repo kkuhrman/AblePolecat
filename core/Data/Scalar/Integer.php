@@ -4,7 +4,7 @@
  * Encapsulates an integer variable.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Scalar.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar.php')));
 
 class  AblePolecat_Data_Scalar_Integer extends AblePolecat_Data_Scalar {
   

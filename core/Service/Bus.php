@@ -11,7 +11,7 @@
  * 
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Client.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Client.php')));
 
 /**
  * Manages multiple web services client connections and routes messages
@@ -79,27 +79,27 @@ include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'C
     if (isset($ClassRegistry)) {
        $ClassRegistry->registerLoadableClass(
         'AblePolecat_Message_Request_Delete',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Delete.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')),
         'create'
       );
        $ClassRegistry->registerLoadableClass(
         'AblePolecat_Message_Request_Get',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Get.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')),
         'create'
       );
       $ClassRegistry->registerLoadableClass(
         'AblePolecat_Message_Request_Post',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Post.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Post.php')),
         'create'
       );
       $ClassRegistry->registerLoadableClass(
         'AblePolecat_Message_Request_Put',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request', 'Put.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Put.php')),
         'create'
       );
       $ClassRegistry->registerLoadableClass(
         'AblePolecat_Message_Response',
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Response.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')),
         'create'
       );
     }

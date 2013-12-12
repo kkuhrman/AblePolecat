@@ -5,7 +5,7 @@
  *
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Message.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Message.php');
 
 interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterface {
   

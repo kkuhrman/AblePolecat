@@ -4,7 +4,7 @@
  * Interface for objects whichuse PHP overloading to dynamically create properties and methods.
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Exception.php');
 
 interface AblePolecat_DynamicObjectInterface {
   

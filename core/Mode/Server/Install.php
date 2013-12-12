@@ -4,7 +4,7 @@
  * Boots Able Polecat server in development mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Server', 'Check', 'Paths.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Check', 'Paths.php')));
 
 class AblePolecat_Mode_Server_Install extends AblePolecat_Mode_Server {
   /**
@@ -21,6 +21,11 @@ class AblePolecat_Mode_Server_Install extends AblePolecat_Mode_Server {
     error_reporting(E_ALL);
     ini_set('display_errors', TRUE);
     ini_set('display_startup_errors', TRUE);
+    
+    //
+    // Load environment/configuration
+    //
+    $this->setEnvironment(AblePolecat_Environment_Server::wakeup(self::getAgent()));
     
     //
     // Check system paths.

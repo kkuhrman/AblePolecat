@@ -44,6 +44,14 @@ if (!defined('ABLE_POLECAT_ETC')) {
 }
 
 /**
+ * Variable files directory (e.g. log files).
+ */
+if (!defined('ABLE_POLECAT_FILES')) {
+  $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
+  define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
+}
+
+/**
  * Secondary directory hierarchy contains third-party modules, custom pages, services, 
  * utilities, etc.
  */
@@ -52,25 +60,15 @@ if (!defined('ABLE_POLECAT_USR')) {
   define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
 }
 
-/**
- * Variable files directory (e.g. log files).
- */
-if (!defined('ABLE_POLECAT_FILES')) {
-  $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
-  define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
-}
-
 //
 // These are listed in the order they are created in initialize() and bootstrap()
 //
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
-require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry.php')));
-
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Csv.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Url.php');
 
@@ -164,12 +162,109 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
    */
   private $version;
   
-  /**
-   * functions called in bootstrap().
-   */
+  /********************************************************************************
+   * Bootstrap functions
+   ********************************************************************************/
   
   /**
-   * boot server mode
+   * Bootstrap procedure for Able Polecat.
+   */
+  public static function bootstrap() {
+    
+    //
+    // AblePolecat_Server implements Singelton design pattern.
+    //
+    if (!isset(self::$Server)) {
+      //
+      // Create instance of Singleton.
+      //
+      self::$Server = new self();
+      
+      //
+      // Server environment configuration settings
+      //
+      self::$Server->bootServerMode();
+      
+      //
+      // Application database
+      //
+      self::$Server->bootDatabase();
+      
+      //
+      // No connection to database.
+      // Could happen if this is a first time install.
+      // But need to rule out any trouble.
+      //
+      if ((self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) && 
+          (self::$Server->getDatabaseState('connected') === FALSE)) {
+          //
+          // Verify variable file paths exist
+          //
+          try {
+            $logs_path = AblePolecat_Server_Paths::getFullPath('logs');
+            AblePolecat_Server_Paths::touch($logs_path);
+          }
+          catch (AblePolecat_Server_Paths_Exception $Exception) {
+            self::shutdown($Exception->getMessage());
+          }
+          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'tpl', 'main.tpl')));
+      }
+      
+      //
+      // Class registry
+      //
+      self::$Server->bootClassRegistry();
+      
+      //
+      // Application log
+      //
+      self::$Server->bootLog();
+      
+      //
+      // Remainder of boot procedure is skipped if this is an install
+      //
+      if (self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) {
+        //
+        // Access control service
+        //
+        self::$Server->bootAccessControl();
+        
+        //
+        // ESB - service bus
+        //
+        self::$Server->bootServiceBus();
+        
+        //
+        // Third-party modules
+        //
+        self::$Server->bootApplicationMode();
+        
+        //
+        // User session and access control management
+        //
+        self::$Server->bootUserMode();
+      }
+            
+      //
+      // Register some other core classes.
+      //
+      // self::getClassRegistry()->registerLoadableClass($class_name,
+        // $path_to_include,
+        // $create_method
+      // );
+      
+      //
+      // Close the boot log file
+      //
+      if (isset(self::$Server->BootLog)) {
+        self::$Server->BootLog->sleep();
+        self::$Server->BootLog = NULL;
+      }
+    }
+  }
+   
+  /**
+   * Server Mode - manages core environment configuration settings.
    */
   protected function bootServerMode() {
     
@@ -186,7 +281,6 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       // Get version number from server conf
       //
       $versionConf = $ServerMode->getEnvironment()->getConf('version');
-      // var_dump($versionConf);
       $attr = $versionConf->attributes();
       isset($attr['name']) ? self::$Server->version['name'] = $attr['name']->__toString() : NULL;
       isset($versionConf->major) ? self::$Server->version['major'] = $versionConf->major->__toString() : NULL;
@@ -220,7 +314,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * boot function template
+   * Application database.
    */
   protected function bootDatabase() {
     
@@ -239,14 +333,42 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
         isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
         // isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
-        
         if (!isset($dbname) && !isset($dbid)) {
           self::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
         }
         else {
-          isset($dbattr['mode']) ? $dbmode = $dbattr['mode']->__toString() : $dbmode = $BootMode;
-          isset($dbattr['use']) ? $dbuse = intval($dbattr['use']->__toString()) : $dbuse = 0;        
-          if (($dbmode = $BootMode) && $dbuse) {
+          //
+          // More than one application database can be defined in server conf file. However, only ONE
+          // application database can be active per server mode. 
+          // If 'mode' attribute is empty, polecat will assume any mode; otherwise, database is defined 
+          // for given mode only. 
+          // The 'use' attribute indicates that the database should be loaded for the mode(s) given by 
+          // the 'mode' attribute. 
+          // Polecat will scan database definitions until it finds one with mode/use attributes combined 
+          // in such a way that directs it to use the database for the current server mode.
+          //
+          $BootMode = self::getBootMode();
+          if (isset($dbattr['mode'])) {
+            //
+            // database only defined for given mode
+            //
+            $dbmode = $dbattr['mode']->__toString();
+            if ($dbmode == '') {
+              //
+              // attribute blank, assume any mode (use current)
+              //
+              $dbmode = $BootMode;
+            }
+          }
+          else {
+            //
+            // attribute not defined, assume any mode (use current)
+            //
+            $dbmode = $BootMode;
+          }
+          isset($dbattr['use']) ? $dbuse = intval($dbattr['use']->__toString()) : $dbuse = 0;
+          
+          if (($dbmode == $BootMode) && $dbuse) {
             //
             // DSN
             //
@@ -270,7 +392,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
             $Database = AblePolecat_Database_Pdo::wakeup($this->Agent);
             $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
             $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
-            $Database->open($this->Agent, $DbUrl);
+            $Database->open($this->Agent, $DbUrl);           
             self::setResource(self::RING_DATABASE, self::NAME_DATABASE, $Database);
             $this->db_state['connected'] = TRUE;
             $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
@@ -288,7 +410,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * boot function template
+   * Default application log.
    */
   protected function bootLog() {
     
@@ -319,7 +441,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * boot function template
+   * Manages registration and auto-loading of classes.
    */
   protected function bootClassRegistry() {
     
@@ -350,7 +472,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * boot function template
+   * Role-based access control.
    */
   protected function bootAccessControl() {
     
@@ -378,7 +500,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * boot function template
+   * Service Bus - Manages message queues, transactions and web service client connections.
    */
   protected function bootServiceBus() {
     
@@ -419,10 +541,16 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       self::$Server->Resources[self::RING_APPLICATION_MODE] = array();
       
       //
+      // Wakeup access control agent.
+      //
+      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Application.php')));
+      $AppAgent = AblePolecat_AccessControl_Agent_Application::wakeup($this);
+      
+      //
       // Wakeup Application Mode
       //
       require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
-      $ApplicationMode = AblePolecat_Mode_Application::wakeup(self::getAccessControl()->getSession());
+      $ApplicationMode = AblePolecat_Mode_Application::wakeup($AppAgent);
       self::setResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $ApplicationMode);
       
       //
@@ -475,81 +603,39 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     }
   }
   
-  /**
-   * boot function template
-   */
-  protected function bootTemplate() {
-    
-    $errmsg = '';
-    
-    try {
-      //
-      // @todo: initialize and cache resource
-      //
-    }
-    catch(Exception $Exception) {
-      $errmsg .= " Failed to . " . $Exception->getMessage();
-      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
-    }
-  }
-    
-  /**
-   * Initialize resources in protection ring '0' (e.g. kernel).
-   */
-  protected function initialize() {
-    
-    //
-    // state of the application database.
-    //
-    $this->db_state = NULL;
-    
-    //
-    // 'Kernel' resources container.
-    //
-    $this->Resources[self::RING_SERVER_MODE] = array();
-    
-    //
-    // Only caches messages in memory until end of script
-    //
-    $this->BootLog = AblePolecat_Log_Boot::wakeup();
-    
-    //
-    // Access control agent (super user).
-    //
-    $this->Agent = AblePolecat_AccessControl_Agent_Server::wakeup($this);
-    
-    //
-    // Until loaded from conf...
-    // 
-    $this->version = array(
-      'name' => ABLE_POLECAT_VERSION_NAME,
-      'major' => ABLE_POLECAT_VERSION_MAJOR,
-      'minor' => ABLE_POLECAT_VERSION_MINOR,
-      'revision' => ABLE_POLECAT_VERSION_REVISION,
-    );
-    
-    $this->BootLog->logStatusMessage('Server object initialized.');
-  }
+  /********************************************************************************
+   * Server Resource functions
+   ********************************************************************************/
   
   /**
-   * Get information about state of application database at boot time.
+   * Caches resource given by $name in protection ring if available.
    *
-   * @param mixed $param If set, a particular parameter.
+   * @param int $ring Ring assignment.
+   * @param string $name Internal name of resource.
+   * @param mixed $resource The resource to cache.
    *
-   * @return mixed Array containing all state data, or value of given parameter or FALSE.
+   * @throw Exception if ring is not intialized.
    */
-  protected function getDatabaseState($param = NULL) {
+  protected static function setResource($ring, $name, $resource) {
     
-    $state = FALSE;
-    if (isset($this->db_state)) {
-      if (isset($param) && isset($this->db_state[$param])) {
-        $state = $this->db_state[$param];
-      }
-      else {
-        $state = $this->db_state;
+    $errmsg = '';
+    $Server = NULL;
+    
+    try {
+      $Server = AblePolecat_Server::getServer();
+      if (isset($Server->Resources[$ring]) && is_array($Server->Resources[$ring])) {
+        if (!isset($Server->Resources[$ring][$name])) {
+          $Server->Resources[$ring][$name] = $resource;
+        }
       }
     }
-    return $state;
+    catch (AblePolecat_Server_Exception $Exception) {
+      $errmsg .= $Exception->getMessage();
+    }
+    if (!isset($Server->Resources[$ring][$name])) {
+      $errmsg .= " Able Polecat Server rejected attempt to cache resource given by $name at protection ring $ring.";
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
   }
   
   /**
@@ -586,182 +672,6 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * Get instance of singleton.
-   */
-  protected static function getServer() {
-    
-    if (!isset(self::$Server)) {
-      //
-      // throw exception - prevent use of null object to access property/method
-      //
-      throw new AblePolecat_Server_Exception(
-        'Able Polecat server is not initialized.',
-        AblePolecat_Error::ACCESS_INVALID_OBJECT
-      );
-    }
-    return self::$Server;
-  }
-  
-  /**
-   * Caches resource given by $name in protection ring if available.
-   *
-   * @param int $ring Ring assignment.
-   * @param string $name Internal name of resource.
-   * @param mixed $resource The resource to cache.
-   *
-   * @throw Exception if ring is not intialized.
-   */
-  protected static function setResource($ring, $name, $resource) {
-    
-    $errmsg = '';
-    $Server = NULL;
-    
-    try {
-      $Server = AblePolecat_Server::getServer();
-      if (isset($Server->Resources[$ring]) && is_array($Server->Resources[$ring])) {
-        if (!isset($Server->Resources[$ring][$name])) {
-          $Server->Resources[$ring][$name] = $resource;
-        }
-      }
-    }
-    catch (AblePolecat_Server_Exception $Exception) {
-      $errmsg .= $Exception->getMessage();
-    }
-    if (!isset($Server->Resources[$ring][$name])) {
-      $errmsg .= " Able Polecat Server rejected attempt to cache resource given by $name at protection ring $ring.";
-      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
-    }
-  }
-  
-  /**
-   * Log a message to standard/default log (file).
-   * 
-   * @param string $severity error | warning | status | info | debug.
-   * @param mixed  $message Message body.
-   * @param int    $code Error code.
-   */
-  protected static function writeToDefaultLog($severity, $message, $code = NULL) {
-    
-    $DefaultLog = self::getDefaultLog(FALSE);
-    if (isset($DefaultLog)) {
-      switch ($severity) {
-        default:
-          $DefaultLog->logStatusMessage($message);
-          break;
-        case AblePolecat_LogInterface::STATUS:
-          $DefaultLog->logStatusMessage($message);
-          break;
-        case AblePolecat_LogInterface::WARNING:
-          $DefaultLog->logWarningMessage($message);
-          break;
-        case AblePolecat_LogInterface::ERROR:
-          $DefaultLog->logErrorMessage($message);
-          break;
-        case AblePolecat_LogInterface::DEBUG:
-          $DefaultLog->logStatusMessage($message);
-          break;
-      }
-    }
-  }
-  
-  /**
-   * Bootstrap procedure for Able Polecat.
-   */
-  public static function bootstrap() {
-    
-    //
-    // AblePolecat_Server implements Singelton design pattern.
-    //
-    if (!isset(self::$Server)) {
-      //
-      // Create instance of Singleton.
-      //
-      self::$Server = new self();
-      
-      //
-      // Server environment configuration settings
-      //
-      self::$Server->bootServerMode();
-      
-      //
-      // Application database
-      //
-      self::$Server->bootDatabase();
-      
-      //
-      // No connection to database.
-      // Could happen if this is a first time install.
-      // But need to rule out any trouble.
-      //
-      if ((self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) && 
-          (self::$Server->getDatabaseState('connected') === FALSE)) {
-          //
-          // Verify variable file paths exist
-          //
-          try {
-            $logs_path = AblePolecat_Server_Paths::getFullPath('logs');
-            AblePolecat_Server_Paths::touch($logs_path);
-          }
-          catch (AblePolecat_Server_Paths_Exception $Exception) {
-            self::shutdown($Exception->getMessage());
-          }
-          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'tpl', 'main.tpl')));
-      }
-      
-      //
-      // Application log
-      //
-      self::$Server->bootLog();
-      
-      //
-      // Class registry
-      //
-      self::$Server->bootClassRegistry();
-      
-      //
-      // Remainder of boot procedure is skipped if this is an install
-      //
-      if (self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) {
-        //
-        // Access control service
-        //
-        self::$Server->bootAccessControl();
-        
-        //
-        // ESB - service bus
-        //
-        self::$Server->bootServiceBus();
-        
-        //
-        // Third-party modules
-        //
-        self::$Server->bootApplicationMode();
-        
-        //
-        // User session and access control management
-        //
-        self::$Server->bootUserMode();
-      }
-            
-      //
-      // Register some other core classes.
-      //
-      // self::getClassRegistry()->registerLoadableClass($class_name,
-        // $path_to_include,
-        // $create_method
-      // );
-      
-      //
-      // Close the boot log file
-      //
-      if (isset(self::$Server->BootLog)) {
-        self::$Server->BootLog->sleep();
-        self::$Server->BootLog = NULL;
-      }
-    }
-  }
-  
-  /**
    * Get access to server access control resource.
    *
    * @param bool $safe If TRUE will not return NULL, rather throw exception.
@@ -781,35 +691,6 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
    */
   public static function getApplicationMode($safe = TRUE) {
     return self::getResource(self::RING_APPLICATION_MODE, self::NAME_APPLICATION_MODE, $safe);
-  }
-  
-  /**
-   * Returns value of given bootstrap directive from request.
-   *
-   * @param string $directive Name of directive.
-   *
-   * @return mixed value of directive.
-   */
-  public static function getBootDirective($directive) {
-    //
-    // This code checks query string for a boot mode parameter named 'run'.
-    // If passed, and mode is authorized for client, server will boot in
-    // requested mode. If parameter is not passed, but mode is stored in a 
-    // cookie, server will boot in cookie mode. Otherwise, the server will 
-    // boot in normal mode.
-    //
-    $value = AblePolecat_Server::getRequestVariable('mode');
-    if (!isset($value)) {
-      //
-      // If runtime context was saved in a cookie, use that until agent
-      // explicitly unsets with run=user or cookie expires.
-      //
-      if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
-        $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
-        isset($data[$directive]) ? $value = $data[$directive] : NULL;
-      }
-    }
-    return $value;
   }
   
   /**
@@ -853,24 +734,6 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * Return unique, system-wide identifier for security resource.
-   *
-   * @return string Resource identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for security resource.
-   *
-   * @return string Resource name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /**
    * Get access to server mode resource.
    *
    * @param bool $safe If TRUE will not return NULL, rather throw exception.
@@ -903,60 +766,39 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     return self::getResource(self::RING_USER_MODE, self::NAME_USER_MODE, $safe);
   }
   
-  /**
-   * Get version number of server/core.
-   */
-  public static function getVersion($as_str = TRUE) {
-    
-    $version = NULL;
-    
-    if (isset(self::$Server)) {
-      if ($as_str) {
-        $version = sprintf("Version %s.%s.%s (%s)",
-          self::$Server->version['major'],
-          self::$Server->version['minor'],
-          self::$Server->version['revision'],
-          self::$Server->version['name']
-        );
-      }
-      else {
-        $version = self::$Server->version;
-      }
-    }
-    else {
-      if ($as_str) {
-        $version = sprintf("Version %s.%s.%s (%s)",
-          ABLE_POLECAT_VERSION_MAJOR,
-          ABLE_POLECAT_VERSION_MINOR,
-          ABLE_POLECAT_VERSION_REVISION,
-          ABLE_POLECAT_VERSION_NAME
-        );
-      }
-      else {
-        $version = array(
-          'name' => ABLE_POLECAT_VERSION_NAME,
-          'major' => ABLE_POLECAT_VERSION_MAJOR,
-          'minor' => ABLE_POLECAT_VERSION_MINOR,
-          'revision' => ABLE_POLECAT_VERSION_REVISION,
-        );
-      }
-    }
-    return $version;
-  }
+  /********************************************************************************
+   * Logging, error handling, redirects and other server behaviour
+   ********************************************************************************/
   
   /**
-   * Helper function returns given $_REQUEST variable.
-   *
-   * @param string $var Name of requested query string variable.
-   *
-   * @return mixed Value of requested variable or NULL.
+   * Log a message to standard/default log (file).
+   * 
+   * @param string $severity error | warning | status | info | debug.
+   * @param mixed  $message Message body.
+   * @param int    $code Error code.
    */
-  public static function getRequestVariable($var) {
-    $value = NULL;
-    if (isset($var) && isset($_REQUEST[$var])) {
-      $value = $_REQUEST[$var];
+  protected static function writeToDefaultLog($severity, $message, $code = NULL) {
+    
+    $DefaultLog = self::getDefaultLog(FALSE);
+    if (isset($DefaultLog)) {
+      switch ($severity) {
+        default:
+          $DefaultLog->logStatusMessage($message);
+          break;
+        case AblePolecat_LogInterface::STATUS:
+          $DefaultLog->logStatusMessage($message);
+          break;
+        case AblePolecat_LogInterface::WARNING:
+          $DefaultLog->logWarningMessage($message);
+          break;
+        case AblePolecat_LogInterface::ERROR:
+          $DefaultLog->logErrorMessage($message);
+          break;
+        case AblePolecat_LogInterface::DEBUG:
+          $DefaultLog->logStatusMessage($message);
+          break;
+      }
     }
-    return $value;
   }
   
   /**
@@ -1092,15 +934,193 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       
     exit($exitmsg);
   }
+   
+  /********************************************************************************
+   * Server state helper functions
+   ********************************************************************************/
   
   /**
-   * Similar to DOM ready() but for Able Polecat core system.
+   * Get information about state of application database at boot time.
    *
-   * @return AblePolecat_Server or FALSE.
+   * @param mixed $param If set, a particular parameter.
+   *
+   * @return mixed Array containing all state data, or value of given parameter or FALSE.
    */
-  // public static function ready() {
-    // return self::$Server;
-  // }
+  protected function getDatabaseState($param = NULL) {
+    
+    $state = FALSE;
+    if (isset($this->db_state)) {
+      if (isset($param) && isset($this->db_state[$param])) {
+        $state = $this->db_state[$param];
+      }
+      else {
+        $state = $this->db_state;
+      }
+    }
+    return $state;
+  }
+  
+  /**
+   * Returns value of given bootstrap directive from request.
+   *
+   * @param string $directive Name of directive.
+   *
+   * @return mixed value of directive.
+   */
+  public static function getBootDirective($directive) {
+    //
+    // This code checks query string for a boot mode parameter named 'run'.
+    // If passed, and mode is authorized for client, server will boot in
+    // requested mode. If parameter is not passed, but mode is stored in a 
+    // cookie, server will boot in cookie mode. Otherwise, the server will 
+    // boot in normal mode.
+    //
+    $value = AblePolecat_Server::getRequestVariable('mode');
+    if (!isset($value)) {
+      //
+      // If runtime context was saved in a cookie, use that until agent
+      // explicitly unsets with run=user or cookie expires.
+      //
+      if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+        $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
+        isset($data[$directive]) ? $value = $data[$directive] : NULL;
+      }
+    }
+    return $value;
+  }
+  
+  /**
+   * Helper function returns given $_REQUEST variable.
+   *
+   * @param string $var Name of requested query string variable.
+   *
+   * @return mixed Value of requested variable or NULL.
+   */
+  public static function getRequestVariable($var) {
+    $value = NULL;
+    if (isset($var) && isset($_REQUEST[$var])) {
+      $value = $_REQUEST[$var];
+    }
+    return $value;
+  }
+  
+  /**
+   * Get version number of server/core.
+   */
+  public static function getVersion($as_str = TRUE) {
+    
+    $version = NULL;
+    
+    if (isset(self::$Server)) {
+      if ($as_str) {
+        $version = sprintf("Version %s.%s.%s (%s)",
+          self::$Server->version['major'],
+          self::$Server->version['minor'],
+          self::$Server->version['revision'],
+          self::$Server->version['name']
+        );
+      }
+      else {
+        $version = self::$Server->version;
+      }
+    }
+    else {
+      if ($as_str) {
+        $version = sprintf("Version %s.%s.%s (%s)",
+          ABLE_POLECAT_VERSION_MAJOR,
+          ABLE_POLECAT_VERSION_MINOR,
+          ABLE_POLECAT_VERSION_REVISION,
+          ABLE_POLECAT_VERSION_NAME
+        );
+      }
+      else {
+        $version = array(
+          'name' => ABLE_POLECAT_VERSION_NAME,
+          'major' => ABLE_POLECAT_VERSION_MAJOR,
+          'minor' => ABLE_POLECAT_VERSION_MINOR,
+          'revision' => ABLE_POLECAT_VERSION_REVISION,
+        );
+      }
+    }
+    return $version;
+  }
+  
+  /********************************************************************************
+   * Constructor and article identification
+   ********************************************************************************/
+     
+  /**
+   * Initialize resources in protection ring '0' (e.g. kernel).
+   */
+  protected function initialize() {
+    
+    //
+    // state of the application database.
+    //
+    $this->db_state = NULL;
+    
+    //
+    // 'Kernel' resources container.
+    //
+    $this->Resources[self::RING_SERVER_MODE] = array();
+    
+    //
+    // Only caches messages in memory until end of script
+    //
+    $this->BootLog = AblePolecat_Log_Boot::wakeup();
+    
+    //
+    // Access control agent (super user).
+    //
+    $this->Agent = AblePolecat_AccessControl_Agent_Server::wakeup($this);
+    
+    //
+    // Until loaded from conf...
+    // 
+    $this->version = array(
+      'name' => ABLE_POLECAT_VERSION_NAME,
+      'major' => ABLE_POLECAT_VERSION_MAJOR,
+      'minor' => ABLE_POLECAT_VERSION_MINOR,
+      'revision' => ABLE_POLECAT_VERSION_REVISION,
+    );
+    
+    $this->BootLog->logStatusMessage('Server object initialized.');
+  }
+  
+  /**
+   * Return unique, system-wide identifier for security resource.
+   *
+   * @return string Resource identifier.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name for security resource.
+   *
+   * @return string Resource name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /**
+   * Get instance of singleton.
+   */
+  protected static function getServer() {
+    
+    if (!isset(self::$Server)) {
+      //
+      // throw exception - prevent use of null object to access property/method
+      //
+      throw new AblePolecat_Server_Exception(
+        'Able Polecat server is not initialized.',
+        AblePolecat_Error::ACCESS_INVALID_OBJECT
+      );
+    }
+    return self::$Server;
+  }
   
   final protected function __construct() {
     

@@ -102,7 +102,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       catch(Exception $Exception) {
         self::$ServerMode = NULL;
         throw new AblePolecat_Server_Exception(
-          'Failed to initialize boot mode. ' . $Exception->getMessage(),
+          'Failed to initialize server mode. ' . $Exception->getMessage(),
           AblePolecat_Error::BOOT_SEQ_VIOLATION
         );
       }

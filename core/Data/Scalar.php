@@ -4,7 +4,7 @@
  * Encapsulates a scalar variable.
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Data.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Data.php');
 
 abstract class AblePolecat_Data_Scalar extends AblePolecat_DataAbstract {
   

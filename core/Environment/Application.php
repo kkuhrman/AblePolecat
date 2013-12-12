@@ -313,12 +313,16 @@ class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAb
       // Initialize singleton instance.
       //
       self::$Environment = new AblePolecat_Environment_Application();
+      
+      //
+      // Initialize server access control.
+      //
+      self::$Environment->setAgent($Subject);
             
       //
-      // Register and load contributed classes
+      // Register module classes
       //
       self::$Environment->registerModules();
-      // $Environment->loadModules();
     }
     return self::$Environment;
   }

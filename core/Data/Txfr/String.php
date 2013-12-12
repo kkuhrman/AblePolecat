@@ -4,7 +4,7 @@
  * Standard string transformation class.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Txfr.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Txfr.php')));
 
 class AblePolecat_Data_Txfr_String extends AblePolecat_Data_TxfrAbstract {
   
@@ -18,7 +18,7 @@ class AblePolecat_Data_Txfr_String extends AblePolecat_Data_TxfrAbstract {
     if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
       AblePolecat_Server::getClassRegistry()->registerLoadableClass(
         'AblePolecat_Data_Scalar_String', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Scalar', 'String.php')),
+        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
         'typeCast'
       );
     }

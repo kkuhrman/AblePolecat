@@ -53,6 +53,11 @@ MySql 5.5.8+
 
 Basic Installation Instructions
 --------------------------------------------------------------------------------
+
+More detailed instrcutions can be found at:
+https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started
+
+But the basic steps for getting started with Able Polecat are:
 1. Clone Able Polecat core from Git (https://github.com/kkuhrman/AblePolecat)
    in target directory (DOCUMENT_ROOT == POLECAT_ROOT)
 2. Make [POLECAT_ROOT]/files directory writeable (e.g. chmod a+w files)

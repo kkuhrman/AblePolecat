@@ -6,11 +6,11 @@
  * stop-watch with lap counter and some presets
  */
 
-if (!defined('ABLE_POLECAT_PATH')) {
+if (!defined('ABLE_POLECAT_CORE')) {
   $able_polecat_path = __DIR__;
-  define('ABLE_POLECAT_PATH', $able_polecat_path);
+  define('ABLE_POLECAT_CORE', $able_polecat_path);
 }
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Exception.php');
 
 class AblePolecat_Clock {
 

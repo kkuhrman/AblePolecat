@@ -4,7 +4,7 @@
  * Base class for SOAP service.
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Service.php');
 
 abstract class AblePolecat_Service_SoapAbstract implements AblePolecat_Service_Interface {
   

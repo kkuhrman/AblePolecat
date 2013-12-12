@@ -23,7 +23,7 @@
  * to marshal and unmarshal such a list. 
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'DynamicObject.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 
 /**
  * Interface for argument lists.

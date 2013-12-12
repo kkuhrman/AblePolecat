@@ -4,9 +4,9 @@
  * Interface for a service intermediary or end point.
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Response.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 
 /**
  * Encapsulates a web service.

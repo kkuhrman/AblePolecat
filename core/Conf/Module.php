@@ -4,7 +4,7 @@
  * Module configuration settings.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Conf.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Conf.php');
 
 class AblePolecat_Conf_Module extends AblePolecat_ConfAbstract {
   

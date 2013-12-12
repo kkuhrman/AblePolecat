@@ -37,9 +37,18 @@ class AblePolecat_ClassRegistry_Pdo extends AblePolecat_ClassRegistryAbstract {
     }
 
     //
-    // @todo: populate class from application database
-    // @see: setRegisteredClass()
+    // Populate class from application database
+    // Query application database for registered classes.
     //
+    $sql = __SQL()->          
+      select('name', 'path', 'method')->
+      from('class');
+    $Stmt = $this->Database->prepareStatement($sql);
+    if ($Stmt->execute()) {
+      while ($result = $Stmt->fetch()) {
+        $this->registerLoadableClass($result['name'], $result['path'], $result['method']);
+      }
+    }
   }
   
   /**
@@ -49,25 +58,26 @@ class AblePolecat_ClassRegistry_Pdo extends AblePolecat_ClassRegistryAbstract {
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     try {
-      $Database = AblePolecat_Server::getDatabase();
-      $registeredClasses = $this->getRegisteredClasses();
-      foreach($registeredClasses as $class_name => $class_info) {
-        $result = FALSE;
-        isset($class_info[self::CLASS_REG_PATH]) ? $path = $class_info[self::CLASS_REG_PATH] : $path = NULL; 
-        isset($class_info[self::CLASS_REG_METHOD]) ? $method = $class_info[self::CLASS_REG_METHOD] : $method = NULL;
-        if (isset($path) && isset($method)) {
-          //
-          // Insert new or update existing entry
-          //
-          $sql = __SQL()->          
-            replace('name', 'path', 'method')->
-            into('class')->
-            values($class_name, $path, $method);
-          $Stmt = $Database->prepareStatement($sql);
-          $result = $Stmt->execute();
-        }
-        if (!$result) {
-          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Failed to save $class_name registry");
+      if (isset($this->Database)) {
+        $registeredClasses = $this->getRegisteredClasses();
+        foreach($registeredClasses as $class_name => $class_info) {
+          $result = FALSE;
+          isset($class_info[self::CLASS_REG_PATH]) ? $path = $class_info[self::CLASS_REG_PATH] : $path = NULL; 
+          isset($class_info[self::CLASS_REG_METHOD]) ? $method = $class_info[self::CLASS_REG_METHOD] : $method = NULL;
+          if (isset($path) && isset($method)) {
+            //
+            // Insert new or update existing entry
+            //
+            $sql = __SQL()->          
+              replace('name', 'path', 'method')->
+              into('class')->
+              values($class_name, $path, $method);
+            $Stmt = $this->Database->prepareStatement($sql);
+            $result = $Stmt->execute();
+          }
+          if (!$result) {
+            AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Failed to save $class_name registry");
+          }
         }
       }
     }

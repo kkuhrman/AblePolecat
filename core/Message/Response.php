@@ -4,8 +4,8 @@
  * Base class for all response messages in Able Polecat.
  */
 
-include(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Overloadable.php');
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Message.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Message.php');
 
 interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInterface, AblePolecat_OverloadableInterface {
   

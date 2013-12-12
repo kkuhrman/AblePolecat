@@ -4,7 +4,7 @@
  * Encapsulates an Able Poelcat GET request.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
 
 class AblePolecat_Message_Request_Get extends AblePolecat_Message_RequestAbstract {
   

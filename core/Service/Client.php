@@ -3,7 +3,7 @@
  * Base for web service clients.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Service', 'Initiator.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
 
 /**
  * Manages a client connection to a web services provider.

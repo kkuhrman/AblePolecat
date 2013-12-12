@@ -22,8 +22,8 @@
  * offsets and so on.
  */
  
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'DynamicObject.php');
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Overloadable.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
  
 interface AblePolecat_MetaDataInterface extends AblePolecat_DynamicObjectInterface, AblePolecat_OverloadableInterface {
   

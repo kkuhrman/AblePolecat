@@ -5,7 +5,8 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Statement.php')));
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
 
 interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_DynamicObjectInterface, 
@@ -70,20 +71,20 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    */
   protected function initialize() {
     
-    if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
-      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
-        '__construct'
-      );
-    }
-    if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
-      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        'AblePolecat_Data_Scalar_String', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
-        'typeCast'
-      );
-    }
+    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
+      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        // 'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
+        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
+        // '__construct'
+      // );
+    // }
+    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
+      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        // 'AblePolecat_Data_Scalar_String', 
+        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
+        // 'typeCast'
+      // );
+    // }
     
     //
     // Initialize SQL support settings (for static method calls).
@@ -786,7 +787,6 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         $tokens[] = $this->getLimitOffsetSyntax();
         break;
     }
-    // var_dump($tokens);
     $sqlStatement = implode(' ', $tokens);
     return trim($sqlStatement);
   }

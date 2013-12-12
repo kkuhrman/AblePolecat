@@ -207,7 +207,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
           foreach($registeredClasses[$interfaceName] as $moduleName => $moduleClasses) {
             foreach($moduleClasses as $id => $className) {
               $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
-              $ApplicationMode->setResource($interfaceName, $moduleName, $class);
+              self::$ApplicationMode->setResource($interfaceName, $moduleName, $class);
             }
           }
         }
@@ -272,17 +272,32 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$ApplicationMode)) {
-      //
-      // Create instance of application mode
-      //
-      self::$ApplicationMode = new AblePolecat_Mode_Application();
+      try {
+        //
+        // Set access control agent
+        //
+        self::setAgent($Subject);
+        
+        //
+        // Create instance of application mode
+        //
+        self::$ApplicationMode = new AblePolecat_Mode_Application();
+      }
+      catch(Exception $Exception) {
+        self::$ApplicationMode = NULL;
+        throw new AblePolecat_Server_Exception(
+          'Failed to initialize application mode. ' . $Exception->getMessage(),
+          AblePolecat_Error::BOOT_SEQ_VIOLATION
+        );
+      }
+      
       
       //
       // Load environment settings
       //
-      $Environment = AblePolecat_Environment_Application::wakeup();
+      $Environment = AblePolecat_Environment_Application::wakeup(self::getAgent());
       if (isset($Environment)) {
-        self::$ApplicationMode->Environment = $Environment;
+        self::$ApplicationMode->setEnvironment($Environment);
       }
       else {
         throw new AblePolecat_Environment_Exception('Failed to load Able Polecat application environment.',

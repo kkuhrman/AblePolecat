@@ -79,8 +79,8 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
    * @param string $method Method used for creation (default is __construct()).
    *
    */
-  protected function setRegisteredClass($class_name, $path, $method) {
-    if (isset($this->registeredClasses)) {
+  private function setRegisteredClass($class_name, $path, $method) {
+    if (isset($this->registeredClasses) && isset($class_name) && isset($path) && isset($method)) {
       $this->registeredClasses[$class_name] = array(
           self::CLASS_REG_PATH => $path,
           self::CLASS_REG_METHOD => $method,
@@ -280,7 +280,7 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
       //
       // Attempt to define path based on core class naming convention.
       //
-      $path = str_replace(array('AblePolecat', '_'), array(ABLE_POLECAT_PATH, DIRECTORY_SEPARATOR), $class_name);
+      $path = str_replace(array('AblePolecat', '_'), array(ABLE_POLECAT_CORE, DIRECTORY_SEPARATOR), $class_name);
       $path .= '.php';
     }
     if (is_file($path)) {

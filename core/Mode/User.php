@@ -4,8 +4,8 @@
  * Base class for User mode (password, security token protected etc).
  */
  
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Mode.php');
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'User.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'User.php')));
 
 class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   

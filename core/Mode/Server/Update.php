@@ -16,5 +16,10 @@ class AblePolecat_Mode_Server_Update extends AblePolecat_Mode_Server {
 
     set_error_handler(array('AblePolecat_Mode_Server', 'defaultErrorHandler'));
     set_exception_handler(array('AblePolecat_Mode_Server', 'defaultExceptionHandler'));
+    
+    //
+    // Load environment/configuration
+    //
+    $this->setEnvironment(AblePolecat_Environment_Server::wakeup(self::getAgent()));
   }
 }

@@ -4,7 +4,7 @@
  * Base class for access control for applications using Able Polecat.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
 
 class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessControl_AgentAbstract {
   
@@ -54,7 +54,16 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $Agent = new AblePolecat_AccessControl_Agent_Application();
+    
+    $Agent = NULL;
+    if (is_a($Subject, 'AblePolecat_Server')) {
+      $Agent = new AblePolecat_AccessControl_Agent_Application();
+    }
+    else {
+      $msg = "Access denied to application agent.";
+      isset($Subject) ? $msg .= ' ' . get_class($Subject) . ' does not have sufficient privilege.' : NULL;
+      throw new AblePolecat_AccessControl_Exception($msg, AblePolecat_Error::ACCESS_DENIED);
+    }
     return $Agent;
   }
 }

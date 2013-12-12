@@ -4,7 +4,7 @@
  * Base class for Able Polecat user access control agent.
  */
 
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Agent.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
 
 class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_AgentAbstract {
   

@@ -4,7 +4,7 @@
  * Base class for both scalar and not scalar data types in Able Polecat.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Exception.php');
 
 interface AblePolecat_DataInterface extends Serializable {
   

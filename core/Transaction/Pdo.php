@@ -4,7 +4,7 @@
  * Uses a PDO database connection for managing transaction locks,savepoints etc.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Transaction.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Transaction.php');
 
 class AblePolecat_Transaction_Pdo extends AblePolecat_TransactionAbstract {
   

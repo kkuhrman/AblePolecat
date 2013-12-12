@@ -120,9 +120,9 @@ class AblePolecat_Server_Paths {
         // case 'dev':
           // $path = self::dev;
           // break;
-        // case 'libs':
-          // $path = self::libs;
-          // break;
+        case 'libs':
+          $path = self::usr . DIRECTORY_SEPARATOR . 'libs';
+          break;
         case 'conf':
           $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
           break;
@@ -178,7 +178,7 @@ class AblePolecat_Server_Paths {
       case 'conf';
       case 'logs':
       // case 'dev':
-      // case 'libs':
+      case 'libs':
       case 'usr':
       case 'files':
       case 'mods':

@@ -4,9 +4,9 @@
  * Interface for any class which will dispatch a request to a service (initiate a response).
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'CacheObject.php');
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Message', 'Request.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Service.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
 
 interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_CacheObjectInterface {
   

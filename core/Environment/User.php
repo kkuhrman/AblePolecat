@@ -4,7 +4,7 @@
  * Environment for Able Polecat User Mode.
  */
 
-require_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'AccessControl.php');
 
 class AblePolecat_Environment_User extends AblePolecat_CacheObjectAbstract implements AblePolecat_EnvironmentInterface {
   

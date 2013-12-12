@@ -4,7 +4,7 @@
  * Default access control role assigned to web applications.
  */
  
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Role.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Role.php');
 
 class AblePolecat_AccessControl_Role_Application extends AblePolecat_AccessControl_RoleAbstract {
   

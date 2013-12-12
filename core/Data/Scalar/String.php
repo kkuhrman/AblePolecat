@@ -4,7 +4,7 @@
  * Encapsulates text data.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Data', 'Scalar.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar.php')));
 
 class  AblePolecat_Data_Scalar_String extends AblePolecat_Data_Scalar {
   

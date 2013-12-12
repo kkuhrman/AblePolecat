@@ -4,7 +4,7 @@
  * Role reserved for anonymous agent (user).
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role', 'User.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role', 'User.php')));
 
 class AblePolecat_AccessControl_Role_User_Anonymous extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_Role_UserInterface {
   

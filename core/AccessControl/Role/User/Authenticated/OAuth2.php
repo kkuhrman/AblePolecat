@@ -4,7 +4,7 @@
  * Role reserved for anonymous agent (user).
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'AccessControl', 'Role', 'User', 'Authenticated.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role', 'User', 'Authenticated.php')));
 
 interface AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Interface extends AblePolecat_AccessControl_Role_User_AuthenticatedInterface {
   

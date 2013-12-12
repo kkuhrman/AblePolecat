@@ -3,8 +3,8 @@
  * Base class for data transformation and exchange web services.
  */
 
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Environment.php');
-include_once(ABLE_POLECAT_PATH . DIRECTORY_SEPARATOR . 'Service.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Environment.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Service.php');
 
 /**
  * Encapsulates a service for transforming and exchanging data between two clients.

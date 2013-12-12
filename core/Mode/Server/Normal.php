@@ -4,7 +4,7 @@
  * Boots Able Polecat server in normal mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_PATH, 'Environment', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Server.php')));
 
 class AblePolecat_Mode_Server_Normal extends AblePolecat_Mode_Server {
   
