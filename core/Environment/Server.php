@@ -32,27 +32,27 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
     // @todo: Do nothing if agent is not browser.
     //
     if (isset($serverMode)) {
-      if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+      if (isset($_COOKIE[ABLE_POLECAT_BOOT_DIRECTIVE])) {
         //
         // Compare current cookie setting to parameter
         //
-        $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
+        $data = unserialize($_COOKIE[ABLE_POLECAT_BOOT_DIRECTIVE]);
         isset($data['context']) ? $stored_serverMode = $data['context'] : NULL;
         if ($serverMode != $stored_serverMode) {
           //
           // Setting changed, first expire cookie
           //
-          setcookie('ABLE_POLECAT_RUNTIME', '', time() - 3600);
+          setcookie(ABLE_POLECAT_BOOT_DIRECTIVE, '', time() - 3600);
         }
       }
       $data = array('context' => $serverMode);
-      setcookie('ABLE_POLECAT_RUNTIME', serialize($data), time() + 3600);    
+      setcookie(ABLE_POLECAT_BOOT_DIRECTIVE, serialize($data), time() + 3600);    
     }
-    else if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
+    else if (isset($_COOKIE[ABLE_POLECAT_BOOT_DIRECTIVE])) {
       //
       // Expire any runtime context cookie
       //
-      setcookie('ABLE_POLECAT_RUNTIME', '', time() - 3600);
+      setcookie(ABLE_POLECAT_BOOT_DIRECTIVE, '', time() - 3600);
     }
   }
   

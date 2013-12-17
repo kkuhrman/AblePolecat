@@ -11,10 +11,10 @@
  * 
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Client.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
 
 /**
- * Manages multiple web services client connections and routes messages
+ * Manages multiple web services initiator connections and routes messages
  * between these and the application in scope.
  */
 
@@ -32,9 +32,9 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'C
   private static $ServiceBus;
   
   /**
-   * @var Array Web service clients.
+   * @var Array of objects, which implement AblePolecat_Service_InitiatorInterface.
    */
-  protected $Clients;
+  protected $ServiceInitiators;
   
   /**
    * @todo: message queue
@@ -65,12 +65,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'C
   }
   
   /**
-   * Iniitialize client configuration settings prior to attempting a connection.
+   * Iniitialize service bus.
    *
    * @return bool TRUE if configuration is valid, otherwise FALSE.
    */
   protected function initialize() {
-    $this->Clients = array();
+    $this->ServiceInitiators = array();
     
     //
     // Register all message types
@@ -106,32 +106,32 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'C
   }
   
   /**
-   * Add a service client to the bus.
+   * Add a service initiator to the bus.
    * 
-   * @param string $id UUID of service client class.
+   * @param string $id UUID of service initiator class.
    * @param string $class_name The name of class to register.
    *
-   * @throw AblePolecat_Service_Exception if client cannot be set.
+   * @throw AblePolecat_Service_Exception if initiator cannot be set.
    */
-  protected function registerClient($id, $class_name) {
+  protected function registerServiceInitiator($id, $class_name) {
     
     $ClassRegistry = AblePolecat_Server::getClassRegistry();
     if (isset($ClassRegistry)) {
-      if (!isset($this->Clients[$id])) {
+      if (!isset($this->ServiceInitiators[$id])) {
         //
         // Preliminary checks.
         // Class must be registered with Able Polecat.
-        // Class must implement AblePolecat_Service_ClientInterface.
+        // Class must implement AblePolecat_Service_InitiatorInterface.
         //
         if ($ClassRegistry->isLoadable($class_name) &&
-            is_subclass_of($class_name, 'AblePolecat_Service_ClientInterface')) {
+            is_subclass_of($class_name, 'AblePolecat_Service_InitiatorInterface')) {
             //
-            // Do not load the client until first call to getClient().
+            // Do not load the initiator until first call to getServiceInitiator().
             //
-            $this->Clients[$id] = $class_name;
+            $this->ServiceInitiators[$id] = $class_name;
         }
         else {
-          throw new AblePolecat_Service_Exception("Able Polecat rejected attempt to add client type $class_name to service bus.",
+          throw new AblePolecat_Service_Exception("Able Polecat rejected attempt to add initiator type $class_name to service bus.",
             ABLE_POLECAT_EXCEPTION_SVC_CLIENT_TYPE_FAIL
           );
         }
@@ -170,32 +170,32 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'C
     //
     
     //
-    // Determine target client
+    // Determine target initiator
     //
-    $clientId = NULL;
+    $initiatorId = NULL;
     switch ($subclass) {
       default:
         break;
       case self::REQUEST:
-        $clientId = $Message->getResource();
+        $initiatorId = $Message->getResource();
         break;
       case self::RESPONSE:
         break;
     }
-    $Client = $this->getClient($clientId);
+    $ServiceInitiator = $this->getServiceInitiator($initiatorId);
     
     //
-    // @todo: dispatch the message.
+    // Dispatch the message.
     //
-    if (isset($Client)) {
+    if (isset($ServiceInitiator)) {
       try { 
-        $Response = $Client->prepare($Agent, $Message)->dispatch(); 
+        $Response = $ServiceInitiator->prepare($Agent, $Message)->dispatch(); 
       } 
-      catch(AblePolecat_Service_Client_Exception $Exception) {
+      catch(AblePolecat_Service_Exception $Exception) {
         //
-        // @todo: this will only happen if client cannot dispatch message
+        // @todo: this will only happen if initiator cannot dispatch message
         // 1. see if problem is with message, if yes return error response
-        // 2. otherwise client is busy, queue message for later dispatch
+        // 2. otherwise initiator is busy, queue message for later dispatch
         //
       }
       if (isset($Response)) {
@@ -212,50 +212,36 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'C
   }
   
   /**
-   * Is singleton initialized?
-   *
-   * @return AblePolecat_Service_Bus or FALSE.
+   * Registers service initiators by id => class name.
    */
-  // public static function ready() {
+  public function registerServiceInitiators() {
     
-    // $ready = isset(self::$ServiceBus);
-    // if ($ready) {
-      // $ready = self::$ServiceBus;
-    // }
-    // return $ready;
-  // }
-  
-  /**
-   * Registers service clients by id => class name.
-   */
-  public function registerClients() {
-    
-    $registeredClasses = AblePolecat_Server::getClassRegistry()->getModuleClasses('interface', 'AblePolecat_Service_ClientInterface');
-    foreach($registeredClasses as $moduleName => $clientClasses) {
-      foreach($clientClasses as $classId => $className) {
-        $this->registerClient($classId, $className);
+    $registeredClasses = AblePolecat_Server::getClassRegistry()->getModuleClasses('interface', 'AblePolecat_Service_InitiatorInterface');
+    foreach($registeredClasses as $moduleName => $initiatorClasses) {
+      foreach($initiatorClasses as $classId => $className) {
+        $this->registerServiceInitiator($classId, $className);
       }
     }
   }
   
   /**
-   * Returns a service client by class id.
+   * Returns a service initiator by class id.
    *
-   * @param string $id UUID of service client class.
+   * @param string $id UUID of service initiator class.
    *
-   * @return AblePolecat_Service_ClientInterface or NULL.
+   * @return AblePolecat_Service_InitiatorInterface or NULL.
    */
-  public function getClient($id) {
+  public function getServiceInitiator($id) {
     
-    $Client = NULL;
-    if (isset($this->Clients[$id])) {
-      $class = $this->Clients[$id];
+    $ServiceInitiator = NULL;
+    if (isset($this->ServiceInitiators[$id])) {
+      $class = $this->ServiceInitiators[$id];
       if (!is_object($class)) {
-        $this->Clients[$id] = AblePolecat_Server::getClassRegistry()->loadClass($class);
+        $this->ServiceInitiators[$id] = AblePolecat_Server::getClassRegistry()->loadClass($class);
       }
-      $Client = $this->Clients[$id];
+      $ServiceInitiator = $this->ServiceInitiators[$id];
     }
-    return $Client;
+    return $ServiceInitiator;
   }
   
   /**

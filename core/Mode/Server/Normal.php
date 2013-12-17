@@ -25,6 +25,6 @@ class AblePolecat_Mode_Server_Normal extends AblePolecat_Mode_Server {
     //
     // Load environment/configuration
     //
-    $this->setEnvironment(AblePolecat_Environment_Server::wakeup(self::getAgent()));
+    $this->setEnvironment(AblePolecat_Environment_Server::wakeup($this->getAgent()));
   }
 }

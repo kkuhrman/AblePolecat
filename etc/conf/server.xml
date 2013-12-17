@@ -3,10 +3,10 @@
   <!-- 
     The Able Polecat version number is strictly informational and has no bearing on behaviour. 
   -->
-  <version name="DEV-0.2.1">
+  <version name="DEV-0.2.2">
     <major>0</major>
     <minor>2</minor>
-    <revision>1</revision>
+    <revision>2</revision>
   </version>
   <databases>
     <!-- 

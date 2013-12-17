@@ -17,6 +17,11 @@ class AblePolecat_Environment_User extends AblePolecat_CacheObjectAbstract imple
   private static $Environment = NULL;
   
   /**
+   * User agent.
+   */
+  private $Agent;
+  
+  /**
    * Extends __construct(). 
    * 
    * Sub-classes can override to initialize members prior to load.
@@ -30,7 +35,7 @@ class AblePolecat_Environment_User extends AblePolecat_CacheObjectAbstract imple
    * @return AblePolecat_AccessControl_AgentInterface.
    */
   public function getAgent() {
-    return AblePolecat_AccessControl::wakeup()->getAgent($this);
+    return $this->Agent;
   }
   
   /**
@@ -68,23 +73,16 @@ class AblePolecat_Environment_User extends AblePolecat_CacheObjectAbstract imple
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Environment = self::$Environment;
-    
-    if (!isset($Environment)) {
+    if (!isset(self::$Environment)) {
       //
       // Create environment object.
       //
-      $Environment = new AblePolecat_Environment_User();
+      self::$Environment = new AblePolecat_Environment_User();
       
       //
       // Initialize access control for application environment settings.
       //
-      $Agent = $Environment->getAgent();
-      
-      //
-      // Initialize singleton instance.
-      //
-      self::$Environment = $Environment;
+      self::$Environment->Agent = AblePolecat_AccessControl::wakeup($Subject)->getAgent(self::$Environment);
     }
     return self::$Environment;
   }

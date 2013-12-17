@@ -5,8 +5,8 @@
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Service.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 
 interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_CacheObjectInterface {
   
@@ -28,4 +28,108 @@ interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessContr
    * @return bool TRUE if the request was dispatched, otherwise FALSE.
    */
   public function dispatch();
+}
+
+/**
+ * Base class for service initiators (respond to request, initiate service, return response).
+ */
+abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_Service_InitiatorInterface {
+  
+  /**
+   * @var Prepared requests, ready to dispatch. FIFO.
+   */
+  private $PreparedRequests;
+  
+  /**
+   * @var bool Internal lock. Prevents concurrent dispatching of requests.
+   */
+  private $lock;
+  
+  /**
+   * Handle a prepared request.
+   *
+   * @param AblePolecat_Message_RequestInterface $Request.
+   * @param AblePolecat_Message_ResponseInterface &$Response.
+   *
+   * @throw AblePolecat_Service_Exception If processing request fails.
+   */
+  abstract protected function handlePreparedRequest($Request, &$Response);
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize properties.
+   */
+  protected function initialize() {
+    $this->PreparedRequests = array();
+    $this->lock = FALSE;
+  }
+  
+  /**
+   * Return next request prepared for dispatch.
+   *
+   * @return mixed Next request or NULL.
+   */
+  protected function getNextPreparedRequest() {
+    return array_shift($this->PreparedRequests);
+  }
+  
+  /**
+   * Pushes a prepared request to the end of the list.
+   *
+   * @param mixed $Request.
+   */
+  protected function pushPreparedRequest($Request) {
+    return array_push($this->PreparedRequests, $Request);
+  }
+  
+  /**
+   * @return bool TRUE if lock on client is set, otherwise FALSE.
+   */
+  protected function isLocked() {
+    return $this->lock;
+  }
+  
+  /**
+   * @param bool $lock Prevents concurrent dispatching of requests.
+   */
+  protected function setLock($lock = TRUE) {
+    $this->lock = $lock;
+  }
+  
+  /**
+   * Dispatch a prepared request to a service.
+   *
+   * @return bool TRUE if the request was dispatched, otherwise FALSE.
+   */
+  public function dispatch() {
+    
+    //
+    // Set lock.
+    //
+    $this->setLock();
+    
+    //
+    // Prepare response.
+    //
+    $Response = AblePolecat_Message_Response::create(200, 'OK');    
+    
+    //
+    // Handle next prepared request.
+    //
+    $PreparedRequest = $this->getNextPreparedRequest();
+    $this->handlePreparedRequest($PreparedRequest, $Response);
+    
+    //
+    // Release lock and return response.
+    //
+    $this->setLock(FALSE);
+    return $Response;
+  }
+}
+
+/**
+ * Exceptions thrown by Able Polecat services and service clients.
+ */
+class AblePolecat_Service_Exception extends AblePolecat_Exception {
 }

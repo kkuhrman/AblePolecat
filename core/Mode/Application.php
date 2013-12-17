@@ -44,9 +44,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
-    
-    parent::initialize();
-    
     //
     // Supported Able Polecat interfaces.
     //
@@ -274,14 +271,9 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     if (!isset(self::$ApplicationMode)) {
       try {
         //
-        // Set access control agent
-        //
-        self::setAgent($Subject);
-        
-        //
         // Create instance of application mode
         //
-        self::$ApplicationMode = new AblePolecat_Mode_Application();
+        self::$ApplicationMode = new AblePolecat_Mode_Application($Subject);
       }
       catch(Exception $Exception) {
         self::$ApplicationMode = NULL;
@@ -295,7 +287,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       //
       // Load environment settings
       //
-      $Environment = AblePolecat_Environment_Application::wakeup(self::getAgent());
+      $Environment = AblePolecat_Environment_Application::wakeup($Subject);
       if (isset($Environment)) {
         self::$ApplicationMode->setEnvironment($Environment);
       }

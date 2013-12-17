@@ -58,7 +58,11 @@ class AblePolecat_ClassRegistry_Pdo extends AblePolecat_ClassRegistryAbstract {
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     try {
-      if (isset($this->Database)) {
+      //
+      // @todo: install/update mode only
+      //
+      // if (isset($this->Database)) {
+      if ((AblePolecat_Server::getBootMode() !== AblePolecat_Server::BOOT_MODE_NORMAL) && isset($this->Database)) {
         $registeredClasses = $this->getRegisteredClasses();
         foreach($registeredClasses as $class_name => $class_info) {
           $result = FALSE;
@@ -67,6 +71,7 @@ class AblePolecat_ClassRegistry_Pdo extends AblePolecat_ClassRegistryAbstract {
           if (isset($path) && isset($method)) {
             //
             // Insert new or update existing entry
+            // @todo: prid, scope
             //
             $sql = __SQL()->          
               replace('name', 'path', 'method')->

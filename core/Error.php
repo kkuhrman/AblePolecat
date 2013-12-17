@@ -55,7 +55,7 @@ class AblePolecat_Error {
   const INCOMPLETE_INPUT_DATA         = 10170;
   const INVALID_TXFR_CLASS_NAME       = 10175;
   const DTX_ERROR                     = 10180;
-  
+  const HTTP_REQUEST_ROUTE_FAIL       = 10200;
   
   /**
    * @return Default message for given exception code.
@@ -201,6 +201,9 @@ class AblePolecat_Error {
         break;
       case self::DTX_ERROR:
         $message = 'Data transformation/exchange error. See log for more information.';
+        break;
+      case self::HTTP_REQUEST_ROUTE_FAIL:
+        $message = 'Able Polecat failed to route HTTP request to resource given.';
         break;
     }
     return $message;

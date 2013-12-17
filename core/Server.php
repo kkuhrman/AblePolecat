@@ -20,6 +20,11 @@ define('ABLE_POLECAT_VERSION_MINOR', '2');
 define('ABLE_POLECAT_VERSION_REVISION', '0');
 
 /**
+ * Request query string parameter.
+ */
+define('ABLE_POLECAT_BOOT_DIRECTIVE', 'mode');
+
+/**
  * Root directory of the entire Able Polecat core project.
  */
 if (!defined('ABLE_POLECAT_ROOT')) {
@@ -80,6 +85,11 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   const DBNAME            =  'polecat';
   
   //
+  // Able Polecat request resource id (passed as parameter in request).
+  //
+  const REQUEST_PARAM_RESOURCE_ID = 'prid';
+  
+  //
   // Boot directives (passed as parameters in request).
   //
   const BOOT_MODE         = 'mode';
@@ -124,6 +134,11 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   const RING_USER_MODE        = 2;
   
   const NAME_USER_MODE        = 'user mode';
+  
+  /**
+   * @var AblePolecat_Message_ResponseInterface Only response sent by this script.
+   */
+  private static $Response = NULL;
     
   /**
    * @var AblePolecat_Server Singleton instance.
@@ -168,8 +183,10 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   
   /**
    * Bootstrap procedure for Able Polecat.
+   *
+   * @param int $mode 0 = Server mode only, 1 = mode 0 + Application mode, 2 = mode 1 + User mode
    */
-  public static function bootstrap() {
+  public static function bootstrap($mode = self::RING_USER_MODE) {
     
     //
     // AblePolecat_Server implements Singelton design pattern.
@@ -205,7 +222,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
             AblePolecat_Server_Paths::touch($logs_path);
           }
           catch (AblePolecat_Server_Paths_Exception $Exception) {
-            self::shutdown($Exception->getMessage());
+            self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $Exception->getMessage());
           }
           AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'tpl', 'main.tpl')));
       }
@@ -237,12 +254,16 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         //
         // Third-party modules
         //
-        self::$Server->bootApplicationMode();
+        if ($mode >= self::RING_APPLICATION_MODE) {
+          self::$Server->bootApplicationMode();
+        }
         
         //
         // User session and access control management
         //
-        self::$Server->bootUserMode();
+        if ($mode >= self::RING_USER_MODE) {
+          self::$Server->bootUserMode();
+        }
       }
             
       //
@@ -252,7 +273,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         // $path_to_include,
         // $create_method
       // );
-      
+
       //
       // Close the boot log file
       //
@@ -559,9 +580,9 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       $ApplicationMode->loadRegisteredResources();
       
       //
-      // Register client classes from contributed contributed modules with service bus.
+      // Register services and service client classes with service bus.
       //
-      self::getServiceBus()->registerClients();
+      self::getServiceBus()->registerServiceInitiators();
       
       //
       // Put success messages at bottom in case something up there chokes
@@ -585,13 +606,20 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     
     $errmsg = '';
     
-    try {
+    try {      
       //
       // User mode.
       //
       self::$Server->Resources[self::RING_USER_MODE] = array();
+      
+      //
+      // Wakeup access control agent.
+      //
+      require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php')));
+      $UserAgent = AblePolecat_AccessControl_Agent_User::wakeup(self::getAccessControl()->getSession());
+      
       require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
-      $UserMode = AblePolecat_Mode_User::wakeup(self::getAccessControl()->getSession());
+      $UserMode = AblePolecat_Mode_User::wakeup($UserAgent);
       self::setResource(self::RING_USER_MODE, self::NAME_USER_MODE, $UserMode);
       $this->BootLog->logStatusMessage('Wakeup User Mode - OK');
     }
@@ -805,11 +833,40 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
    * Handle critical environment errors depending on runtime context.
    */
   public static function handleCriticalError($error_number, $error_message = NULL) {
-  
+    
+    //
+    // Set a default error message if not provided.
+    //
     !isset($error_message) ? $error_message = ABLE_POLECAT_EXCEPTION_MSG($error_number) : NULL;
-    // require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Browser.php')));
-    // AblePolecat_Log_Browser::dumpBacktrace($error_message);
-    self::shutdown('error', $error_message, $error_number);
+    
+    //
+    // Create an HTTP response with error info in body.
+    //
+    self::$Response = AblePolecat_Message_Response::create(500);
+    self::$Response->body = AblePolecat_Message_Response::BODY_DOCTYPE_XML;
+    self::$Response->body .= sprintf("<able_polecat_server><error_number>%d</error_number><error_message>%s</error_message></able_polecat_server>", 
+      $error_number,
+      $error_message
+    );
+    
+    //
+    // Attempt to log message.
+    //
+    self::writeToDefaultLog('error', $error_message, $error_number);
+      
+    //
+    // Close the boot log file if it's open
+    //
+    if (isset(self::$Server->BootLog)) {
+      self::$Server->BootLog->logStatusMessage($error_message);
+      self::$Server->BootLog->sleep();
+      self::$Server->BootLog = NULL;
+    }
+    
+    //
+    // Shut down server and send response.
+    //
+    self::shutdown();
   }
   
   /**
@@ -849,87 +906,133 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
-   * Handles requests to redirect a request from a web browser.
+   * Handles a request with an unidentified resource.
    *
-   * @param string $location An absolute URL or a preset Able Polecat page/template.
-   * @param bool $replace Parameter in PHP header() NIU
-   * @param int $http_response_code Parameter in PHP header() NIU
+   * @param string $resource_id Optional.
    */
-  public static function redirect($location = '', $replace = TRUE, $http_response_code = 302) {
+  public static function redirect($resource_id = NULL) {  
+    //
+    // Create a default response.
+    //
+    self::$Response = AblePolecat_Message_Response::create(302);
+    self::$Response->body = AblePolecat_Message_Response::BODY_DOCTYPE_XML;
+    self::$Response->body .= "<able_polecat>";
     
     //
-    // @todo: this is merely a stub, obviously not a solution
+    // Able Polecat version.
     //
-    $Locater = AblePolecat_AccessControl_Resource_Locater::create($location);
-    $output = file_get_contents($Locater);
-    if ($output) {
-      $dbstate = 'The connection to the application database is ';
-      switch (self::$Server->getDatabaseState('connected')) {
-        default:
-          $dbstate .= 'active.';
-          break;
-        case FALSE:
-          $dbstate .= 'NOT active.';
-          break;
-      }
-      $output = str_replace(
-        array(
-          '{POLECAT_VERSION}',
-          '{POLECAT_DBSTATE}',
-        ),
-        array(
-          '<em>' . AblePolecat_Server::getVersion() . '</em>', 
-          '<em>' . $dbstate . '</em>', 
-        ),
-        $output
-      );
-      echo $output;
-    }
-    self::shutdown();
+    self::$Response->body .= AblePolecat_Server::getVersion(TRUE, 'XML');
+    
+    //
+    // Application database state.
+    //
+    self::$Server->getDatabaseState('connected') ? $dbstate = 'connected' : $dbstate = 'not connected';
+    self::$Response->body .= "<dbstate>$dbstate</dbstate>";
+    
+    self::$Response->body .= "</able_polecat>";
   }
   
   /**
-   * Force shut down of  Able Polecat.
-   * 
-   * @param string $severity error | warning | status | info | debug.
-   * @param mixed  $message Message body.
-   * @param int    $code Error code.
+   * Main point of entry for all Able Polecat page and service requests.
+   *
    */
-  public static function shutdown($severity = NULL, $message = NULL, $code = NULL) {
-  
-  //
-  // Default shutdown code - OK
-  //
-  $exitmsg = 0;
-  
-  //
-  // If no error information provided, bypass logging
-  //
-  if (isset($severity) && isset($message)) {
-    isset($code) ? $codetxt = sprintf("code %d", $code) : $codetxt = "no code";
-      $exitmsg = sprintf("Able Polecat was forced to shutdown. %s condition.  %s. %s",
-        $severity, 
-        $message, 
-        $codetxt
-      );
-      self::writeToDefaultLog($severity, $exitmsg, $code);
+  public static function routeRequest() {
+    
+    //
+    // Default error message.
+    //
+    $error_msg = 'Failed to route request.';
+    
+    try {
+      //
+      // Bootstrap routine
+      //
+      self::bootstrap();
       
       //
-      // Close the boot log file if it's open
+      // Build request.
       //
-      if (isset(self::$Server->BootLog)) {
-        self::$Server->BootLog->logStatusMessage($message);
-        self::$Server->BootLog->sleep();
-        self::$Server->BootLog = NULL;
+      $Request = NULL;
+      isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
+      switch ($method) {
+        default:
+          break;
+        case 'GET':
+          $Request = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Message_Request_Get');
+          break;
+        case 'POST':
+          $Request = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Message_Request_Post');
+          break;
+        case 'PUT':
+          $Request = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Message_Request_Put');
+          break;
+        case 'DELETE':
+          $Request = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Message_Request_Delete');
+          break;
       }
+      if (isset($Request)) {
+        //
+        // Id of requested service/page.
+        //
+        $resource_id = self::getRequestVariable(self::REQUEST_PARAM_RESOURCE_ID);
+        if (isset($resource_id)) {
+          $Request->setResource($resource_id);
+          $error_msg .= " resource id:  $resource_id";
+          
+          //
+          // @todo: get request HEAD
+          // @todo: get request BODY
+          //
+          
+          //
+          // Dispatch the request.
+          //
+          $Agent = AblePolecat_Server::getUserMode()->getUserAgent();
+          self::$Response = AblePolecat_Server::getServiceBus()->dispatch($Agent, $Request);
+        }
+        else {
+          //
+          // Get default response.
+          //
+          $error_msg .= " resource id:  none";
+          AblePolecat_Server::redirect();
+        }
+      }
+      else {
+        $error_msg .= " resource id:  none";
+      }
+    }
+    catch(Exception $Exception) {
+      $error_msg .= ' ' . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::HTTP_REQUEST_ROUTE_FAIL, $error_msg);
     }
     
     //
-    // shut down procedures
+    // shut down and send response
     //
-    try {
+    AblePolecat_Server::shutdown();
+  }
+  
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   */
+  public static function shutdown() {
+  
+    //
+    // Default shut down code - OK
+    //
+    $exitmsg = 0;
+    
+    if (!isset(self::$Response)) {
+      //
+      // This should never happen, even if script fails before response can be created.
+      // Exceptions/Errors should always be caught and passed to handleCriticalError.
+      // This is here for debugging mainly
+      var_dump(self::$Server);
+      die('Able Polecat encountered an unexpected error and must shut down');
     }
-    catch(Exception $Exception) {
+    else {
+      self::$Response->send();
     }
       
     exit($exitmsg);
@@ -975,14 +1078,14 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     // cookie, server will boot in cookie mode. Otherwise, the server will 
     // boot in normal mode.
     //
-    $value = AblePolecat_Server::getRequestVariable('mode');
+    $value = AblePolecat_Server::getRequestVariable(ABLE_POLECAT_BOOT_DIRECTIVE);
     if (!isset($value)) {
       //
       // If runtime context was saved in a cookie, use that until agent
       // explicitly unsets with run=user or cookie expires.
       //
-      if (isset($_COOKIE['ABLE_POLECAT_RUNTIME'])) {
-        $data = unserialize($_COOKIE['ABLE_POLECAT_RUNTIME']);
+      if (isset($_COOKIE[ABLE_POLECAT_BOOT_DIRECTIVE])) {
+        $data = unserialize($_COOKIE[ABLE_POLECAT_BOOT_DIRECTIVE]);
         isset($data[$directive]) ? $value = $data[$directive] : NULL;
       }
     }
@@ -1007,18 +1110,33 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   /**
    * Get version number of server/core.
    */
-  public static function getVersion($as_str = TRUE) {
+  public static function getVersion($as_str = TRUE, $doc_type = 'XML') {
     
     $version = NULL;
     
     if (isset(self::$Server)) {
       if ($as_str) {
-        $version = sprintf("Version %s.%s.%s (%s)",
-          self::$Server->version['major'],
-          self::$Server->version['minor'],
-          self::$Server->version['revision'],
-          self::$Server->version['name']
-        );
+        switch ($doc_type) {
+          default:
+            $version = sprintf("Version %s.%s.%s (%s)",
+              self::$Server->version['major'],
+              self::$Server->version['minor'],
+              self::$Server->version['revision'],
+              self::$Server->version['name']
+            );
+            break;
+          case 'XML':
+            $version = sprintf("<polecat_version name=\"%s\"><major>%s</major><minor>%s</minor><revision>%s</revision></polecat_version>",
+              self::$Server->version['name'],
+              strval(self::$Server->version['major']),
+              strval(self::$Server->version['minor']),
+              strval(self::$Server->version['revision'])
+            );
+            break;
+          //
+          // @todo: case 'JSON':
+          //
+        }
       }
       else {
         $version = self::$Server->version;
@@ -1125,9 +1243,24 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   final protected function __construct() {
     
     //
+    // Turn on output buffering.
+    //
+    ob_start();
+    
+    //
     // Not ready until after initialize().
     //
     $this->initialize();
+  }
+  
+  /**
+   * Serialization prior to going out of scope in sleep().
+   */
+  final public function __destruct() {
+    //
+    // Flush output buffer.
+    //
+    ob_end_flush();
   }
 }
 

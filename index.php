@@ -64,7 +64,7 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'core', 'Server.php')));
 
 try {
-  AblePolecat_Server::bootstrap();
+  AblePolecat_Server::routeRequest();
 }
 catch (AblePolecat_Exception $Exception) {
   AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'html', 'install', 'home.html')));

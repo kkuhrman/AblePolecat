@@ -25,7 +25,7 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
   /**
    * @var AblePolecat_AccessControl_AgentInterface
    */
-  private static $Agent;
+  private $Agent;
   
   /**
    * @var AblePolecat_EnvironmentInterface.
@@ -36,22 +36,20 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
    * Extends constructor.
    * Sub-classes should override to initialize members.
    */
-  protected function initialize() {
-    $this->Environment = NULL;
-  }
+  abstract protected function initialize();
   
   /**
-   * @return AblePolecat_AccessControl_AgentInterface
+   * @return AblePolecat_AccessControl_AgentInterface or NULL
    */
-  protected static function getAgent() {
-    return self::$Agent;
+  protected function getAgent() {
+    return $this->Agent;
   }
   
   /**
    * @param AblePolecat_AccessControl_AgentInterface $Agent
    */
   protected static function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
-    self::$Agent = $Agent;
+    $this->Agent = $Agent;
   }
   
   /**
@@ -133,6 +131,14 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
    * @see initialize(), wakeup().
    */
   final protected function __construct() {
+    $args = func_get_args();
+    if (isset($args[0]) && is_a($args[0], 'AblePolecat_AccessControl_AgentInterface')) {
+      $this->Agent = $args[0];
+    }
+    else {
+      $this->Agent = NULL;
+    }
+    $this->Environment = NULL;
     $this->initialize();
   }
   

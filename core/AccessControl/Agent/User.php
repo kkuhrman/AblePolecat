@@ -54,6 +54,10 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    //
+    // @todo: if $Subject is session restore agent from session
+    //
     $Agent = new AblePolecat_AccessControl_Agent_User();
     return $Agent;
   }

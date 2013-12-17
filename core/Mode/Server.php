@@ -24,9 +24,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
-    
-    parent::initialize();
-    
     //
     // Check for required server resources.
     // (these will throw exception if not ready).
@@ -76,26 +73,21 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     
     if (!isset(self::$ServerMode)) {
       try {        
-        //
-        // Set access control agent
-        //
-        self::setAgent($Subject);
-        
         switch (AblePolecat_Server::getBootDirective(AblePolecat_Server::BOOT_MODE)) {
           default:
             //
             // default mode is normal/user
             //
             require_once('Server/Normal.php');
-            self::$ServerMode = new AblePolecat_Mode_Server_Normal();
+            self::$ServerMode = new AblePolecat_Mode_Server_Normal($Subject);
             break;
           case 'install':
             require_once('Server/Install.php');
-            self::$ServerMode = new AblePolecat_Mode_Server_Install();
+            self::$ServerMode = new AblePolecat_Mode_Server_Install($Subject);
             break;
           case 'update':
             require_once('Server/Update.php');
-            self::$ServerMode = new AblePolecat_Mode_Server_Update();
+            self::$ServerMode = new AblePolecat_Mode_Server_Update($Subject);
             break;
         }
       }

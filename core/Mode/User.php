@@ -27,16 +27,6 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   protected function initialize() {
     
     //
-    // Start in 'not ready' state
-    //
-    self::$UserMode = NULL;
-    
-    //
-    // Initialize parents
-    //
-    parent::initialize();
-    
-    //
     // Check for required server resources.
     // (will throw exception if not ready).
     //
@@ -59,6 +49,15 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    */
   public static function getName() {
     return self::NAME;
+  }
+  
+  /**
+   * Get access control agent for current user.
+   *
+   * @return
+   */
+  public function getUserAgent() {
+    return $this->getAgent();
   }
   
   /**
@@ -86,7 +85,7 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
       //
       // Create instance of user mode
       //
-      $UserMode = new AblePolecat_Mode_User();
+      self::$UserMode = new AblePolecat_Mode_User($Subject);
       
       //
       // @todo get user settings from session ($Subject).
@@ -97,14 +96,12 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
       //
       $Environment = AblePolecat_Environment_User::wakeup($Subject);
       if (isset($Environment)) {
-        $UserMode->Environment = $Environment;
+        self::$UserMode->setEnvironment($Environment);
       }
       else {
         throw new AblePolecat_Environment_Exception('Failed to load Able Polecat user environment.',
           AblePolecat_Error::BOOT_SEQ_VIOLATION);
       }
-      
-      self::$UserMode = $UserMode;
     }
       
     return self::$UserMode;
