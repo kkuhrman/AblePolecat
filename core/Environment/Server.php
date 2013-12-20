@@ -4,10 +4,10 @@
  * Environment for Able Polecat Server Mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Conf.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Dom.php')));
 
-class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstract {
+class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   
   const UUID = '318df280-5def-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Server Environment';
@@ -96,60 +96,56 @@ class AblePolecat_Environment_Server extends AblePolecat_Environment_ConfAbstrac
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Environment)) {
-      //
-      // Initialize singleton instance.
-      //
-      self::$Environment = new AblePolecat_Environment_Server();
-      
-      //
-      // Initialize server access control.
-      //
-      self::$Environment->setAgent($Subject);
-
-      //
-      // Load application configuration settings.
-      //    
-      // Load AblePolecat_Storage_File_Conf, which must implement 
-      // AblePolecat_AccessControl_ResourceInterface. Will use agent 
-      // created in #4 to gain access to this. If file does not exist 
-      // initialization routine will create it with default settings.
-      //
-      $Config = AblePolecat_Conf_Server::touch();
-      $ConfigUrl = AblePolecat_Conf_Server::getResourceLocater();
-      if (isset($Config) && $ConfigUrl) {
+      try {
         //
-        // Grant open permission on config file to agent.
+        // Initialize singleton instance.
         //
-        $Config->setPermission($Subject, AblePolecat_AccessControl_Constraint_Open::getId());
-        $Config->setPermission($Subject, AblePolecat_AccessControl_Constraint_Read::getId());
+        self::$Environment = new AblePolecat_Environment_Server();
         
         //
-        // Set configuration file/path.
-        // This opens the conf file.
+        // Get system-wide configuration from server.
         //
-        self::$Environment->setConf($Config, $ConfigUrl);
+        $Conf = AblePolecat_Server::getSysConfig();
         
         //
-        // Server environment initialized.
-        // Set configurable system paths.
+        // Initialize system environment variables from conf file.
         //
-        $paths = self::$Environment->getConf('paths');
-        foreach($paths->path as $key => $path) {
-          $pathAttributes = $path->attributes();
-          if (isset($pathAttributes['name'])) {
-            AblePolecat_Server_Paths::setFullPath($pathAttributes['name']->__toString(), $path->__toString());
-          }
-        }
-        
-        //
-        // Verify user/configurable directories.
-        //
-        AblePolecat_Server_Paths::verifyConfDirs();
+        self::$Environment->setVariable(
+          $Subject,
+          AblePolecat_Server::SYSVAR_CORE_VERSION,
+          $Conf->getCoreVersion()
+        );
+        self::$Environment->setVariable(
+          $Subject,
+          AblePolecat_Server::SYSVAR_CORE_DATABASE,
+          $Conf->getCoreDatabaseConf()
+        );
       }
-      else {
-        throw new AblePolecat_Environment_Exception("Failure to access/set application configuration.", 
+      catch (Exception $Exception) {
+        throw new AblePolecat_Environment_Exception("Failure to access/set application configuration. " . $Exception->getMessage(), 
           AblePolecat_Error::BOOTSTRAP_CONFIG);
       }
+      
+      // $Config = AblePolecat_Conf_Server::touch();
+      // $ConfigUrl = AblePolecat_Conf_Server::getResourceLocater();
+      // if (isset($Config) && $ConfigUrl) {
+        // $Config->setPermission($Subject, AblePolecat_AccessControl_Constraint_Open::getId());
+        // $Config->setPermission($Subject, AblePolecat_AccessControl_Constraint_Read::getId());
+        
+        // self::$Environment->setConf($Config, $ConfigUrl);
+        
+        // $paths = self::$Environment->getConf('paths');
+        // foreach($paths->path as $key => $path) {
+          // $pathAttributes = $path->attributes();
+          // if (isset($pathAttributes['name'])) {
+            // AblePolecat_Server_Paths::setFullPath($pathAttributes['name']->__toString(), $path->__toString());
+          // }
+        // }
+        
+        // AblePolecat_Server_Paths::verifyConfDirs();
+      // }
+      // else {       
+      // }
     }
     return self::$Environment;
   }

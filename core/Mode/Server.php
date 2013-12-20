@@ -5,6 +5,7 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Server.php')));
 
 class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   
@@ -28,8 +29,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     // Check for required server resources.
     // (these will throw exception if not ready).
     //
-    // AblePolecat_Server::getBootMode();
-    // AblePolecat_Server::getClassRegistry();
   }
   
   /**

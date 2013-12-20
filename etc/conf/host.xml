@@ -1,13 +1,5 @@
 <?xml version='1.0' standalone='yes'?>
-<config name="default" description="Default Able Polecat configuration file." author="Karl Kuhrman">
-  <!-- 
-    The Able Polecat version number is strictly informational and has no bearing on behaviour. 
-  -->
-  <version name="DEV-0.2.2">
-    <major>0</major>
-    <minor>2</minor>
-    <revision>2</revision>
-  </version>
+<host>
   <databases>
     <!-- 
     More than one application database can be defined in server conf file. However, only ONE
@@ -24,12 +16,4 @@
     </database>
     -->
   </databases>
-  <paths>
-    <!-- User configurable sub-directories -->
-    <!-- 
-    <path name="myDir">
-      C:\path\to\AblePolecat\myDir 
-    </path>
-    -->
-  </paths>
-</config>
+</host>

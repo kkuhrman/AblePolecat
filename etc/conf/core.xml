@@ -1,0 +1,33 @@
+<?xml version='1.0' standalone='no'?>
+<core>
+  <!-- 
+    The Able Polecat version number is strictly informational and has no bearing on behaviour. 
+  -->
+  <version name="DEV-0.3.3">
+    <major>0</major>
+    <minor>3</minor>
+    <revision>3</revision>
+  </version>
+  <!--
+    Interfaces that can be implemented as a means of extending Able Polecat.
+  -->
+  <interfaces>
+    <interface>
+      <interfaceName>AblePolecat_CacheObjectInterface</interfaceName>
+    </interface>
+  </interfaces>
+  <!--
+    The following class definitions will be added to the class registry.
+  -->
+  <classes>
+    <class register="1" id="">
+      <className></className>
+      <interfaces>
+        <interface></interface>
+      </interfaces>
+      <fileName></fileName>
+      <filePath></filePath>
+      <classFactoryMethod></classFactoryMethod>
+    </class>
+  </classes>
+</core>

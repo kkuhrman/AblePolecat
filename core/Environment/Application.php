@@ -4,10 +4,10 @@
  * Environment for Able Polecat Application Mode.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Conf.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Module.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Dom.php')));
 
-class AblePolecat_Environment_Application extends AblePolecat_Environment_ConfAbstract {
+class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstract {
   
   const UUID = 'df5e0c10-5f4d-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Application Environment';

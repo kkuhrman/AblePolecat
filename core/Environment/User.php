@@ -4,9 +4,10 @@
  * Environment for Able Polecat User Mode.
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'AccessControl.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Dom.php')));
 
-class AblePolecat_Environment_User extends AblePolecat_CacheObjectAbstract implements AblePolecat_EnvironmentInterface {
+class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
   
   const UUID = '1c385af0-5f4e-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat User Environment';

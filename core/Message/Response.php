@@ -11,7 +11,9 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   
   const STATUS_CODE             = 'status_code';
   const REASON_PHRASE           = 'reason_phrase';
+  const HEADER_FIELDS           = 'header_fields';
   
+  const HEAD_CONTENT_TYPE_HTML  = 'Content-type: text/html';
   const HEAD_CONTENT_TYPE_JSON  = 'Content-Type: application/json';
   const HEAD_CONTENT_TYPE_XML   = 'Content-type: text/xml; charset=utf-8';
   
@@ -31,6 +33,11 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   private $m_reason_phrase;
   
   /**
+   * @var array Fields to be sent in the response header.
+   */
+  private $headerFields;
+  
+  /**
    * Extends __construct().
    *
    * Sub-classes should override to initialize properties.
@@ -38,6 +45,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   protected function initialize() {
     $this->m_status_code = 0;
     $this->m_reason_phrase = '';
+    $this->headerFields = array();
     // AblePolecat_Error::INVALID_HTTP_RESPONSE
   }
   
@@ -48,7 +56,14 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     //
     // @todo: send HTTP headers
     //
-    header(self::HEAD_CONTENT_TYPE_XML);
+    if (count($this->headerFields)) {
+      foreach($this->headerFields as $key => $field) {
+        header($field);
+      }
+    }
+    else {
+      header(self::HEAD_CONTENT_TYPE_XML);
+    }
     header('', TRUE, $this->getStatusCode());
   }
   
@@ -206,13 +221,26 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   }
   
   /**
-   * Initialize the reason phrase.
+   * Append fields to be sent with response header.
    *
-   * @param string $reason_phrase.
+   * @param ARRAY $fields.
    */
-  // protected function setReasonPhrase($reason_phrase) {
-    // $this->m_reason_phrase = $reason_phrase;
-  // }
+  protected function appendHeaderFields($fields) {
+    if (isset($fields) && is_array($fields)) {
+      foreach($fields as $key => $field) {
+        if ($this->validateHeaderField($field)) {
+          $this->headerFields[] = $field;
+        }
+      }
+    }
+  }
+  
+  /**
+   * @todo: smirk
+   */
+  protected function validateHeaderField($field) {
+    return TRUE;
+  }
   
   /**
    * @return string The response status code.
@@ -268,7 +296,7 @@ class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract 
               $ArgsList->{AblePolecat_Message_ResponseInterface::STATUS_CODE} = $value;
               break;
             case 1:
-              // $ArgsList->{AblePolecat_Message_ResponseInterface::REASON_PHRASE} = $value;
+              $ArgsList->{AblePolecat_Message_ResponseInterface::HEADER_FIELDS} = $value;
               break;
           }
           break;
@@ -300,9 +328,9 @@ class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract 
     $Response->setStatusCode(
       $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
     );
-    // $Response->setReasonPhrase(
-      // $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::REASON_PHRASE, 'OK')
-    // );
+    $Response->appendHeaderFields(
+      $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
+    );
     
     //
     // Return initialized object.

@@ -14,10 +14,10 @@
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.2.0');
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.3.3');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
-define('ABLE_POLECAT_VERSION_MINOR', '2');
-define('ABLE_POLECAT_VERSION_REVISION', '0');
+define('ABLE_POLECAT_VERSION_MINOR', '3');
+define('ABLE_POLECAT_VERSION_REVISION', '3');
 
 /**
  * Request query string parameter.
@@ -69,6 +69,7 @@ if (!defined('ABLE_POLECAT_USR')) {
 // These are listed in the order they are created in initialize() and bootstrap()
 //
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Dom.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
@@ -102,6 +103,19 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   const BOOT_MODE_UPDATE  = 'update';
   
   //
+  // Boot sequence
+  //
+  const BOOT_SEQ_SYS_CONFIG     = 0; // Load system configuration settings from conf file(s).
+  const BOOT_SEQ_SERVER_MODE    = 1; // Start server environment and set boot mode.
+  const BOOT_SEQ_DATABASE       = 2; // Establish a connection to the core/application database.
+  const BOOT_SEQ_CLASS_REGISTRY = 3; // Load registry of supported class and interface definitions.
+  const BOOT_SEQ_DEFAULT_LOG    = 4; // Start the database logging feature.
+  const BOOT_SEQ_ACCESS_CONTROL = 5; // Initiate access control for applications and users.
+  const BOOT_SEQ_SERVICE_BUS    = 6; // Bring service bus on line.
+  const BOOT_SEQ_APPLICATION_MODE = 7; // Load user and third-party code engine.
+  const BOOT_SEQ_USER_MODE      = 8; // Start user session and exit bootstrap.
+  
+  //
   // protection ring 0, Server Mode.
   //
   const RING_ACCESS_CONTROL   = 0;
@@ -111,6 +125,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   const RING_CLASS_REGISTRY   = 0;
   const RING_SERVER_MODE      = 0;
   const RING_SERVICE_BUS      = 0;
+  const RING_SYS_CONFIG       = 0;
   
   const NAME_ACCESS_CONTROL   = 'access control';
   const NAME_BOOT_MODE        = 'boot mode';
@@ -120,6 +135,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   const NAME_CLASS_REGISTRY   = 'class registry';
   const NAME_SERVER_MODE      = 'server mode';
   const NAME_SERVICE_BUS      = 'service bus';
+  const NAME_SYS_CONFIG       = 'system configuration';
 
   //
   // Protection ring 1, Application Mode.
@@ -134,6 +150,19 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   const RING_USER_MODE        = 2;
   
   const NAME_USER_MODE        = 'user mode';
+  
+  //
+  // System environment variable names
+  //
+  const SYSVAR_CORE_VERSION   = 'coreVersion';
+  const SYSVAR_CORE_CLASSES   = 'coreClasses';
+  const SYSVAR_CORE_DATABASE  = 'coreDatabase';
+  const SYSVAR_CORE_INTERFACES = 'coreInterfaces';
+  
+  /**
+   * @var int An incremental marker for continually checking state of boostrap procedure.
+   */
+  private static $boot_check = 0;
   
   /**
    * @var AblePolecat_Message_ResponseInterface Only response sent by this script.
@@ -198,6 +227,11 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       self::$Server = new self();
       
       //
+      // System configuration settings needed for bootstrap.
+      //
+      self::$Server->bootSysConfig();
+      
+      //
       // Server environment configuration settings
       //
       self::$Server->bootServerMode();
@@ -206,26 +240,6 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       // Application database
       //
       self::$Server->bootDatabase();
-      
-      //
-      // No connection to database.
-      // Could happen if this is a first time install.
-      // But need to rule out any trouble.
-      //
-      if ((self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) && 
-          (self::$Server->getDatabaseState('connected') === FALSE)) {
-          //
-          // Verify variable file paths exist
-          //
-          try {
-            $logs_path = AblePolecat_Server_Paths::getFullPath('logs');
-            AblePolecat_Server_Paths::touch($logs_path);
-          }
-          catch (AblePolecat_Server_Paths_Exception $Exception) {
-            self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $Exception->getMessage());
-          }
-          AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'tpl', 'main.tpl')));
-      }
       
       //
       // Class registry
@@ -237,34 +251,26 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       //
       self::$Server->bootLog();
       
+
       //
-      // Remainder of boot procedure is skipped if this is an install
+      // Access control service
       //
-      if (self::$Server->getBootMode() != self::BOOT_MODE_INSTALL) {
-        //
-        // Access control service
-        //
-        self::$Server->bootAccessControl();
-        
-        //
-        // ESB - service bus
-        //
-        self::$Server->bootServiceBus();
-        
-        //
-        // Third-party modules
-        //
-        if ($mode >= self::RING_APPLICATION_MODE) {
-          self::$Server->bootApplicationMode();
-        }
-        
-        //
-        // User session and access control management
-        //
-        if ($mode >= self::RING_USER_MODE) {
-          self::$Server->bootUserMode();
-        }
-      }
+      self::$Server->bootAccessControl();
+      
+      //
+      // ESB - service bus
+      //
+      self::$Server->bootServiceBus();
+      
+      //
+      // Third-party modules
+      //
+      self::$Server->bootApplicationMode();
+      
+      //
+      // User session and access control management
+      //
+      self::$Server->bootUserMode();
             
       //
       // Register some other core classes.
@@ -281,6 +287,36 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         self::$Server->BootLog->sleep();
         self::$Server->BootLog = NULL;
       }
+    }
+  }
+  
+  /**
+   * Load system-wide configuration settings needed to boot server from file(s).
+   */
+  protected function bootSysConfig() {
+    
+    $errmsg = '';
+    
+    try {
+      //
+      // Merge system-wide configuration settings from one or more XML doc(s).
+      //
+      $SysConfig = AblePolecat_Conf_Dom::wakeup($this->Agent);
+      
+      // Set access control constraints.
+      //
+      $SysConfig->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Read::getId());
+      $SysConfig->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Write::getId());
+    
+      self::setResource(self::RING_SYS_CONFIG, self::NAME_SYS_CONFIG, $SysConfig);
+      $this->BootLog->logStatusMessage('Wakeup System Configuration - OK');
+      $this->bootCheck();
+    }
+    catch(Exception $Exception) {
+      $this->BootLog->logStatusMessage('Wakeup System Configuration - FAIL');
+      $this->BootLog->logStatusMessage($Exception->getMessage());
+      $errmsg .= " Failed to load system configuration settings. " . $Exception->getMessage();
+      self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
   }
    
@@ -301,12 +337,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       //
       // Get version number from server conf
       //
-      $versionConf = $ServerMode->getEnvironment()->getConf('version');
-      $attr = $versionConf->attributes();
-      isset($attr['name']) ? self::$Server->version['name'] = $attr['name']->__toString() : NULL;
-      isset($versionConf->major) ? self::$Server->version['major'] = $versionConf->major->__toString() : NULL;
-      isset($versionConf->minor) ? self::$Server->version['minor'] = $versionConf->minor->__toString() : NULL;
-      isset($versionConf->revision) ? self::$Server->version['revision'] = $versionConf->revision->__toString() : NULL;
+      $this->setVersion($ServerMode->getEnvironment()->getVariable($this->Agent, self::SYSVAR_CORE_VERSION));
       
       //
       // Set the bootstrap Server Mode
@@ -325,6 +356,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       }
       self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, $BootMode);
       $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup Server Mode - FAIL');
@@ -342,87 +374,28 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     $errmsg = '';
     
     try {
+      //
+      // Load core database configuration settings.
+      //
       $ServerMode = self::getServerMode();
-      
-      //
-      // Load application database for active mode.
-      // @todo: core will only use PDO; move custom class loading to application mode
-      //
-      $dbconf = $ServerMode->getEnvironment()->getConf('databases');
-      foreach($dbconf as $element_name => $db) {
-        $dbattr = $db->attributes();
-        isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
-        isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
-        // isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
-        if (!isset($dbname) && !isset($dbid)) {
-          self::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
-        }
-        else {
-          //
-          // More than one application database can be defined in server conf file. However, only ONE
-          // application database can be active per server mode. 
-          // If 'mode' attribute is empty, polecat will assume any mode; otherwise, database is defined 
-          // for given mode only. 
-          // The 'use' attribute indicates that the database should be loaded for the mode(s) given by 
-          // the 'mode' attribute. 
-          // Polecat will scan database definitions until it finds one with mode/use attributes combined 
-          // in such a way that directs it to use the database for the current server mode.
-          //
-          $BootMode = self::getBootMode();
-          if (isset($dbattr['mode'])) {
-            //
-            // database only defined for given mode
-            //
-            $dbmode = $dbattr['mode']->__toString();
-            if ($dbmode == '') {
-              //
-              // attribute blank, assume any mode (use current)
-              //
-              $dbmode = $BootMode;
-            }
-          }
-          else {
-            //
-            // attribute not defined, assume any mode (use current)
-            //
-            $dbmode = $BootMode;
-          }
-          isset($dbattr['use']) ? $dbuse = intval($dbattr['use']->__toString()) : $dbuse = 0;
-          
-          if (($dbmode == $BootMode) && $dbuse) {
-            //
-            // DSN
-            //
-            isset($db->dsn) ? $dbdsn = $db->dsn->__toString() : $dbdsn = NULL;
-            
-            //
-            // Store info about application database.
-            //
-            $this->db_state = array(
-              'name' => $dbname,
-              'id' => $dbid,
-              'mode' => $dbmode,
-              'use' => $dbuse,
-              'dsn' => $dbdsn,
-              'connected' => FALSE,
-            );
-            
-            //
-            // Attempt a connection.
-            //
-            $Database = AblePolecat_Database_Pdo::wakeup($this->Agent);
-            $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
-            $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
-            $Database->open($this->Agent, $DbUrl);           
-            self::setResource(self::RING_DATABASE, self::NAME_DATABASE, $Database);
-            $this->db_state['connected'] = TRUE;
-            $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
-            break;
-          }
-        }
+      $this->db_state = $ServerMode->getEnvironment()->getVariable($this->Agent, self::SYSVAR_CORE_DATABASE);
+      $this->db_state['connected'] = FALSE;
+      if (isset($this->db_state['dsn'])) {
+        //
+        // Attempt a connection.
+        //
+        $Database = AblePolecat_Database_Pdo::wakeup($this->Agent);
+        $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
+        $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
+        $Database->open($this->Agent, $DbUrl);           
+        self::setResource(self::RING_DATABASE, self::NAME_DATABASE, $Database);
+        $this->db_state['connected'] = TRUE;
+        $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+        $this->bootCheck();
       }
     }
     catch(Exception $Exception) {
+      !isset($this->db_state['connected']) ? $this->db_state['connected'] = FALSE : NULL;
       $this->BootLog->logStatusMessage('Wakeup Application Database - FAIL');
       $this->BootLog->logStatusMessage($Exception->getMessage());
       $errmsg .= " Failed to boot application database. " . $Exception->getMessage();
@@ -452,6 +425,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
       }
       $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup Application Log - FAIL');
@@ -483,6 +457,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
       }
       $this->BootLog->logStatusMessage('Wakeup Class Registry - OK');
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup Class Registry - FAIL');
@@ -511,6 +486,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       else {
         $this->BootLog->logStatusMessage('Wakeup Access Control (NO DB) - SKIP');
       }
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup Access Control - FAIL');
@@ -539,6 +515,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       else {
         $this->BootLog->logStatusMessage('Wakeup Service Bus (NO DB) - SKIP');
       }
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup Service Bus - FAIL');
@@ -590,6 +567,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       $this->BootLog->logStatusMessage('Wakeup Application Mode - OK');
       $this->BootLog->logStatusMessage('Load third-party resources - OK');
       $this->BootLog->logStatusMessage('Register third-party clients - OK');
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup Application Mode - FAIL');
@@ -622,12 +600,94 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       $UserMode = AblePolecat_Mode_User::wakeup($UserAgent);
       self::setResource(self::RING_USER_MODE, self::NAME_USER_MODE, $UserMode);
       $this->BootLog->logStatusMessage('Wakeup User Mode - OK');
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       $this->BootLog->logStatusMessage('Wakeup User Mode - FAIL');
       $this->BootLog->logStatusMessage($Exception->getMessage());
       $errmsg .= " Failed to . " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
+    }
+  }
+  
+  /**
+   * Checks bootstrap procedure after each sub-routine and takes action accordingly.
+   */
+  protected function bootCheck() {
+    
+    $Go = FALSE;
+    
+    switch (self::$boot_check) {
+      default:
+        break;
+      case self::BOOT_SEQ_SYS_CONFIG:
+        //
+        // Check state of system configuration document.
+        //
+        if (isset($this->Resources[self::RING_SYS_CONFIG][self::NAME_SYS_CONFIG])) {
+          $Go = is_a($this->Resources[self::RING_SYS_CONFIG][self::NAME_SYS_CONFIG], 
+            'AblePolecat_ConfInterface'
+          );
+        }
+        break;
+      case self::BOOT_SEQ_SERVER_MODE:
+        //
+        // Check state of system configuration document.
+        //
+        if (isset($this->Resources[self::RING_SERVER_MODE][self::NAME_SERVER_MODE])) {
+          $Go = is_a($this->Resources[self::RING_SERVER_MODE][self::NAME_SERVER_MODE], 
+            'AblePolecat_Mode_Server'
+          ) &&
+          isset($this->Resources[self::RING_BOOT_MODE][self::NAME_BOOT_MODE]);
+        }
+        break;
+      case self::BOOT_SEQ_DATABASE:
+        $Go = self::$Server->getDatabaseState('connected');
+        break;
+      case self::BOOT_SEQ_CLASS_REGISTRY:
+        // Load registry of supported class and interface definitions.
+        break;
+      case self::BOOT_SEQ_DEFAULT_LOG:
+        // Start the database logging feature.
+        break;
+      case self::BOOT_SEQ_ACCESS_CONTROL:
+        // Initiate access control for applications and users.
+        break;
+      case self::BOOT_SEQ_SERVICE_BUS:
+        // Bring service bus on line.
+        break;
+      case self::BOOT_SEQ_APPLICATION_MODE:
+        // Load user and third-party code engine.
+        break;
+      case self::BOOT_SEQ_USER_MODE:
+        // Start user session and exit bootstrap.
+        break;
+    }
+    
+    if ($Go) {
+      //
+      // Advance to next step.
+      //
+      self::$boot_check++;
+    }
+    else {
+      $statusPageContent = "<p>Able Polecat encountered a problem during the bootstrap process and shut down.</p>";
+      switch (self::$boot_check) {
+        default:
+          break;
+        case self::BOOT_SEQ_SYS_CONFIG:
+          $statusPageContent .= "<p>The system configuration file(s) appear to be missing or corrupted.</p>";
+          break;
+        case self::BOOT_SEQ_SERVER_MODE:
+          $statusPageContent .= "<p>The server environment settings failed to load properly.</p>";
+          break;
+        case self::BOOT_SEQ_DATABASE:
+          $statusPageContent .= "<p>A connection with the core (application) database could not be made.</p>";
+          break;
+      }
+      $statusPageContent .= "<p>Please consult the <a href=\"https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started\">
+        installation instructions</a> for further information about setting up Able Polecat to run on your web server.</p>";
+      self::sendStatusPageResponse($statusPageContent);
     }
   }
   
@@ -667,6 +727,31 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /**
+   * Sets version information from core configuration file.
+   */
+  protected function setVersion($version = NULL) {
+    
+    if (isset($version['name']) &&
+        isset($version['major']) &&
+        isset($version['minor']) &&
+        isset($version['revision'])) {
+        $this->version = array();
+      $this->version['name'] = $version['name'];
+      $this->version['major'] = $version['major'];
+      $this->version['minor'] = $version['minor'];
+      $this->version['revision'] = $version['revision'];
+    }
+    else {
+      $this->version = array(
+        'name' => ABLE_POLECAT_VERSION_NAME,
+        'major' => ABLE_POLECAT_VERSION_MAJOR,
+        'minor' => ABLE_POLECAT_VERSION_MINOR,
+        'revision' => ABLE_POLECAT_VERSION_REVISION,
+      );
+    }
+  }
+  
+  /**
    * Retrieves resource given by $name in protection ring given by $ring.
    *
    * @param int $ring Ring assignment.
@@ -693,7 +778,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     }
 
     if (!isset($resource) && $safe) {
-      $errmsg .= $errmsg = " Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed. ";
+      $errmsg = " Attempt to retrieve Able Polecat Server resource given by $name at protection ring $ring failed. ";
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
     return $resource;
@@ -781,6 +866,17 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
    */
   public static function getServiceBus($safe = TRUE) {
     return self::getResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $safe);
+  }
+  
+  /**
+   * Get system-wide configuration settings (XML/DOM).
+   *
+   * @param bool $safe If TRUE will not return NULL, rather throw exception.
+   *
+   * @return AblePolecat_ConfInterface or NULL.
+   */
+  public static function getSysConfig($safe = TRUE) {
+    return self::getResource(self::RING_SYS_CONFIG, self::NAME_SYS_CONFIG, $safe);
   }
   
   /**
@@ -1028,8 +1124,8 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       // This should never happen, even if script fails before response can be created.
       // Exceptions/Errors should always be caught and passed to handleCriticalError.
       // This is here for debugging mainly
-      var_dump(self::$Server);
-      die('Able Polecat encountered an unexpected error and must shut down');
+      //
+      self::sendStatusPageResponse('Able Polecat encountered an unexpected error and must shut down. Check log(s) for details.');
     }
     else {
       self::$Response->send();
@@ -1114,7 +1210,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     
     $version = NULL;
     
-    if (isset(self::$Server)) {
+    if (isset(self::$Server->version)) {
       if ($as_str) {
         switch ($doc_type) {
           default:
@@ -1164,6 +1260,58 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   }
   
   /********************************************************************************
+   * Sends HTML status page.
+   *
+   * Able Polecat is not designed to intended to serve up web pages. However, there
+   * will be instances where it is necessary to display *something* more than XML
+   * without style rules; for example, something goes wrong during an installation 
+   * or update.
+   *
+   * @param mixed $content Content of status page.
+   * 
+   ********************************************************************************/
+   
+  protected static function sendStatusPageResponse($content = NULL) {
+    
+    $caption = "Able Polecat &copy; Project";
+    $version = "Core " . self::getVersion(TRUE, NULL);
+    $swnotice = "The Able Polecat Core is free software released 'as is' under a BSD II license 
+      (see <a href=\"https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md\">license</a> for more detail.)";
+    $copyright = "Copyright &copy; 2008-2013 <a href=\"http://www.abledistributors.com\" target=\"new\">
+      Able Distributors Inc.</a> All rights reserved.";
+    
+    self::$Response = AblePolecat_Message_Response::create(
+      200, 
+      array(
+        AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML
+      )
+    );
+    self::$Response->body = "<!DOCTYPE html>\n<html>\n<head>\n<title>Able Polecat | Status</title>\n</head>\n";
+    self::$Response->body .= "<body>\n<div id=\"container\" style=\"left:12px;width:520px; style=\"font-family: \"Lucida Console\", \"Verdana\", Sans-serif; border-style: solid; border-color: black;\">\n";
+    
+    self::$Response->body .= "<div id=\"caption\" style=\"position:relative; padding:4px; opacity:0.8;height:64px;background-color:grey; border-style: solid; border-color: white;\">\n";
+    self::$Response->body .= "<h2>$caption</h2>\n</div>\n";
+
+    self::$Response->body .= "<div id=\"version\" style=\"position:relative; padding:4px; background-color:palegoldenrod; border-style: solid; border-color: white;\">";
+    self::$Response->body .= "<h3>$version</h3>\n</div>\n";
+    
+    if (isset($content)) {
+        self::$Response->body .= "<div id=\"content\" style=\"position:relative; padding:4px; background-color: lightpink; border-style: solid; border-color: white;\">\n";
+        self::$Response->body .= "<p>$content</p>\n</div>\n";
+    }
+    
+    self::$Response->body .= "<div id=\"notice\" style=\"position:relative; padding:4px; opacity:0.8;height:100px;background-color:grey; border-style: solid; border-color: white;\">\n";
+    self::$Response->body .= "<p><small>$swnotice</small></p><p>$copyright</p></div>\n";
+     
+    self::$Response->body .= "</div>\n</body>\n</html>";
+    
+    //
+    // Shutdown and send response.
+    //
+    self::shutdown();
+  }
+   
+  /********************************************************************************
    * Constructor and article identification
    ********************************************************************************/
      
@@ -1193,14 +1341,9 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     $this->Agent = AblePolecat_AccessControl_Agent_Server::wakeup($this);
     
     //
-    // Until loaded from conf...
+    // Until loaded from conf, use defaults.
     // 
-    $this->version = array(
-      'name' => ABLE_POLECAT_VERSION_NAME,
-      'major' => ABLE_POLECAT_VERSION_MAJOR,
-      'minor' => ABLE_POLECAT_VERSION_MINOR,
-      'revision' => ABLE_POLECAT_VERSION_REVISION,
-    );
+    $this->setVersion();
     
     $this->BootLog->logStatusMessage('Server object initialized.');
   }
