@@ -391,8 +391,8 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         self::setResource(self::RING_DATABASE, self::NAME_DATABASE, $Database);
         $this->db_state['connected'] = TRUE;
         $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
-        $this->bootCheck();
       }
+      $this->bootCheck();
     }
     catch(Exception $Exception) {
       !isset($this->db_state['connected']) ? $this->db_state['connected'] = FALSE : NULL;
@@ -683,6 +683,24 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
           break;
         case self::BOOT_SEQ_DATABASE:
           $statusPageContent .= "<p>A connection with the core (application) database could not be made.</p>";
+          break;
+        case self::BOOT_SEQ_CLASS_REGISTRY:
+          // Load registry of supported class and interface definitions.
+          break;
+        case self::BOOT_SEQ_DEFAULT_LOG:
+          // Start the database logging feature.
+          break;
+        case self::BOOT_SEQ_ACCESS_CONTROL:
+          // Initiate access control for applications and users.
+          break;
+        case self::BOOT_SEQ_SERVICE_BUS:
+          // Bring service bus on line.
+          break;
+        case self::BOOT_SEQ_APPLICATION_MODE:
+          // Load user and third-party code engine.
+          break;
+        case self::BOOT_SEQ_USER_MODE:
+          // Start user session and exit bootstrap.
           break;
       }
       $statusPageContent .= "<p>Please consult the <a href=\"https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started\">
@@ -1271,7 +1289,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
    * 
    ********************************************************************************/
    
-  protected static function sendStatusPageResponse($content = NULL) {
+  public static function sendStatusPageResponse($content = NULL) {
     
     $caption = "Able Polecat &copy; Project";
     $version = "Core " . self::getVersion(TRUE, NULL);

@@ -108,22 +108,13 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
           "Able Polecat attempted to open a CSV log file in the directory given at %s. No such directory exists or it is not writable by web agent.",
           AblePolecat_Server_Paths::getFullPath('logs')
         );
-        throw new AblePolecat_Log_Exception(
-          $msg,
-          AblePolecat_Error::BOOTSTRAP_LOGGER
-        );
-        // trigger_error($msg, E_USER_ERROR);
+        AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOTSTRAP_LOGGER, $msg);
       }
       
       if (isset($flog)) {
         fclose($flog);
         $flog = NULL;
       }
-      
-      //
-      // Go out of scope
-      //
-      self::$Log = NULL;
     }
   }
   
@@ -135,6 +126,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    * @return AblePolecat_Log_Boot or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
     if (!isset(self::$Log)) {
       self::$Log = new AblePolecat_Log_Boot();
     }
