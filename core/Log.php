@@ -20,6 +20,7 @@ else {
 
 interface AblePolecat_LogInterface extends AblePolecat_CacheObjectInterface {
   
+  const BOOT    = 'boot'; // bootstrap info message - not logged unless a problem during boot
   const ERROR   = 'error';
   const DEBUG   = 'debug';
   const INFO    = 'info';

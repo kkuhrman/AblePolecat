@@ -5,9 +5,9 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject', 'Pdo.php')));
 
-abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObjectAbstract {
+class AblePolecat_ClassRegistry extends AblePolecat_CacheObject_PdoAbstract {
   
     /**
    * Class registration constants.
@@ -16,10 +16,14 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
   const CLASS_REG_METHOD  = 'method';
   
   /**
+   * @var AblePolecat_ClassRegistry Singleton instance.
+   */
+  private static $ClassRegistry = NULL;
+  
+  /**
    * @var List of Able Polecat interfaces.
    */
-  private static $AblePolecatInterfaces = NULL;
-   
+  private $AblePolecatInterfaces = NULL;
   
   /**
    * @var Array Registry of classes which can be loaded.
@@ -33,9 +37,15 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
   
   /**
    * Extends constructor.
-   * Sub-classes should override to initialize members.
    */
   protected function initialize() {
+    
+    parent::initialize();
+    
+    //
+    // Supported interfaces.
+    //
+    $this->AblePolecatInterfaces = array();
     
     //
     // Class registration.
@@ -54,9 +64,40 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
       'interface' => array(),
       'module' => array(),
     );
-    $AblePolecatInterfaces = self::getAblePolecatInterfaces();
-    foreach($AblePolecatInterfaces as $key => $InterfaceName) {
-      $this->registeredModules['interface'][$InterfaceName] = array();
+    
+    //
+    // Check if there are entries in database
+    //
+    $sql = __SQL()->          
+      select('COUNT(*)')->
+      from('class');
+    $Classes = $this->executeStatement($sql);
+    if(isset($Classes[0][0]) && intval($Classes[0][0]) > 0) {
+      //
+      // Populate class from application database
+      // Query application database for registered classes.
+      //
+      $sql = __SQL()->          
+        select('name', 'path', 'method')->
+        from('class');
+      $Classes = $this->executeStatement($sql);
+      $error_info = '';
+      foreach($Classes as $key => $Class) {
+        if (FALSE === $this->registerLoadableClass($Class['name'], $Class['path'], $Class['method'], $error_info)) {
+          $msg = sprintf("There is an invalid class definition in the database class registry for %s.",
+            $Class['name']
+          );
+          $msg .= ' ' . $error_info;
+          // throw new AblePolecat_ClassRegistry_Exception($msg, AblePolecat_Error::BOOTSTRAP_CLASS_REG);
+          AblePolecat_Server::log(AblePolecat_LogInterface::BOOT, $msg);
+        }
+      }
+    }
+    else {
+      throw new AblePolecat_ClassRegistry_Exception(
+        'There are no class definitions saved in the database class registry.', 
+        AblePolecat_Error::BOOTSTRAP_CLASS_REG
+      );
     }
   }
   
@@ -94,29 +135,10 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
    * @return Array Names of Able Polecat interfaces.
    */
   public static function getAblePolecatInterfaces() {
-    if (!isset(self::$AblePolecatInterfaces)) {
-      self::$AblePolecatInterfaces = array(
-        'AblePolecat_AccessControl_AgentInterface',
-        'AblePolecat_AccessControl_ArticleInterface',
-        'AblePolecat_AccessControl_ConstraintInterface',
-        'AblePolecat_AccessControl_Resource_LocaterInterface',
-        'AblePolecat_AccessControl_ResourceInterface',
-        'AblePolecat_AccessControl_RoleInterface',
-        'AblePolecat_AccessControl_SubjectInterface',
-        'AblePolecat_CacheObjectInterface',
-        'AblePolecat_LogInterface',
-        'AblePolecat_MessageInterface',
-        'AblePolecat_ModeInterface',
-        'AblePolecat_Server_CheckInterface',
-        'AblePolecat_Service_ClientInterface',
-        'AblePolecat_Service_DtxInterface',
-        'AblePolecat_Service_InitiatorInterface',
-        'AblePolecat_Service_Interface',
-        'AblePolecat_SessionInterface',
-        'AblePolecat_TransactionInterface',
-      );
-    }
-    return self::$AblePolecatInterfaces;
+    //
+    // @todo:
+    //
+    return $this->AblePolecatInterfaces;
   }
   
   /**
@@ -269,10 +291,11 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
    * @param string $class_name The name of class to register.
    * @param string $path Full path of include file if not given elsewhere in script.
    * @param string $method Method used for creation (default is __construct()).
+   * @param string &$error_info If passed any error info is stored here.
    *
    * @return TRUE if class is registered, otherwise FALSE.
    */
-  public function registerLoadableClass($class_name, $path = NULL, $method = NULL) {
+  public function registerLoadableClass($class_name, $path = NULL, $method = NULL, &$error_info = NULL) {
     
     $registered = FALSE;
     
@@ -286,9 +309,8 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
     if (is_file($path)) {
       include_once($path);
     }
-    else {
-      AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOT_PATH_INVALID,
-        "Invalid include path for $class_name: $path");
+    else if (isset($error_info)) {      
+      $error_info .= "Invalid include path ($path)";
     }
     
     $methods = get_class_methods($class_name);
@@ -299,8 +321,7 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
         $registered = TRUE;
       }
       else {
-        AblePolecat_Server::handleCriticalError(AblePolecat_Error::BOOTSTRAP_CLASS_REG,
-          "Invalid registration for $class_name: constructor");
+        $error_info .= "Invalid create method ($method)";
       }
     }
     return $registered;
@@ -357,6 +378,36 @@ abstract class AblePolecat_ClassRegistryAbstract extends AblePolecat_CacheObject
       }
     }
     return $registerClass;
+  }
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_ClassRegistry Initialized server resource ready for business or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    if (!isset(self::$ClassRegistry)) {
+      try {
+        self::$ClassRegistry = new AblePolecat_ClassRegistry();
+      }
+      catch (Exception $Exception) {
+        self::$ClassRegistry = NULL;
+        throw new AblePolecat_ClassRegistry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
+      }
+    }
+    return self::$ClassRegistry;
   }
 }
 

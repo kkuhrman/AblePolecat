@@ -9,11 +9,8 @@
     scan database definitions until it finds one suitable for the current server mode where the
     'use' attribute is set. 
     -->
-    <!-- mySql database
-    <database name="polecat" mode="" use="0">
-      <dsn>mysql://user:pass@localhost/example</dsn>
-      <classname>AblePolecat_Database_Pdo</classname>
+    <database name="polecat" mode="any" use="1">
+      <dsn>mysql://polecat:8895555@localhost/polecat</dsn>
     </database>
-    -->
   </databases>
 </host>

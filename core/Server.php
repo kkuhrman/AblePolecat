@@ -192,7 +192,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
   private $Agent;
   
   /**
-   * @var AblePolecat_Log_Boot A log file for the boot process.
+   * @var AblePolecat_Log_Boot Saves log messages in a file until db log is available.
    */
   private $BootLog;
   
@@ -284,7 +284,6 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       // Close the boot log file
       //
       if (isset(self::$Server->BootLog)) {
-        self::$Server->BootLog->sleep();
         self::$Server->BootLog = NULL;
       }
     }
@@ -309,12 +308,12 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       $SysConfig->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Write::getId());
     
       self::setResource(self::RING_SYS_CONFIG, self::NAME_SYS_CONFIG, $SysConfig);
-      $this->BootLog->logStatusMessage('Wakeup System Configuration - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Wakeup System Configuration - OK');
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup System Configuration - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup System Configuration - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to load system configuration settings. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -355,12 +354,12 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
           break;
       }
       self::setResource(self::RING_BOOT_MODE, self::NAME_BOOT_MODE, $BootMode);
-      $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Server Mode - OK');
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup Server Mode - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Server Mode - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to boot server mode. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -386,18 +385,18 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         //
         $Database = AblePolecat_Database_Pdo::wakeup($this->Agent);
         $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
-        $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
+        $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($this->db_state['dsn']);
         $Database->open($this->Agent, $DbUrl);           
         self::setResource(self::RING_DATABASE, self::NAME_DATABASE, $Database);
         $this->db_state['connected'] = TRUE;
-        $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+        self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Server Mode - OK');
       }
       $this->bootCheck();
     }
     catch(Exception $Exception) {
       !isset($this->db_state['connected']) ? $this->db_state['connected'] = FALSE : NULL;
-      $this->BootLog->logStatusMessage('Wakeup Application Database - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Application Database - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to boot application database. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -424,12 +423,12 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         $DefaultLog = AblePolecat_Log_Csv::wakeup($this->Agent);
         self::setResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $DefaultLog);
       }
-      $this->BootLog->logStatusMessage('Wakeup Server Mode - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Server Mode - OK');
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup Application Log - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Application Log - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to boot application log. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -447,21 +446,16 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       // First choice for class registry is database, then XML
       //
       if (self::$Server->getDatabaseState('connected')) {
-        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry', 'Pdo.php')));
-        $ClassRegistry = AblePolecat_ClassRegistry_Pdo::wakeup($this->Agent);
+        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry.php')));
+        $ClassRegistry = AblePolecat_ClassRegistry::wakeup($this->Agent);
         self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
+        self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Class Registry - OK');
       }
-      else {
-        require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ClassRegistry', 'Xml.php')));
-        $ClassRegistry = AblePolecat_ClassRegistry_Xml::wakeup($this->Agent);
-        self::setResource(self::RING_CLASS_REGISTRY, self::NAME_CLASS_REGISTRY, $ClassRegistry);
-      }
-      $this->BootLog->logStatusMessage('Wakeup Class Registry - OK');
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup Class Registry - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Class Registry - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to boot class registry. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -481,16 +475,16 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       if (self::$Server->getDatabaseState('connected')) {
         $AccessControl = AblePolecat_AccessControl::wakeup();
         self::setResource(self::RING_ACCESS_CONTROL, self::NAME_ACCESS_CONTROL, $AccessControl);
-        $this->BootLog->logStatusMessage('Wakeup Access Control - OK');
+        self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Access Control - OK');
       }
       else {
-        $this->BootLog->logStatusMessage('Wakeup Access Control (NO DB) - SKIP');
+        self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Access Control (NO DB) - SKIP');
       }
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup Access Control - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Access Control - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to . " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -510,16 +504,16 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       if (self::$Server->getDatabaseState('connected')) {
         $ServiceBus = AblePolecat_Service_Bus::wakeup();
         self::setResource(self::RING_SERVICE_BUS, self::NAME_SERVICE_BUS, $ServiceBus);
-        $this->BootLog->logStatusMessage('Wakeup Service Bus - OK');
+        self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Service Bus - OK');
       }
       else {
-        $this->BootLog->logStatusMessage('Wakeup Service Bus (NO DB) - SKIP');
+        self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Service Bus (NO DB) - SKIP');
       }
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup Service Bus - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Service Bus - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to boot service bus. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -564,14 +558,14 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       //
       // Put success messages at bottom in case something up there chokes
       //
-      $this->BootLog->logStatusMessage('Wakeup Application Mode - OK');
-      $this->BootLog->logStatusMessage('Load third-party resources - OK');
-      $this->BootLog->logStatusMessage('Register third-party clients - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Wakeup Application Mode - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Load third-party resources - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Register third-party clients - OK');
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup Application Mode - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup Application Mode - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to boot Application Mode. " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -599,12 +593,12 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
       require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
       $UserMode = AblePolecat_Mode_User::wakeup($UserAgent);
       self::setResource(self::RING_USER_MODE, self::NAME_USER_MODE, $UserMode);
-      $this->BootLog->logStatusMessage('Wakeup User Mode - OK');
+      self::log(AblePolecat_LogInterface::BOOT, 'Wakeup User Mode - OK');
       $this->bootCheck();
     }
     catch(Exception $Exception) {
-      $this->BootLog->logStatusMessage('Wakeup User Mode - FAIL');
-      $this->BootLog->logStatusMessage($Exception->getMessage());
+      self::log(AblePolecat_LogInterface::ERROR, 'Wakeup User Mode - FAIL');
+      self::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       $errmsg .= " Failed to . " . $Exception->getMessage();
       self::handleCriticalError(AblePolecat_Error::BOOT_SEQ_VIOLATION, $errmsg);
     }
@@ -861,7 +855,18 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
    * @return AblePolecat_LogInterface.
    */
   public static function getDefaultLog($safe = TRUE) {
-    return self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $safe);
+  
+    $Log = self::getResource(self::RING_DEFAULT_LOG, self::NAME_DEFAULT_LOG, $safe);
+    if (!isset($Log) && isset(self::$Server->BootLog)) {
+      $Log = self::$Server->BootLog;
+    }
+    else if ($safe) {
+      throw new AblePolecat_Server_Exception(
+        'Message sent to Able Polecat server log but no log facility is available.',
+        AblePolecat_Error::ACCESS_INVALID_OBJECT
+      );
+    }
+    return $Log;
   }
   
   /**
@@ -927,6 +932,14 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
         default:
           $DefaultLog->logStatusMessage($message);
           break;
+        case AblePolecat_LogInterface::BOOT:
+          //
+          // These are only sent to boot log
+          //
+          if (isset(self::$Server->BootLog)) {
+            self::$Server->BootLog->logStatusMessage($message);
+          }
+          break;
         case AblePolecat_LogInterface::STATUS:
           $DefaultLog->logStatusMessage($message);
           break;
@@ -966,16 +979,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     //
     // Attempt to log message.
     //
-    self::writeToDefaultLog('error', $error_message, $error_number);
-      
-    //
-    // Close the boot log file if it's open
-    //
-    if (isset(self::$Server->BootLog)) {
-      self::$Server->BootLog->logStatusMessage($error_message);
-      self::$Server->BootLog->sleep();
-      self::$Server->BootLog = NULL;
-    }
+    self::log(AblePolecat_LogInterface::ERROR, $error_message, $error_number);
     
     //
     // Shut down server and send response.
@@ -998,6 +1002,14 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     $type = AblePolecat_LogInterface::INFO;
     switch ($severity) {
       default:
+        break;
+      case AblePolecat_LogInterface::BOOT:
+        //
+        // These are only sent to boot log
+        //
+        if (isset(self::$Server->BootLog)) {
+          self::$Server->BootLog->logStatusMessage($message);
+        }
         break;
       case AblePolecat_LogInterface::STATUS:
       case AblePolecat_LogInterface::WARNING:
@@ -1363,7 +1375,7 @@ class AblePolecat_Server implements AblePolecat_AccessControl_SubjectInterface {
     // 
     $this->setVersion();
     
-    $this->BootLog->logStatusMessage('Server object initialized.');
+    self::log(AblePolecat_LogInterface::BOOT, 'Server object initialized.');
   }
   
   /**

@@ -65,8 +65,11 @@ class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
       //
       // source is a file
       //
-      $XmlPart = DOMDocument::load($source);
-      $Element = $XmlPart->getElementsByTagName($tagname)->item(0);
+      // die('roll the bones');
+      $XmlPart = @DOMDocument::load($source);
+      if ($XmlPart) {
+        $Element = $XmlPart->getElementsByTagName($tagname)->item(0);
+      }
     }
     else {
       //
