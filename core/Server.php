@@ -153,7 +153,7 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
    *
    * @throw AblePolecat_Command_Exception If link is refused.
    */
-  public function forwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+  public function setForwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
     
     $Super = NULL;
     
@@ -172,6 +172,21 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
       throw new AblePolecat_Command_Exception($msg);
     }
     return $Super;
+  }
+  
+  /**
+   * Allow given subject to serve as direct superior in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended superior target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function setReverseCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $msg = sprintf("%s must be highest node in any chain of responsibility hierarchy.",
+      get_class($this)
+    );
+    throw new AblePolecat_Command_Exception($msg);
   }
   
   /********************************************************************************

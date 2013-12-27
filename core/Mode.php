@@ -217,6 +217,91 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
   }
   
   /********************************************************************************
+   * Command target methods.
+   ********************************************************************************/
+  
+  /**
+   * Validates given command target as a forward or reverse COR link.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target.
+   * @param string $direction 'forward' | 'reverse'
+   *
+   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
+   */
+  abstract protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction);
+  
+  /**
+   * Get forward (subordinate) link in command-processing Chain of Responsibility.
+   *
+   * @return AblePolecat_Command_TargetInterface $Target 
+   */
+  protected function getForwardCommandLink() {
+    return $this->Subordinate;
+  }
+  
+  /**
+   * Get reverse (superior) link in command-processing Chain of Responsibility.
+   *
+   * @return AblePolecat_Command_TargetInterface $Target 
+   */
+  protected function getReverseCommandLink() {
+    return $this->Superior;
+  }
+  
+  /**
+   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function setForwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Super = NULL;
+    
+    if ($this->validateCommandLink($Target, AblePolecat_Command_TargetInterface::CMD_LINK_FWD)) {
+      $Super = $this;
+      $this->Subordinate = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Super;
+  }
+  
+  /**
+   * Allow given subject to serve as direct superior in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended superior target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function setReverseCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Subordinate = NULL;
+    
+    //
+    // Only application mode can serve as next in COR.
+    //
+    if ($this->validateCommandLink($Target, AblePolecat_Command_TargetInterface::CMD_LINK_REV)) {
+      $Subordinate = $this;
+      $this->Superior = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Subordinate;
+  }
+  
+  /********************************************************************************
    * Error/exceptional handling methods.
    ********************************************************************************/
   

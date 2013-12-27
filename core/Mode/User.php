@@ -18,7 +18,7 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   /**
    * @var Instance of Singleton.
    */
-  private static $UserMode;
+  private static $Mode;
   
   /********************************************************************************
    * Access control methods.
@@ -55,31 +55,28 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   * Validates given command target as a forward or reverse COR link.
    *
-   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   * @param AblePolecat_Command_TargetInterface $Target.
+   * @param string $direction 'forward' | 'reverse'
    *
-   * @throw AblePolecat_Command_Exception If link is refused.
+   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
    */
-  public function forwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
     
-    $Super = NULL;
+    $ValidLink = FALSE;
     
-    //
-    // Only mode can serve as next in COR.
-    //
-    if (is_a($Target, 'AblePolecat_ModeInterface')) {
-      $Super = $this;
-      $this->Subordinate = $Target;
+    switch ($direction) {
+      default:
+        break;
+      case 'forward':
+        $ValidLink = is_a($Target, 'AblePolecat_ModeInterface');
+        break;
+      case 'reverse':
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
+        break;
     }
-    else {
-      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
-        get_class($Target),
-        get_class($this)
-      );
-      throw new AblePolecat_Command_Exception($msg);
-    }
-    return $Super;
+    return $ValidLink;
   }
   
   /********************************************************************************
@@ -109,10 +106,6 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // @todo: persist
-    //
-    self::$UserMode = NULL;
   }
   
   /**
@@ -124,29 +117,35 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    if (!isset(self::$UserMode)) {
+    if (!isset(self::$Mode)) {
       //
       // Create instance of user mode
       //
-      self::$UserMode = new AblePolecat_Mode_User($Subject);
+      self::$Mode = new AblePolecat_Mode_User($Subject);
       
+      //
+        // Set chain of responsibility relationship
+        //
+        $Subject->setForwardCommandLink(self::$Mode);
+        self::$Mode->setReverseCommandLink($Subject);
+        
       //
       // @todo get user settings from session ($Subject).
       //
         
       //
-      // Load environment settings
+      // @todo: load environment settings in initialize()
       //
-      $Environment = AblePolecat_Environment_User::wakeup($Subject);
-      if (isset($Environment)) {
-        self::$UserMode->setEnvironment($Environment);
-      }
-      else {
-        throw new AblePolecat_Environment_Exception('Failed to load Able Polecat user environment.',
-          AblePolecat_Error::BOOT_SEQ_VIOLATION);
-      }
+      // $Environment = AblePolecat_Environment_User::wakeup($Subject);
+      // if (isset($Environment)) {
+        // self::$Mode->setEnvironment($Environment);
+      // }
+      // else {
+        // throw new AblePolecat_Environment_Exception('Failed to load Able Polecat user environment.',
+          // AblePolecat_Error::BOOT_SEQ_VIOLATION);
+      // }
     }
       
-    return self::$UserMode;
+    return self::$Mode;
   }
 }

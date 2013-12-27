@@ -23,9 +23,9 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   const RESOURCE_ALL = 'all';
   
   /**
-   * @var AblePolecat_Mode_ApplicationAbstract Concrete ApplicationMode instance.
+   * @var AblePolecat_Mode_ApplicationAbstract Concrete Mode instance.
    */
-  protected static $ApplicationMode;
+  protected static $Mode;
     
   /**
    * @var List of interfaces which can be used as application resources.
@@ -74,31 +74,28 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   * Validates given command target as a forward or reverse COR link.
    *
-   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   * @param AblePolecat_Command_TargetInterface $Target.
+   * @param string $direction 'forward' | 'reverse'
    *
-   * @throw AblePolecat_Command_Exception If link is refused.
+   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
    */
-  public function forwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
     
-    $Super = NULL;
+    $ValidLink = FALSE;
     
-    //
-    // Only user mode can serve as next in COR.
-    //
-    if (is_a($Target, 'AblePolecat_Mode_User')) {
-      $Super = $this;
-      $this->Subordinate = $Target;
+    switch ($direction) {
+      default:
+        break;
+      case 'forward':
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_User');
+        break;
+      case 'reverse':
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Server');
+        break;
     }
-    else {
-      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
-        get_class($Target),
-        get_class($this)
-      );
-      throw new AblePolecat_Command_Exception($msg);
-    }
-    return $Super;
+    return $ValidLink;
   }
   
   /********************************************************************************
@@ -143,7 +140,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     //
     // @todo: persist
     //
-    self::$ApplicationMode = NULL;
+    self::$Mode = NULL;
   }
   
   /**
@@ -155,26 +152,32 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    if (!isset(self::$ApplicationMode)) {
+    if (!isset(self::$Mode)) {
       try {
         //
         // Create instance of application mode
         //
-        self::$ApplicationMode = new AblePolecat_Mode_Application($Subject);
+        self::$Mode = new AblePolecat_Mode_Application($Subject);
         
         //
-        // Load environment settings
+        // Set chain of responsibility relationship
         //
-        self::$ApplicationMode->setEnvironment(AblePolecat_Environment_Application::wakeup($Subject));
+        $Subject->setForwardCommandLink(self::$Mode);
+        self::$Mode->setReverseCommandLink($Subject);
+        
+        //
+        // @todo: load environment settings in initialize().
+        //
+        // self::$Mode->setEnvironment(AblePolecat_Environment_Application::wakeup($Subject));
       }
       catch(Exception $Exception) {
-        self::$ApplicationMode = NULL;
+        self::$Mode = NULL;
         throw new AblePolecat_Server_Exception(
           'Failed to initialize application mode. ' . $Exception->getMessage(),
           AblePolecat_Error::BOOT_SEQ_VIOLATION
         );
       }
     }
-    return self::$ApplicationMode;
+    return self::$Mode;
   }
 }
