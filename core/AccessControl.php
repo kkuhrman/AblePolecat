@@ -39,36 +39,6 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
     $this->AgentRoles = array();
     $this->Session = AblePolecat_Session::wakeup();
   }
-  
-  /**
-   * Assign agent to given role.
-   *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent
-   * @param AblePolecat_AccessControl_RoleInterface $Role
-   * 
-   * @return bool TRUE if agent is assigned to role, otherwise FALSE.
-   */
-  public function assign(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_RoleInterface $Role) {
-    //
-    // @TODO:
-    //
-    return TRUE;
-  }
-  
-  /**
-   * Authorize role for given agent.
-   *
-   * @param AblePolecat_AccessControl_RoleInterface $Role
-   * @param AblePolecat_AccessControl_AgentInterface $Agent
-   * 
-   * @return bool TRUE if role is authorized for agent, otherwise FALSE.
-   */
-   public function authorize(AblePolecat_AccessControl_RoleInterface $Role, AblePolecat_AccessControl_AgentInterface $Agent) {
-    //
-    // @TODO:
-    //
-    return TRUE;
-   }
    
   /**
    * Return access control agent for given environment context.
@@ -241,25 +211,6 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
     return $this->Session;
   }
    
-   /**
-   * Grants permission (removes constraint) to given agent or role.
-   *
-   * In actuality, unless a constraint is set on the resource, all agents and roles 
-   * have permission for corresponding action. If constraint is set, grant() 
-   * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
-   * @param AblePolecat_AccessControl_ConstraintInterface $Constraint.
-   *
-   * @return bool TRUE if permission is granted, otherwise FALSE.
-   */
-  public function grant(AblePolecat_AccessControl_SubjectInterface $Subject, AblePolecat_AccessControl_ConstraintInterface $Constraint) {
-    //
-    // @TODO:
-    //
-    return TRUE;
-  }
-  
   /**
    * Serialize object to cache.
    *
@@ -287,10 +238,4 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
     }
     return self::$AccessControl;
   }
-}
-
-/**
- * Exceptions thrown by Able Polecat Access Control objects.
- */
-class AblePolecat_AccessControl_Exception extends AblePolecat_Exception {
 }

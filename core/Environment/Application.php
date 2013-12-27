@@ -160,10 +160,8 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
               $ModConfig = AblePolecat_Server::getClassRegistry()->loadClass('AblePolecat_Conf_Module');
               if (isset($ModConfig)) {
                 //
-                // Grant open permission on config file to agent.
+                // @todo: Grant open permission on config file to agent.
                 //
-                $ModConfig->setPermission($this->getAgent(), AblePolecat_AccessControl_Constraint_Open::getId());
-                $ModConfig->setPermission($this->getAgent(), AblePolecat_AccessControl_Constraint_Read::getId());              
                 $ModConfigUrl = AblePolecat_AccessControl_Resource_Locater::create($module_conf_path);
                 
                 //
@@ -314,11 +312,6 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
       //
       self::$Environment = new AblePolecat_Environment_Application();
       
-      //
-      // Initialize server access control.
-      //
-      self::$Environment->setAgent($Subject);
-            
       //
       // Register module classes
       //

@@ -13,6 +13,11 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   const NAME              = 'PDO database';
   
   /**
+   * @var AblePolecat_Database_Pdo Instance of singleton.
+   */
+  private static $Database = NULL;
+  
+  /**
    * @var resource Database connection.
    */
   private $DatabaseConnection;
@@ -21,10 +26,6 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * Extends __construct().
    */
   protected function initialize() {
-    //
-    // Set resource constraints.
-    //
-    $this->setConstraint(new AblePolecat_AccessControl_Constraint_Open());
     $this->DatabaseConnection = NULL;
   }
   
@@ -88,7 +89,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       }
     }
     catch (PDOException $Exception) {
-      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, __METHOD__ . ' failed: ' . $e->getMessage());
+      throw new AblePolecat_Database_Exception(__METHOD__ . ' failed: ' . $e->getMessage());
     }
     return $id;
   }
@@ -100,7 +101,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     if (isset($this->DatabaseConnection)) {
       $info = $this->DatabaseConnection->errorInfo();
       foreach($info as $key => $value) {
-        AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, strval($value));
+        throw new AblePolecat_Database_Exception(strval($value));
       }
     }
   }
@@ -140,29 +141,28 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $open = FALSE;
     
-    if ($this->hasPermission($Agent, AblePolecat_AccessControl_Constraint_Open::getId())) {
+    //
+    // @todo: access control
+    //
+    if (isset($Url)) {
       //
-      // Open the database.
+      // @todo str_replace is a hack for cleansing/normalizing db name
       //
-      if (isset($Url)) {
-        //
-        // @todo str_replace is a hack for cleansing/normalizing db name
-        //
-        $dsn = sprintf("%s:dbname=%s;host=%s",
-          $Url->getProtocol(),
-          str_replace('/', '', $Url->getPathname()),
-          $Url->getHost());
-        $user = $Url->getUsername();
-        $password = $Url->getPassword();
-        try {
-          $this->DatabaseConnection = new PDO($dsn, $user, $password);
-          $this->setLocater($Url);
-        } catch (PDOException $e) {
-          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, 'Connection failed: ' . $e->getMessage());
-        }
+      $dsn = sprintf("%s:dbname=%s;host=%s",
+        $Url->getProtocol(),
+        str_replace('/', '', $Url->getPathname()),
+        $Url->getHost());
+      $user = $Url->getUsername();
+      $password = $Url->getPassword();
+      try {
+        $this->DatabaseConnection = new PDO($dsn, $user, $password);
+        $this->setLocater($Url);
+      } catch (PDOException $e) {
+        throw new AblePolecat_Database_Exception('Connection failed: ' . $e->getMessage());
       }
-      $open = isset($this->DatabaseConnection);
     }
+    $open = isset($this->DatabaseConnection);
+
     return $open;
   }
   
@@ -204,10 +204,16 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Database = new AblePolecat_Database_Pdo();
-    //
-    // @todo: IF $Subject is session, restore connection
-    //
+    $Database = NULL;
+    
+    if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_Server')) {
+      if (!isset(self::$Database)) {
+        self::$Database = new AblePolecat_Database_Pdo();
+      }
+      $Database = self::$Database;
+    }
+    else {
+    }
     return $Database;
   }
 }

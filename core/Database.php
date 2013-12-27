@@ -4,13 +4,27 @@
  * Base class for Able Polecat database clients.
  */
 
-require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource', 'Locater.php')));
+require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Database.php')));
 
 interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
 }
 
-abstract class AblePolecat_DatabaseAbstract extends AblePolecat_AccessControl_ResourceAbstract implements AblePolecat_DatabaseInterface {
+abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_DatabaseInterface {
+
+  /**
+   * @var AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource if any.
+   */
+  protected $Locater;
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    $this->Locater = NULL;
+  }
   
   /**
    * Opens an existing resource or makes an empty one accessible depending on permissions.
@@ -24,12 +38,18 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_AccessControl_Re
   abstract public function open(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_Resource_LocaterInterface $Url = NULL);
   
   /**
-   * Serialization prior to going out of scope in sleep().
+   * Sets URL used to open resource.
+   *
+   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Locater.
    */
-  final public function __destruct() {
-    $this->sleep();
+  protected function setLocater(AblePolecat_AccessControl_Resource_LocaterInterface $Locater) {
+    $this->Locater = $Locater;
   }
-}
-
-class AblePolecat_Database_Exception extends AblePolecat_Exception {
+  
+  /**
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource or NULL.
+   */
+  public function getLocater() {
+    return $this->Locater;
+  }
 }

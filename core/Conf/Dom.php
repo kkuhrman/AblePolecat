@@ -8,6 +8,7 @@ require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Conf.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Open.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Read.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Write.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
 
 class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
   
@@ -38,13 +39,6 @@ class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
     $RootElement = $this->Document->appendChild($RootElement);
     $CoreElement = $this->Document->createElement(self::ELEMENT_CORE);
     $CoreElement = $RootElement->appendChild($CoreElement);
-    
-    //
-    // Set resource constraints.
-    //
-    $this->setConstraint(new AblePolecat_AccessControl_Constraint_Open());
-    $this->setConstraint(new AblePolecat_AccessControl_Constraint_Read());
-    $this->setConstraint(new AblePolecat_AccessControl_Constraint_Write());
   }
   
   /**

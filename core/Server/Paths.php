@@ -4,6 +4,8 @@
  * Encapsulates Able Polecat server, application and user path utilities.
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Server', 'Paths.php')));
+
 class AblePolecat_Server_Paths {
 
   /**
@@ -73,8 +75,7 @@ class AblePolecat_Server_Paths {
         $full_path = $sanitized_path;
       }
       else {
-        throw new AblePolecat_Server_Paths_Exception("Failed attempt to create directory $sanitized_path.",
-          AblePolecat_Error::MKDIR_FAIL);
+        throw new AblePolecat_Server_Paths_Exception("Failed attempt to create directory $sanitized_path.");
       }
     }
     return $full_path;
@@ -101,8 +102,7 @@ class AblePolecat_Server_Paths {
             $path = self::$data_paths[$subdir];
           }
           else {
-            throw new AblePolecat_Server_Paths_Exception("Attempt to access $subdir directory before configurable paths initialized.",
-              AblePolecat_Error::BOOT_SEQ_VIOLATION);
+            throw new AblePolecat_Server_Paths_Exception("Attempt to access $subdir directory before configurable paths initialized.");
           }
           break;
         //
@@ -199,30 +199,24 @@ class AblePolecat_Server_Paths {
    */
   public static function setFullPath($subdir, $fullpath) {
     
-    if (isset($subdir) && !self::isPresetDir($subdir)) {
-      
-      try {
-        switch($subdir) {
-          default:
-            $new_path = self::touch($fullpath);
-            self::$conf_paths[$subdir] = $new_path;
-            break;
-          case 'data':
-            $new_path = self::touch($fullpath);
-            self::$data_paths['data'] = $new_path;
-            break;
-          case 'session':
-            $new_path = self::touch($fullpath);
-            self::$data_paths['session'] = $new_path;
-            break;
-        }
-      }
-      catch (AblePolecat_Server_Paths_Exception $Exception) {
-        AblePolecat_Server::log('warning', $Exception->getMessage());
+    if (isset($subdir) && !self::isPresetDir($subdir)) {      
+      switch($subdir) {
+        default:
+          $new_path = self::touch($fullpath);
+          self::$conf_paths[$subdir] = $new_path;
+          break;
+        case 'data':
+          $new_path = self::touch($fullpath);
+          self::$data_paths['data'] = $new_path;
+          break;
+        case 'session':
+          $new_path = self::touch($fullpath);
+          self::$data_paths['session'] = $new_path;
+          break;
       }
     }
     else {
-      AblePolecat_Server::log('warning', "Cannot set [$subdir] as configurable directory.");
+      throw new AblePolecat_Server_Paths_Exception("Cannot set [$subdir] as configurable directory.");
     }
   }
   
@@ -258,15 +252,8 @@ class AblePolecat_Server_Paths {
         continue;
       }
       else {
-        echo "User configured directory named $name does not exist at $path.";
-        AblePolecat_Server::log('warning', "User configured directory named $name does not exist at $path.");
+        throw new AblePolecat_Server_Paths_Exception("User configured directory named $name does not exist at $path.");
       }
     }
   }
-}
-
-/**
- * Exceptions thrown by Able Polecat relating to system paths.
- */
-class AblePolecat_Server_Paths_Exception extends AblePolecat_Exception {
 }

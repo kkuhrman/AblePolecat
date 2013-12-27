@@ -1,37 +1,269 @@
 <?php
 /**
  * @file: Mode.php
- * The Mode object encapsulates application environment configuration and
- * error/exception handling. Able Polecat loads three basic modes sequentially,
- * similar to OS protection rings: 
- * Server Mode - handles configuration of core class library
- * Application Mode - handles configuration of extended functionality (e.g. modules)
- * Session Mode - handles state of current session.
+ * A link in the command processing chain of responsibility.
+ *
+ * Able Polecat Modes are similar to OS protection rings, in terms of access control,
+ * but serve also as an implementation of the chain of responsibility (COR) design 
+ * pattern, either processing a command or passing it to the next, higher level of 
+ * responsibility in the the chain/hierarchy.
+ *
+ * The simplest COR hierarchy in Able Polecat:
+ * Server Mode - Receives HTTP request, sends HTTP response
+ * Application Mode - Handles interaction between Able Polecat objects via class methods. 
+ * Session Mode - Handles interaction between Able Polecat objects and web server session state.
+ *
+ * Important responsibilities of the Mode class:
+ * 1. Handle errors and exceptions.
+ * 2. Encapsulate environment configuration settings.
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Syslog.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Delegate', 'System.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Target.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Mode.php')));
 
-interface AblePolecat_ModeInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
+interface AblePolecat_ModeInterface 
+  extends AblePolecat_AccessControl_DelegateInterface,
+          AblePolecat_CacheObjectInterface,
+          AblePolecat_Command_TargetInterface {
   
   /**
-   * @return AblePolecat_EnvironmentInterface.
+   * Handle access control violations.
    */
-  public function getEnvironment();
+  // public static function handleAccessControlViolation();
+  
+  /**
+   * Handle errors triggered by child objects.
+   */
+  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL);
+  
+  /**
+   * Handle exceptions thrown by child objects.
+   */
+  public static function handleException(Exception $Exception);
+  
 }
 
 abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
   
   /**
-   * @var AblePolecat_AccessControl_AgentInterface
+   * @var Next reverse target in command chain of responsibility.
    */
-  private $Agent;
+  private $Superior;
   
   /**
-   * @var AblePolecat_EnvironmentInterface.
+   * @var Next forward target in command chain of responsibility.
    */
-  private $Environment;
+  private $Subordinate;
   
+  /********************************************************************************
+   * Access control methods.
+   * Overriding these provides opportunity to handle delegated tasks. Otherwise,
+   * responsibility should be passed to reverse link (upstream) to higher authority.
+   ********************************************************************************/
+  
+  /**
+   * Assign given role(s) to agent(s).
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
+   * @param mixed $agent_id i.e. AblePolecat_AccessControl_AgentInterface::getId() or Array of Ids.
+   * @param string $role_id i.e. AblePolecat_AccessControl_RoleInterface::getId() or Array of Ids.
+   * 
+   * @throw AblePolecat_AccessControl_Exception if any role cannot be assigned to given agent(s)
+   */
+  public function assignRoleToAgent(
+    AblePolecat_AccessControl_SubjectInterface $Authority,
+    $agent_id,
+    $role_id
+  ) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->assignRoleToAgent($Authority, $agent_id, $role_id);
+    }
+    else {
+      $message = "Could not assign role(s) to agent(s) because access control authority is not available.";
+      throw new AblePolecat_AccessControl_Exception($message);
+    }
+    
+    return $Result;
+  }
+  
+  /**
+   * Authorize agent(s) to assume given role(s).
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
+   * @param mixed $agent_id i.e. AblePolecat_AccessControl_AgentInterface::getId() or Array of Ids.
+   * @param string $role_id i.e. AblePolecat_AccessControl_RoleInterface::getId() or Array of Ids.
+   * 
+   * @throw AblePolecat_AccessControl_Exception if any role cannot be authorized for given agent(s).
+   */
+   public function authorizeRoleForAgent(
+    AblePolecat_AccessControl_SubjectInterface $Authority,
+    $agent_id,
+    $role_id
+  ) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->authorizeRoleForAgent($Authority, $agent_id, $role_id);
+    }
+    else {
+      $message = "Could not authorize role(s) for agent(s) because access control authority is not available.";
+      throw new AblePolecat_AccessControl_Exception($message);
+    }
+    
+    return $Result;
+  }
+  
+  /**
+   * Grants permission (removes constraint) to given agent or role.
+   *
+   * In actuality, unless a constraint is set on the resource, all agents and roles 
+   * have permission for corresponding action. If constraint is set, grant() 
+   * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
+   * @param mixed $subject_id i.e. AblePolecat_AccessControl_SubjectInterface::getId() or Array of Ids.
+   * @param mixed $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
+   * @param mixed $resource_id i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
+   *
+   * @throw AblePolecat_AccessControl_Exception if any permission cannot be granted to given agent/role(s).
+   */
+  public function grantPermission(
+    AblePolecat_AccessControl_SubjectInterface $Authority,
+    $subject_id, 
+    $constraint_id, 
+    $resource_id
+  ) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->grantPermission($Authority, $subject_id, $constraint_id, $resource_id);
+    }
+    else {
+      $message = "Could not grant requested permission(s) because access control authority is not available.";
+      throw new AblePolecat_AccessControl_Exception($message);
+    }
+    
+    return $Result;
+  }
+  
+  /**
+   * Verifies that agent or role has given permission.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject Agent or role.
+   * @param string $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId().
+   * @param string $resource_id i.e. AblePolecat_AccessControl_ResourceInterface::getId().
+   *
+   * @return bool TRUE if $Subject has given permission, otherwise FALSE.
+   * @throw AblePolecat_AccessControl_Exception if $Authority is not privileged to access permissions.
+   */
+  public function hasPermission(
+    AblePolecat_AccessControl_SubjectInterface $Authority,
+    AblePolecat_AccessControl_SubjectInterface $Subject, 
+    $constraint_id, 
+    $resource_id
+  ) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->hasPermission($Authority, $subject_id, $constraint_id, $resource_id);
+    }
+    else {
+      $message = "Could not validate permission(s) because access control authority is not available.";
+      throw new AblePolecat_AccessControl_Exception($message);
+    }
+    
+    return $Result;
+  }
+  
+  /**
+   * Sets given constraint on the resource.
+   *
+   * By default, setting constraint on this resource denies this action to all 
+   * agents and roles. 
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
+   * @param mixed $constraint_id i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
+   * @param mixed $resource_id i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
+   *
+   * @return bool TRUE if constraint is set, otherwise FALSE.
+   * @throw AblePolecat_AccessControl_Exception if any constraint(s) cannot be set on given resource(s).
+   */
+  public function setConstraint(
+    AblePolecat_AccessControl_SubjectInterface $Authority,
+    $constraint_id, 
+    $resource_id
+  ) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->setConstraint($Authority, $constraint_id, $resource_id);
+    }
+    else {
+      $message = "Could not set constraint(s) because access control authority is not available.";
+      throw new AblePolecat_AccessControl_Exception($message);
+    }
+    
+    return $Result;
+  }
+  
+  /********************************************************************************
+   * Error/exceptional handling methods.
+   ********************************************************************************/
+  
+  /**
+   * Handle errors triggered by child objects.
+   */
+  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->handleError($errno, $errstr, $errfile, $errline, $errcontext);
+    }
+    else {
+      $message = sprintf("Error [%d] in Able Polecat. %s No command target was able to intercept.",
+        $errno, $errstr
+      );
+      trigger_error($message, E_USER_ERROR);
+    }
+    
+    return $Result;
+  }
+  
+  /**
+   * Handle exceptions thrown by child objects.
+   */
+  public static function handleException(Exception $Exception) {
+    
+    $Result = NULL;
+    
+    if (isset($this->Superior)) {
+      $Result = $this->Superior->handleException($Exception);
+    }
+    else {
+      $message = sprintf("Unhandled exception [%d] in Able Polecat. %s No command target was able to intercept.",
+        $Exception->getCode(), 
+        $Exception->getMessage()
+      );
+      throw new AblePolecat_Mode_Exception($message);
+    }
+    
+    return $Result;
+  }
+  /********************************************************************************
+   * Create/destroy methods
+   ********************************************************************************/
+   
   /**
    * Extends constructor.
    * Sub-classes should override to initialize members.
@@ -39,106 +271,27 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
   abstract protected function initialize();
   
   /**
-   * @return AblePolecat_AccessControl_AgentInterface or NULL
-   */
-  protected function getAgent() {
-    return $this->Agent;
-  }
-  
-  /**
-   * @param AblePolecat_AccessControl_AgentInterface $Agent
-   */
-  protected static function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
-    $this->Agent = $Agent;
-  }
-  
-  /**
-   * @param AblePolecat_EnvironmentInterface $Environment.
-   */
-  protected function setEnvironment(AblePolecat_EnvironmentInterface $Environment) {
-    $this->Environment = $Environment;
-  }
-  
-  /**
-   * Used to handle errors encountered while running in production mode.
-   */
-  public static function defaultErrorHandler($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
-    
-    $die = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
-    
-    //
-    // Get error information
-    //
-    $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
-    isset($errfile) ? $msg .= " in $errfile" : NULL;
-    isset($errline) ? $msg .= " line $errline" : NULL;
-    
-    //
-    // @todo: perhaps better diagnostics.
-    // serialize() is not supported for all types
-    //
-    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
-    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
-    
-    //
-    // Send error information to syslog
-    //
-    $type = AblePolecat_LogInterface::STATUS;
-    switch($errno) {
-      default:
-        break;
-      case E_USER_ERROR:
-      case E_ERROR:
-        $type = AblePolecat_LogInterface::ERROR;
-        break;
-      case E_USER_WARNING:
-        $type = AblePolecat_LogInterface::WARNING;
-        break;
-    }
-    AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
-    if ($die) {
-      die("Fatal error in Able Polecat ($errstr)");
-    }
-    return $die;
-  }
-  
-  /**
-   * Used to log exceptions thrown before user logger(s) initialized.
-   */
-  public static function defaultExceptionHandler($Exception) {
-    
-    $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
-      $Exception->getCode(),
-      $Exception->getFile(),
-      $Exception->getLine(),
-      $Exception->getMessage()
-    );
-    $message = "$msg ({$_SERVER['REMOTE_ADDR']},  ({$_SERVER['HTTP_USER_AGENT']}))";
-    AblePolecat_Log_Syslog::wakeup()->putMessage($type, $message);
-    die($msg);
-  }
-  
-  /**
-   * @return AblePolecat_EnvironmentInterface.
-   */
-  public function getEnvironment() {
-    return $this->Environment;
-  }
-  
-  /**
    * Cached objects must be created by wakeup().
    * Initialization of sub-classes should take place in initialize().
    * @see initialize(), wakeup().
    */
   final protected function __construct() {
+    
+    //
+    // Process constructor arguments
+    //
     $args = func_get_args();
-    if (isset($args[0]) && is_a($args[0], 'AblePolecat_AccessControl_AgentInterface')) {
-      $this->Agent = $args[0];
+    if (isset($args[0]) && is_a($args[0], 'AblePolecat_ModeInterface')) {
+      $this->Superior = $args[0];
     }
     else {
-      $this->Agent = NULL;
+      $this->Superior = NULL;
     }
-    $this->Environment = NULL;
+    $this->Subordinate = NULL;
+    
+    //
+    // Initialize sub-class members.
+    //
     $this->initialize();
   }
   

@@ -46,6 +46,14 @@ class AblePolecat_ClassRegistry extends AblePolecat_CacheObject_PdoAbstract {
     // Supported interfaces.
     //
     $this->AblePolecatInterfaces = array();
+    $sql = __SQL()->          
+      select('name')->
+      from('interface');
+    $Interfaces = $this->executeStatement($sql);
+    $error_info = '';
+    foreach($Interfaces as $key => $interface) {
+      $this->AblePolecatInterfaces[] = $interface['name'];
+    }
     
     //
     // Class registration.

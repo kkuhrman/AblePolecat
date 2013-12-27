@@ -6,9 +6,9 @@
  * Duties of the Environment object:
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Environment.php')));
 
 interface AblePolecat_EnvironmentInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
   
@@ -34,7 +34,7 @@ interface AblePolecat_EnvironmentInterface extends AblePolecat_AccessControl_Res
   public function setVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value);
 }
 
-abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_AccessControl_ResourceAbstract implements AblePolecat_EnvironmentInterface {
+abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_EnvironmentInterface {
   
   /**
    * @var Environment Variables.
@@ -60,11 +60,13 @@ abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_AccessControl
     
     $Value = NULL;
     
-    if ($this->hasPermission($Agent, AblePolecat_AccessControl_Constraint_Read::getId())) {
-      if (isset($this->Variables[$name])) {
-        $Value = $this->Variables[$name];
-      }
+    //
+    // @todo: access control
+    //
+    if (isset($this->Variables[$name])) {
+      $Value = $this->Variables[$name];
     }
+
     return $Value;
   }
   
@@ -81,23 +83,12 @@ abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_AccessControl
     
     $set = FALSE;
     
-    if ($this->hasPermission($Agent, AblePolecat_AccessControl_Constraint_Write::getId())) {
-      $this->Variables[$name] = $value;
-      $set = TRUE;
-    }
+    //
+    // @todo: access control
+    //
+    $this->Variables[$name] = $value;
+    $set = TRUE;
+
     return $set;
   }
-  
-  /**
-   * Serialization prior to going out of scope in sleep().
-   */
-  final public function __destruct() {
-    $this->sleep();
-  }
-}
-
-/**
- * Exceptions thrown by environment objects.
- */
-class AblePolecat_Environment_Exception extends AblePolecat_Exception {
 }

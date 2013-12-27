@@ -8,7 +8,7 @@
  *
  * @see http://www.w3.org/TR/url/#url
  */
- 
+
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
 

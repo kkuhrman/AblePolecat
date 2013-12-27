@@ -67,6 +67,8 @@ try {
   AblePolecat_Server::routeRequest();
 }
 catch (AblePolecat_Exception $Exception) {
-  AblePolecat_Server::redirect(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_FILES, 'html', 'install', 'home.html')));
+  //
+  // @todo: unhandled exception
+  //
 }
 ?>

@@ -57,7 +57,7 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     $Agent = NULL;
-    if (is_a($Subject, 'AblePolecat_Server')) {
+    if (is_a($Subject, 'AblePolecat_Mode_Server')) {
       $Agent = new AblePolecat_AccessControl_Agent_Server();
     }
     else {

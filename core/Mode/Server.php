@@ -1,36 +1,49 @@
 <?php
 /**
- * @file: Server.php
- * Base class for Server modes (most protected).
+ * @file: Mode/Server.php
+ * Highest level in command processing chain of responsibility hierarchy.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Syslog.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
 
 class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   
-  /**
-   * Constants.
-   */
   const UUID = '2621ce80-5df4-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Server Mode';
   
   /**
-   * @var AblePolecat_Mode_ServerAbstract Concrete ServerMode instance.
+   * @var AblePolecat_Mode_Server Instance of singleton.
    */
-  private static $ServerMode = NULL;
+  private static $Mode = NULL;
   
   /**
-   * Extends constructor.
-   * Sub-classes should override to initialize members.
+   * @var AblePolecat_AccessControl_AgentInterface
    */
-  protected function initialize() {
-    //
-    // Check for required server resources.
-    // (these will throw exception if not ready).
-    //
-  }
+  private $Agent;
   
+  /**
+   * @var AblePolecat_Database_Pdo
+   */
+  private $Database;
+  
+  /**
+   * @var Array Information about state of the server database.
+   */
+  private $db_state;
+  
+  /**
+   * @var AblePolecat_EnvironmentInterface.
+   */
+  private $Environment;
+  
+  /********************************************************************************
+   * Access control methods.
+   ********************************************************************************/
+   
   /**
    * Return unique, system-wide identifier.
    *
@@ -49,55 +62,235 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     return self::NAME;
   }
   
+  /********************************************************************************
+   * Command target methods.
+   ********************************************************************************/
+   
+  /**
+   * Execute the command and return the result of the action.
+   *
+   * @param AblePolecat_CommandInterface $Command The command to execute.
+   */
+  public function execute(AblePolecat_CommandInterface $Command) {
+  }
+  
+  /**
+   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function forwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Super = NULL;
+    
+    //
+    // Only application mode can serve as next in COR.
+    //
+    if (is_a($Target, 'AblePolecat_Mode_Application')) {
+      $Super = $this;
+      $this->Subordinate = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Super;
+  }
+  
+  /********************************************************************************
+   * Resource access methods.
+   ********************************************************************************/
+  /**
+   * Get access to application database.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject
+   *
+   * @return AblePolecat_DatabaseInterface.
+   */
+  public static function getDatabase() {
+    
+    $Database = NULL;
+    if (isset($Subject) && ($this->Agent === $Subject)) {
+    }
+    else {
+    }
+    return $Database;
+  }
+  
+  /**
+   * Get information about state of application database at boot time.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject
+   * @param mixed $param If set, a particular parameter.
+   *
+   * @return mixed Array containing all state data, or value of given parameter or FALSE.
+   */
+  public function getDatabaseState(AblePolecat_AccessControl_SubjectInterface $Subject = NULL, $param = NULL) {
+    
+    $state = NULL;
+    
+    if (isset($Subject)) {
+      if ($Subject === $this) {
+        if (isset($this->db_state)) {
+          if (isset($param) && isset($this->db_state[$param])) {
+            $state = $this->db_state[$param];
+          }
+          else {
+            $state = $this->db_state;
+          }
+        }
+      }
+      else {
+        if (isset($this->db_state)) {
+          switch($param) {
+            default:
+              break;
+            case 'name':
+            case 'connected':
+              isset($this->db_state[$param]) ? $state = $this->db_state[$param] : NULL;
+              break;
+          }
+        }
+      }
+    }
+    
+    return $state;
+  }
+  
+  /********************************************************************************
+   * Error/exceptional handling methods.
+   ********************************************************************************/
+  
+  /**
+   * Handle errors triggered by child objects.
+   */
+  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
+    
+    $shutdown = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
+    
+    //
+    // Get error information
+    //
+    $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
+    isset($errfile) ? $msg .= " in $errfile" : NULL;
+    isset($errline) ? $msg .= " line $errline" : NULL;
+    
+    //
+    // @todo: perhaps better diagnostics.
+    // serialize() is not supported for all types
+    //
+    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
+    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
+    
+    //
+    // Send error information to syslog
+    //
+    $type = AblePolecat_LogInterface::STATUS;
+    switch($errno) {
+      default:
+        break;
+      case E_USER_ERROR:
+      case E_ERROR:
+        $type = AblePolecat_LogInterface::ERROR;
+        break;
+      case E_USER_WARNING:
+        $type = AblePolecat_LogInterface::WARNING;
+        break;
+    }
+    AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
+    if ($shutdown) {
+      AblePolecat_Server::shutdown();
+    }
+    return $shutdown;
+  }
+  
+  /**
+   * Handle exceptions thrown by child objects.
+   */
+  public static function handleException(Exception $Exception) {
+    $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
+      $Exception->getCode(),
+      $Exception->getFile(),
+      $Exception->getLine(),
+      $Exception->getMessage()
+    );
+    AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
+  }
+  
+  /********************************************************************************
+   * Caching methods.
+   ********************************************************************************/
+  
+  /**
+   * Extends constructor.
+   */
+  protected function initialize() {
+    //
+    // Default error/exception handling
+    //
+    set_error_handler(array('AblePolecat_Mode_Server', 'handleError'));
+    set_exception_handler(array('AblePolecat_Mode_Server', 'handleException'));
+    
+    //
+    // Access control agent (super user).
+    //
+    $this->Agent = AblePolecat_AccessControl_Agent_Server::wakeup($this);
+    
+    //
+    // Load environment/configuration
+    //
+    //
+    $this->Environment = AblePolecat_Environment_Server::wakeup($this->Agent);
+    
+    //
+    // Load core database configuration settings.
+    //
+    $this->db_state = $this->Environment->getVariable($this->Agent, AblePolecat_Server::SYSVAR_CORE_DATABASE);
+    $this->db_state['connected'] = FALSE;
+    if (isset($this->db_state['dsn'])) {
+      //
+      // Attempt a connection.
+      // @todo: access control
+      //
+      $this->Database = AblePolecat_Database_Pdo::wakeup($this);
+      $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($this->db_state['dsn']);
+      $this->Database->open($this->Agent, $DbUrl);           
+      $this->db_state['connected'] = TRUE;
+    }
+  }
+  
   /**
    * Serialize object to cache.
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // todo: Persist...
-    //
-    self::$ServerMode = NULL;
   }
   
   /**
    * Create a new instance of object or restore cached object to previous state.
    *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    *
    * @return AblePolecat_Mode_Dev or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    if (!isset(self::$ServerMode)) {
-      try {        
-        switch (AblePolecat_Server::getBootDirective(AblePolecat_Server::BOOT_MODE)) {
-          default:
-            //
-            // default mode is normal/user
-            //
-            require_once('Server/Normal.php');
-            self::$ServerMode = new AblePolecat_Mode_Server_Normal($Subject);
-            break;
-          case 'install':
-            require_once('Server/Install.php');
-            self::$ServerMode = new AblePolecat_Mode_Server_Install($Subject);
-            break;
-          case 'update':
-            require_once('Server/Update.php');
-            self::$ServerMode = new AblePolecat_Mode_Server_Update($Subject);
-            break;
-        }
+    if (!isset(self::$Mode)) {
+      //
+      // Only server can wakeup server mode.
+      //
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_Server')) {
+        self::$Mode = new AblePolecat_Mode_Server();
       }
-      catch(Exception $Exception) {
-        self::$ServerMode = NULL;
-        throw new AblePolecat_Server_Exception(
-          'Failed to initialize server mode. ' . $Exception->getMessage(),
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
+      else {
       }
     }
-    return self::$ServerMode;
+    return self::$Mode;
   }
 }

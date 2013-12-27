@@ -20,19 +20,10 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    */
   private static $UserMode;
   
-  /**
-   * Extends constructor.
-   * Sub-classes should override to initialize members.
-   */
-  protected function initialize() {
-    
-    //
-    // Check for required server resources.
-    // (will throw exception if not ready).
-    //
-    AblePolecat_Server::getApplicationMode();    
-  }
-  
+  /********************************************************************************
+   * Access control methods.
+   ********************************************************************************/
+   
   /**
    * Return unique, system-wide identifier.
    *
@@ -51,13 +42,65 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
     return self::NAME;
   }
   
+  /********************************************************************************
+   * Command target methods.
+   ********************************************************************************/
+   
   /**
-   * Get access control agent for current user.
+   * Execute the command and return the result of the action.
    *
-   * @return
+   * @param AblePolecat_CommandInterface $Command The command to execute.
    */
-  public function getUserAgent() {
-    return $this->getAgent();
+  public function execute(AblePolecat_CommandInterface $Command) {
+  }
+  
+  /**
+   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function forwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Super = NULL;
+    
+    //
+    // Only mode can serve as next in COR.
+    //
+    if (is_a($Target, 'AblePolecat_ModeInterface')) {
+      $Super = $this;
+      $this->Subordinate = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Super;
+  }
+  
+  /********************************************************************************
+   * Resource access methods.
+   ********************************************************************************/
+  
+  /********************************************************************************
+   * Caching methods.
+   ********************************************************************************/
+  
+  /**
+   * Extends constructor.
+   * Sub-classes should override to initialize members.
+   */
+  protected function initialize() {
+    
+    //
+    // Check for required server resources.
+    // (will throw exception if not ready).
+    //
+    AblePolecat_Server::getApplicationMode();    
   }
   
   /**

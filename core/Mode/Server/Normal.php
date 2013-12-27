@@ -28,10 +28,9 @@ class AblePolecat_Mode_Server_Normal extends AblePolecat_Mode_Server {
     //
     $Environment = AblePolecat_Environment_Server::wakeup($this->getAgent());
     
-    // Set access control constraints.
     //
-    $Environment->setPermission($this->getAgent(), AblePolecat_AccessControl_Constraint_Read::getId());
-    $Environment->setPermission($this->getAgent(), AblePolecat_AccessControl_Constraint_Write::getId());
+    // @todo: Set access control constraints.
+    //
     
     //
     // Save 

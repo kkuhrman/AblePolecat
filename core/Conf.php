@@ -90,14 +90,7 @@ interface AblePolecat_ConfInterface extends AblePolecat_AccessControl_ResourceIn
   
 }
 
-abstract class AblePolecat_ConfAbstract extends AblePolecat_AccessControl_ResourceAbstract implements AblePolecat_ConfInterface {
-  
-  /**
-   * Serialization prior to going out of scope in sleep().
-   */
-  final public function __destruct() {
-    $this->sleep();
-  }
+abstract class AblePolecat_ConfAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_ConfInterface {
 }
 
 /**

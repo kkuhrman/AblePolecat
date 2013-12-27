@@ -39,6 +39,76 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    */
   private $Resources = NULL;
   
+  /********************************************************************************
+   * Access control methods.
+   ********************************************************************************/
+   
+  /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /********************************************************************************
+   * Command target methods.
+   ********************************************************************************/
+   
+  /**
+   * Execute the command and return the result of the action.
+   *
+   * @param AblePolecat_CommandInterface $Command The command to execute.
+   */
+  public function execute(AblePolecat_CommandInterface $Command) {
+  }
+  
+  /**
+   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function forwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Super = NULL;
+    
+    //
+    // Only user mode can serve as next in COR.
+    //
+    if (is_a($Target, 'AblePolecat_Mode_User')) {
+      $Super = $this;
+      $this->Subordinate = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Super;
+  }
+  
+  /********************************************************************************
+   * Resource access methods.
+   ********************************************************************************/
+  
+  /********************************************************************************
+   * Caching methods.
+   ********************************************************************************/
+   
   /**
    * Extends constructor.
    * Sub-classes should override to initialize members.
@@ -62,189 +132,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     AblePolecat_Server::getDefaultLog();
     AblePolecat_Server::getServerMode();
     AblePolecat_Server::getServiceBus();
-  }
-  
-  /**
-   * Return unique, system-wide identifier.
-   *
-   * @return UUID.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return Common name.
-   *
-   * @return string Common name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /**
-   * Retrieves application resource(s).
-   *
-   * @param int $interface One of the supported interface types.
-   * @param string $module Name of module (if 'all' - all resources of $interface are returned).
-   * @param bool $safe If TRUE will not return NULL, rather throw exception.
-   *
-   * @return mixed The cached resource or NULL.
-   *
-   * @throw Exception if no resource stored at given location.
-   * @see setResource().
-   */
-  public function getResource($interface, $module = self::RESOURCE_ALL, $safe = TRUE) {
-    
-    $resource = NULL;
-    if (isset($this->Resources[$interface])) {
-      if ($module === self::RESOURCE_ALL) {
-        $resource = $this->Resources[$interface];
-      }
-      else if (isset($this->Resources[$interface][$module])) {
-        $resource = $this->Resources[$interface][$module];
-      }
-    }
-    if (!isset($resource) && $safe) {
-      AblePolecat_Server::handleCriticalError(AblePolecat_Error::UNSUPPORTED_INTERFACE, 
-        "Attempt to retrieve Able Polecat application resource of type $interface, module $module failed.");
-    }
-    return $resource;
-  }
-  
-  /**
-   * Return an array with the names of all supported resource interfaces.
-   *
-   * @return Array Names of supported resource interfaces.
-   */
-  public static function getSupportedResourceInterfaces() {
-    
-    //
-    // @todo: perhaps this should be in conf file, database, other?
-    //
-    if (!isset(self::$supported_interfaces)) {
-      self::$supported_interfaces = array(
-        'AblePolecat_LogInterface',
-      );
-    }
-    return self::$supported_interfaces;
-  }
-  
-  /**
-   * Indicates whether given interface/class combination qualifies as an application resource.
-   *
-   * @param int $interface Name of interface.
-   * @param mixed $resource Object or class name.
-   *
-   * @return mixed Name of supported resource interface implemented by object/class or FALSE.
-   */
-  public static function isValidResource($interface, $resource) {
-    
-    $valid = array_key_exists($interface, array_flip(self::getSupportedResourceInterfaces()));
-    
-    if ($valid && isset($resource)) {
-      if (is_object($resource)) {
-        $valid = is_a($resource, $interface);
-      }
-      else if (is_string($resource)) {
-        $valid = is_subclass_of($resource, $interface);
-      }
-      else {
-        $valid = FALSE;
-      }
-    }
-    return $valid;
-  }
-  
-  /**
-   * Stores an application resource.
-   *
-   * @param int $interface One of the supported interface types.
-   * @param string $module Name of module.
-   * @param mixed $resource The resource to cache.
-   *
-   * @return mixed Name of supported resource interface.
-   * @throw Exception if resource does not implement a supoprted interface.
-   */
-  protected function setResource($interface, $module, $resource) {
-    
-    if (self::isValidResource($interface, $resource)) {
-      if(!isset($this->Resources[$interface])) {
-        $this->Resources[$interface] = array();
-      }
-      if (!isset($this->Resources[$interface][$module])) {
-        $this->Resources[$interface][$module] = array();
-      }
-      $class_name = get_class($resource);
-      if (!isset($this->Resources[$interface][$module][$class_name])) {
-        $this->Resources[$interface][$module][$class_name] = $resource;
-      }
-    }
-    else {
-      $msg = sprintf("Able Polecat rejected attempt to store application resource for module %s. %s does not implement %s or %s is not a supported resource interface.",
-        $module,
-        get_class($resource),
-        $interface,
-        $interface
-      );
-      AblePolecat_Server::handleCriticalError(AblePolecat_Error::UNSUPPORTED_INTERFACE, $msg);
-    }
-  }
-  
-  /**
-   * Load resources from registered modules based on class attribute load.
-   * @throw AblePolecat_Server_Exception is application mode is not ready.
-   */
-  public function loadRegisteredResources() {
-  
-    if (isset(self::$ApplicationMode)) {
-      $registeredClasses = AblePolecat_Server::getClassRegistry()->getModuleClasses('interface');   
-      foreach($this->Resources as $interfaceName => $resources) {
-        if (isset($registeredClasses[$interfaceName])) {
-          foreach($registeredClasses[$interfaceName] as $moduleName => $moduleClasses) {
-            foreach($moduleClasses as $id => $className) {
-              $class = AblePolecat_Server::getClassRegistry()->loadClass($className);
-              self::$ApplicationMode->setResource($interfaceName, $moduleName, $class);
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  /**
-   * Log a message to application log(s).
-   * 
-   * @param string $severity error | warning | status | info | debug.
-   * @param mixed  $message Message body.
-   * @param int    $code Error code.
-   */
-  public function log($severity, $message, $code = NULL) {
-    
-    $allRegisteredLogs = $this->getResource('AblePolecat_LogInterface', self::RESOURCE_ALL, FALSE);
-    if (isset($allRegisteredLogs)) {
-      foreach($allRegisteredLogs as $moduleName => $moduleRegisteredLogs) {
-        foreach($moduleRegisteredLogs as $className => $log) {
-          switch ($severity) {
-            default:
-              $log->logStatusMessage($message);
-              break;
-            case AblePolecat_LogInterface::STATUS:
-              $log->logStatusMessage($message);
-              break;
-            case AblePolecat_LogInterface::WARNING:
-              $log->logWarningMessage($message);
-              break;
-            case AblePolecat_LogInterface::ERROR:
-              $log->logErrorMessage($message);
-              break;
-            case AblePolecat_LogInterface::DEBUG:
-              $log->logStatusMessage($message);
-              break;
-          }
-        }
-      }
-    }
   }
   
   /**
@@ -274,6 +161,11 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         // Create instance of application mode
         //
         self::$ApplicationMode = new AblePolecat_Mode_Application($Subject);
+        
+        //
+        // Load environment settings
+        //
+        self::$ApplicationMode->setEnvironment(AblePolecat_Environment_Application::wakeup($Subject));
       }
       catch(Exception $Exception) {
         self::$ApplicationMode = NULL;
@@ -282,113 +174,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
           AblePolecat_Error::BOOT_SEQ_VIOLATION
         );
       }
-      
-      
-      //
-      // Load environment settings
-      //
-      $Environment = AblePolecat_Environment_Application::wakeup($Subject);
-      if (isset($Environment)) {
-        self::$ApplicationMode->setEnvironment($Environment);
-      }
-      else {
-        throw new AblePolecat_Environment_Exception('Failed to load Able Polecat application environment.',
-          AblePolecat_Error::BOOT_SEQ_VIOLATION);
-      }
     }
     return self::$ApplicationMode;
-  }
-  
-  protected function loadModuleDatabases() {
-    //
-    // Load application database for active mode.
-    // @todo: core will only use PDO; move custom class loading to application mode
-    //
-    $databases = array(
-        self::NAME_DATABASES => array(),
-        'id' => array(),
-        'name' => array(),
-    );
-    
-    //
-    // @todo???
-    //
-    // $dbconf = $ServerMode->getEnvironment()->getConf('databases');
-    $dbconf = array();
-    
-    $dbkey = 0;
-    foreach($dbconf as $element_name => $db) {
-      $dbattr = $db->attributes();
-      isset($dbattr['name']) ? $dbname = $dbattr['name']->__toString() : $dbname = NULL;
-      isset($dbattr['id']) ? $dbid = $dbattr['id']->__toString() : $dbid = NULL;
-      isset($db->modulename) ? $dbmodulename = $db->modulename->__toString() : $dbmodulename = NULL;
-      
-      if (!isset($dbname) && !isset($dbid)) {
-        AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Database(s) defined in conf must have either id or name attribute assigned.");
-      }
-      else {        
-        //
-        // If module is not core, wait until application mode.
-        //
-        if (isset($dbmodulename) && ($dbmodulename !== 'core')) {
-          isset($db->classname) ? $dbclassname = $db->classname->__toString() : $dbclassname = NULL;
-          if (isset($db->classname)) {
-            //
-            // Register and load the database class.
-            //
-            AblePolecat_Server::getClassRegistry()->registerLoadableClass($dbclassname, NULL, 'wakeup');
-            $Database = AblePolecat_Server::getClassRegistry()->loadClass($dbclassname);
-            
-            //
-            // Open the database connection.
-            //
-            $Database->setPermission($this->Agent, AblePolecat_AccessControl_Constraint_Open::getId());
-            isset($db->dsn) ? $dbdsn = $db->dsn->__toString() : $dbdsn = NULL;
-            $DbUrl = AblePolecat_AccessControl_Resource_Locater::create($dbdsn);
-            $Database->open($this->Agent, $DbUrl);
-            
-            //
-            // Add the database to server.
-            //
-            $databases[AblePolecat_Server::NAME_DATABASES][$dbkey] = $Database;
-            isset($dbid) ? $databases['id'][$dbid] = $dbkey : NULL;
-            isset($dbname) ? $databases['name'][$dbname] = $dbkey : NULL;
-          }
-          else {
-            AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, sprintf("no class name given for database %s in conf.", $dbname));
-          }
-        }
-        else {
-          AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, sprintf("no module name given for database %s in conf.", $dbname));
-        }
-      }
-      $dbkey++;
-    }
-    self::setResource($dbclassname, $dbmodulename, $databases);
-  }
-  
-  /**
-   * @param string $id Id or name of registered database.
-   *
-   * @return AblePolecat_DatabaseInterface.
-   */
-  public static function getDatabase($id) {
-    $Database = NULL;
-    // $databases = self::getResource(self::RING_DATABASES, self::NAME_DATABASES);
-    $key = NULL;
-    if (isset($databases['id'][$id])) {
-      $key = $databases['id'][$id];
-    }
-    else if (isset($databases['name'][$id])) {
-      $key = $databases['name'][$id];
-    }
-    if (isset($databases[AblePolecat_Server::NAME_DATABASES][$key])) {
-      $Database = $databases[AblePolecat_Server::NAME_DATABASES][$key];
-    }
-    else {
-      throw new AblePolecat_Server_Exception("Could not access database $id. No such object registered.",
-        AblePolecat_Error::ACCESS_INVALID_OBJECT);
-    }
-    return $Database;
   }
 }

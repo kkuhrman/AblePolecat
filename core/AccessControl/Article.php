@@ -7,7 +7,9 @@
  * made by the Subject, Object, Constraint etc. in an access control system.
  */
 
- interface AblePolecat_AccessControl_ArticleInterface {
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'AccessControl.php')));
+
+interface AblePolecat_AccessControl_ArticleInterface {
   
   /**
    * Ideally unique id will be UUID.
