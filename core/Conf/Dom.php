@@ -59,8 +59,8 @@ class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
       //
       // source is a file
       //
-      // die('roll the bones');
-      $XmlPart = @DOMDocument::load($source);
+      $XmlPart = new DOMDocument();
+      $XmlPart->load($source);
       if ($XmlPart) {
         $Element = $XmlPart->getElementsByTagName($tagname)->item(0);
       }
@@ -243,7 +243,7 @@ class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
     //
     // Create conf object
     //
-    $Conf = new AblePolecat_Conf_Dom();
+    $Conf = new AblePolecat_Conf_Dom($Subject);
     
     //
     // Merge multiple XML conf files into one DOM document

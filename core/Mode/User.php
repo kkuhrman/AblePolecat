@@ -4,8 +4,9 @@
  * Base class for User mode (password, security token protected etc).
  */
  
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'User.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
 
 class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   
@@ -19,6 +20,16 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    * @var Instance of Singleton.
    */
   private static $Mode;
+  
+  /**
+   * @var AblePolecat_AccessControl_AgentInterface
+   */
+  private $Agent;
+  
+  /**
+   * @var AblePolecat_EnvironmentInterface.
+   */
+  private $Environment;
   
   /********************************************************************************
    * Access control methods.
@@ -47,11 +58,56 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    ********************************************************************************/
    
   /**
-   * Execute the command and return the result of the action.
+   * Execute a command or pass back/forward chain of responsibility.
    *
-   * @param AblePolecat_CommandInterface $Command The command to execute.
+   * @param AblePolecat_CommandInterface $Command
+   * @param string $direction forward | reverse
+   *
+   * @return AblePolecat_Command_Result
    */
-  public function execute(AblePolecat_CommandInterface $Command) {
+  public function execute(AblePolecat_CommandInterface $Command, $direction = self::CMD_LINK_REV) {
+    
+    $Result = NULL;
+    
+    //
+    // @todo: check invoker access rights
+    //
+    switch ($Command::getId()) {
+      default:
+        //
+        // Not handled
+        //
+        break;
+      case '85fc7590-724d-11e3-981f-0800200c9a66':
+        //
+        // Log
+        //
+        
+        //
+        // @todo: write to user log(s)
+        //
+        
+        switch($Command->getEventSeverity()) {
+          default:
+            break;
+          case AblePolecat_LogInterface::USER_INFO:
+          case AblePolecat_LogInterface::USER_STATUS:
+          case AblePolecat_LogInterface::USER_WARNING:
+            //
+            // Do not pass these to next link in CoR.
+            //
+            $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+            break;
+        }
+        break;
+    }
+    if (!isset($Result)) {
+      //
+      // Pass command to next link in chain of responsibility
+      //
+      $Result = $this->delegateCommand($Command, $direction);
+    }
+    return $Result;
   }
   
   /**
@@ -78,11 +134,7 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
     }
     return $ValidLink;
   }
-  
-  /********************************************************************************
-   * Resource access methods.
-   ********************************************************************************/
-  
+    
   /********************************************************************************
    * Caching methods.
    ********************************************************************************/
@@ -92,12 +144,6 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
-    
-    //
-    // Check for required server resources.
-    // (will throw exception if not ready).
-    //
-    AblePolecat_Server::getApplicationMode();    
   }
   
   /**
@@ -113,37 +159,42 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_Mode_Application or NULL.
+   * @return AblePolecat_Mode_User or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Mode)) {
-      //
-      // Create instance of user mode
-      //
-      self::$Mode = new AblePolecat_Mode_User($Subject);
-      
-      //
+      try {
+        //
+        // Create instance of user mode
+        //
+        self::$Mode = new AblePolecat_Mode_User($Subject);
+        
+        //
         // Set chain of responsibility relationship
         //
         $Subject->setForwardCommandLink(self::$Mode);
         self::$Mode->setReverseCommandLink($Subject);
         
-      //
-      // @todo get user settings from session ($Subject).
-      //
+        //
+        // Access control agent (super user).
+        //
+        self::$Mode->Agent = AblePolecat_AccessControl_Agent_User::wakeup(self::$Mode);
         
-      //
-      // @todo: load environment settings in initialize()
-      //
-      // $Environment = AblePolecat_Environment_User::wakeup($Subject);
-      // if (isset($Environment)) {
-        // self::$Mode->setEnvironment($Environment);
-      // }
-      // else {
-        // throw new AblePolecat_Environment_Exception('Failed to load Able Polecat user environment.',
-          // AblePolecat_Error::BOOT_SEQ_VIOLATION);
-      // }
+        //
+        // Load environment/configuration
+        //
+        //
+        self::$Mode->Environment = AblePolecat_Environment_User::wakeup(self::$Mode->Agent);
+      }
+      catch(Exception $Exception) {
+        self::$Mode = NULL;
+        throw new AblePolecat_Server_Exception(
+          'Failed to initialize user mode. ' . $Exception->getMessage(),
+          AblePolecat_Error::BOOT_SEQ_VIOLATION
+        );
+      }
+       
     }
       
     return self::$Mode;

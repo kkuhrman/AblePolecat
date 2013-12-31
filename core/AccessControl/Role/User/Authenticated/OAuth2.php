@@ -115,7 +115,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
       }
     }
     catch (AblePolecat_Exception $Exception) {
-      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+      AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
     }
     
     return $result;
@@ -150,7 +150,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     }
     catch (AblePolecat_Exception $Exception) {
       $this->token = NULL;
-      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+      AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
     }
     
     return $this->token;
@@ -178,7 +178,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     }
     catch (AblePolecat_Exception $Exception) {
       $this->token = NULL;
-      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+      AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
     }
   }
   

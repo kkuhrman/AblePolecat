@@ -16,27 +16,12 @@ class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
    * @var AblePolecat_Environment_Server Singleton instance.
    */
   private static $Environment = NULL;
-  
-  /**
-   * User agent.
-   */
-  private $Agent;
-  
+    
   /**
    * Extends __construct(). 
-   * 
-   * Sub-classes can override to initialize members prior to load.
    */
   protected function initialize() {
-  }
-  
-  /**
-   * Return access control agent.
-   *
-   * @return AblePolecat_AccessControl_AgentInterface.
-   */
-  public function getAgent() {
-    return $this->Agent;
+    parent::initialize();
   }
   
   /**
@@ -78,12 +63,7 @@ class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
       //
       // Create environment object.
       //
-      self::$Environment = new AblePolecat_Environment_User();
-      
-      //
-      // Initialize access control for application environment settings.
-      //
-      self::$Environment->Agent = AblePolecat_AccessControl::wakeup($Subject)->getAgent(self::$Environment);
+      self::$Environment = new AblePolecat_Environment_User($Subject);
     }
     return self::$Environment;
   }

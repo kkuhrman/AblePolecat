@@ -25,11 +25,14 @@ interface AblePolecat_Command_TargetInterface {
   const CMD_LINK_REV    = 'reverse';
   
   /**
-   * Execute the command and return the result of the action.
+   * Execute a command or pass back/forward chain of responsibility.
    *
-   * @param AblePolecat_CommandInterface $Command The command to execute.
+   * @param AblePolecat_CommandInterface $Command
+   * @param string $direction forward | reverse
+   *
+   * @return AblePolecat_Command_Result
    */
-  public function execute(AblePolecat_CommandInterface $Command);
+  public function execute(AblePolecat_CommandInterface $Command, $direction = self::CMD_LINK_REV);
   
   /**
    * Allow given subject to serve as direct subordinate in Chain of Responsibility.

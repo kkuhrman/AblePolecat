@@ -48,19 +48,6 @@ class AblePolecat_Log_Syslog extends AblePolecat_LogAbstract {
   }
   
   /**
-   * Dump backtrace to logger with message.
-   *
-   * Typically only called in a 'panic' situation during testing or development.
-   *
-   * @param variable $msg Variable list of arguments comprising message.
-   */
-  public static function dumpBacktrace($msg = NULL) {
-    !isset($msg) ? $msg = serialize(debug_backtrace()) : NULL;
-    !is_string($msg) ? $message = serialize($msg) : $message = $msg;
-    AblePolecat_Log_Syslog::wakeup()->putMessage(AblePolecat_LogInterface::DEBUG, $message);
-  }
-  
-  /**
    * Serialize object to cache.
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.

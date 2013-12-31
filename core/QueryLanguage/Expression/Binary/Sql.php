@@ -27,7 +27,7 @@ class AblePolecat_QueryLanguage_Expression_Binary_Sql extends AblePolecat_QueryL
       );
     }
     catch (AblePolecat_Exception $Exception) {
-      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+      AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
     }
     return $str;
   }

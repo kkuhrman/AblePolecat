@@ -48,12 +48,7 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
           $strvalue = AblePolecat_Data_Scalar_String::typeCast($value);
           switch($key) {
             default:
-              AblePolecat_Server::log(AblePolecat_LogInterface::WARNING,
-                sprintf("Excess data passed to %s constructor. %s.", 
-                  get_class($this), 
-                  $strvalue
-                )
-              );
+              AblePolecat_Command_Log::invoke($this, sprintf("Excess data passed to %s constructor. %s.", get_class($this), $strvalue), AblePolecat_LogInterface::WARNING);
               break;
             case 0:
               $this->expression[self::LVALUE] = $strvalue;

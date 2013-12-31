@@ -64,7 +64,7 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         //
         // Initialize singleton instance.
         //
-        self::$Environment = new AblePolecat_Environment_Server();
+        self::$Environment = new AblePolecat_Environment_Server($Subject);
         
         //
         // Merge system-wide configuration settings from one or more XML doc(s).

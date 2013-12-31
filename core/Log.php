@@ -4,6 +4,7 @@
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Log.php')));
 
 if (isset($_SERVER['WINDIR'])) {
   define('ABLE_POLECAT_EVENT_ID_ERROR',       LOG_ERR);
@@ -21,12 +22,20 @@ else {
 interface AblePolecat_LogInterface extends AblePolecat_CacheObjectInterface {
   
   const BOOT    = 'boot'; // bootstrap info message - not logged unless a problem during boot
+  
   const ERROR   = 'error';
   const DEBUG   = 'debug';
   const INFO    = 'info';
   const STATUS  = 'status';
   const WARNING = 'warning';
   
+  const APP_INFO    = 'a.info';
+  const APP_STATUS  = 'a.status';
+  const APP_WARNING = 'a.warning';
+  
+  const USER_INFO    = 'u.info';
+  const USER_STATUS  = 'u.status';
+  const USER_WARNING = 'u.warning';
   
   const EVENT_ID_INFO  = ABLE_POLECAT_EVENT_ID_INFORMATION;
   const EVENT_ID_WARN  = ABLE_POLECAT_EVENT_ID_WARNING;
@@ -34,51 +43,15 @@ interface AblePolecat_LogInterface extends AblePolecat_CacheObjectInterface {
   const EVENT_ID_DEBUG = ABLE_POLECAT_EVENT_ID_DEBUG;
   
   /**
-   * Log a status message to stdout.
-   * 
-   * @param variable $msg Variable list of arguments comprising message.
-   */
-  public function logStatusMessage($msg = NULL);
-  
-  /**
-   * Log a status message to stdout.
-   * 
-   * @param variable $msg Variable list of arguments comprising message.
-   */
-  public function logWarningMessage($msg = NULL);
-  
-  /**
-   * Log a error message to stderr.
-   * 
-   * @param variable $msg Variable list of arguments comprising message.
-   */
-  public function logErrorMessage($msg = NULL);
-  
-  /**
-   * Dump backtrace to logger with message.
-   *
-   * Typically only called in a 'panic' situation during testing or development.
-   *
-   * @param variable $msg Variable list of arguments comprising message.
-   */
-  public static function dumpBacktrace($msg = NULL);
-}
-
-abstract class AblePolecat_LogAbstract implements AblePolecat_LogInterface {
-  
-  /**
-   * Extends __construct(). 
-   */
-  abstract protected function initialize();
-  
-  /**
    * Helper function.Writes message to file.
    * 
    * @param string $type STATUS | WARNING | ERROR.
    * @param string $msg  Body of message.
    */
-  abstract public function putMessage($type, $msg);
-  
+  public function putMessage($type, $msg);
+}
+
+abstract class AblePolecat_LogAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_LogInterface {
   /**
    * Log a status message to file.
    * 
@@ -105,26 +78,4 @@ abstract class AblePolecat_LogAbstract implements AblePolecat_LogInterface {
   public function logErrorMessage($msg = NULL) {
     $this->putMessage(AblePolecat_LogInterface::ERROR, $msg);
   }
-  
-  /**
-   * Cached objects must be created by wakeup().
-   * Initialization of sub-classes should take place in initialize().
-   * @see initialize(), wakeup().
-   */
-  final protected function __construct() {
-    $this->initialize();
-  }
-  
-  /**
-   * Serialization prior to going out of scope in sleep().
-   */
-  final public function __destruct() {
-    $this->sleep();
-  }
-}
-
-/**
- * Exceptions thrown by log objects.
- */
-class AblePolecat_Log_Exception extends AblePolecat_Exception {
 }

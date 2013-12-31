@@ -906,9 +906,11 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   public function values() {
     $Values = func_get_args();
     $ValuesQuotes = array();
-    $Database = AblePolecat_Server::getDatabase();
     foreach($Values as $key => $value) {
-      $ValuesQuotes[] = $Database->quote($value);
+      //
+      // @todo: obviously inadequate - need a better solution involving driver/schema & checking
+      //
+      $ValuesQuotes[] = sprintf("'%s'", str_replace('\'', '\'\'', $value));
     }
     $this->setValues($ValuesQuotes);
     return $this;
@@ -940,16 +942,6 @@ function __SQLEXPR() {
       break;
   }
   return $Expression;
-}
-
-/**
- * Helper function - put parameters in quotes.
- */
-function __SQLQUOTE($string) {
-  if (isset($string) && is_scalar($string)) {
-    $string = AblePolecat_Server::getDatabase()->quote($string);
-  }
-  return $string;
 }
 
 class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {

@@ -4,14 +4,10 @@
  * Base class for Application modes (second most protected).
  */
 
-/**
- * Configurable paths are defined *after* server conf file is loaded.
- * Any use prior to this must use AblePolecat_Server_Paths::getFullPath().
- * This is best practice in any case rather than using global constants .
- */
- 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Application.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
 
 class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
 
@@ -26,19 +22,22 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * @var AblePolecat_Mode_ApplicationAbstract Concrete Mode instance.
    */
   protected static $Mode;
-    
-  /**
-   * @var List of interfaces which can be used as application resources.
-   */
-  private static $supported_interfaces = NULL;
   
   /**
-   * @var Array $Resources.
-   *
-   * Application resources are stored as Array([type] => [module name]).
+   * @var AblePolecat_AccessControl_AgentInterface
    */
-  private $Resources = NULL;
+  private $Agent;
   
+  /**
+   * @var AblePolecat_EnvironmentInterface.
+   */
+  private $Environment;
+  
+  /**
+   * @var AblePolecat_Registry_ClassLibrary
+   */
+  private $ClassLibraryRegistry;
+      
   /********************************************************************************
    * Access control methods.
    ********************************************************************************/
@@ -66,11 +65,55 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    ********************************************************************************/
    
   /**
-   * Execute the command and return the result of the action.
+   * Execute a command or pass back/forward chain of responsibility.
    *
-   * @param AblePolecat_CommandInterface $Command The command to execute.
+   * @param AblePolecat_CommandInterface $Command
+   * @param string $direction forward | reverse
+   *
+   * @return AblePolecat_Command_Result
    */
-  public function execute(AblePolecat_CommandInterface $Command) {
+  public function execute(AblePolecat_CommandInterface $Command, $direction = self::CMD_LINK_REV) {
+    
+    $Result = NULL;
+    
+    //
+    // @todo: check invoker access rights
+    //
+    switch ($Command::getId()) {
+      default:
+        $Result = $this->delegateCommand($Command, $direction);
+        break;
+      case '85fc7590-724d-11e3-981f-0800200c9a66':
+        //
+        // Log
+        //
+        
+        //
+        // @todo: write to application log(s)
+        //
+        
+        switch($Command->getEventSeverity()) {
+          default:
+            break;
+          case AblePolecat_LogInterface::DEBUG:
+          case AblePolecat_LogInterface::APP_INFO:
+          case AblePolecat_LogInterface::APP_STATUS:
+          case AblePolecat_LogInterface::APP_WARNING:
+            //
+            // Do not pass these to next link in CoR.
+            //
+            $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+            break;
+        }
+        break;
+    }
+    if (!isset($Result)) {
+      //
+      // Pass command to next link in chain of responsibility
+      //
+      $Result = $this->delegateCommand($Command, $direction);
+    }
+    return $Result;
   }
   
   /**
@@ -97,11 +140,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     }
     return $ValidLink;
   }
-  
-  /********************************************************************************
-   * Resource access methods.
-   ********************************************************************************/
-  
+    
   /********************************************************************************
    * Caching methods.
    ********************************************************************************/
@@ -111,24 +150,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
-    //
-    // Supported Able Polecat interfaces.
-    //
-    $this->Resources = array();
-    $supported_resources = self::getSupportedResourceInterfaces();
-    foreach($supported_resources as $key => $interface_name) {
-      $this->Resources[$interface_name] = array();
-    }
-    
-    //
-    // Check for required server resources.
-    // (these will throw exception if not ready).
-    //
-    AblePolecat_Server::getBootMode();
-    AblePolecat_Server::getClassRegistry();
-    AblePolecat_Server::getDefaultLog();
-    AblePolecat_Server::getServerMode();
-    AblePolecat_Server::getServiceBus();
   }
   
   /**
@@ -137,10 +158,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // @todo: persist
-    //
-    self::$Mode = NULL;
   }
   
   /**
@@ -166,9 +183,20 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         self::$Mode->setReverseCommandLink($Subject);
         
         //
-        // @todo: load environment settings in initialize().
+        // Access control agent (super user).
         //
-        // self::$Mode->setEnvironment(AblePolecat_Environment_Application::wakeup($Subject));
+        self::$Mode->Agent = AblePolecat_AccessControl_Agent_Application::wakeup(self::$Mode);
+        
+        //
+        // Load environment/configuration
+        //
+        //
+        self::$Mode->Environment = AblePolecat_Environment_Application::wakeup(self::$Mode->Agent);
+                
+        //
+        // Load registry of class libraries.
+        //
+        self::$Mode->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup(self::$Mode);
       }
       catch(Exception $Exception) {
         self::$Mode = NULL;

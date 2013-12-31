@@ -17,6 +17,7 @@
  * Most current version is loaded from conf file. These are defaults.
  */
 define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.4.0');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_4_0_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
 define('ABLE_POLECAT_VERSION_MINOR', '4');
 define('ABLE_POLECAT_VERSION_REVISION', '0');
@@ -70,22 +71,31 @@ if (!defined('ABLE_POLECAT_USR')) {
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Delegate', 'System.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
 
 class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstract implements AblePolecat_Command_TargetInterface {
 
   //
   // System environment variable names
   //
-  const SYSVAR_CORE_VERSION   = 'coreVersion';
-  const SYSVAR_CORE_CLASSES   = 'coreClasses';
-  const SYSVAR_CORE_DATABASE  = 'coreDatabase';
-  const SYSVAR_CORE_INTERFACES = 'coreInterfaces';
+  const SYSVAR_CORE_VERSION     = 'coreVersion';
+  const SYSVAR_CORE_CLASSES     = 'coreClasses';
+  const SYSVAR_CORE_DATABASE    = 'coreDatabase';
+  const SYSVAR_CORE_INTERFACES  = 'coreInterfaces';
+  
+  //
+  // Ring constants, like OS protection rings, define chain of responsibility hierarchy
+  //
+  const RING_SERVER_MODE        = 0;
+  const RING_APPLICATION_MODE   = 1;
+  const RING_USER_MODE          = 2;
   
   //
   // Access control id
   //
-  const UUID              = '603a37e0-5dec-11e3-949a-0800200c9a66';
-  const NAME              = 'Able Polecat Server';
+  const UUID                    = '603a37e0-5dec-11e3-949a-0800200c9a66';
+  const NAME                    = 'Able Polecat Server';
   
   /**
    * @var AblePolecat_Server Singleton instance.
@@ -93,9 +103,9 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
   private static $Server = NULL;
   
   /**
-   * @var AblePolecat_Mode_Server.
+   * @var AblePolecat_Command_TargetInterface.
    */
-  private $Mode;
+  private $CommandChain;
   
   /**
    * @var AblePolecat_Message_ResponseInterface.
@@ -137,13 +147,70 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
   /********************************************************************************
    * Command target methods.
    ********************************************************************************/
-   
-   /**
-   * Execute the command and return the result of the action.
+  
+  /**
+   * Request to server to issue command to chain of responsibility.
    *
-   * @param AblePolecat_CommandInterface $Command The command to execute.
+   * @param AblePolecat_CommandInterface $Command
+   * @param string $direction forward | reverse
+   *
+   * @return AblePolecat_Command_Result
    */
-  public function execute(AblePolecat_CommandInterface $Command) {
+  public static function dispatchCommand(
+    AblePolecat_CommandInterface $Command, 
+    $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV
+  ) {
+    
+    $Result = new AblePolecat_Command_Result();
+    
+    if (isset(self::$Server)) {
+      switch ($direction) {
+        default:
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
+          $Result = self::$Server->execute($Command, $direction);
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
+          $Target = self::$Server;
+          if ($key = count(self::$Server->CommandChain)) {
+            $key = $key - 1;
+            isset(self::$Server->CommandChain[$key]) ? $Target = self::$Server->CommandChain[$key] : NULL;
+          }
+          $Result = $Target->execute($Command, $direction);
+          break;
+      }
+    }
+    return $Result;
+  }
+  
+   /**
+   * Execute a command or pass forward on chain of responsibility.
+   *
+   * @param AblePolecat_CommandInterface $Command
+   * @param string $direction forward | reverse
+   *
+   * @return AblePolecat_Command_Result
+   */
+  public function execute(AblePolecat_CommandInterface $Command, $direction = self::CMD_LINK_REV) {
+    
+    $Result = new AblePolecat_Command_Result();
+    
+    switch ($Command::getId()) {
+      default:
+        if ($direction === AblePolecat_Command_TargetInterface::CMD_LINK_FWD) {
+          if (isset($this->CommandChain[self::RING_SERVER_MODE])) {
+            $Result = $this->CommandChain[self::RING_SERVER_MODE]->execute($Command, $direction);
+          }
+        }
+        break;
+      case '85fc7590-724d-11e3-981f-0800200c9a66':
+        //
+        // Apparently, no other log facility was available to handle the message
+        //
+        AblePolecat_Log_Syslog::wakeup()->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
+        break;
+    }
+    return $Result;
   }
   
   /**
@@ -284,7 +351,11 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
       // Initiate command-processing chain of responsibility.
       // (each object wakes up it's subordinate down the chain).
       //
-      self::$Server->Mode = AblePolecat_Mode_Server::wakeup(self::$Server);
+      self::$Server->CommandChain[self::RING_SERVER_MODE] = AblePolecat_Mode_Server::wakeup(self::$Server);
+      self::$Server->CommandChain[self::RING_APPLICATION_MODE] = 
+        AblePolecat_Mode_Application::wakeup(self::$Server->CommandChain[self::RING_SERVER_MODE]);
+      self::$Server->CommandChain[self::RING_USER_MODE] = 
+        AblePolecat_Mode_User::wakeup(self::$Server->CommandChain[self::RING_APPLICATION_MODE]);
       
       //
       // Ready to route HTTP request.
@@ -394,7 +465,7 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
     // Set defaults.
     //
     $this->setVersion(NULL);
-    $this->Mode = NULL;
+    $this->CommandChain = array();
     $this->Response = NULL;
     $this->Subordinate = NULL;
   }

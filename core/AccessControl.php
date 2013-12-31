@@ -131,7 +131,7 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
             $PreparedStatement = $Database->prepareStatement($sql);
             $result = $PreparedStatement->execute();
             if (!$result) {
-              AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, serialize($PreparedStatement->errorInfo()));
+              AblePolecat_Command_Log::invoke($this, serialize($PreparedStatement->errorInfo()), AblePolecat_LogInterface::WARNING);
             }
             else {
               $results = $PreparedStatement->fetchAll();
@@ -148,7 +148,7 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
                   $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
                 }
                 else {
-                  AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, serialize($PreparedStatement->errorInfo()));
+                  AblePolecat_Command_Log::invoke($this, serialize($PreparedStatement->errorInfo()), AblePolecat_LogInterface::WARNING);
                 }
               }
               else {
@@ -181,12 +181,12 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
                       //
                       // @todo: complain
                       //
-                      AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, "Failed to load user role $roleClassName.");
+                      AblePolecat_Command_Log::invoke($this, "Failed to load user role $roleClassName.", AblePolecat_LogInterface::WARNING);
                     }
                   }
                 }
                 catch (AblePolecat_Exception $Exception) {
-                  AblePolecat_Server::log(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
+                  AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
                 }
               }
             }

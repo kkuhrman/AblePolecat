@@ -4,7 +4,8 @@
  * Any object, which can be cached to maintain state or improve performance.
  */
  
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Target.php')));
  
 interface AblePolecat_CacheObjectInterface {
   
@@ -27,7 +28,7 @@ interface AblePolecat_CacheObjectInterface {
    *        MyObject::wakeup()->myMethod();
    *    }
    *    catch(AblePolecat_Exception $Exception) {
-   *       AblePolecat_Server::log(AblePolecat_LogInterface::WARNING, $Exception->getMessage());
+   *       AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
    *    }
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
@@ -40,10 +41,33 @@ interface AblePolecat_CacheObjectInterface {
 abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjectInterface {
   
   /**
+   * @var AblePolecat_AccessControl_SubjectInterface Typically, the subject passed to wakeup().
+   */
+  private $CommandInvoker;
+  
+  /**
    * Extends __construct().
    * Sub-classes initialize properties here.
    */
   abstract protected function initialize();
+  
+  /**
+   * Default command invoker.
+   *
+   * @return AblePolecat_AccessControl_SubjectInterface or NULL.
+   */
+  protected function getDefaultCommandInvoker() {
+    return $this->CommandInvoker;
+  }
+  
+  /**
+   * Sets the default command handlers (invoker/target).
+   * 
+   * @param AblePolecat_AccessControl_SubjectInterface $Invoker
+   */
+  protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
+    $this->CommandInvoker = $Invoker;
+  }
 	
   /**
    * Cached objects must be created by wakeup().
@@ -51,6 +75,13 @@ abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjec
    * @see initialize(), wakeup().
    */
   final protected function __construct() {
+    $args = func_get_args();
+    if (isset($args[0]) && is_a($args[0], 'AblePolecat_AccessControl_SubjectInterface')) {
+      $this->CommandInvoker = $args[0];
+    }
+    else {
+      $this->CommandInvoker = NULL;
+    }
     $this->initialize();
   }
   
