@@ -152,23 +152,27 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
    * Request to server to issue command to chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
-   * @param string $direction forward | reverse
    *
    * @return AblePolecat_Command_Result
    */
-  public static function dispatchCommand(
-    AblePolecat_CommandInterface $Command, 
-    $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV
-  ) {
+  public static function dispatchCommand(AblePolecat_CommandInterface $Command) {
     
     $Result = new AblePolecat_Command_Result();
+    
+    $direction = NULL;
+    if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_FWD;
+    }
+    if (is_a($Command, 'AblePolecat_Command_ReverseInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
+    }
     
     if (isset(self::$Server)) {
       switch ($direction) {
         default:
           break;
         case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-          $Result = self::$Server->execute($Command, $direction);
+          $Result = self::$Server->execute($Command);
           break;
         case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
           $Target = self::$Server;
@@ -176,7 +180,7 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
             $key = $key - 1;
             isset(self::$Server->CommandChain[$key]) ? $Target = self::$Server->CommandChain[$key] : NULL;
           }
-          $Result = $Target->execute($Command, $direction);
+          $Result = $Target->execute($Command);
           break;
       }
     }
@@ -187,19 +191,26 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
    * Execute a command or pass forward on chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
-   * @param string $direction forward | reverse
    *
    * @return AblePolecat_Command_Result
    */
-  public function execute(AblePolecat_CommandInterface $Command, $direction = self::CMD_LINK_REV) {
+  public function execute(AblePolecat_CommandInterface $Command) {
     
     $Result = new AblePolecat_Command_Result();
+    
+    $direction = NULL;
+    if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_FWD;
+    }
+    if (is_a($Command, 'AblePolecat_Command_ReverseInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
+    }
     
     switch ($Command::getId()) {
       default:
         if ($direction === AblePolecat_Command_TargetInterface::CMD_LINK_FWD) {
           if (isset($this->CommandChain[self::RING_SERVER_MODE])) {
-            $Result = $this->CommandChain[self::RING_SERVER_MODE]->execute($Command, $direction);
+            $Result = $this->CommandChain[self::RING_SERVER_MODE]->execute($Command);
           }
         }
         break;

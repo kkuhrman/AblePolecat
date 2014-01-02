@@ -52,6 +52,13 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
   private $Arguments;
   
   /**
+   * Indicates which direction to pass command along CoR.
+   *
+   * @return string both | forward | reverse.
+   */
+  abstract public static function direction();
+  
+  /**
    * Commands accept variable args list - this helper will throw exception on type violation.
    * 
    * @param string $name Name of command.

@@ -6,10 +6,8 @@
 
 class AblePolecat_Command_Result {
   
-  // const RESULT_RETURN         = 'return';
   const RESULT_RETURN_SUCCESS = TRUE;
   const RESULT_RETURN_FAIL    = FALSE;
-  // const RESULT_DATA           = 'data';
   
   /**
    * @var RESULT_RETURN_SUCCESS | RESULT_RETURN_FAIL

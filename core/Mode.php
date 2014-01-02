@@ -234,14 +234,21 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
    * Send command or forward or back the chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
-   * @param string $direction forward | reverse
    *
    * @return AblePolecat_Command_Result
    */
-  protected function delegateCommand(AblePolecat_CommandInterface $Command, $direction) {
+  protected function delegateCommand(AblePolecat_CommandInterface $Command) {
     
     $Result = new AblePolecat_Command_Result();
     $Target = NULL;
+    
+    $direction = NULL;
+    if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_FWD;
+    }
+    if (is_a($Command, 'AblePolecat_Command_ReverseInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
+    }
     
     switch ($direction) {
       default:
@@ -254,7 +261,7 @@ abstract class AblePolecat_ModeAbstract implements AblePolecat_ModeInterface {
         break;
     }
     if (isset($Target)) {
-      $Result = $Target->execute($Command, $direction);
+      $Result = $Target->execute($Command);
     }
     return $Result;
   }

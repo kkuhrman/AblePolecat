@@ -1,0 +1,21 @@
+<?php
+/**
+ * @file: Command/Forward.php
+ * Encapsulates a command, which is passed from highest ranking to lowest target along CoR.
+ */
+
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command.php')));
+
+interface AblePolecat_Command_ForwardInterface extends AblePolecat_CommandInterface {
+  const DIRECTION = 'forward';
+}
+
+abstract class AblePolecat_Command_ForwardAbstract extends AblePolecat_CommandAbstract implements AblePolecat_Command_ForwardInterface {
+  
+  /**
+   * Indicates which direction to pass command along CoR.
+   */
+  public static function direction() {
+    return self::DIRECTION;
+  }
+}

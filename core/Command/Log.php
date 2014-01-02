@@ -4,9 +4,9 @@
  * Execute SQL on core/application database.
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Reverse.php')));
 
-class AblePolecat_Command_Log extends AblePolecat_CommandAbstract {
+class AblePolecat_Command_Log extends AblePolecat_Command_ReverseAbstract {
   
   const UUID = '85fc7590-724d-11e3-981f-0800200c9a66';
   const NAME = 'Log';

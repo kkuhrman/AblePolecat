@@ -68,11 +68,10 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * Execute a command or pass back/forward chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
-   * @param string $direction forward | reverse
    *
    * @return AblePolecat_Command_Result
    */
-  public function execute(AblePolecat_CommandInterface $Command, $direction = self::CMD_LINK_REV) {
+  public function execute(AblePolecat_CommandInterface $Command) {
     
     $Result = NULL;
     
@@ -81,7 +80,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     //
     switch ($Command::getId()) {
       default:
-        $Result = $this->delegateCommand($Command, $direction);
         break;
       case '85fc7590-724d-11e3-981f-0800200c9a66':
         //
@@ -111,7 +109,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
       //
       // Pass command to next link in chain of responsibility
       //
-      $Result = $this->delegateCommand($Command, $direction);
+      $Result = $this->delegateCommand($Command);
     }
     return $Result;
   }
