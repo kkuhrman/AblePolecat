@@ -231,13 +231,21 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       }
       else {
         if (isset($this->db_state)) {
-          switch($param) {
-            default:
-              break;
-            case 'name':
-            case 'connected':
-              isset($this->db_state[$param]) ? $state = $this->db_state[$param] : NULL;
-              break;
+          if (isset($param) && isset($this->db_state[$param])) {
+            switch($param) {
+              default:
+                break;
+              case 'name':
+              case 'connected':
+                isset($this->db_state[$param]) ? $state = $this->db_state[$param] : NULL;
+                break;
+            }
+          }
+          else {
+            $state = array(
+              'name' => $this->db_state['name'],
+              'connected' => $this->db_state['connected']
+            );
           }
         }
       }

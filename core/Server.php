@@ -277,29 +277,55 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
   /********************************************************************************
    * HTTP request/response methods.
    ********************************************************************************/
+  /********************************************************************************
+   * Sends HTML status page if requested or otherwise if request cannot be routed.
+   *
+   * Able Polecat is not designed to intended to serve up web pages. However, there
+   * will be instances where it is necessary to display *something* more than XML
+   * without style rules; for example, something goes wrong during an installation 
+   * or update.
+   *
+   * @param mixed $content Content of status page.
+   * 
+   ********************************************************************************/
    
-  /**
-   * A default response if request could not be routed but no error occurred.
-   */
-  protected function sendDefaultResponse() {
+  protected function sendDefaultResponse($content = NULL) {
     
-    //
-    // Create a default response.
-    //
-    $Response = AblePolecat_Message_Response::create(200);
+    $Response = NULL;
     
-    //
-    // Include Able Polecat version info in response body.
-    //
-    $Response->body = AblePolecat_Message_Response::BODY_DOCTYPE_XML;
-    $Response->body .= "<able_polecat>";
-    $Response->body .= AblePolecat_Server::getVersion(TRUE, 'XML');
-    $Response->body .= "</able_polecat>";
-    
-    //
-    // Send response.
-    //
-    $Response->send();
+    if (isset(self::$Server) && isset(self::$Server->CommandChain[self::RING_SERVER_MODE])) {
+      $sql = __SQL()->          
+        select('mimeType', 'defaultHeaders', 'document')->
+        from('template')->
+        where("resourceId = '52c72b2cae817'");
+      $Result = AblePolecat_Command_DbQuery::invoke(self::$Server->CommandChain[self::RING_SERVER_MODE], $sql);
+      if($Result->success()) {
+        $Template = $Result->value();
+        $headers = unserialize($Template[0]['defaultHeaders']);
+        $headers[] = $Template[0]['mimeType'];
+        self::$Server->Response = AblePolecat_Message_Response::create(200, $headers);
+        $body = $Template[0]['document'];
+        $body = str_replace('{POLECAT_VERSION}', AblePolecat_Server::getVersion(TRUE, 'HTML'), $body);
+        $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
+        $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
+        $dbStateStr .= $dbState['name'] . ' database.';
+        $body = str_replace('{POLECAT_DBSTATE}', $dbStateStr, $body);
+        self::$Server->Response->body = $body;
+      }
+      
+      if (isset(self::$Server->CommandChain[self::RING_USER_MODE])) {
+        AblePolecat_Command_Log::invoke(self::$Server->CommandChain[self::RING_USER_MODE], 'status page requested', 'debug');
+      }
+      
+      //
+      // Shutdown and send response.
+      //
+      self::shutdown();
+    }
+    else {
+      $Response = AblePolecat_Message_Response::create(404);
+      $Response->send();
+    }
   }
   
   /**
@@ -310,8 +336,9 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
     
     if (self::bootstrap()) {
       //
-      // Route the request.
+      // @todo: Route the request.
       //
+      self::$Server->sendDefaultResponse();
     }
     else {
       //
@@ -339,7 +366,9 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
         self::$Server->Response->send();
       }
       else {
-        self::$Server->sendDefaultResponse();
+        //
+        // @todo: 404 response
+        //
       }
     }
     exit(0);
