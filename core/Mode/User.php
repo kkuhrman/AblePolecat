@@ -81,11 +81,6 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
         //
         // Log
         //
-        
-        //
-        // @todo: write to user log(s)
-        //
-        
         switch($Command->getEventSeverity()) {
           default:
             break;

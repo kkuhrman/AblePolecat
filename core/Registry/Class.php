@@ -9,11 +9,14 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Pa
 
 class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   
-    /**
-   * Class registration constants.
+  /**
+   * Registry keys.
    */
-  const CLASS_REG_PATH    = 'classFullPath';
-  const CLASS_REG_METHOD  = 'classFactoryMethod';
+  const KEY_ARTICLE_ID            = 'id';
+  const KEY_CLASS_NAME            = 'className';
+  const KEY_CLASS_FULL_PATH       = 'classFullPath';
+  const KEY_CLASS_FACTORY_METHOD  = 'classFactoryMethod';
+  const KEY_INTERFACE             = 'interface';
   
   /**
    * @var AblePolecat_Registry_Class Singleton instance.
@@ -33,8 +36,12 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     //
     // Class registration.
     //
-    $this->Classes = array();
-    
+    $this->Classes = array(
+      self::KEY_ARTICLE_ID => array(),
+      self::KEY_CLASS_NAME => array(),
+      self::KEY_INTERFACE => array(),
+    );
+      
     //
     // Populate class from application database
     // Query application database for registered classes.
@@ -65,6 +72,36 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   }
   
   /**
+   * Retrieve a list of classes corresponding to the given key name/value.
+   *
+   * @param string $keyName The name of a registry key.
+   * @param string $keyValue Optional value of registry key.
+   *
+   * @return Array List of registered class names.
+   */
+  public function getClassListByKey($key, $value = NULL) {
+    
+    $ClassList = array();
+    
+    switch($key) {
+      case self::KEY_ARTICLE_ID:
+      case self::KEY_CLASS_NAME:
+      case self::KEY_INTERFACE:
+        if (isset($value)) {
+          if (isset($this->Classes[$key][$value])) {
+            $ClassList = $this->Classes[$key][$value];
+          }
+        }
+        else {
+          $ClassList = $this->Classes[$key];
+        }
+        break;
+
+    }
+    return $ClassList;
+  }
+  
+  /**
    * Check if class can be loaded in current environment.
    * 
    * @param string $className The name of class to check for.
@@ -74,8 +111,8 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   public function isLoadable($className) {
     
     $response = FALSE;
-    if (isset($this->Classes[$className])) {
-      $response = $this->Classes[$className];
+    if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
+      $response = $this->Classes[self::KEY_CLASS_NAME][$className];
     }
     return $response;
   }
@@ -92,7 +129,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     
     $Instance = NULL;
     $info = $this->isLoadable($className);
-    if (isset($info[self::CLASS_REG_METHOD])) {
+    if (isset($info[self::KEY_CLASS_FACTORY_METHOD])) {
       //
       // Get any parameters passed.
       //
@@ -102,9 +139,9 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
         array_shift($args);
         $parameters = $args;
       }
-      switch ($info[self::CLASS_REG_METHOD]) {
+      switch ($info[self::KEY_CLASS_FACTORY_METHOD]) {
         default:
-          $Instance = call_user_func_array(array($className, $info[self::CLASS_REG_METHOD]), $parameters);
+          $Instance = call_user_func_array(array($className, $info[self::KEY_CLASS_FACTORY_METHOD]), $parameters);
           break;
         case '__construct':
           $Instance = new $className;
@@ -142,19 +179,53 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       $error_info .= "Invalid include path ($path)";
     }
     
-    $methods = get_class_methods($className);
-    if (isset($methods)) {
-      if (FALSE !== array_search($method, $methods)) {
-        !isset($method) ? $method = '__construct' : NULL;
-        $this->Classes[$className] = array(
-          self::CLASS_REG_PATH => $path,
-          self::CLASS_REG_METHOD => $method,
-        );
-        $registered = TRUE;
+    //
+    // If a creational (factory) method is not provided, assume use of default constructor.
+    //
+    if (!isset($method)) {
+      $method = '__construct';
+    }
+    else if ($method != '__construct') {
+      $methods = array_flip(get_class_methods($className));
+      if (!isset($methods[$method])) {
+        $error_info .= "Class factory method $className::$method does not exist.";
+        throw new AblePolecat_Registry_Exception("Class factory method $className::$method does not exist.");
       }
-      else {
-        $error_info .= "Invalid create method ($method)";
+    }
+    
+    //
+    // Registry
+    //
+    $this->Classes[self::KEY_CLASS_NAME][$className] = array(
+      self::KEY_CLASS_FULL_PATH => $path,
+      self::KEY_CLASS_FACTORY_METHOD => $method,
+    );
+    
+    //
+    // Interfaces implemented by class.
+    //
+    $interfaces = class_implements($className, FALSE);
+    foreach($interfaces as $interfaceName) {
+      //
+      // Map by interface name.
+      //
+      if (!isset($this->Classes[self::KEY_INTERFACE][$interfaceName])) {
+        $this->Classes[self::KEY_INTERFACE][$interfaceName] = array();
       }
+      $this->Classes[self::KEY_INTERFACE][$interfaceName][$className] = $className;
+      
+      //
+      // Additional mapping(s).
+      //
+      switch ($interfaceName) {
+        default:
+          break;
+        case 'AblePolecat_AccessControl_ArticleInterface':
+          $Id = $className::getId();
+          $this->Classes[self::KEY_ARTICLE_ID][$Id] = $className;
+          break;
+      }
+      $registered = TRUE;
     }
     return $registered;
   }

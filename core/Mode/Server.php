@@ -17,6 +17,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')))
  * Core Commands
  */
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'DbQuery.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetRegistry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Log.php')));
 
 class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
@@ -138,6 +139,17 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         //
         $QueryResult = $this->executeDbQuery($Command->getArguments());
         $Result = new AblePolecat_Command_Result($QueryResult, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        break;
+      case 'c7587ad0-74a4-11e3-981f-0800200c9a66':
+        switch($Command->getArguments()) {
+          default:
+            break;
+          case 'AblePolecat_Registry_Class':
+            if (isset(self::$Mode->ClassRegistry)) {
+              $Result = new AblePolecat_Command_Result(self::$Mode->ClassRegistry, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+            }
+            break;
+        }
         break;
       case '85fc7590-724d-11e3-981f-0800200c9a66':
         //

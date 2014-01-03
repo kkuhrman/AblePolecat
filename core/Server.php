@@ -157,7 +157,7 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
    */
   public static function dispatchCommand(AblePolecat_CommandInterface $Command) {
     
-    $Result = new AblePolecat_Command_Result();
+    $Result = NULL;
     
     $direction = NULL;
     if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
@@ -196,7 +196,7 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
    */
   public function execute(AblePolecat_CommandInterface $Command) {
     
-    $Result = new AblePolecat_Command_Result();
+    $Result = NULL;
     
     $direction = NULL;
     if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
@@ -220,6 +220,13 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
         //
         AblePolecat_Log_Syslog::wakeup()->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
         break;
+    }
+    
+    //
+    // If STILL no result, we've reached the end of the line. Return FAIL.
+    // 
+    if (!isset($Result)) {
+      $Result = new AblePolecat_Command_Result();
     }
     return $Result;
   }

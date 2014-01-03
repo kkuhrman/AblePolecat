@@ -37,6 +37,11 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * @var AblePolecat_Registry_ClassLibrary
    */
   private $ClassLibraryRegistry;
+  
+  /**
+   * @var AblePolecat_Command_TargetInterface.
+   */
+  private $CommandChain;
       
   /********************************************************************************
    * Access control methods.
@@ -67,6 +72,19 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   /**
    * Execute a command or pass back/forward chain of responsibility.
    *
+   * Application Mode will give contributed command targets a chance to handle a 
+   * command before passing it back on the CoR. This implementation of the execute()
+   * method will make a 'detour' on the CoR by passing the command to the lowest 
+   * ranking member in the application command target hierarchy, thereby providing 
+   * the ability to 'hook into' the command processing CoR.
+   *
+   * So, the CoR is ordered:
+   * First, user mode
+   * Second, application mode
+   * Third, application (contributed) targets
+   * Fourth, server mode
+   * Last, server
+   *
    * @param AblePolecat_CommandInterface $Command
    *
    * @return AblePolecat_Command_Result
@@ -85,11 +103,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         //
         // Log
         //
-        
-        //
-        // @todo: write to application log(s)
-        //
-        
         switch($Command->getEventSeverity()) {
           default:
             break;
@@ -105,6 +118,19 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         }
         break;
     }
+        
+    //
+    // Application command targets are not ordered in a hierarchy.
+    // They are given a chance to hook into command based on their
+    // order of being registered.
+    //
+    foreach($this->CommandChain as $targetClassName => $Target) {
+      //
+      // @todo: handle accumulated command execution results
+      //
+      $SubResult = $Target->execute($Command);
+    }
+    
     if (!isset($Result)) {
       //
       // Pass command to next link in chain of responsibility
@@ -148,6 +174,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
+    $this->CommandChain = array();
   }
   
   /**
@@ -195,6 +222,18 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         // Load registry of class libraries.
         //
         self::$Mode->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup(self::$Mode);
+        
+        //
+        // Load application command targets.
+        //
+        $CommandResult = AblePolecat_Command_GetRegistry::invoke($Subject, 'AblePolecat_Registry_Class');
+        $Registry = $CommandResult->value();
+        if (isset($Registry)) {
+          $CommandTargets = $Registry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Command_TargetInterface');
+          foreach ($CommandTargets as $key => $className) {
+            self::$Mode->CommandChain[$className] = $Registry->loadClass($className);
+          }
+        }
       }
       catch(Exception $Exception) {
         self::$Mode = NULL;

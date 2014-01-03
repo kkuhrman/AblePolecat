@@ -43,9 +43,9 @@ interface AblePolecat_LogInterface extends AblePolecat_CacheObjectInterface {
   const EVENT_ID_DEBUG = ABLE_POLECAT_EVENT_ID_DEBUG;
   
   /**
-   * Helper function.Writes message to file.
+   * Queue message in event log output buffer.
    * 
-   * @param string $type STATUS | WARNING | ERROR.
+   * @param string $type Event severity e.g. error | warning | status.
    * @param string $msg  Body of message.
    */
   public function putMessage($type, $msg);

@@ -126,7 +126,7 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
    */
   protected function dispatch() {
     
-    $Result = new AblePolecat_Command_Result();
+    $Result = NULL;
     
     if (is_a($this->getInvoker(), 'AblePolecat_Command_TargetInterface')) {
       //

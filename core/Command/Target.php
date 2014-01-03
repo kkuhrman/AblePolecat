@@ -87,7 +87,7 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
    */
   protected function delegateCommand(AblePolecat_CommandInterface $Command) {
     
-    $Result = new AblePolecat_Command_Result();
+    $Result = NULL;
     $Target = NULL;
     
     $direction = NULL;
@@ -98,15 +98,23 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
       $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
     }
     
-    switch ($direction) {
-      default:
-        break;
-      case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-        $Target = $this->getForwardCommandLink();
-        break;
-      case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-        $Target = $this->getReverseCommandLink();
-        break;
+    try {
+      switch ($direction) {
+        default:
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
+          $Target = $this->getForwardCommandLink();
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
+          $Target = $this->getReverseCommandLink();
+          break;
+      }
+    }
+    catch(AblePolecat_Command_Exception $Exception) {
+      //
+      // This target is the end of the CoR and the command has not been handled.
+      //
+      $Result = new AblePolecat_Command_Result();
     }
     if (isset($Target)) {
       $Result = $Target->execute($Command);
@@ -136,7 +144,8 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
   protected function getReverseCommandLink() {
     $Superior = $this->Superior;
     if (!isset($Superior)) {
-      throw new AblePolecat_Command_Exception('Attempt to access ' . __METHOD__ . ' when no forward command link has been defined.');
+      $msg = 'Attempt to access ' . __METHOD__ . ' when no forward command link has been defined.';
+      throw new AblePolecat_Command_Exception($msg);
     }
     return $Superior;
   }
