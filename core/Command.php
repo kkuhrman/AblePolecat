@@ -140,6 +140,10 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
       //
       $Result = AblePolecat_Server::dispatchCommand($this);
     }
+    if (!isset($Result) || !is_a($Result, 'AblePolecat_Command_Result')) {
+      $msg = __CLASS__ . '::invoke() failed to return a valid result object. Check log for details.';
+      throw new AblePolecat_Command_Exception($msg);
+    }
     return $Result;
   }
    

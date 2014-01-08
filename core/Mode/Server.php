@@ -17,6 +17,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')))
  * Core Commands
  */
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'DbQuery.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAgent.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetRegistry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Log.php')));
 
@@ -132,6 +133,9 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     switch ($Command::getId()) {
       default:
+        break;
+      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
+        $Result = new AblePolecat_Command_Result($this->Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
       case 'ef797050-715c-11e3-981f-0800200c9a66':
         //

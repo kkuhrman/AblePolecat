@@ -174,59 +174,57 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     }
     if (is_file($path)) {
       include_once($path);
+    
+      //
+      // If a creational (factory) method is not provided, assume use of default constructor.
+      //
+      if (!isset($method)) {
+        $method = '__construct';
+      }
+      else if ($method != '__construct') {
+      
+        $methods = get_class_methods($className);
+        isset($methods) ? $methods = array_flip($methods) : NULL;
+        if (!isset($methods[$method])) {
+          $error_info .= "Class factory method $className::$method does not exist.";
+          throw new AblePolecat_Registry_Exception("Class factory method $className::$method does not exist.");
+        }
+      }
+      
+      //
+      // Registry
+      //
+      $this->Classes[self::KEY_CLASS_NAME][$className] = array(
+        self::KEY_CLASS_FULL_PATH => $path,
+        self::KEY_CLASS_FACTORY_METHOD => $method,
+      );
+      
+      //
+      // Interfaces implemented by class.
+      //
+      $interfaces = class_implements($className, FALSE);
+      array_key_exists('AblePolecat_AccessControl_ArticleInterface', $interfaces) ? $Id = $className::getId() : $Id = NULL;;
+      foreach($interfaces as $interfaceName) {
+        //
+        // Map by interface name.
+        //
+        if (!isset($this->Classes[self::KEY_INTERFACE][$interfaceName])) {
+          $this->Classes[self::KEY_INTERFACE][$interfaceName] = array();
+        }
+        if (!isset($this->Classes[self::KEY_INTERFACE][$interfaceName][$className])) {
+          $this->Classes[self::KEY_INTERFACE][$interfaceName][$className] = array();
+        }
+        $this->Classes[self::KEY_INTERFACE][$interfaceName][$className][self::KEY_CLASS_NAME] = $className;
+        if (isset($Id)) {
+          $this->Classes[self::KEY_INTERFACE][$interfaceName][$className][self::KEY_ARTICLE_ID] = $Id;
+        }
+        $registered = TRUE;
+      }
     }
     else if (isset($error_info)) {      
       $error_info .= "Invalid include path ($path)";
     }
     
-    //
-    // If a creational (factory) method is not provided, assume use of default constructor.
-    //
-    if (!isset($method)) {
-      $method = '__construct';
-    }
-    else if ($method != '__construct') {
-      $methods = array_flip(get_class_methods($className));
-      if (!isset($methods[$method])) {
-        $error_info .= "Class factory method $className::$method does not exist.";
-        throw new AblePolecat_Registry_Exception("Class factory method $className::$method does not exist.");
-      }
-    }
-    
-    //
-    // Registry
-    //
-    $this->Classes[self::KEY_CLASS_NAME][$className] = array(
-      self::KEY_CLASS_FULL_PATH => $path,
-      self::KEY_CLASS_FACTORY_METHOD => $method,
-    );
-    
-    //
-    // Interfaces implemented by class.
-    //
-    $interfaces = class_implements($className, FALSE);
-    foreach($interfaces as $interfaceName) {
-      //
-      // Map by interface name.
-      //
-      if (!isset($this->Classes[self::KEY_INTERFACE][$interfaceName])) {
-        $this->Classes[self::KEY_INTERFACE][$interfaceName] = array();
-      }
-      $this->Classes[self::KEY_INTERFACE][$interfaceName][$className] = $className;
-      
-      //
-      // Additional mapping(s).
-      //
-      switch ($interfaceName) {
-        default:
-          break;
-        case 'AblePolecat_AccessControl_ArticleInterface':
-          $Id = $className::getId();
-          $this->Classes[self::KEY_ARTICLE_ID][$Id] = $className;
-          break;
-      }
-      $registered = TRUE;
-    }
     return $registered;
   }
   

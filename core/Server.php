@@ -73,6 +73,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
 
 class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstract implements AblePolecat_Command_TargetInterface {
 
@@ -336,9 +337,61 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
     
     if (self::bootstrap()) {
       //
-      // @todo: Route the request.
+      // Build request.
       //
-      self::$Server->sendDefaultResponse();
+      $Request = NULL;
+      isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
+      switch ($method) {
+        default:
+          break;
+        case 'GET':
+          $Request = AblePolecat_Message_Request_Get::create();
+          break;
+        case 'POST':
+          $Request = AblePolecat_Message_Request_Post::create();
+          break;
+        case 'PUT':
+          $Request = AblePolecat_Message_Request_Put::create();
+          break;
+        case 'DELETE':
+          $Request = AblePolecat_Message_Request_Delete::create();
+          break;
+      }
+      
+      if (!isset($Request)) {
+        //
+        // @todo: 405 Method not allowed.
+        // The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. 
+        // The response MUST include an Allow header containing a list of valid methods for the requested resource. 
+        //
+      }
+      else {
+        //
+        // Get resource id from request.
+        //
+        if(isset($_REQUEST['id'])) {
+          $Id = $_REQUEST['id'];
+          $Request->setResource($Id);
+          
+          //
+          // @todo: get agent from user mode
+          //
+          $Agent = NULL;
+          $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Server->CommandChain[self::RING_USER_MODE]);
+          if ($CommandResult->success()) {
+            $Agent = $CommandResult->value();
+          }
+          
+          //
+          // Dispatch the request
+          //
+          $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Server->CommandChain[self::RING_SERVER_MODE]);
+          self::$Server->Response = $ServiceBus->dispatch($Agent, $Request);
+        }
+        else {
+          self::$Server->sendDefaultResponse();
+        }
+      }
     }
     else {
       //

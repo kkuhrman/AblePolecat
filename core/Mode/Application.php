@@ -99,6 +99,9 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     switch ($Command::getId()) {
       default:
         break;
+      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
+        $Result = new AblePolecat_Command_Result($this->Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        break;
       case '85fc7590-724d-11e3-981f-0800200c9a66':
         //
         // Log
@@ -230,7 +233,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         $Registry = $CommandResult->value();
         if (isset($Registry)) {
           $CommandTargets = $Registry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Command_TargetInterface');
-          foreach ($CommandTargets as $key => $className) {
+          foreach ($CommandTargets as $className => $classInfo) {
             self::$Mode->CommandChain[$className] = $Registry->loadClass($className);
           }
         }
