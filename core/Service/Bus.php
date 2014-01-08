@@ -120,6 +120,29 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
           //
         }
       }
+      else {
+        //
+        // Resource is not registered (NOT FOUND).
+        //
+        $sql = __SQL()->          
+          select('mimeType', 'defaultHeaders', 'body')->
+          from('response')->
+          where("statusCode = '404'");
+        $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+        if($Result->success()) {
+          //
+          // @todo: move this redundant code to an object
+          // @see: 
+          //
+          $Template = $Result->value();
+          $headers = unserialize($Template[0]['defaultHeaders']);
+          $headers[] = $Template[0]['mimeType'];
+          $Response = AblePolecat_Message_Response::create(404, $headers);
+          $body = $Template[0]['body'];
+          $body = str_replace('{POLECAT_RESOURCE_ID}', $initiatorId, $body);
+          $Response->body = $body;
+        }
+      }
     }
     
     //
