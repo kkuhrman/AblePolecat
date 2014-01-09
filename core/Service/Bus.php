@@ -98,56 +98,22 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
         case self::RESPONSE:
           break;
       }
-      $ServiceInitiator = $this->getServiceInitiator($initiatorId);
       
-      //
-      // Dispatch the message.
-      //
-      if (isset($ServiceInitiator)) {
-        try { 
-          $Response = $ServiceInitiator->prepare($Agent, $Message)->dispatch(); 
-        } 
-        catch(AblePolecat_Service_Exception $Exception) {
-          //
-          // @todo: this will only happen if initiator cannot dispatch message
-          // 1. see if problem is with message, if yes return error response
-          // 2. otherwise initiator is busy, queue message for later dispatch
-          //
-        }
-        if (isset($Response)) {
-          //
-          // @todo: handle response
-          //
-        }
-      }
-      else {
-        //
-        // Resource is not registered (NOT FOUND).
-        //
-        $sql = __SQL()->          
-          select('mimeType', 'defaultHeaders', 'body')->
-          from('response')->
-          where("statusCode = '404'");
-        $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-        if($Result->success()) {
-          //
-          // @todo: move this redundant code to an object
-          // @see: 
-          //
-          $Template = $Result->value();
-          $headers = unserialize($Template[0]['defaultHeaders']);
-          $headers[] = $Template[0]['mimeType'];
-          $Response = AblePolecat_Message_Response::create(404, $headers);
-          $body = $Template[0]['body'];
-          $body = str_replace('{POLECAT_RESOURCE_ID}', $initiatorId, $body);
-          $Response->body = $body;
-        }
+      try { 
+        $ServiceInitiator = $this->getServiceInitiator($initiatorId);
+        $Response = $ServiceInitiator->prepare($Agent, $Message)->dispatch(); 
+      } 
+      catch(AblePolecat_Service_Exception $Exception) {
+        $substitutions = array(
+          'POLECAT_EXCEPTION_MESSAGE' => $Exception->getMessage(),
+        );
+        $Response = AblePolecat_Message_Response_Template::create(
+          $this->getDefaultCommandInvoker(),
+          AblePolecat_Message_Response_Template::DEFAULT_404,
+          $substitutions
+        );
       }
     }
-    
-    //
-    // Send response.
-    //
     return $Response;
   }
   

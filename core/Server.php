@@ -69,7 +69,7 @@ if (!defined('ABLE_POLECAT_USR')) {
 }
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Delegate', 'System.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Template.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
@@ -295,24 +295,38 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
     $Response = NULL;
     
     if (isset(self::$Server) && isset(self::$Server->CommandChain[self::RING_SERVER_MODE])) {
-      $sql = __SQL()->          
-        select('mimeType', 'defaultHeaders', 'document')->
-        from('template')->
-        where("resourceId = '52c72b2cae817'");
-      $Result = AblePolecat_Command_DbQuery::invoke(self::$Server->CommandChain[self::RING_SERVER_MODE], $sql);
-      if($Result->success()) {
-        $Template = $Result->value();
-        $headers = unserialize($Template[0]['defaultHeaders']);
-        $headers[] = $Template[0]['mimeType'];
-        self::$Server->Response = AblePolecat_Message_Response::create(200, $headers);
-        $body = $Template[0]['document'];
-        $body = str_replace('{POLECAT_VERSION}', AblePolecat_Server::getVersion(TRUE, 'HTML'), $body);
-        $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
-        $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
-        $dbStateStr .= $dbState['name'] . ' database.';
-        $body = str_replace('{POLECAT_DBSTATE}', $dbStateStr, $body);
-        self::$Server->Response->body = $body;
-      }
+      // $sql = __SQL()->          
+        // select('mimeType', 'defaultHeaders', 'document')->
+        // from('template')->
+        // where("resourceId = '52c72b2cae817'");
+      // $Result = AblePolecat_Command_DbQuery::invoke(self::$Server->CommandChain[self::RING_SERVER_MODE], $sql);
+      // if($Result->success()) {
+        // $Template = $Result->value();
+        // $headers = unserialize($Template[0]['defaultHeaders']);
+        // $headers[] = $Template[0]['mimeType'];
+        // self::$Server->Response = AblePolecat_Message_Response::create(200, $headers);
+        // $body = $Template[0]['document'];
+        // $body = str_replace('{POLECAT_VERSION}', AblePolecat_Server::getVersion(TRUE, 'HTML'), $body);
+        // $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
+        // $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
+        // $dbStateStr .= $dbState['name'] . ' database.';
+        // $body = str_replace('{POLECAT_DBSTATE}', $dbStateStr, $body);
+        // self::$Server->Response->body = $body;
+      // }
+      
+      $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
+      $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
+      $dbStateStr .= $dbState['name'] . ' database.';
+      $substitutions = array(
+        'POLECAT_VERSION' => AblePolecat_Server::getVersion(TRUE, 'HTML'),
+        'POLECAT_DBSTATE' => $dbStateStr,
+        
+      );
+      self::$Server->Response = AblePolecat_Message_Response_Template::create(
+        self::$Server->CommandChain[self::RING_SERVER_MODE],
+        AblePolecat_Message_Response_Template::DEFAULT_STATUS,
+        $substitutions
+      );
       
       if (isset(self::$Server->CommandChain[self::RING_USER_MODE])) {
         AblePolecat_Command_Log::invoke(self::$Server->CommandChain[self::RING_USER_MODE], 'status page requested', 'debug');

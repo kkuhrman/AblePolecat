@@ -12,6 +12,7 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   const STATUS_CODE             = 'status_code';
   const REASON_PHRASE           = 'reason_phrase';
   const HEADER_FIELDS           = 'header_fields';
+  const RESOURCE_ID             = 'resource_id';
   
   const HEAD_CONTENT_TYPE_HTML  = 'Content-type: text/html';
   const HEAD_CONTENT_TYPE_JSON  = 'Content-Type: application/json';
@@ -223,7 +224,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   /**
    * Append fields to be sent with response header.
    *
-   * @param ARRAY $fields.
+   * @param Array $fields.
    */
   protected function appendHeaderFields($fields) {
     if (isset($fields) && is_array($fields)) {
