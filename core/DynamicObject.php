@@ -1,7 +1,7 @@
 <?php
 /**
  * @file: DynamicObject.php
- * Interface for objects whichuse PHP overloading to dynamically create properties and methods.
+ * Interface for objects which use PHP overloading to dynamically create properties and methods.
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Exception.php');

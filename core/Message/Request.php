@@ -6,6 +6,7 @@
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Message.php');
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Url.php');
 
 interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterface {
   
@@ -15,16 +16,13 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   public function getMethod();
   
   /**
-   * @return string Request resource (URI/URL).
+   * @return AblePolecat_Url Request resource (URI/URL).
    */
   public function getResource();
   
   /**
-   * Set request resource.
-   * 
-   * @param string $resource.
+   * @todo: assign resource if building request to send to another server.
    */
-  public function setResource($resource);
 }
 
 abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_RequestInterface {
@@ -40,7 +38,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
-    $this->m_resource = NULL;
+    $this->m_resource = AblePolecat_Url::create();
   }
   
   /**
@@ -48,14 +46,5 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   public function getResource() {
     return $this->m_resource;
-  }
-  
-  /**
-   * Set request resource.
-   * 
-   * @param string $resource.
-   */
-  public function setResource($resource) {
-    $this->m_resource = $resource;
   }
 }

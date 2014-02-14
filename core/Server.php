@@ -295,33 +295,22 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
     $Response = NULL;
     
     if (isset(self::$Server) && isset(self::$Server->CommandChain[self::RING_SERVER_MODE])) {
-      // $sql = __SQL()->          
-        // select('mimeType', 'defaultHeaders', 'document')->
-        // from('template')->
-        // where("resourceId = '52c72b2cae817'");
-      // $Result = AblePolecat_Command_DbQuery::invoke(self::$Server->CommandChain[self::RING_SERVER_MODE], $sql);
-      // if($Result->success()) {
-        // $Template = $Result->value();
-        // $headers = unserialize($Template[0]['defaultHeaders']);
-        // $headers[] = $Template[0]['mimeType'];
-        // self::$Server->Response = AblePolecat_Message_Response::create(200, $headers);
-        // $body = $Template[0]['document'];
-        // $body = str_replace('{POLECAT_VERSION}', AblePolecat_Server::getVersion(TRUE, 'HTML'), $body);
-        // $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
-        // $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
-        // $dbStateStr .= $dbState['name'] . ' database.';
-        // $body = str_replace('{POLECAT_DBSTATE}', $dbStateStr, $body);
-        // self::$Server->Response->body = $body;
-      // }
-      
+      //
+      // Create an array of data to be inserted into template
+      //
       $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
       $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
       $dbStateStr .= $dbState['name'] . ' database.';
+      
       $substitutions = array(
         'POLECAT_VERSION' => AblePolecat_Server::getVersion(TRUE, 'HTML'),
         'POLECAT_DBSTATE' => $dbStateStr,
         
       );
+      
+      //
+      // Load response template
+      //
       self::$Server->Response = AblePolecat_Message_Response_Template::create(
         self::$Server->CommandChain[self::RING_SERVER_MODE],
         AblePolecat_Message_Response_Template::DEFAULT_STATUS,
@@ -338,8 +327,11 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
       self::shutdown();
     }
     else {
-      $Response = AblePolecat_Message_Response::create(404);
+      $Response = AblePolecat_Message_Response::create(200);
+      $Response->body = "<error><message>Able Polecat server is being directed to send HTTP response but has failed to initialize 
+        or has already shut down.</message><content>$content</content></error>";      
       $Response->send();
+      exit(1);
     }
   }
   
@@ -380,30 +372,27 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
         //
       }
       else {
-        //
-        // Get resource id from request.
-        //
-        if(isset($_REQUEST['id'])) {
-          $Id = $_REQUEST['id'];
-          $Request->setResource($Id);
-          
-          //
-          // @todo: get agent from user mode
-          //
-          $Agent = NULL;
-          $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Server->CommandChain[self::RING_USER_MODE]);
-          if ($CommandResult->success()) {
-            $Agent = $CommandResult->value();
-          }
-          
-          //
-          // Dispatch the request
-          //
-          $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Server->CommandChain[self::RING_SERVER_MODE]);
-          self::$Server->Response = $ServiceBus->dispatch($Agent, $Request);
-        }
-        else {
-          self::$Server->sendDefaultResponse();
+        $requestPathInfo = $Request->getResource()->getRequestPathInfo();
+        switch ($requestPathInfo[AblePolecat_Url::URI_RESOURCE_NAME]) {
+          default:
+            //
+            // @todo: get agent from user mode
+            //
+            $Agent = NULL;
+            $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Server->CommandChain[self::RING_USER_MODE]);
+            if ($CommandResult->success()) {
+              $Agent = $CommandResult->value();
+            }
+            
+            //
+            // Dispatch the request
+            //
+            $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Server->CommandChain[self::RING_SERVER_MODE]);
+            self::$Server->Response = $ServiceBus->dispatch($Agent, $Request);
+            break;
+          case AblePolecat_Url::URI_SLASH:
+            self::$Server->sendDefaultResponse();
+            break;
         }
       }
     }
@@ -428,15 +417,18 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
    */
   public static function shutdown() {
     
+    $ResponseSent = FALSE;
+    
     if (isset(self::$Server)) {
       if (isset(self::$Server->Response)) {
         self::$Server->Response->send();
+        $ResponseSent = TRUE;
       }
-      else {
-        //
-        // @todo: 404 response
-        //
-      }
+    }
+    if (!$ResponseSent) {
+      $Response = AblePolecat_Message_Response::create(200);
+      $Response->body = "<errorMessage>Able Polecat server is being directed to shut down but has failed to generate a response to last request.</errorMessage>";
+      $Response->send();
     }
     exit(0);
   }
@@ -460,7 +452,7 @@ class AblePolecat_Server extends AblePolecat_AccessControl_Delegate_SystemAbstra
       // Create instance of Singleton.
       //
       self::$Server = new AblePolecat_Server();
-      
+
       //
       // Initiate command-processing chain of responsibility.
       // (each object wakes up it's subordinate down the chain).

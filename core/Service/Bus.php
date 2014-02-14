@@ -104,9 +104,16 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
         $Response = $ServiceInitiator->prepare($Agent, $Message)->dispatch(); 
       } 
       catch(AblePolecat_Service_Exception $Exception) {
+        //
+        // Create an array of data to be inserted into template
+        //
         $substitutions = array(
           'POLECAT_EXCEPTION_MESSAGE' => $Exception->getMessage(),
         );
+        
+        //
+        // Load response template
+        //
         $Response = AblePolecat_Message_Response_Template::create(
           $this->getDefaultCommandInvoker(),
           AblePolecat_Message_Response_Template::DEFAULT_404,
@@ -128,7 +135,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
    *
    * @return AblePolecat_Service_InitiatorInterface or NULL.
    */
-  public function getServiceInitiator($id) {
+  protected function getServiceInitiator($id) {
     
     $ServiceInitiator = NULL;
     
