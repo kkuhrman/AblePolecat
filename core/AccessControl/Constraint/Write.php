@@ -14,6 +14,10 @@ class AblePolecat_AccessControl_Constraint_Write implements AblePolecat_AccessCo
   const UUID = '9ca96bc0-63dc-11e2-bcfd-0800200c9a66';
   const NAME = 'write';
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier for security constraint.
    *

@@ -20,6 +20,10 @@ class AblePolecat_AccessControl_Role_Server extends AblePolecat_AccessControl_Ro
   protected function initialize() {
   }
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier for agent.
    *
@@ -37,6 +41,10 @@ class AblePolecat_AccessControl_Role_Server extends AblePolecat_AccessControl_Ro
   public static function getName() {
     return self::NAME;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
   /**
    * Serialize object to cache.

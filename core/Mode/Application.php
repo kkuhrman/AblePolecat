@@ -44,7 +44,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   private $CommandChain;
       
   /********************************************************************************
-   * Access control methods.
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
    
   /**
@@ -66,7 +66,80 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   }
   
   /********************************************************************************
-   * Command target methods.
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Mode_Application or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    if (!isset(self::$Mode)) {
+      try {
+        //
+        // Create instance of application mode
+        //
+        self::$Mode = new AblePolecat_Mode_Application($Subject);
+        
+        //
+        // Set chain of responsibility relationship
+        //
+        $Subject->setForwardCommandLink(self::$Mode);
+        self::$Mode->setReverseCommandLink($Subject);
+        
+        //
+        // Access control agent (super user).
+        //
+        self::$Mode->Agent = AblePolecat_AccessControl_Agent_Application::wakeup(self::$Mode);
+        
+        //
+        // Load environment/configuration
+        //
+        //
+        self::$Mode->Environment = AblePolecat_Environment_Application::wakeup(self::$Mode->Agent);
+                
+        //
+        // Load registry of class libraries.
+        //
+        self::$Mode->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup(self::$Mode);
+        
+        //
+        // Load application command targets.
+        //
+        $CommandResult = AblePolecat_Command_GetRegistry::invoke($Subject, 'AblePolecat_Registry_Class');
+        $Registry = $CommandResult->value();
+        if (isset($Registry)) {
+          $CommandTargets = $Registry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Command_TargetInterface');
+          foreach ($CommandTargets as $className => $classInfo) {
+            self::$Mode->CommandChain[$className] = $Registry->loadClass($className);
+          }
+        }
+      }
+      catch(Exception $Exception) {
+        self::$Mode = NULL;
+        throw new AblePolecat_Server_Exception(
+          'Failed to initialize application mode. ' . $Exception->getMessage(),
+          AblePolecat_Error::BOOT_SEQ_VIOLATION
+        );
+      }
+    }
+    return self::$Mode;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_Command_TargetInterface.
    ********************************************************************************/
    
   /**
@@ -142,6 +215,10 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     }
     return $Result;
   }
+    
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Validates given command target as a forward or reverse COR link.
@@ -167,85 +244,12 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     }
     return $ValidLink;
   }
-    
-  /********************************************************************************
-   * Caching methods.
-   ********************************************************************************/
-   
+  
   /**
    * Extends constructor.
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
     $this->CommandChain = array();
-  }
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Mode_Application or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$Mode)) {
-      try {
-        //
-        // Create instance of application mode
-        //
-        self::$Mode = new AblePolecat_Mode_Application($Subject);
-        
-        //
-        // Set chain of responsibility relationship
-        //
-        $Subject->setForwardCommandLink(self::$Mode);
-        self::$Mode->setReverseCommandLink($Subject);
-        
-        //
-        // Access control agent (super user).
-        //
-        self::$Mode->Agent = AblePolecat_AccessControl_Agent_Application::wakeup(self::$Mode);
-        
-        //
-        // Load environment/configuration
-        //
-        //
-        self::$Mode->Environment = AblePolecat_Environment_Application::wakeup(self::$Mode->Agent);
-                
-        //
-        // Load registry of class libraries.
-        //
-        self::$Mode->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup(self::$Mode);
-        
-        //
-        // Load application command targets.
-        //
-        $CommandResult = AblePolecat_Command_GetRegistry::invoke($Subject, 'AblePolecat_Registry_Class');
-        $Registry = $CommandResult->value();
-        if (isset($Registry)) {
-          $CommandTargets = $Registry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Command_TargetInterface');
-          foreach ($CommandTargets as $className => $classInfo) {
-            self::$Mode->CommandChain[$className] = $Registry->loadClass($className);
-          }
-        }
-      }
-      catch(Exception $Exception) {
-        self::$Mode = NULL;
-        throw new AblePolecat_Server_Exception(
-          'Failed to initialize application mode. ' . $Exception->getMessage(),
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
-      }
-    }
-    return self::$Mode;
   }
 }

@@ -21,6 +21,10 @@ abstract class AblePolecat_AccessControl_Delegate_SystemAbstract implements Able
    */
   private $m_Constraints;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_DelegateInterface
+   ********************************************************************************/
+  
   /**
    * Assign given role(s) to agent(s).
    *
@@ -165,6 +169,10 @@ abstract class AblePolecat_AccessControl_Delegate_SystemAbstract implements Able
       }
     }
   }
+  
+  /********************************************************************************
+   Helper functions.
+   ********************************************************************************/
   
   /** 
    * Looks up a constraint based on given id.

@@ -107,12 +107,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   //
   const UUID                    = '603a37e0-5dec-11e3-949a-0800200c9a66';
   const NAME                    = 'Able Polecat Server';
-  
-  /**
-   * @var AblePolecat_Server Singleton instance.
-   */
-  private static $Server = NULL;
-  
+    
   /**
    * @var AblePolecat_Command_TargetInterface.
    */
@@ -134,116 +129,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   private $version;
   
   /********************************************************************************
-   * Implementation of AblePolecat_HostInterface
-   ********************************************************************************/
-  
-  /**
-   * Main point of entry for all Able Polecat page and service requests.
-   *
-   */
-  public static function routeRequest() {
-    
-    //
-    // Get instance of singleton.
-    //
-    $Server = self::getInstance();
-    
-    if (isset($Server)) {
-      
-      //
-      // Initiate command-processing chain of responsibility.
-      // (each object wakes up it's subordinate down the chain).
-      //
-      $Server->CommandChain[self::RING_SERVER_MODE] = 
-        AblePolecat_Mode_Server::wakeup($Server);
-      $Server->CommandChain[self::RING_APPLICATION_MODE] = 
-        AblePolecat_Mode_Application::wakeup($Server->CommandChain[self::RING_SERVER_MODE]);
-      $Server->CommandChain[self::RING_USER_MODE] = 
-        AblePolecat_Mode_User::wakeup($Server->CommandChain[self::RING_APPLICATION_MODE]);
-      
-      //
-      // Build request.
-      //
-      $Request = NULL;
-      isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
-      switch ($method) {
-        default:
-          break;
-        case 'GET':
-          $Request = AblePolecat_Message_Request_Get::create();
-          break;
-        case 'POST':
-          $Request = AblePolecat_Message_Request_Post::create();
-          break;
-        case 'PUT':
-          $Request = AblePolecat_Message_Request_Put::create();
-          break;
-        case 'DELETE':
-          $Request = AblePolecat_Message_Request_Delete::create();
-          break;
-      }
-      
-      if (!isset($Request)) {
-        //
-        // @todo: 405 Method not allowed.
-        // The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. 
-        // The response MUST include an Allow header containing a list of valid methods for the requested resource. 
-        //
-      }
-      else {
-        $requestPathInfo = $Request->getResource()->getRequestPathInfo();
-        switch ($requestPathInfo[AblePolecat_Url::URI_RESOURCE_NAME]) {
-          default:
-            //
-            // @todo: get agent from user mode
-            //
-            $Agent = NULL;
-            $CommandResult = AblePolecat_Command_GetAgent::invoke($Server->CommandChain[self::RING_USER_MODE]);
-            if ($CommandResult->success()) {
-              $Agent = $CommandResult->value();
-            }
-            
-            //
-            // Dispatch the request
-            //
-            $ServiceBus = AblePolecat_Service_Bus::wakeup($Server->CommandChain[self::RING_SERVER_MODE]);
-            $Server->Response = $ServiceBus->dispatch($Agent, $Request);
-            break;
-          case AblePolecat_Url::URI_SLASH:
-            $Server->sendDefaultResponse();
-            break;
-        }
-      }
-    }
-    else {
-      //
-      // Only one call per HTTP request.
-      //
-      throw new AblePolecat_Server_Exception(
-        'Able Polecat server is already routing the current request.',
-        AblePolecat_Error::ACCESS_INVALID_OBJECT
-      );
-    }
-    
-    //
-    // shut down and send response
-    //
-    AblePolecat_Server::shutdown();
-  }
-  
-  /**
-   * Checks if the requested resource is a valid name in the system.
-   *
-   * @param string $requestedResourceName Name of requested resource.
-   *
-   * @return string Name of valid resource (default is 'search').
-   */
-  public function validateResourceName($requestedResourceName) {
-    return $requestedResourceName;
-  }
-  
-  /********************************************************************************
-   * Access control methods.
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
   
   /**
@@ -265,49 +151,10 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   }
   
   /********************************************************************************
-   * Command target methods.
+   * Implementation of AblePolecat_Command_TargetInterface.
    ********************************************************************************/
   
   /**
-   * Request to server to issue command to chain of responsibility.
-   *
-   * @param AblePolecat_CommandInterface $Command
-   *
-   * @return AblePolecat_Command_Result
-   */
-  public static function dispatchCommand(AblePolecat_CommandInterface $Command) {
-    
-    $Result = NULL;
-    
-    $direction = NULL;
-    if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
-      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_FWD;
-    }
-    if (is_a($Command, 'AblePolecat_Command_ReverseInterface')) {
-      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
-    }
-    
-    if (isset(self::$Server)) {
-      switch ($direction) {
-        default:
-          break;
-        case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-          $Result = self::$Server->execute($Command);
-          break;
-        case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-          $Target = self::$Server;
-          if ($key = count(self::$Server->CommandChain)) {
-            $key = $key - 1;
-            isset(self::$Server->CommandChain[$key]) ? $Target = self::$Server->CommandChain[$key] : NULL;
-          }
-          $Result = $Target->execute($Command);
-          break;
-      }
-    }
-    return $Result;
-  }
-  
-   /**
    * Execute a command or pass forward on chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
@@ -395,8 +242,145 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   }
   
   /********************************************************************************
-   * HTTP request/response methods.
+   * Implementation of AblePolecat_HostInterface
    ********************************************************************************/
+  
+  /**
+   * Main point of entry for all Able Polecat page and service requests.
+   *
+   */
+  public static function routeRequest() {
+    
+    if (!isset(self::$Host)) {
+      //
+      // Create instance of Singleton.
+      //
+      self::$Host = new AblePolecat_Server();
+      
+      //
+      // Build request.
+      //
+      $Request = NULL;
+      isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
+      switch ($method) {
+        default:
+          break;
+        case 'GET':
+          $Request = AblePolecat_Message_Request_Get::create();
+          break;
+        case 'POST':
+          $Request = AblePolecat_Message_Request_Post::create();
+          break;
+        case 'PUT':
+          $Request = AblePolecat_Message_Request_Put::create();
+          break;
+        case 'DELETE':
+          $Request = AblePolecat_Message_Request_Delete::create();
+          break;
+      }
+      
+      if (!isset($Request)) {
+        //
+        // @todo: 405 Method not allowed.
+        // The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. 
+        // The response MUST include an Allow header containing a list of valid methods for the requested resource. 
+        //
+      }
+      else {
+        $requestPathInfo = $Request->getResource()->getRequestPathInfo();
+        switch ($requestPathInfo[AblePolecat_Url::URI_RESOURCE_NAME]) {
+          default:
+            //
+            // @todo: get agent from user mode
+            //
+            $Agent = NULL;
+            $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
+            if ($CommandResult->success()) {
+              $Agent = $CommandResult->value();
+            }
+            
+            //
+            // Dispatch the request
+            //
+            $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Host->CommandChain[self::RING_SERVER_MODE]);
+            self::$Host->Response = $ServiceBus->dispatch($Agent, $Request);
+            break;
+          case AblePolecat_Url::URI_SLASH:
+            self::$Host->sendDefaultResponse();
+            break;
+        }
+      }
+    }
+    else {
+      //
+      // Only one call per HTTP request.
+      //
+      throw new AblePolecat_Server_Exception(
+        'Able Polecat server is already routing the current request.',
+        AblePolecat_Error::ACCESS_INVALID_OBJECT
+      );
+    }
+    
+    //
+    // shut down and send response
+    //
+    AblePolecat_Server::shutdown();
+  }
+  
+  /**
+   * Checks if the requested resource is a valid name in the system.
+   *
+   * @param string $requestedResourceName Name of requested resource.
+   *
+   * @return string Name of valid resource (default is 'search').
+   */
+  public function validateResourceName($requestedResourceName) {
+    return $requestedResourceName;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Request to server to issue command to chain of responsibility.
+   *
+   * @param AblePolecat_CommandInterface $Command
+   *
+   * @return AblePolecat_Command_Result
+   */
+  public static function dispatchCommand(AblePolecat_CommandInterface $Command) {
+    
+    $Result = NULL;
+    
+    $direction = NULL;
+    if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_FWD;
+    }
+    if (is_a($Command, 'AblePolecat_Command_ReverseInterface')) {
+      $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
+    }
+    
+    if (isset(self::$Host)) {
+      switch ($direction) {
+        default:
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
+          $Result = self::$Host->execute($Command);
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
+          $Target = self::$Host;
+          if ($key = count(self::$Host->CommandChain)) {
+            $key = $key - 1;
+            isset(self::$Host->CommandChain[$key]) ? $Target = self::$Host->CommandChain[$key] : NULL;
+          }
+          $Result = $Target->execute($Command);
+          break;
+      }
+    }
+    return $Result;
+  }
+  
   /********************************************************************************
    * Sends HTML status page if requested or otherwise if request cannot be routed.
    *
@@ -413,11 +397,11 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     
     $Response = NULL;
     
-    if (isset(self::$Server) && isset(self::$Server->CommandChain[self::RING_SERVER_MODE])) {
+    if (isset(self::$Host) && isset(self::$Host->CommandChain[self::RING_SERVER_MODE])) {
       //
       // Create an array of data to be inserted into template
       //
-      $dbState = self::$Server->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Server);
+      $dbState = self::$Host->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Host);
       $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
       $dbStateStr .= $dbState['name'] . ' database.';
       
@@ -430,14 +414,14 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       //
       // Load response template
       //
-      self::$Server->Response = AblePolecat_Message_Response_Template::create(
-        self::$Server->CommandChain[self::RING_SERVER_MODE],
+      self::$Host->Response = AblePolecat_Message_Response_Template::create(
+        self::$Host->CommandChain[self::RING_SERVER_MODE],
         AblePolecat_Message_Response_Template::DEFAULT_STATUS,
         $substitutions
       );
       
-      if (isset(self::$Server->CommandChain[self::RING_USER_MODE])) {
-        AblePolecat_Command_Log::invoke(self::$Server->CommandChain[self::RING_USER_MODE], 'status page requested', 'debug');
+      if (isset(self::$Host->CommandChain[self::RING_USER_MODE])) {
+        AblePolecat_Command_Log::invoke(self::$Host->CommandChain[self::RING_USER_MODE], 'status page requested', 'debug');
       }
       
       //
@@ -453,11 +437,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       exit(1);
     }
   }
-  
-  /********************************************************************************
-   * startup and shutdown procedures
-   ********************************************************************************/
-  
+    
   /**
    * Shut down Able Polecat server and send HTTP response.
    */
@@ -465,9 +445,9 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     
     $ResponseSent = FALSE;
     
-    if (isset(self::$Server)) {
-      if (isset(self::$Server->Response)) {
-        self::$Server->Response->send();
+    if (isset(self::$Host)) {
+      if (isset(self::$Host->Response)) {
+        self::$Host->Response->send();
         $ResponseSent = TRUE;
       }
     }
@@ -478,35 +458,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     }
     exit(0);
   }
-  
-  /**
-   * Main bootstrap routine.
-   */
-  protected static function bootstrap() {
     
-    $Ready = FALSE;
-    
-    //
-    // AblePolecat_Server implements Singleton design pattern.
-    //
-    if (!isset(self::$Server)) {
-      //
-      // Create instance of Singleton.
-      //
-      self::$Server = new AblePolecat_Server();
-      
-      //
-      // Ready to route HTTP request.
-      //
-      $Ready = TRUE;
-    }
-    return $Ready;
-  }
-  
-  /********************************************************************************
-   * Sysinfo methods.
-   ********************************************************************************/
-  
   /**
    * Sets version information from core configuration file.
    */
@@ -542,23 +494,23 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     //
     // @todo: override defaults with data from core conf file?
     //
-    if (isset(self::$Server->version)) {
+    if (isset(self::$Host->version)) {
       if ($as_str) {
         switch ($doc_type) {
           default:
             $version = sprintf("Version %s.%s.%s (%s)",
-              self::$Server->version['major'],
-              self::$Server->version['minor'],
-              self::$Server->version['revision'],
-              self::$Server->version['name']
+              self::$Host->version['major'],
+              self::$Host->version['minor'],
+              self::$Host->version['revision'],
+              self::$Host->version['name']
             );
             break;
           case 'XML':
             $version = sprintf("<polecat_version name=\"%s\"><major>%s</major><minor>%s</minor><revision>%s</revision></polecat_version>",
-              self::$Server->version['name'],
-              strval(self::$Server->version['major']),
-              strval(self::$Server->version['minor']),
-              strval(self::$Server->version['revision'])
+              self::$Host->version['name'],
+              strval(self::$Host->version['major']),
+              strval(self::$Host->version['minor']),
+              strval(self::$Host->version['revision'])
             );
             break;
           //
@@ -567,7 +519,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         }
       }
       else {
-        $version = self::$Server->version;
+        $version = self::$Host->version;
       }
     }
     else {
@@ -590,24 +542,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     }
     return $version;
   }
-  
-  /********************************************************************************
-   * Create/destroy methods
-   ********************************************************************************/
-  
-  /**
-   * Get instance of singleton.
-   */
-  protected static function getInstance() {
-    if (!isset(self::$Server)) {
-      //
-      // Create instance of Singleton.
-      //
-      self::$Server = new AblePolecat_Server();
-    }
-    return self::$Server;
-  }
-  
+      
   /**
    * Initialize resources in protection ring '0' (e.g. kernel).
    */
@@ -616,10 +551,19 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     parent::initialize();
     
     //
-    // Set defaults.
+    // Initiate command-processing chain of responsibility.
+    // (each object wakes up it's subordinate down the chain).
     //
-    $this->setVersion(NULL);
     $this->CommandChain = array();
+    $this->CommandChain[self::RING_SERVER_MODE] = 
+      AblePolecat_Mode_Server::wakeup($this);
+    $this->CommandChain[self::RING_APPLICATION_MODE] = 
+      AblePolecat_Mode_Application::wakeup($this->CommandChain[self::RING_SERVER_MODE]);
+    $this->CommandChain[self::RING_USER_MODE] = 
+      AblePolecat_Mode_User::wakeup($this->CommandChain[self::RING_APPLICATION_MODE]);
+        
+    $this->setVersion(NULL);
+    
     $this->Response = NULL;
     $this->Subordinate = NULL;
   }

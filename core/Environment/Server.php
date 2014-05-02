@@ -24,6 +24,10 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
     parent::initialize();
   }
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier.
    *
@@ -41,6 +45,10 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   public static function getName() {
     return self::NAME;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
   /**
    * Serialize object to cache.

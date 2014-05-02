@@ -10,6 +10,10 @@ class AblePolecat_Command_GetRegistry extends AblePolecat_Command_ReverseAbstrac
   
   const UUID = 'c7587ad0-74a4-11e3-981f-0800200c9a66';
   const NAME = 'GetRegistry';
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
      
   /**
    * Return unique, system-wide identifier.
@@ -28,6 +32,10 @@ class AblePolecat_Command_GetRegistry extends AblePolecat_Command_ReverseAbstrac
   public static function getName() {
     return self::NAME;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
   
   /**
    * Invoke the command and return response from target.

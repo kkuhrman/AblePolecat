@@ -24,6 +24,10 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
     parent::initialize();
   }
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier.
    *
@@ -41,6 +45,10 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   public static function getName() {
     return self::NAME;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
   /**
    * Serialize object to cache.

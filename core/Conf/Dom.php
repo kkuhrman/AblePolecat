@@ -85,24 +85,6 @@ class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
   }
   
   /**
-   * Return unique, system-wide identifier for security resource.
-   *
-   * @return string Resource identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for security resource.
-   *
-   * @return string Resource name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /**
    * @return Array Core class registry.
    */
   public function getCoreClasses() {
@@ -222,6 +204,32 @@ class AblePolecat_Conf_Dom extends AblePolecat_ConfAbstract {
     }
     return $this->Variables[self::ELEMENT_CORE][self::ELEMENT_VERSION];
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * Return unique, system-wide identifier for security resource.
+   *
+   * @return string Resource identifier.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name for security resource.
+   *
+   * @return string Resource name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
   /**
    * Serialize object to cache.

@@ -14,6 +14,10 @@ class AblePolecat_AccessControl_Constraint_Read implements AblePolecat_AccessCon
   const UUID = '6b71c7f0-63dc-11e2-bcfd-0800200c9a66';
   const NAME = 'read';
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier for security constraint.
    *

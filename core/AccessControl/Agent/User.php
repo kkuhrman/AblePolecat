@@ -20,6 +20,10 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
   protected function initialize() {
   }
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier for agent.
    *
@@ -37,6 +41,10 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
   public static function getName() {
     return self::NAME;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
   /**
    * Serialize object to cache.

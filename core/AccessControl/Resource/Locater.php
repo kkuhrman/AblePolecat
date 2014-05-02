@@ -12,7 +12,14 @@
  * class as more than a crude container for local file paths names and very simple web addresses.
  */
 
+if (!defined('URI_SLASH')) {
+  $URI_SLASH = chr(0x2F);
+  define('URI_SLASH', $URI_SLASH);
+}
+
 interface AblePolecat_AccessControl_Resource_LocaterInterface {
+  
+  const URI_SLASH = URI_SLASH;
   
   /**
    * Create URL.
@@ -216,72 +223,76 @@ interface AblePolecat_AccessControl_Resource_LocaterInterface {
 }
 
 class AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessControl_Resource_LocaterInterface {
-
+  
+  /**
+   * @var string raw URL as passed to constructor.
+   * @see create().
+   */
+  private $raw_url;
+  
   /**
    * @var DOMString protocol.
    */
-  private $m_protocol;
+  protected $m_protocol;
   
   /**
    * @var DOMString username.
    */
-  private $m_username;
+  protected $m_username;
   
   /**
    * @var DOMString password.
    */
-  private $m_password;
+  protected $m_password;
   
   /**
    * @var DOMString host.
    */
-  private $m_host;
+  protected $m_host;
   
   /**
    * @var DOMString hostname.
    */
-  private $m_hostname;
+  protected $m_hostname;
   
   /**
    * @var DOMString port.
    */
-  private $m_port;
+  protected $m_port;
   
   /**
    * @var DOMString pathname.
    */
-  private $m_pathname;
+  protected $m_pathname;
   
   /**
    * @var DOMString search.
    */
-  private $m_search;
+  protected $m_search;
   
   /**
    * @var DOMString hash.
    */
-  private $m_hash;
+  protected $m_hash;
   
   /**
    * @var DOMString filename.
    */
-  private $m_filename;
+  protected $m_filename;
   
   /**
    * @var DOMString origin.
    */
-  private $m_origin;
+  protected $m_origin;
   
   /**
    * @var Array parameters.
    */
-  private $m_parameters;
+  protected $m_parameters;
   
-  /**
-   * Extends __construct();
-   */
-  protected function initialize() {
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Resource_LocaterInterface.
+   ********************************************************************************/
   
   /**
    * Create URL.
@@ -292,7 +303,7 @@ class AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessCo
    * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
    */
   public static function create($url, $baseURL = NULL) {
-    isset($baseURL) ? $url = $baseURL . DIRECTORY_SEPARATOR . $url : NULL;
+    isset($baseURL) ? $url = $baseURL . self::URI_SLASH . $url : NULL;
     $Locater = new AblePolecat_AccessControl_Resource_Locater($url);
     return $Locater;
   }
@@ -580,8 +591,25 @@ class AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessCo
     return $url;
   }
   
-  final protected function __construct($url = NULL) {
-    $url_parts = parse_url($url);   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Returns the raw, unencoded URL as passed to constructor.
+   *
+   * @return string.
+   * @see create().
+   */
+  public function getRawUrl() {
+    return $this->raw_url;
+  }
+  
+  /**
+   * Extends __construct();
+   */
+  protected function initialize() {
+    $url_parts = parse_url($this->getRawUrl());   
     isset($url_parts['scheme']) ? $this->m_protocol = $url_parts['scheme'] : $this->m_protocol = NULL;
     isset($url_parts['host']) ? $this->m_host = $url_parts['host'] : $this->m_host = NULL;
     isset($url_parts['port']) ? $this->m_port = $url_parts['port'] : $this->m_port = NULL;
@@ -596,5 +624,10 @@ class AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessCo
     $this->m_filename = '';
     $this->m_origin = '';
     $this->m_parameters = array();
+  }
+  
+  final protected function __construct($url = NULL) {
+    $this->raw_url = $url;
+    $this->initialize();
   }
 }

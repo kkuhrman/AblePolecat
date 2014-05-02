@@ -12,6 +12,10 @@ interface AblePolecat_Command_ReverseInterface extends AblePolecat_CommandInterf
 
 abstract class AblePolecat_Command_ReverseAbstract extends AblePolecat_CommandAbstract implements AblePolecat_Command_ReverseInterface {
   
+  /********************************************************************************
+   * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
+   
   /**
    * Indicates which direction to pass command along CoR.
    */

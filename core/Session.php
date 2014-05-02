@@ -5,65 +5,45 @@
  */
 
 require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Session.php')));
 
 //
 // @todo: PHP 5.4 support for SessionHandlerInterface
 //
 interface AblePolecat_SessionInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
-}
-
-abstract class AblePolecat_SessionAbstract implements AblePolecat_SessionInterface {
   
   /**
-   * Extends __construct().
-   * Sub-classes initialize properties here.
+   * Destroy a session.
+   *
+   * @param string $session_id ID of session to destroy.
+   * 
+   * @return bool TRUE on success, otherwise FALSE.
    */
-  abstract protected function initialize();
+  public function destroy($session_id);
   
   /**
    * Returns the current session status.
    *
    * @return int PHP_SESSION_DISABLED | PHP_SESSION_NONE | PHP_SESSION_ACTIVE.
    */
-  public function getSessionStatus() {
-    //
-    // PHP 5.4+
-    //
-    // $session_status = session_status();
-    $session_status = NULL;
-    // $status = array(PHP_SESSION_DISABLED => 'disabled', PHP_SESSION_NONE => 'none', PHP_SESSION_ACTIVE => 'active');
-    // isset($status[$session_status]) ? $status_str = $status[$session_status] : $status_str = 'unknown';
-    return $session_status;
-  }
-	
-  /**
-   * Cached objects must be created by wakeup().
-   * Initialization of sub-classes should take place in initialize().
-   * @see initialize(), wakeup().
-   */
-  final protected function __construct() {
-    $this->initialize();
-  }
+  public function getSessionStatus();
   
   /**
-   * Serialization prior to going out of scope in sleep().
+   * Sets the current session id.
+   *
+   * @return string Session id for current session or empty string if no current session id exists.
    */
-  final public function __destruct() {
-    $this->sleep();
-  }
+  public function setSessionId($session_id);
 }
 
 /**
  * Standard session wrapper.
  */
-class AblePolecat_Session extends AblePolecat_SessionAbstract {
+class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements AblePolecat_SessionInterface {
   
-  /**
-   * Extends __construct().
-   * Sub-classes initialize properties here.
-   */
-  protected function initialize() {
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
   
   /**
    * Ideally unique id will be UUID.
@@ -84,29 +64,9 @@ class AblePolecat_Session extends AblePolecat_SessionAbstract {
     return 'Able Polecat Session';
   }
   
-  /**
-   * Destroy a session.
-   *
-   * @param string $session_id ID of session to destroy.
-   * 
-   * @return bool TRUE on success, otherwise FALSE.
-   */
-  public function destroy($session_id) {
-    $ret = FALSE;
-    if (self::getId() == $session_id) {
-      $ret = session_destroy();
-    }
-    return $ret;
-  }
-  
-  /**
-   * Sets the current session id.
-   *
-   * @return string Session id for current session or empty string if no current session id exists.
-   */
-  public function setSessionId($session_id) {
-    return session_id($session_id);
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
   /**
    * Serialize object to cache.
@@ -131,9 +91,59 @@ class AblePolecat_Session extends AblePolecat_SessionAbstract {
     }
     return $Session;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_SessionInterface.
+   ********************************************************************************/
+  
+  /**
+   * Destroy a session.
+   *
+   * @param string $session_id ID of session to destroy.
+   * 
+   * @return bool TRUE on success, otherwise FALSE.
+   */
+  public function destroy($session_id) {
+    $ret = FALSE;
+    if (self::getId() == $session_id) {
+      $ret = session_destroy();
+    }
+    return $ret;
+  }
+  
+  /**
+   * Returns the current session status.
+   *
+   * @return int PHP_SESSION_DISABLED | PHP_SESSION_NONE | PHP_SESSION_ACTIVE.
+   */
+  public function getSessionStatus() {
+    //
+    // PHP 5.4+
+    //
+    // $session_status = session_status();
+    $session_status = NULL;
+    // $status = array(PHP_SESSION_DISABLED => 'disabled', PHP_SESSION_NONE => 'none', PHP_SESSION_ACTIVE => 'active');
+    // isset($status[$session_status]) ? $status_str = $status[$session_status] : $status_str = 'unknown';
+    return $session_status;
+  }
+  
+  /**
+   * Sets the current session id.
+   *
+   * @return string Session id for current session or empty string if no current session id exists.
+   */
+  public function setSessionId($session_id) {
+    return session_id($session_id);
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   * Sub-classes initialize properties here.
+   */
+  protected function initialize() {
+  }
 }
-
-/**
-  * Exceptions thrown by AblePolecat_Session and sub-classes.
-  */
-class AblePolecat_Session_Exception extends AblePolecat_Exception {}

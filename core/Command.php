@@ -12,6 +12,13 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 interface AblePolecat_CommandInterface extends AblePolecat_AccessControl_ArticleInterface {
   
   /**
+   * Indicates which direction to pass command along CoR.
+   *
+   * @return string both | forward | reverse.
+   */
+  public static function direction();
+  
+  /**
    * Return reference to object which invoked command.
    *
    * @return AblePolecat_AccessControl_SubjectInterface Object which invoked command.
@@ -51,12 +58,9 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
    */
   private $Arguments;
   
-  /**
-   * Indicates which direction to pass command along CoR.
-   *
-   * @return string both | forward | reverse.
-   */
-  abstract public static function direction();
+  /********************************************************************************
+   * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
   
   /**
    * Commands accept variable args list - this helper will throw exception on type violation.

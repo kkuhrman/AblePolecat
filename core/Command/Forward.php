@@ -12,6 +12,10 @@ interface AblePolecat_Command_ForwardInterface extends AblePolecat_CommandInterf
 
 abstract class AblePolecat_Command_ForwardAbstract extends AblePolecat_CommandAbstract implements AblePolecat_Command_ForwardInterface {
   
+  /********************************************************************************
+   * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
+   
   /**
    * Indicates which direction to pass command along CoR.
    */

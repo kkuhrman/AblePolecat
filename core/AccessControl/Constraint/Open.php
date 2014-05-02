@@ -14,6 +14,10 @@ class AblePolecat_AccessControl_Constraint_Open implements AblePolecat_AccessCon
   const UUID = '8ac53be0-6117-11e2-bcfd-0800200c9a66';
   const NAME = 'open';
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
   /**
    * Return unique, system-wide identifier for security constraint.
    *

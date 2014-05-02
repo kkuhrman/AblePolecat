@@ -10,6 +10,10 @@ class AblePolecat_Command_GetAgent extends AblePolecat_Command_ReverseAbstract {
   
   const UUID = '54d2e7d0-77b9-11e3-981f-0800200c9a66';
   const NAME = 'GetAgent';
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
      
   /**
    * Return unique, system-wide identifier.
@@ -28,6 +32,10 @@ class AblePolecat_Command_GetAgent extends AblePolecat_Command_ReverseAbstract {
   public static function getName() {
     return self::NAME;
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
   
   /**
    * Invoke the command and return response from target.

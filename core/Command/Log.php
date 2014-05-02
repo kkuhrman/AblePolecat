@@ -14,6 +14,10 @@ class AblePolecat_Command_Log extends AblePolecat_Command_ReverseAbstract {
   const ARG_EVENT_MSG = 'eventMessage';
   const ARG_EVENT_SEV = 'eventSeverity';
   const ARG_LOG_NAME  = 'logName';
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
      
   /**
    * Return unique, system-wide identifier.
@@ -33,33 +37,9 @@ class AblePolecat_Command_Log extends AblePolecat_Command_ReverseAbstract {
     return self::NAME;
   }
   
-  /**
-   * @return string Event message.
-   */
-  public function getEventMessage() {
-    
-    $args = $this->getArguments();
-    isset($args[self::ARG_EVENT_MSG]) ? $arg = $args[self::ARG_EVENT_MSG] : $arg = NULL;
-    return $arg;
-  }
-  
-  /**
-   * @return string Event severity.
-   */
-  public function getEventSeverity() {
-    $args = $this->getArguments();
-    isset($args[self::ARG_EVENT_SEV]) ? $arg = $args[self::ARG_EVENT_SEV] : $arg = NULL;
-    return $arg;
-  }
-  
-  /**
-   * @return string Name of event log.
-   */
-  public function getLogName() {
-    $args = $this->getArguments();
-    isset($args[self::ARG_LOG_NAME]) ? $arg = $args[self::ARG_LOG_NAME] : $arg = NULL;
-    return $arg;
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
   
   /**
    * Invoke the command and return response from target.
@@ -94,5 +74,37 @@ class AblePolecat_Command_Log extends AblePolecat_Command_ReverseAbstract {
     //
     $Command = new AblePolecat_Command_Log($Invoker, $Event);
     return $Command->dispatch();
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
+  /**
+   * @return string Event message.
+   */
+  public function getEventMessage() {
+    
+    $args = $this->getArguments();
+    isset($args[self::ARG_EVENT_MSG]) ? $arg = $args[self::ARG_EVENT_MSG] : $arg = NULL;
+    return $arg;
+  }
+  
+  /**
+   * @return string Event severity.
+   */
+  public function getEventSeverity() {
+    $args = $this->getArguments();
+    isset($args[self::ARG_EVENT_SEV]) ? $arg = $args[self::ARG_EVENT_SEV] : $arg = NULL;
+    return $arg;
+  }
+  
+  /**
+   * @return string Name of event log.
+   */
+  public function getLogName() {
+    $args = $this->getArguments();
+    isset($args[self::ARG_LOG_NAME]) ? $arg = $args[self::ARG_LOG_NAME] : $arg = NULL;
+    return $arg;
   }
 }

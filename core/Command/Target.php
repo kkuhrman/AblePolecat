@@ -65,7 +65,64 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
   private $Subordinate;
   
   /********************************************************************************
-   * Command target methods.
+   * Implementation of AblePolecat_Command_TargetInterface.
+   ********************************************************************************/
+  
+  /**
+   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function setForwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Super = NULL;
+    
+    if ($this->validateCommandLink($Target, AblePolecat_Command_TargetInterface::CMD_LINK_FWD)) {
+      $Super = $this;
+      $this->Subordinate = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Super;
+  }
+  
+  /**
+   * Allow given subject to serve as direct superior in Chain of Responsibility.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target Intended superior target.
+   *
+   * @throw AblePolecat_Command_Exception If link is refused.
+   */
+  public function setReverseCommandLink(AblePolecat_Command_TargetInterface $Target) {
+    
+    $Subordinate = NULL;
+    
+    //
+    // Only application mode can serve as next in COR.
+    //
+    if ($this->validateCommandLink($Target, AblePolecat_Command_TargetInterface::CMD_LINK_REV)) {
+      $Subordinate = $this;
+      $this->Superior = $Target;
+    }
+    else {
+      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
+        get_class($Target),
+        get_class($this)
+      );
+      throw new AblePolecat_Command_Exception($msg);
+    }
+    return $Subordinate;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
    ********************************************************************************/
   
   /**
@@ -148,58 +205,5 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
       throw new AblePolecat_Command_Exception($msg);
     }
     return $Superior;
-  }
-  
-  /**
-   * Allow given subject to serve as direct subordinate in Chain of Responsibility.
-   *
-   * @param AblePolecat_Command_TargetInterface $Target Intended subordinate target.
-   *
-   * @throw AblePolecat_Command_Exception If link is refused.
-   */
-  public function setForwardCommandLink(AblePolecat_Command_TargetInterface $Target) {
-    
-    $Super = NULL;
-    
-    if ($this->validateCommandLink($Target, AblePolecat_Command_TargetInterface::CMD_LINK_FWD)) {
-      $Super = $this;
-      $this->Subordinate = $Target;
-    }
-    else {
-      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
-        get_class($Target),
-        get_class($this)
-      );
-      throw new AblePolecat_Command_Exception($msg);
-    }
-    return $Super;
-  }
-  
-  /**
-   * Allow given subject to serve as direct superior in Chain of Responsibility.
-   *
-   * @param AblePolecat_Command_TargetInterface $Target Intended superior target.
-   *
-   * @throw AblePolecat_Command_Exception If link is refused.
-   */
-  public function setReverseCommandLink(AblePolecat_Command_TargetInterface $Target) {
-    
-    $Subordinate = NULL;
-    
-    //
-    // Only application mode can serve as next in COR.
-    //
-    if ($this->validateCommandLink($Target, AblePolecat_Command_TargetInterface::CMD_LINK_REV)) {
-      $Subordinate = $this;
-      $this->Superior = $Target;
-    }
-    else {
-      $msg = sprintf("Attempt to set %s as forward command link to %s was refused.",
-        get_class($Target),
-        get_class($this)
-      );
-      throw new AblePolecat_Command_Exception($msg);
-    }
-    return $Subordinate;
   }
 }

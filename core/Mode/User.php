@@ -32,9 +32,8 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   private $Environment;
   
   /********************************************************************************
-   * Access control methods.
-   ********************************************************************************/
-   
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/  
   /**
    * Return unique, system-wide identifier.
    *
@@ -54,94 +53,8 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   }
   
   /********************************************************************************
-   * Command target methods.
+   * Implementation of AblePolecat_CacheObjectInterface.
    ********************************************************************************/
-   
-  /**
-   * Execute a command or pass back/forward chain of responsibility.
-   *
-   * @param AblePolecat_CommandInterface $Command
-   *
-   * @return AblePolecat_Command_Result
-   */
-  public function execute(AblePolecat_CommandInterface $Command) {
-    
-    $Result = NULL;
-    
-    //
-    // @todo: check invoker access rights
-    //
-    switch ($Command::getId()) {
-      default:
-        //
-        // Not handled
-        //
-        break;
-      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
-        $Result = new AblePolecat_Command_Result($this->Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
-        break;
-      case '85fc7590-724d-11e3-981f-0800200c9a66':
-        //
-        // Log
-        //
-        switch($Command->getEventSeverity()) {
-          default:
-            break;
-          case AblePolecat_LogInterface::USER_INFO:
-          case AblePolecat_LogInterface::USER_STATUS:
-          case AblePolecat_LogInterface::USER_WARNING:
-            //
-            // Do not pass these to next link in CoR.
-            //
-            $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
-            break;
-        }
-        break;
-    }
-    if (!isset($Result)) {
-      //
-      // Pass command to next link in chain of responsibility
-      //
-      $Result = $this->delegateCommand($Command);
-    }
-    return $Result;
-  }
-  
-  /**
-   * Validates given command target as a forward or reverse COR link.
-   *
-   * @param AblePolecat_Command_TargetInterface $Target.
-   * @param string $direction 'forward' | 'reverse'
-   *
-   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
-   */
-  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
-    
-    $ValidLink = FALSE;
-    
-    switch ($direction) {
-      default:
-        break;
-      case 'forward':
-        $ValidLink = is_a($Target, 'AblePolecat_ModeInterface');
-        break;
-      case 'reverse':
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
-        break;
-    }
-    return $ValidLink;
-  }
-    
-  /********************************************************************************
-   * Caching methods.
-   ********************************************************************************/
-  
-  /**
-   * Extends constructor.
-   * Sub-classes should override to initialize members.
-   */
-  protected function initialize() {
-  }
   
   /**
    * Serialize object to cache.
@@ -195,5 +108,95 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
     }
       
     return self::$Mode;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_Command_TargetInterface.
+   ********************************************************************************/
+   
+  /**
+   * Execute a command or pass back/forward chain of responsibility.
+   *
+   * @param AblePolecat_CommandInterface $Command
+   *
+   * @return AblePolecat_Command_Result
+   */
+  public function execute(AblePolecat_CommandInterface $Command) {
+    
+    $Result = NULL;
+    
+    //
+    // @todo: check invoker access rights
+    //
+    switch ($Command::getId()) {
+      default:
+        //
+        // Not handled
+        //
+        break;
+      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
+        $Result = new AblePolecat_Command_Result($this->Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        break;
+      case '85fc7590-724d-11e3-981f-0800200c9a66':
+        //
+        // Log
+        //
+        switch($Command->getEventSeverity()) {
+          default:
+            break;
+          case AblePolecat_LogInterface::USER_INFO:
+          case AblePolecat_LogInterface::USER_STATUS:
+          case AblePolecat_LogInterface::USER_WARNING:
+            //
+            // Do not pass these to next link in CoR.
+            //
+            $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+            break;
+        }
+        break;
+    }
+    if (!isset($Result)) {
+      //
+      // Pass command to next link in chain of responsibility
+      //
+      $Result = $this->delegateCommand($Command);
+    }
+    return $Result;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
+  /**
+   * Validates given command target as a forward or reverse COR link.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target.
+   * @param string $direction 'forward' | 'reverse'
+   *
+   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
+   */
+  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
+    
+    $ValidLink = FALSE;
+    
+    switch ($direction) {
+      default:
+        break;
+      case 'forward':
+        $ValidLink = is_a($Target, 'AblePolecat_ModeInterface');
+        break;
+      case 'reverse':
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
+        break;
+    }
+    return $ValidLink;
+  }
+  
+  /**
+   * Extends constructor.
+   * Sub-classes should override to initialize members.
+   */
+  protected function initialize() {
   }
 }

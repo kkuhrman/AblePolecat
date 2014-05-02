@@ -52,6 +52,57 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
   protected $Transactions;
   
   /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * Return unique, system-wide identifier for security resource.
+   *
+   * @return string Resource identifier.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name for security resource.
+   *
+   * @return string Resource name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Service_Bus or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    if (!isset(self::$ServiceBus)) {
+      self::$ServiceBus = new AblePolecat_Service_Bus($Subject);
+      
+    }					
+    return self::$ServiceBus;
+  }
+  
+  /********************************************************************************
    * Message processing methods.
    ********************************************************************************/
   
@@ -125,9 +176,9 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
   }
   
   /********************************************************************************
-   * Resource access methods.
+   * Helper functions.
    ********************************************************************************/
-   
+  
   /**
    * Returns a service initiator by class id.
    *
@@ -154,32 +205,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
     return $ServiceInitiator;
   }
   
-  /********************************************************************************
-   * Access control methods.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for security resource.
-   *
-   * @return string Resource identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for security resource.
-   *
-   * @return string Resource name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-
-  /********************************************************************************
-   * Caching methods.
-   ********************************************************************************/
-   
   /**
    * Iniitialize service bus.
    *
@@ -204,30 +229,5 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
         $this->ServiceInitiators[$Id] = $className;
       }
     }
-  }
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Service_Bus or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$ServiceBus)) {
-      self::$ServiceBus = new AblePolecat_Service_Bus($Subject);
-      
-    }					
-    return self::$ServiceBus;
   }
 }
