@@ -9,7 +9,6 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   
