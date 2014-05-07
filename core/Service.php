@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Service.php
- * Interface for a service intermediary or end point.
+ * @file      polecat/core/Service.php
+ * @brief     Interface for a service intermediary or end point.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
@@ -17,6 +21,10 @@ interface AblePolecat_Service_Interface extends AblePolecat_Service_InitiatorInt
  */
 abstract class AblePolecat_ServiceAbstract extends AblePolecat_Service_InitiatorAbstract implements AblePolecat_Service_Interface {
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
   /**
    * Extends __construct().
    */

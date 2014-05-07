@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Pdo.php
- * Uses a PDO database connection for managing transaction locks,savepoints etc.
+ * @file      polecat/core/Transaction/Pdo.php
+ * @brief     Uses a PDO database connection for managing transaction locks,savepoints etc.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Transaction.php');
@@ -17,6 +21,48 @@ class AblePolecat_Transaction_Pdo extends AblePolecat_TransactionAbstract {
    * @var resource A prepared PDO statement for setting locks on service requests.
    */
   private $InsertLockStatement = NULL;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
+  /**
+   * Create a save point.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+  }
+  
+  /**
+   * Start a new transaction or resume an existing one.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    $Transaction = new AblePolecat_Transaction_Pdo();
+    return $Transaction;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_TransactionInterface.
+   ********************************************************************************/
+  
+  /**
+   * Commit
+   */
+  public function commit() {}
+  
+  /**
+   * Rollback
+   */
+  public function rollback() {}
+    
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Extends __construct().
@@ -62,30 +108,5 @@ class AblePolecat_Transaction_Pdo extends AblePolecat_TransactionAbstract {
       }
     }
     return $result;
-  }
-  
-  /**
-   * Commit
-   */
-  public function commit() {}
-  
-  /**
-   * Rollback
-   */
-  public function rollback() {}
-  
-  /**
-   * Create a savepoint.
-   */
-  public function save() {}
-  
-  /**
-   * Start a new transaction.
-   * 
-   * @return AblePolecat_TransactionInterface.
-   */
-  public static function start() {
-    $Transaction = new AblePolecat_Transaction_Pdo();
-    return $Transaction;
   }
 }

@@ -1,6 +1,11 @@
 <?php
 /**
- * Base class for data transformation and exchange web services.
+ * @file      polecat/core/Service/Dtx.php
+ * @brief     Base class for data transformation and exchange web services.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Environment.php');
@@ -72,16 +77,57 @@ abstract class AblePolecat_Service_DtxAbstract implements AblePolecat_Service_Dt
    */
   private $m_CountQuery;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_Service_DtxInterface.
+   ********************************************************************************/
+  
   /**
-   * Extends __construct(). 
-   * 
-   * Sub-classes can override to initialize members such as service clients.
+   * Prepare a valid SQL SELECT statement for the *source* database and store internally.
+   *
+   * @param Array or String $select_expression List of column names or valid SELECT expression
+   * @param string $table_name table name or references
+   * @param string $where_condition WHERE condition
+   * @param string $group_by_expression GROUP BY expression
+   * @param string $order_by_expression ORDER BY expression
+   * @param Array $options Options are driver-specific.
+   *
+   * @return TRUE if SELECT statement is ready for execution, otherwise FALSE.
+   * @see prepare().
    */
-  protected function initialize() {
-    $this->m_query = NULL;
-    $this->m_table_name = NULL;
-    $this->m_CountQuery = 'SELECT COUNT(*)';
+  public function prepare(
+    $select_expression,
+    $table_name,
+    $where_condition = NULL,
+    $group_by_expression = NULL,
+    $order_by_expression = NULL,
+    $options = NULL
+  ) {
+    
+    $queryReady = TRUE;
+    
+    //
+    // These functions will build the query string
+    //
+    try {
+      $this->setSelectColumns($select_columns);
+      $this->setTableName($table_name);
+      $this->setWhereCondition($where_condition);
+      $this->setGroupByExpression($group_by_expression);
+      $this->setOrderByExpression($order_by_expression);
+      $this->setQueryOptions($options);
+    }
+    catch(Exception $Exception) {
+      $queryReady = FALSE;
+      //
+      // @todo log exception message
+      //
+    }
+    return $queryReady;
   }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * @todo: check proper formatting/escaping of table name
@@ -153,26 +199,6 @@ abstract class AblePolecat_Service_DtxAbstract implements AblePolecat_Service_Dt
   }
   
   /**
-   * @return Able Polecat environment.
-   */
-  public function getEnvironment() {
-    $Environment = AblePolecat_EnvironmentAbstract::getCurrent();
-    return $Environment;
-  }
-  
-  /**
-   * @return Able Polecat ESB
-   */
-  public function getServiceBus() {
-    $Bus = $this->getEnvironment()->getServiceBus();
-    if (!isset($Bus)) {
-      throw new AblePolecat_Environment_Exception("Attempt to access invalid service bus object.", 
-        AblePolecat_Error::ACCESS_INVALID_OBJECT);
-    }
-    return $Bus;
-  }
-  
-  /**
    * @return Prepared SQL statement.
    */
   public function getQuery() {
@@ -180,57 +206,13 @@ abstract class AblePolecat_Service_DtxAbstract implements AblePolecat_Service_Dt
   }
   
   /**
-   * Prepare a valid SQL SELECT statement for the *source* database and store internally.
-   *
-   * @param Array or String $select_expression List of column names or valid SELECT expression
-   * @param string $table_name table name or references
-   * @param string $where_condition WHERE condition
-   * @param string $group_by_expression GROUP BY expression
-   * @param string $order_by_expression ORDER BY expression
-   * @param Array $options Options are driver-specific.
-   *
-   * @return TRUE if SELECT statement is ready for execution, otherwise FALSE.
-   * @see prepare().
+   * Extends __construct(). 
+   * 
+   * Sub-classes can override to initialize members such as service clients.
    */
-  public function prepare(
-    $select_expression,
-    $table_name,
-    $where_condition = NULL,
-    $group_by_expression = NULL,
-    $order_by_expression = NULL,
-    $options = NULL
-  ) {
-    
-    $queryReady = TRUE;
-    
-    //
-    // These functions will build the query string
-    //
-    try {
-      $this->setSelectColumns($select_columns);
-      $this->setTableName($table_name);
-      $this->setWhereCondition($where_condition);
-      $this->setGroupByExpression($group_by_expression);
-      $this->setOrderByExpression($order_by_expression);
-      $this->setQueryOptions($options);
-    }
-    catch(Exception $Exception) {
-      $queryReady = FALSE;
-      $this->getEnvironment()->logErrorMessage(serialize($Exception));
-    }
-    return $queryReady;
-  }
-  
-  /**
-   * Sub classes must implement bootstrap(), which will return instance of class.
-   */
-  final protected function __construct() {
-    
-    //
-    // Will throw exception if fail to get valid environment or ESB objects
-    //
-    $this->getEnvironment();
-    $this->getServiceBus();
-    $this->initialize();
+  protected function initialize() {
+    $this->m_query = NULL;
+    $this->m_table_name = NULL;
+    $this->m_CountQuery = 'SELECT COUNT(*)';
   }
 }

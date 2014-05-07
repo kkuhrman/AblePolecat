@@ -1,10 +1,20 @@
 <?php
 /**
- * @file: Transaction.php
- * Encapsulates an ACID transaction between two or more service clients.
+ * @file      polecat/core/Transaction.php
+ * @brief     Encapsulates an ACID transaction between two or more service clients.
+ *
+ * Implements AblePolecat_CacheObjectInterface using wakeup() to start or resume a 
+ * transaction and sleep() to create a save point.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
-interface AblePolecat_TransactionInterface {
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Transaction.php')));
+
+interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterface {
   
   /**
    * Commit
@@ -15,22 +25,14 @@ interface AblePolecat_TransactionInterface {
    * Rollback
    */
   public function rollback();
-  
-  /**
-   * Create a savepoint.
-   */
-  public function save();
-  
-  /**
-   * Start a new transaction.
-   * 
-   * @return AblePolecat_TransactionInterface.
-   */
-  public static function start();
 }
 
-abstract class AblePolecat_TransactionAbstract implements AblePolecat_TransactionInterface {
+abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_TransactionInterface {
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
   /**
    * Extends __construct().
    *
@@ -38,17 +40,4 @@ abstract class AblePolecat_TransactionAbstract implements AblePolecat_Transactio
    */
   protected function initialize() {
   }
-  
-  /**
-   * Call start() to create new transaction.
-   */
-  final protected function __construct() {
-    $this->initialize();
-  }
-}
-
-/**
- * Exceptions thrown by Able Polecat transactions.
- */
-class AblePolecat_Transaction_Exception extends AblePolecat_Exception {
 }

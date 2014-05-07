@@ -1,6 +1,11 @@
 <?php
 /**
- * Base for web service clients.
+ * @file      polecat/core/Service/Client.php
+ * @brief     Base for web service clients.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
@@ -18,16 +23,14 @@ abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_Service_In
    */
   protected $Client;
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
   /**
    * Extends __construct().
    */
   protected function initialize() {
     parent::initialize();
   }
-}
-
-/**
- * Exceptions thrown by Able Polecat service clients.
- */
-class AblePolecat_Service_Client_Exception extends AblePolecat_Service_Exception {
 }
