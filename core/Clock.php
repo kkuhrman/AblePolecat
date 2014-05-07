@@ -1,16 +1,22 @@
 <?php
 /**
- * AblePolecat_Clock
+ * @file      polecat/core/Clock.php
+ * @brief     Encapsulates micro-time functions for performance monitoring.
  *
  * Encapsulates micro-time functions to mimic behavior of ordinary
  * stop-watch with lap counter and some presets
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
+ 
  */
 
 if (!defined('ABLE_POLECAT_CORE')) {
   $able_polecat_path = __DIR__;
   define('ABLE_POLECAT_CORE', $able_polecat_path);
 }
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Clock.php')));
 
 class AblePolecat_Clock {
 
@@ -550,7 +556,4 @@ class AblePolecat_Clock {
         }
     }
 
-}
-
-class AblePolecat_Clock_Exception extends AblePolecat_Exception {
 }

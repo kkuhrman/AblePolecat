@@ -219,7 +219,12 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         //
         // Log
         //
-        self::$Mode->Log->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
+        if (isset(self::$Mode->Log)) {
+          self::$Mode->Log->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
+        }
+        else {
+          AblePolecat_Log_Syslog::wakeup()->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
+        }
         switch($Command->getEventSeverity()) {
           default:
             $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);

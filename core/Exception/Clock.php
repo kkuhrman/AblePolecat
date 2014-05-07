@@ -1,7 +1,7 @@
-<?php 
+<?php
 /**
- * @file      polecat/core/Exception/Log.php
- * @brief     Exceptions thrown by Able Polecat log objects.
+ * @file      Exception/Clock.php
+ * @brief     Exceptions thrown by Able Polecat clock.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -10,5 +10,5 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));
 
-class AblePolecat_Log_Exception extends AblePolecat_Exception {
+class AblePolecat_Clock_Exception extends AblePolecat_Exception {
 }

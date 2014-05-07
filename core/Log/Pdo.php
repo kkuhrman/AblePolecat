@@ -1,18 +1,46 @@
 <?php
 /**
- * @file: Pdo.php
- * Logs messages to application database.
+ * @file      polecat/core/Log/Pdo.php
+ * @brief     Logs messages to application database.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Log.php');
 
 class AblePolecat_Log_Pdo extends AblePolecat_LogAbstract {
-    
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
   /**
-   * Extends __construct().
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  protected function initialize() {
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Log_Pdo or NULL.
+   * @throw AblePolecat_Log_Exception if PDO database is not accessible.
+   * @see initialize().
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {   
+    $Log = new AblePolecat_Log_Pdo($Subject);
+    return $Log;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_LogInterface.
+   ********************************************************************************/
   
   /**
    * Helper function.Writes message to file.
@@ -44,25 +72,13 @@ class AblePolecat_Log_Pdo extends AblePolecat_LogAbstract {
     }
   }
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+    
   /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   * Extends __construct().
    */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Log_Pdo or NULL.
-   * @throw AblePolecat_Log_Exception if PDO database is not accessible.
-   * @see initialize().
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {   
-    $Log = new AblePolecat_Log_Pdo($Subject);
-    return $Log;
+  protected function initialize() {
   }
 }

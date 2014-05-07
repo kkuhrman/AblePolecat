@@ -1,6 +1,11 @@
 <?php
 /**
- * Public interface to Able Polecat Logger.
+ * @file      polecat/core/Log.php
+ * @brief     Public interface to Able Polecat Logger.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));

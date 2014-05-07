@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Syslog.php
- * Special log file for tracing bootstrap.
+ * @file      polecat/core/Log/Syslog.php
+ * @brief     Special log file for tracing bootstrap.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Clock.php');
@@ -9,14 +13,35 @@ require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Log.php');
 
 class AblePolecat_Log_Syslog extends AblePolecat_LogAbstract {
   
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
   /**
-   * Extends __construct().
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  protected function initialize() {
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
   
   /**
-   * Helper function. Queue messages.
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Log_Syslog or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    return new AblePolecat_Log_Syslog();
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_LogInterface.
+   ********************************************************************************/
+  
+  /**
+   * Queue messages.
    * 
    * @param string $type STATUS | WARNING | ERROR.
    * @param string $msg  Body of message.
@@ -47,22 +72,13 @@ class AblePolecat_Log_Syslog extends AblePolecat_LogAbstract {
     }
   }
   
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Log_Syslog or NULL.
+   * Extends __construct().
    */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    return new AblePolecat_Log_Syslog();
+  protected function initialize() {
   }
 }
