@@ -1,10 +1,14 @@
 <?php
 /**
- * @file: PhpVersion.php
- * Check if current PHP version meets Able Polecat core requirement.
+ * @file      polecat/core/Server/Check/PhpVersion.php
+ * @brief     Check if current PHP version meets Able Polecat core requirement.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
-include_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Check.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Check.php')));
 
 class AblePolecat_Server_Check_PhpVersion extends AblePolecat_Server_CheckAbstract {
   

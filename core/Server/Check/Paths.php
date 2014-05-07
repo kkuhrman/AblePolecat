@@ -1,10 +1,14 @@
 <?php
 /**
- * @file: Paths.php
- * Check Able Polecat paths.
+ * @file      polecat/core/Server/Check/Paths.php
+ * @brief     Check Able Polecat paths.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
-include_once(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Check.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Check.php')));
 
 class AblePolecat_Server_Check_Paths extends AblePolecat_Server_CheckAbstract {
   

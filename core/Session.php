@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Session.php
- * Default class for Able Polecat user sessions.
+ * @file      polecat/core/Session.php
+ * @brief     Default class for Able Polecat user sessions.
+  *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');

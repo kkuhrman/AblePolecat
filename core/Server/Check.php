@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Check.php
- * Encapsulates a single system check (test).
+ * @file      polecat/core/Server/Check.php
+ * @brief     Encapsulates a single system check (test).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 interface AblePolecat_Server_CheckInterface {

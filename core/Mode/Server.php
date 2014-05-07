@@ -2,6 +2,10 @@
 /**
  * @file      polecat/core/Mode/Server.php
  * @brief     Highest level in command processing chain of responsibility hierarchy.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));

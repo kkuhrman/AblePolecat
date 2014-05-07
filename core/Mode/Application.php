@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Application.php
- * Base class for Application modes (second most protected).
+ * @file      polecat/core/Mode/Application.php
+ * @brief     Base class for Application modes (second most protected).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Application.php')));

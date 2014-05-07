@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: User.php
- * Base class for User mode (password, security token protected etc).
+ * @file      polecat/core/Mode/User.php
+ * @brief     Base class for User mode (password, security token protected etc).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php')));
