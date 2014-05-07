@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Exception/Environment.php
- * Exceptions thrown by Able Polecat Environment objects.
+ * @file      polecat/core/Exception/Environment.php
+ * @brief     Exceptions thrown by Able Polecat Environment objects.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));

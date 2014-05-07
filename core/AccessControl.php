@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: AccessControl.php
- * Manages access control for Able Polecat server.
+ * @file      polecat/core/AccessControl.php
+ * @brief     Manages access control for Able Polecat server.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role.php')));
@@ -30,14 +34,36 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
    */
   private $Session;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
   /**
-   * Extends __construct().
-   * Sub-classes should override to initialize properties.
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
-  protected function initialize() {
-    $this->Agents = array();
-    $this->AgentRoles = array();
-    $this->Session = AblePolecat_Session::wakeup();
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_AccessControl Initialized access control service or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    if (!isset(self::$AccessControl)) {
+      self::$AccessControl = new AblePolecat_AccessControl();
+      //
+      // @todo: load access control matrix
+      //
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_Session')) {
+        echo "your session id is " . AblePolecat_Session::getId();
+      }
+    }
+    return self::$AccessControl;
   }
    
   /**
@@ -210,32 +236,18 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract {
   public function getSession() {
     return $this->Session;
   }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
    
   /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   * Extends __construct().
+   * Sub-classes should override to initialize properties.
    */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_AccessControl Initialized access control service or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (!isset(self::$AccessControl)) {
-      self::$AccessControl = new AblePolecat_AccessControl();
-      //
-      // @todo: load access control matrix
-      //
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_Session')) {
-        echo "your session id is " . AblePolecat_Session::getId();
-      }
-    }
-    return self::$AccessControl;
+  protected function initialize() {
+    $this->Agents = array();
+    $this->AgentRoles = array();
+    $this->Session = AblePolecat_Session::wakeup();
   }
 }
