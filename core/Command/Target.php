@@ -1,7 +1,7 @@
 <?php
 /**
- * @file: Command/Target.php
- * The recipient of a synchronous command within scope of single script execution.
+ * @file      polecat/core/Command/Target.php
+ * @brief     The recipient of a synchronous command within scope of single script execution.
  *
  * Implements the Chain of Responsibility (COR) design pattern by linking with other
  * command target objects.
@@ -15,6 +15,9 @@
  * itself, which subordinate must save as reverse link. Otherwise, if link is not
  * permitted, an exception is thrown and the whole thing fails.
  * 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command.php')));

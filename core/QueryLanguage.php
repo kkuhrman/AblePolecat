@@ -1,7 +1,11 @@
 <?php
 /**
- * QueryLanguage.php
- * Data/object retrieval or manipulation language interface.
+ * @file      polecat/core/QueryLanguage.php
+ * @brief     Data/object retrieval or manipulation language interface.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));

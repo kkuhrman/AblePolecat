@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: CacheObject.php
- * Any object, which can be cached to maintain state or improve performance.
+ * @file      polecat/core/CacheObject.php
+ * @brief     Any object, which can be cached to maintain state or improve performance.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));

@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Overloadable.php
- * Must define methods for marshalling variable argument lists passed to methods.
+ * @file      polecat/Overloadable.php
+ * @brief     Must define methods for marshalling variable argument lists passed to methods.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ArgsList.php')));

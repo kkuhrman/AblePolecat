@@ -1,7 +1,7 @@
 <?php
 /**
- * @file: Mode/Server.php
- * Highest level in command processing chain of responsibility hierarchy.
+ * @file      polecat/core/Mode/Server.php
+ * @brief     Highest level in command processing chain of responsibility hierarchy.
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
@@ -242,6 +242,66 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+  
+  /**
+   * Handle errors triggered by child objects.
+   */
+  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
+    
+    $shutdown = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
+    
+    //
+    // Get error information
+    //
+    $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
+    isset($errfile) ? $msg .= " in $errfile" : NULL;
+    isset($errline) ? $msg .= " line $errline" : NULL;
+    
+    //
+    // @todo: perhaps better diagnostics.
+    // serialize() is not supported for all types
+    //
+    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
+    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
+    
+    //
+    // Send error information to syslog
+    //
+    $type = AblePolecat_LogInterface::STATUS;
+    switch($errno) {
+      default:
+        break;
+      case E_USER_ERROR:
+      case E_ERROR:
+        $type = AblePolecat_LogInterface::ERROR;
+        break;
+      case E_USER_WARNING:
+        $type = AblePolecat_LogInterface::WARNING;
+        break;
+    }
+    AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
+    if ($shutdown) {
+      AblePolecat_Server::shutdown();
+    }
+    return $shutdown;
+  }
+  
+  /**
+   * Handle exceptions thrown by child objects.
+   */
+  public static function handleException(Exception $Exception) {
+    $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
+      $Exception->getCode(),
+      $Exception->getFile(),
+      $Exception->getLine(),
+      $Exception->getMessage()
+    );
+    AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
    
@@ -341,62 +401,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     }
     
     return $state;
-  }
-  
-  /**
-   * Handle errors triggered by child objects.
-   */
-  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
-    
-    $shutdown = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
-    
-    //
-    // Get error information
-    //
-    $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
-    isset($errfile) ? $msg .= " in $errfile" : NULL;
-    isset($errline) ? $msg .= " line $errline" : NULL;
-    
-    //
-    // @todo: perhaps better diagnostics.
-    // serialize() is not supported for all types
-    //
-    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
-    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
-    
-    //
-    // Send error information to syslog
-    //
-    $type = AblePolecat_LogInterface::STATUS;
-    switch($errno) {
-      default:
-        break;
-      case E_USER_ERROR:
-      case E_ERROR:
-        $type = AblePolecat_LogInterface::ERROR;
-        break;
-      case E_USER_WARNING:
-        $type = AblePolecat_LogInterface::WARNING;
-        break;
-    }
-    AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
-    if ($shutdown) {
-      AblePolecat_Server::shutdown();
-    }
-    return $shutdown;
-  }
-  
-  /**
-   * Handle exceptions thrown by child objects.
-   */
-  public static function handleException(Exception $Exception) {
-    $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
-      $Exception->getCode(),
-      $Exception->getFile(),
-      $Exception->getLine(),
-      $Exception->getMessage()
-    );
-    AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
   }
     
   /**

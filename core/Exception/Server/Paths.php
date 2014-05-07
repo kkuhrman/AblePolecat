@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Exceptions/Server/Paths.php
- * Exceptions thrown by Able Polecat relating to system paths.
+ * @file      polecat/core/Exceptions/Server/Paths.php
+ * @brief     Exceptions thrown by Able Polecat relating to system paths.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Server.php')));

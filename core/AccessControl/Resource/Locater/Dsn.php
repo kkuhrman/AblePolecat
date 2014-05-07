@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: polecat/core/AccessControl/Resource/Locater/Dsn.php
- * Encapsulates a resource locater for DSN.
+ * @file      polecat/core/AccessControl/Resource/Locater/Dsn.php
+ * @brief     Encapsulates a resource locater for DSN.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource', 'Locater.php')));
@@ -15,6 +19,24 @@ interface AblePolecat_AccessControl_Resource_Locater_DsnInterface extends AblePo
 }
 
 class AblePolecat_AccessControl_Resource_Locater_Dsn extends AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessControl_Resource_Locater_DsnInterface {
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Resource_LocaterInterface.
+   ********************************************************************************/
+  
+  /**
+   * Create URL.
+   * 
+   * @param DOMString $url Relative or absolute path.
+   * @param optional DOMString $baseURL.
+   *
+   * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
+   */
+  public static function create($url, $baseURL = NULL) {
+    isset($baseURL) ? $url = $baseURL . self::URI_SLASH . $url : NULL;
+    $Locater = new AblePolecat_AccessControl_Resource_Locater_Dsn($url);
+    return $Locater;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Resource_Locater_DsnInterface.
@@ -35,24 +57,6 @@ class AblePolecat_AccessControl_Resource_Locater_Dsn extends AblePolecat_AccessC
     $port = $this->getPort();
     isset($port) ? $dsn .= ";port=$port" : NULL;
     return $dsn;
-  }
-   
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Resource_LocaterInterface.
-   ********************************************************************************/
-  
-  /**
-   * Create URL.
-   * 
-   * @param DOMString $url Relative or absolute path.
-   * @param optional DOMString $baseURL.
-   *
-   * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
-   */
-  public static function create($url, $baseURL = NULL) {
-    isset($baseURL) ? $url = $baseURL . self::URI_SLASH . $url : NULL;
-    $Locater = new AblePolecat_AccessControl_Resource_Locater_Dsn($url);
-    return $Locater;
   }
   
   /********************************************************************************

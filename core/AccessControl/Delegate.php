@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: AccessControl/Delegate.php
- * An object to which certain access control responsibilities have been delegated.
+ * @file      polecat/AccessControl/Delegate.php
+ * @brief     An object to which certain access control responsibilities have been delegated.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));

@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Server.php
- * The server access control agent is the super administrator within Able Polecat.
+ * @file      polecat/core/AccessControl/Agent/Server.php
+ * @brief     The server access control agent is the super administrator within Able Polecat.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
@@ -14,12 +18,6 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
    */
   const UUID = '4d29bf99-beb7-44b1-bd3b-83f5bba31165';
   const NAME = 'Server Agent';
-  
-  /**
-   * Extends __construct().
-   */
-  protected function initialize() {
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -74,5 +72,15 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
       throw new AblePolecat_AccessControl_Exception($msg, AblePolecat_Error::ACCESS_DENIED);
     }
     return $Agent;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
   }
 }

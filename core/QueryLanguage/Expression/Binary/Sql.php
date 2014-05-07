@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Sql.php
- * Interface for a binary SQL expression.
+ * @file      polecat/core/QueryLanguage/Expression/Binary/Sql.php
+ * @brief     Interface for a SQL binary expression.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary.php')));
@@ -11,6 +15,10 @@ interface AblePolecat_QueryLanguage_Expression_Binary_SqlInterface extends AbleP
 
 class AblePolecat_QueryLanguage_Expression_Binary_Sql extends AblePolecat_QueryLanguage_Expression_BinaryAbstract {
   
+  /********************************************************************************
+   * Implementation of AblePolecat_QueryLanguage_ExpressionInterface.
+   ********************************************************************************/
+   
   /**
    * @return query langauge expression as a string.
    */

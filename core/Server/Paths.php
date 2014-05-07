@@ -1,7 +1,11 @@
 <?php 
 /**
- * @file: Paths.php
- * Encapsulates Able Polecat server, application and user path utilities.
+ * @file      polecat/core/Server/Paths.php
+ * @brief     Encapsulates Able Polecat server, application and user path utilities.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Server', 'Paths.php')));

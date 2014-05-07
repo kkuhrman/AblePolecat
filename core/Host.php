@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: polecat/Host.php
- * Base class for [virtual] computer host acting as either client or server (request/response).
+ * @file      polecat/core/Host.php
+ * @brief     Base class for host acting as either client or server (request/response).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 if (!defined('URI_SLASH')) {
@@ -75,6 +79,10 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
    * @var Array Query string arguments.
    */
   private $query_string;
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Return info relating to analysis of URI request path.

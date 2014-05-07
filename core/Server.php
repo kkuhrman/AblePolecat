@@ -1,7 +1,7 @@
 <?php
 /**
- * @file: Server.php
- * Server as in 'client-server' and also as in $_SERVER[].
+ * @file      polecat/core/Server.php
+ * @brief     Routes HTTP(S) request and returns response.
  *
  * Server has the following duties:
  * 1. Marshall web server REQUEST
@@ -12,24 +12,18 @@
  * 6. Act as terminal/final command target
  * 7. Act as binding access control arbitrator
  *
- * BEGIN 2014-04 Notes
- * An Able Polecat 'host' is a virtual server (or client), which receives 
- * an HTTP request and returns an HTTP response (with an XML or HTML entity
- * body). The Able Polecat application point of entry is always routeRequest().
- *
- * After a call to routeRequest(), the server (or client) will do the following:
- * 1. Filter/sanitize path, query string and entity body (if applicable)
- * 2. Check sanitized path parts for conformance to Able Polecat resource request syntax.
- * 3. Validate that host has access to requested resource (independent of user access rights).
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.4.0');
-define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_4_0_DEV');
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.5.0');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_5_0_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
-define('ABLE_POLECAT_VERSION_MINOR', '4');
+define('ABLE_POLECAT_VERSION_MINOR', '5');
 define('ABLE_POLECAT_VERSION_REVISION', '0');
 
 /**
@@ -287,8 +281,8 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         //
       }
       else {
-        $requestPathInfo = $Request->getResource()->getRequestPathInfo();
-        switch ($requestPathInfo[AblePolecat_Url::URI_RESOURCE_NAME]) {
+        $requestPathInfo = self::$Host->getRequestPathInfo();
+        switch ($requestPathInfo[self::URI_RESOURCE_NAME]) {
           default:
             //
             // @todo: get agent from user mode
@@ -305,7 +299,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
             $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Host->CommandChain[self::RING_SERVER_MODE]);
             self::$Host->Response = $ServiceBus->dispatch($Agent, $Request);
             break;
-          case AblePolecat_Url::URI_SLASH:
+          case self::URI_SLASH:
             self::$Host->sendDefaultResponse();
             break;
         }

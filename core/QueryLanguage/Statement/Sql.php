@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Sql.php
- * Base class for most SQL statement objects.
+ * @file      polecat/core/QueryLanguage/Statement/Sql.php
+ * @brief     Base class for most SQL statement objects.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Statement.php')));
@@ -64,34 +68,234 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    */
   private static $supportedSql = NULL;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_DynamicObjectInterface.
+   ********************************************************************************/
+   
   /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize arguments.
+   * Override base class implementation of __set() magic method so as to use syntax checking.
    */
-  protected function initialize() {
+  public function __set($name, $value) {
     
-    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
-      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        // 'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
-        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
-        // '__construct'
-      // );
-    // }
-    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
-      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        // 'AblePolecat_Data_Scalar_String', 
-        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
-        // 'typeCast'
-      // );
-    // }
+    switch ($name) {
+      default:
+        parent::__set($name, $value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::DML:
+        $this->setDmlOp($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES:
+        $this->setTables($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS:
+        $this->setColumns($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE:
+        $this->setWhereCondition($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING:
+        $this->setHavingCondition($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY:
+        $this->setGroupByExpression($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY:
+        $this->setOrderByExpression($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT:
+        $this->setLimit($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET:
+        $this->setOffset($value);
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES:
+        $this->setValues($value);
+        break;
+    }
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_OverloadableInterface.
+   ********************************************************************************/
+  
+  /**
+   * Marshall numeric-indexed array of variable method arguments.
+   *
+   * @param string $method_name __METHOD__ will render className::methodName; __FUNCTION__ is probably good enough.
+   * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
+   * @param mixed $options Reserved for future use.
+   *
+   * @return Array Associative array representing [argument name] => [argument value]
+   */
+  public static function unmarshallArgsList($method_name, $args, $options = NULL) {
+    
+    $ArgsList = AblePolecat_ArgsList::create();
+    
+    foreach($args as $key => $value) {
+      switch ($method_name) {
+        default:
+          break;
+        case 'create':
+          switch($key) {
+            case 0:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::DML} = $value;
+              break;
+            case 1:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES} = $value;
+              break;
+            case 2:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS} = $value;
+              break;
+            case 3:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE} = $value;
+              break;
+            case 4:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY} = $value;
+              break;
+            case 5:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES} = $value;
+              break;
+            case 6:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT} = $value;
+              break;
+            case 7:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET} = $value;
+              break;
+            case 8:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY} = $value;
+              break;
+            case 9:
+              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING} = $value;
+              break;
+          }
+          break;
+      }
+    }
+    return $ArgsList;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_QueryLanguage_StatementInterface.
+   ********************************************************************************/
+  
+  /**
+   * @return query langauge statement as a string.
+   */
+  public function __toString() {
+    
+    $sqlStatement = '';
+    $tokens = array($this->getDmlOp());
+    switch($this->getDmlOp()) {
+      default:
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
+        $tokens[] = $this->getColumns();
+        if ($this->getTables()) {
+          $tokens[] = 'FROM';
+          $tokens[] = $this->getTables();
+        }
+        if ($this->getWhereCondition()) {
+          $tokens[] = 'WHERE';
+          $tokens[] = $this->getWhereCondition();
+        }
+        if ($this->getGroupByExpression()) {
+          $tokens[] = 'GROUP BY';
+          $tokens[] = $this->getGroupByExpression();
+        }
+        if ($this->getHavingCondition()) {
+          $tokens[] = 'HAVING';
+          $tokens[] = $this->getHavingCondition();
+        }
+        if ($this->getOrderByExpression()) {
+          $tokens[] = 'ORDER BY';
+          $tokens[] = $this->getOrderByExpression();
+        }
+        $tokens[] = $this->getLimitOffsetSyntax();
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
+        if ($this->getTables()) {
+          $tokens[] = 'INTO';
+          $tokens[] = $this->getTables();
+        }
+        $tokens[] = '(' . $this->getColumns() . ')';
+        $tokens[] = 'VALUES (' . $this->getValues() . ')';
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE:
+        if ($this->getTables()) {
+          $tokens[] = 'INTO';
+          $tokens[] = $this->getTables();
+        }
+        $tokens[] = '(' . $this->getColumns() . ')';
+        $tokens[] = 'VALUES (' . $this->getValues() . ')';
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE:
+        $tokens[] = $this->getTables();
+        $tokens[] = 'SET';
+        $tokens[] = $this->getColumns();
+        if ($this->getWhereCondition()) {
+          $tokens[] = 'WHERE';
+          $tokens[] = $this->getWhereCondition();
+        }
+        if ($this->getOrderByExpression()) {
+          $tokens[] = 'ORDER BY';
+          $tokens[] = $this->getOrderByExpression();
+        }
+        $tokens[] = $this->getLimitOffsetSyntax();
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE:
+        if ($this->getTables()) {
+          $tokens[] = 'FROM';
+          $tokens[] = $this->getTables();
+        }
+        if ($this->getWhereCondition()) {
+          $tokens[] = 'WHERE';
+          $tokens[] = $this->getWhereCondition();
+        }
+        if ($this->getOrderByExpression()) {
+          $tokens[] = 'ORDER BY';
+          $tokens[] = $this->getOrderByExpression();
+        }
+        $tokens[] = $this->getLimitOffsetSyntax();
+        break;
+    }
+    $sqlStatement = implode(' ', $tokens);
+    return trim($sqlStatement);
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_QueryLanguage_Statement_Sql_Interface.
+   ********************************************************************************/
+  
+  /**
+   * Verifies if given syntax element is supported.
+   *
+   * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
+   * @param string $element One of the predefined SQL syntax element constants.
+   *
+   * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
+   */
+  public static function supportsSyntax($dml, $element = NULL) {
+    
+    $Supported = FALSE;
     
     //
     // Initialize SQL support settings (for static method calls).
     //
     self::setSqlSyntaxSupport();
+    
+    if (isset($element)) {
+      isset(self::$supportedSql[$dml][$element]) ? $Supported = self::$supportedSql[$dml][$element] : $Supported = FALSE;
+    }
+    else {
+      $Supported = isset(self::$supportedSql[$dml]);
+    }
+    return $Supported;
   }
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
   /**
    * Initialize class from creational method variable args list.
    * 
@@ -226,32 +430,6 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   }
   
   /**
-   * Verifies if given syntax element is supported.
-   *
-   * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
-   * @param string $element One of the predefined SQL syntax element constants.
-   *
-   * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
-   */
-  public static function supportsSyntax($dml, $element = NULL) {
-    
-    $Supported = FALSE;
-    
-    //
-    // Initialize SQL support settings (for static method calls).
-    //
-    self::setSqlSyntaxSupport();
-    
-    if (isset($element)) {
-      isset(self::$supportedSql[$dml][$element]) ? $Supported = self::$supportedSql[$dml][$element] : $Supported = FALSE;
-    }
-    else {
-      $Supported = isset(self::$supportedSql[$dml]);
-    }
-    return $Supported;
-  }
-  
-  /**
    * @return string DML operation.
    */
   public function getDmlOp() {
@@ -262,49 +440,49 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    * @return string Table references.
    */
   public function getTables() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES, NULL);
   }
   
   /**
    * @return string Column list.
    */
   public function getColumns() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS, NULL);
   }
   
   /**
    * @return string WHERE condition.
    */
   public function getWhereCondition() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE, NULL);
   }
   
   /**
    * @return string HAVING condition.
    */
   public function getHavingCondition() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING, NULL);
   }
   
   /**
    * @return string GROUP BY expression.
    */
   public function getGroupByExpression() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY, NULL);
   }
   
   /**
    * @return string ORDER BY expression.
    */
   public function getOrderByExpression() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY, NULL);
   }
   
   /**
    * @return string LIMIT.
    */
   public function getLimit() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT, NULL);
   }
   
   /**
@@ -326,56 +504,14 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    * @return string OFFSET.
    */
   public function getOffset() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET, NULL);
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET, NULL);
   }
   
   /**
    * @return string VALUES.
    */
   public function getValues() {
-    return $this->getPropertySafe(AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES, NULL);
-  }
-  
-  /**
-   * Override base class implementation of __set() magic method so as to use syntax checking.
-   */
-  public function __set($name, $value) {
-    
-    switch ($name) {
-      default:
-        parent::__set($name, $value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::DML:
-        $this->setDmlOp($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES:
-        $this->setTables($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS:
-        $this->setColumns($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE:
-        $this->setWhereCondition($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING:
-        $this->setHavingCondition($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY:
-        $this->setGroupByExpression($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY:
-        $this->setOrderByExpression($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT:
-        $this->setLimit($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET:
-        $this->setOffset($value);
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES:
-        $this->setValues($value);
-        break;
-    }
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES, NULL);
   }
   
   /**
@@ -652,146 +788,6 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   }
   
   /**
-   * Marshall numeric-indexed array of variable method arguments.
-   *
-   * @param string $method_name __METHOD__ will render className::methodName; __FUNCTION__ is probably good enough.
-   * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
-   * @param mixed $options Reserved for future use.
-   *
-   * @return Array Associative array representing [argument name] => [argument value]
-   */
-  public static function unmarshallArgsList($method_name, $args, $options = NULL) {
-    
-    $ArgsList = AblePolecat_ArgsList::create();
-    
-    foreach($args as $key => $value) {
-      switch ($method_name) {
-        default:
-          break;
-        case 'create':
-          switch($key) {
-            case 0:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::DML} = $value;
-              break;
-            case 1:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES} = $value;
-              break;
-            case 2:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS} = $value;
-              break;
-            case 3:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::WHERE} = $value;
-              break;
-            case 4:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY} = $value;
-              break;
-            case 5:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES} = $value;
-              break;
-            case 6:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT} = $value;
-              break;
-            case 7:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET} = $value;
-              break;
-            case 8:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::GROUPBY} = $value;
-              break;
-            case 9:
-              $ArgsList->{AblePolecat_QueryLanguage_Statement_Sql_Interface::HAVING} = $value;
-              break;
-          }
-          break;
-      }
-    }
-    return $ArgsList;
-  }
-  
-  /**
-   * @return query langauge statement as a string.
-   */
-  public function __toString() {
-    
-    $sqlStatement = '';
-    $tokens = array($this->getDmlOp());
-    switch($this->getDmlOp()) {
-      default:
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
-        $tokens[] = $this->getColumns();
-        if ($this->getTables()) {
-          $tokens[] = 'FROM';
-          $tokens[] = $this->getTables();
-        }
-        if ($this->getWhereCondition()) {
-          $tokens[] = 'WHERE';
-          $tokens[] = $this->getWhereCondition();
-        }
-        if ($this->getGroupByExpression()) {
-          $tokens[] = 'GROUP BY';
-          $tokens[] = $this->getGroupByExpression();
-        }
-        if ($this->getHavingCondition()) {
-          $tokens[] = 'HAVING';
-          $tokens[] = $this->getHavingCondition();
-        }
-        if ($this->getOrderByExpression()) {
-          $tokens[] = 'ORDER BY';
-          $tokens[] = $this->getOrderByExpression();
-        }
-        $tokens[] = $this->getLimitOffsetSyntax();
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
-        if ($this->getTables()) {
-          $tokens[] = 'INTO';
-          $tokens[] = $this->getTables();
-        }
-        $tokens[] = '(' . $this->getColumns() . ')';
-        $tokens[] = 'VALUES (' . $this->getValues() . ')';
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE:
-        if ($this->getTables()) {
-          $tokens[] = 'INTO';
-          $tokens[] = $this->getTables();
-        }
-        $tokens[] = '(' . $this->getColumns() . ')';
-        $tokens[] = 'VALUES (' . $this->getValues() . ')';
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::UPDATE:
-        $tokens[] = $this->getTables();
-        $tokens[] = 'SET';
-        $tokens[] = $this->getColumns();
-        if ($this->getWhereCondition()) {
-          $tokens[] = 'WHERE';
-          $tokens[] = $this->getWhereCondition();
-        }
-        if ($this->getOrderByExpression()) {
-          $tokens[] = 'ORDER BY';
-          $tokens[] = $this->getOrderByExpression();
-        }
-        $tokens[] = $this->getLimitOffsetSyntax();
-        break;
-      case AblePolecat_QueryLanguage_Statement_Sql_Interface::DELETE:
-        if ($this->getTables()) {
-          $tokens[] = 'FROM';
-          $tokens[] = $this->getTables();
-        }
-        if ($this->getWhereCondition()) {
-          $tokens[] = 'WHERE';
-          $tokens[] = $this->getWhereCondition();
-        }
-        if ($this->getOrderByExpression()) {
-          $tokens[] = 'ORDER BY';
-          $tokens[] = $this->getOrderByExpression();
-        }
-        $tokens[] = $this->getLimitOffsetSyntax();
-        break;
-    }
-    $sqlStatement = implode(' ', $tokens);
-    return trim($sqlStatement);
-  }
-  
-  /**
    * Helper functions.
    */
   public function delete() {
@@ -915,6 +911,34 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     $this->setValues($ValuesQuotes);
     return $this;
   }
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize arguments.
+   */
+  protected function initialize() {
+    
+    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
+      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        // 'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
+        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
+        // '__construct'
+      // );
+    // }
+    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
+      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
+        // 'AblePolecat_Data_Scalar_String', 
+        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
+        // 'typeCast'
+      // );
+    // }
+    
+    //
+    // Initialize SQL support settings (for static method calls).
+    //
+    self::setSqlSyntaxSupport();
+  }
 }
 
 /**
@@ -946,15 +970,10 @@ function __SQLEXPR() {
 
 class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
   
-  /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize arguments.
-   */
-  protected function initialize() {
-    parent::initialize();
-  }
-  
+  /********************************************************************************
+   * Implementation of AblePolecat_QueryLanguage_StatementInterface.
+   ********************************************************************************/
+   
   public static function create() {
     //
     // Create a new query object.
@@ -971,5 +990,18 @@ class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
     // Return initialized object.
     //
     return $Query;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize arguments.
+   */
+  protected function initialize() {
+    parent::initialize();
   }
 }

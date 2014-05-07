@@ -1,11 +1,15 @@
 <?php
 /**
- * @file: Server.php
- * Environment for Able Polecat Server Mode.
+ * @file      polecat/core/Environment/Server.php
+ * @brief     Environment for Able Polecat Server Mode.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Conf', 'Dom.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   
@@ -13,16 +17,14 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   const NAME = 'Able Polecat Server Environment';
   
   /**
+   * Configuration file constants.
+   */
+  const CONF_FILENAME_HOST        = 'host.xml';
+  
+  /**
    * @var AblePolecat_Environment_Server Singleton instance.
    */
   private static $Environment = NULL;
-  
-  /**
-   * Extends __construct(). 
-   */
-  protected function initialize() {
-    parent::initialize();
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -75,22 +77,38 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         self::$Environment = new AblePolecat_Environment_Server($Subject);
         
         //
-        // Merge system-wide configuration settings from one or more XML doc(s).
+        // Get database settings from configuration file.
         //
-        $SysConfig = AblePolecat_Conf_Dom::wakeup($Subject);
+        $confPath = implode(DIRECTORY_SEPARATOR, 
+          array(
+            AblePolecat_Server_Paths::getFullPath('conf'),
+            self::CONF_FILENAME_HOST
+          )
+        );
+        $Conf = new DOMDocument();
+        $Conf->load($confPath);
+        $DbNodes = AblePolecat_Dom::getElementsByTagName($Conf, 'database');
+        $db_state = array();
+        foreach($DbNodes as $key => $Node) {
+          if (($Node->getAttribute('name') == 'polecat') && ($Node->getAttribute('use'))) {
+            $db_state['name'] = $Node->getAttribute('name');
+            $db_state['mode'] = $Node->getAttribute('mode');
+            $db_state['use'] = $Node->getAttribute('use');
+            foreach($Node->childNodes as $key => $childNode) {
+              if($childNode->nodeName == 'dsn') {
+                $db_state['dsn'] = $childNode->nodeValue;
+              }
+            }
+          }
+        }
         
         //
         // Initialize system environment variables from conf file.
         //
         self::$Environment->setVariable(
           $Subject,
-          AblePolecat_Server::SYSVAR_CORE_VERSION,
-          $SysConfig->getCoreVersion()
-        );
-        self::$Environment->setVariable(
-          $Subject,
           AblePolecat_Server::SYSVAR_CORE_DATABASE,
-          $SysConfig->getCoreDatabaseConf()
+          $db_state
         );
       }
       catch (Exception $Exception) {
@@ -99,5 +117,16 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       }
     }
     return self::$Environment;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
+  /**
+   * Extends __construct(). 
+   */
+  protected function initialize() {
+    parent::initialize();
   }
 }

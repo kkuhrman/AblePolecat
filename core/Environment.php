@@ -1,9 +1,11 @@
 <?php
 /**
- * @file: Environment.php
- * Base class for Able Polecat Environment objects.
+ * @file      polecat/core/Environment.php
+ * @brief     Base class for Able Polecat Environment objects.
  *
- * Duties of the Environment object:
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
@@ -41,12 +43,9 @@ abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_CacheObjectAb
    */
   private $Variables;
   
-  /**
-   * Extends __construct(). 
-   */
-  protected function initialize() {
-    $this->Variables = array();
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_EnvironmentInterface.
+   ********************************************************************************/
   
   /**
    * Returns assigned value of given environment variable.
@@ -90,5 +89,16 @@ abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_CacheObjectAb
     $set = TRUE;
 
     return $set;
+  }
+  
+  /********************************************************************************
+   Helper functions.
+   ********************************************************************************/
+   
+  /**
+   * Extends __construct(). 
+   */
+  protected function initialize() {
+    $this->Variables = array();
   }
 }

@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Command/Result.php
- * Encapsulates success/failure status of command execution and return result.
+ * @file      polecat/Command/Result.php
+ * @brief     Encapsulates success/failure status of command execution and return result.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 class AblePolecat_Command_Result {

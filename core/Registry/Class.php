@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Registry/Class.php
- * Handles registration and lazy loading of Able Polecat classes.
+ * @file      polecat/core/Registry/Class.php
+ * @brief     Handles registration and lazy loading of Able Polecat classes.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -27,6 +31,44 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * @var Array Registry of classes which can be loaded.
    */
   private $Classes;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Registry_Class Initialized server resource ready for business or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    if (!isset(self::$Registry)) {
+      try {
+        self::$Registry = new AblePolecat_Registry_Class($Subject);
+      }
+      catch (Exception $Exception) {
+        self::$Registry = NULL;
+        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
+      }
+    }
+    return self::$Registry;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Extends constructor.
@@ -226,35 +268,5 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     }
     
     return $registered;
-  }
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Registry_Class Initialized server resource ready for business or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$Registry)) {
-      try {
-        self::$Registry = new AblePolecat_Registry_Class($Subject);
-      }
-      catch (Exception $Exception) {
-        self::$Registry = NULL;
-        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
-      }
-    }
-    return self::$Registry;
   }
 }

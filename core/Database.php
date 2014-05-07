@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Database.php
- * Base class for Able Polecat database clients.
+ * @file      Database.php
+ * @brief     Base class for Able Polecat database clients.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));

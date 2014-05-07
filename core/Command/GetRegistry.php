@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Command/GetRegistry.php
- * Retrieve a registry object.
+ * @file      polecat/Command/GetRegistry.php
+ * @brief     Retrieve a registry object.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Reverse.php')));

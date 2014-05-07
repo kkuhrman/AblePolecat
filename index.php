@@ -1,29 +1,28 @@
 <?php
 /**
- * @file: index.php
- * Default point of entry for Able Polecat.
- *
- * All Able Polecat Project software is released under the BSD 2 License.
- * @see: LICENSE.md.
+ * @file      polecat/index.php
+ * @brief     All requests to Able Polecat are routed through index.php.
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  */
  
 /**
  * Root directory of the entire Able Polecat core project.
  */
-// if (!defined('ABLE_POLECAT_ROOT')) {
-  // $ABLE_POLECAT_ROOT = __DIR__;
-  // define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
-// }
+if (!defined('ABLE_POLECAT_ROOT')) {
+  $ABLE_POLECAT_ROOT = __DIR__;
+  define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
+}
 
 /**
  * Location of Able Polecat core class library.
  * Override this definition if you intend to locate the core class library
  * anywhere other than ABLE_POLECAT_ROOT/core.
  */
-// if (!defined('ABLE_POLECAT_CORE')) {
-  // $ABLE_POLECAT_CORE = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'core';
-  // define('ABLE_POLECAT_CORE', $ABLE_POLECAT_CORE);
-// }
+if (!defined('ABLE_POLECAT_CORE')) {
+  $ABLE_POLECAT_CORE = implode(DIRECTORY_SEPARATOR, array(dirname(__DIR__), 'public', 'core'));
+  define('ABLE_POLECAT_CORE', $ABLE_POLECAT_CORE);
+}
 
 /**
  * Host-specific system-wide configuration files directory.
@@ -57,18 +56,8 @@
 // }
 
 /**
- * Bootstrap Able Polecat.
- * Override this if you redefine the constant ABLE_POLECAT_CORE like so:
- * require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server.php')));
+ * Route HTTP request.
  */
-require_once(implode(DIRECTORY_SEPARATOR, array(__DIR__, 'core', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server.php')));
 
-try {
-  AblePolecat_Server::routeRequest();
-}
-catch (AblePolecat_Exception $Exception) {
-  //
-  // @todo: unhandled exception
-  //
-}
-?>
+AblePolecat_Server::routeRequest();

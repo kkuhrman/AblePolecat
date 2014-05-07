@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Registry/ClassLibrary.php
- * Manages registry of third-pary class libraries used by modules.
+ * @file      polecat/core/Registry/ClassLibrary.php
+ * @brief     Manages registry of third-pary class libraries used by modules.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -19,30 +23,11 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    */
   private $ClassLibraries = NULL;
   
-    /**
-   * Extends constructor.
-   */
-  protected function initialize() {
-    
-    //
-    // Supported modules.
-    //
-    $this->ClassLibraries = array();
-    
-    $sql = __SQL()->          
-      select('classLibraryName', 'classLibraryId', 'classLibraryType', 'major', 'minor', 'revision', 'classLibraryDirectory')->
-      from('classlib');
-    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    if($Result->success()) {
-      $ClassLibraries = $Result->value();
-      foreach($ClassLibraries as $key => $classlib) {
-        $classLibraryName = $classlib['classLibraryName'];
-        $this->ClassLibraries[$classLibraryName] = $classlib;
-      }
-    }
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
-    /**
+  /**
    * Serialize object to cache.
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
@@ -69,5 +54,32 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       }
     }
     return self::$Registry;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+    /**
+   * Extends constructor.
+   */
+  protected function initialize() {
+    
+    //
+    // Supported modules.
+    //
+    $this->ClassLibraries = array();
+    
+    $sql = __SQL()->          
+      select('classLibraryName', 'classLibraryId', 'classLibraryType', 'major', 'minor', 'revision', 'classLibraryDirectory')->
+      from('classlib');
+    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    if($Result->success()) {
+      $ClassLibraries = $Result->value();
+      foreach($ClassLibraries as $key => $classlib) {
+        $classLibraryName = $classlib['classLibraryName'];
+        $this->ClassLibraries[$classLibraryName] = $classlib;
+      }
+    }
   }
 }

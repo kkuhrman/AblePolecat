@@ -1,13 +1,16 @@
 <?php
 /**
- * @file: Response.php
- * Base class for all response messages in Able Polecat.
+ * @file      polecat/Message/Response.php
+ * @brief     Base class for all response messages in Able Polecat.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Message.php');
 
-interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInterface, AblePolecat_OverloadableInterface {
+interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInterface {
   
   const STATUS_CODE             = 'status_code';
   const REASON_PHRASE           = 'reason_phrase';
@@ -19,6 +22,21 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   const HEAD_CONTENT_TYPE_XML   = 'Content-type: text/xml; charset=utf-8';
   
   const BODY_DOCTYPE_XML        = "<?xml version='1.0' standalone='yes'?>";
+  
+  /**
+   * @return string The response status code.
+   */
+  public function getStatusCode();
+  
+  /**
+   * @return string The response reason phrase.
+   */
+  public function getReasonPhrase();
+  
+  /**
+   * Send HTTP Response.
+   */
+  public function send();
 }
 
 abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_ResponseInterface {
@@ -38,17 +56,35 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    */
   private $headerFields;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_Message_ResponseInterface.
+   ********************************************************************************/
+  
   /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize properties.
+   * @return string The response status code.
    */
-  protected function initialize() {
-    $this->m_status_code = 0;
-    $this->m_reason_phrase = '';
-    $this->headerFields = array();
-    // AblePolecat_Error::INVALID_HTTP_RESPONSE
+  public function getStatusCode() {
+    return $this->m_status_code;
   }
+  
+  /**
+   * @return string The response reason phrase.
+   */
+  public function getReasonPhrase() {
+    return $this->m_reason_phrase;
+  }
+  
+  /**
+   * Send HTTP Response.
+   */
+  public function send() {
+    $this->sendHead();
+    $this->sendBody();
+  }
+   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Send HTTP response headers.
@@ -244,25 +280,15 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   }
   
   /**
-   * @return string The response status code.
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize properties.
    */
-  public function getStatusCode() {
-    return $this->m_status_code;
-  }
-  
-  /**
-   * @return string The response reason phrase.
-   */
-  public function getReasonPhrase() {
-    return $this->m_reason_phrase;
-  }
-  
-  /**
-   * Send HTTP Response.
-   */
-  public function send() {
-    $this->sendHead();
-    $this->sendBody();
+  protected function initialize() {
+    $this->m_status_code = 0;
+    $this->m_reason_phrase = '';
+    $this->headerFields = array();
+    // AblePolecat_Error::INVALID_HTTP_RESPONSE
   }
   
   /**
@@ -273,6 +299,47 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
 }
 
 class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract {
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_DynamicObjectInterface.
+   ********************************************************************************/
+  
+  /**
+   * Create a concrete instance of AblePolecat_MessageInterface.
+   *
+   * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
+   */
+  public static function create() {
+    
+    //
+    // Create a new response object.
+    //
+    $Response = new AblePolecat_Message_Response();
+    
+    //
+    // Unmarshall (from numeric keyed index to named properties) variable args list.
+    //
+    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
+    
+    //
+    // Assign properties from variable args list.
+    //
+    $Response->setStatusCode(
+      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
+    );
+    $Response->appendHeaderFields(
+      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
+    );
+    
+    //
+    // Return initialized object.
+    //
+    return $Response;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_OverloadableInterface.
+   ********************************************************************************/
   
   /**
    * Marshall numeric-indexed array of variable method arguments.
@@ -304,38 +371,5 @@ class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract 
       }
     }
     return $ArgsList;
-  }
-  
-  /**
-   * Create a concrete instance of AblePolecat_MessageInterface.
-   *
-   * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
-   */
-  public static function create() {
-    
-    //
-    // Create a new response object.
-    //
-    $Response = new AblePolecat_Message_Response();
-    
-    //
-    // Unmarshall (from numeric keyed index to named properties) variable args list.
-    //
-    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-    
-    //
-    // Assign properties from variable args list.
-    //
-    $Response->setStatusCode(
-      $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
-    );
-    $Response->appendHeaderFields(
-      $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
-    );
-    
-    //
-    // Return initialized object.
-    //
-    return $Response;
   }
 }

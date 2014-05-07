@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Pdo.php
- * Encapsulates a PDO database connection.
+ * @file      polecat/core/Database/Pdo.php
+ * @brief     Encapsulates a PDO database connection.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');

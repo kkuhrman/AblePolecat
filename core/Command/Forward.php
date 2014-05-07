@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Command/Forward.php
- * Encapsulates a command, which is passed from highest ranking to lowest target along CoR.
+ * @file      Command/Forward.php
+ * @brief     Encapsulates a command, which is passed from highest ranking to lowest target along CoR.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command.php')));

@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Application.php
- * Base class for access control for applications using Able Polecat.
+ * @file      Application.php
+ * @brief     Base class for access control for applications using Able Polecat.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
@@ -13,12 +17,6 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
    */
   const UUID = '6c1c36d0-60bd-11e2-bcfd-0800200c9a66';
   const NAME = 'Application';
-  
-  /**
-   * Extends __construct().
-   */
-  protected function initialize() {
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -73,5 +71,15 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
       throw new AblePolecat_AccessControl_Exception($msg, AblePolecat_Error::ACCESS_DENIED);
     }
     return $Agent;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
   }
 }

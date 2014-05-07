@@ -1,13 +1,17 @@
 <?php
 /**
- * @file: polecat/core/Dom.php
- * A helper class encapsulates common DOM/XML creation/manipulation routines.
+ * @file      polecat/core/Dom.php
+ * @brief     A helper class encapsulates common DOM/XML creation/manipulation routines.
  *
  * Able Polecat uses DOM settings which often differ from the PHP defaults and
  * this class helps with the tedium of overriding these. It also provides 
  * helper functions for common DOM-related tasks, such as creating a DOM 
  * sub-tree from a markup fragment in a file and then merging it into a DOM
  * document.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 class AblePolecat_Dom {

@@ -1,7 +1,11 @@
 <?php
 /**
- * Expression.php
- * Represents a valid query language expression (e.g. unary, binary).
+ * @file      polecat/core/QueryLanguage/Expression.php
+ * @brief     Represents a valid query language expression (e.g. unary, binary).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 interface AblePolecat_QueryLanguage_ExpressionInterface {

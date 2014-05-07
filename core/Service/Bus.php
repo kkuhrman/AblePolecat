@@ -1,14 +1,17 @@
 <?php
 /**
- * @file: Bus.php
- * Provides a channel for Able Polecat services to communicate with one another.
+ * @file      polecat/core/Service/Bus.php
+ * @brief     Provides a channel for Able Polecat services to communicate with one another.
  *
- * Route messages between services implemented in Able Polecat.
- * Resolve contention between services.
- * Control data transformation and exchange (DTX) between services.
- * Marshal redundant resources (e.g. web service client connections).
- * Handle messaging, exceptions, logging etc.
+ * 1. Route messages between services implemented in Able Polecat.
+ * 2. Resolve contention between services.
+ * 3. Control data transformation and exchange (DTX) between services.
+ * 4. Marshal redundant resources (e.g. web service client connections).
+ * 5. Handle messaging, exceptions, logging etc.
  * 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
@@ -16,7 +19,6 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Put.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 
 /**
  * Manages multiple web services initiator connections and routes messages

@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Resource.php
- * Base class for file resources protected by access control.
+ * @file      polecat/core/AccessControl/Resource/File.php
+ * @brief     Base class for file resources protected by access control.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));

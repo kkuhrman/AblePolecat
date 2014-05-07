@@ -1,7 +1,7 @@
 <?php
 /**
- * @file: Mode.php
- * A link in the command processing chain of responsibility.
+ * @file      polecat/core/Mode.php
+ * @brief     A link in the command processing chain of responsibility.
  *
  * Able Polecat Modes are similar to OS protection rings, in terms of access control,
  * but serve also as an implementation of the chain of responsibility (COR) design 
@@ -16,6 +16,10 @@
  * Important responsibilities of the Mode class:
  * 1. Handle errors and exceptions.
  * 2. Encapsulate environment configuration settings.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Delegate', 'System.php')));
@@ -48,7 +52,8 @@ interface AblePolecat_ModeInterface
 abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstract implements AblePolecat_ModeInterface {
   
   /********************************************************************************
-   * Access control methods.
+   * Implementation of AblePolecat_AccessControl_DelegateInterface.
+   *
    * Overriding these provides opportunity to handle delegated tasks. Otherwise,
    * responsibility should be passed to reverse link (upstream) to higher authority.
    ********************************************************************************/
@@ -207,7 +212,7 @@ abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstra
   }
   
   /********************************************************************************
-   * Error/exceptional handling methods.
+   * Implementation of AblePolecat_ModeInterface.
    ********************************************************************************/
   
   /**
@@ -251,7 +256,7 @@ abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstra
     return $Result;
   }
   /********************************************************************************
-   * Create/destroy methods
+   * Helper functions.
    ********************************************************************************/
    
   /**

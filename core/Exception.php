@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Exception.php
- * Base class for all Able Polecat Exceptions.
+ * @file      polecat/core/Exception.php
+ * @brief     Base class for all Able Polecat Exceptions.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
  
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Error.php');

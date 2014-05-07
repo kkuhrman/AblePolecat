@@ -1,10 +1,15 @@
 <?php
 /**
- * @file: Initiator.php
- * Interface for any class which will dispatch a request to a service (initiate a response).
+ * @file      polecat/core/Service/Initiator.php
+ * @brief     Interface for any class which will dispatch a request to a service (initiate a response).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Service.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 
@@ -45,6 +50,44 @@ abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheOb
    */
   private $lock;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_Service_InitiatorInterface.
+   ********************************************************************************/
+  
+  /**
+   * Dispatch a prepared request to a service.
+   *
+   * @return bool TRUE if the request was dispatched, otherwise FALSE.
+   */
+  public function dispatch() {
+    
+    //
+    // Set lock.
+    //
+    $this->setLock();
+    
+    //
+    // Prepare response.
+    //
+    $Response = AblePolecat_Message_Response::create(200, 'OK');    
+    
+    //
+    // Handle next prepared request.
+    //
+    $PreparedRequest = $this->getNextPreparedRequest();
+    $this->handlePreparedRequest($PreparedRequest, $Response);
+    
+    //
+    // Release lock and return response.
+    //
+    $this->setLock(FALSE);
+    return $Response;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
   /**
    * Handle a prepared request.
    *
@@ -54,16 +97,6 @@ abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheOb
    * @throw AblePolecat_Service_Exception If processing request fails.
    */
   abstract protected function handlePreparedRequest($Request, &$Response);
-  
-  /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize properties.
-   */
-  protected function initialize() {
-    $this->PreparedRequests = array();
-    $this->lock = FALSE;
-  }
   
   /**
    * Return next request prepared for dispatch.
@@ -98,38 +131,12 @@ abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheOb
   }
   
   /**
-   * Dispatch a prepared request to a service.
+   * Extends __construct().
    *
-   * @return bool TRUE if the request was dispatched, otherwise FALSE.
+   * Sub-classes should override to initialize properties.
    */
-  public function dispatch() {
-    
-    //
-    // Set lock.
-    //
-    $this->setLock();
-    
-    //
-    // Prepare response.
-    //
-    $Response = AblePolecat_Message_Response::create(200, 'OK');    
-    
-    //
-    // Handle next prepared request.
-    //
-    $PreparedRequest = $this->getNextPreparedRequest();
-    $this->handlePreparedRequest($PreparedRequest, $Response);
-    
-    //
-    // Release lock and return response.
-    //
-    $this->setLock(FALSE);
-    return $Response;
+  protected function initialize() {
+    $this->PreparedRequests = array();
+    $this->lock = FALSE;
   }
-}
-
-/**
- * Exceptions thrown by Able Polecat services and service clients.
- */
-class AblePolecat_Service_Exception extends AblePolecat_Exception {
 }

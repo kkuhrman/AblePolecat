@@ -1,26 +1,20 @@
 <?php
 /**
- * @file
- * Interface for all Able Polecat messages passed to service bus.
+ * @file      polecat/Message.php
+ * @brief     Interface for all Able Polecat messages passed to service bus.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Message.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
 
-interface AblePolecat_MessageInterface extends AblePolecat_DynamicObjectInterface {
+interface AblePolecat_MessageInterface extends AblePolecat_DynamicObjectInterface, AblePolecat_OverloadableInterface {
+  const ENTITY_BODY   = 'BODY';
+  const HEAD          = 'HEAD';
 }
 
 abstract class AblePolecat_MessageAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_MessageInterface {
-  
-  /**
-   * Helper funciton for outputting message as text.
-   */
-  protected function CRLF() {
-    return sprintf("%c%c", 13, 10);
-  }
-}
-
-/**
-  * Exceptions thrown by Able Polecat message sub-classes.
-  */
-class AblePolecat_Message_Exception extends AblePolecat_Exception {
 }

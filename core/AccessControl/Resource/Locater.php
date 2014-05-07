@@ -1,7 +1,7 @@
 <?php
 /**
- * @file: Locater.php
- * Simple URL interface.
+ * @file      polecat/core/AccessControl/Resource/Locater.php
+ * @brief     Simple URL interface.
  *
  * Intended to follow interface specified by W3C but does not provide public access to 
  * properties (get/set methods provided).
@@ -10,6 +10,10 @@
  *
  * @todo there is much work to do to comply with W3C spec. At present would not trust this 
  * class as more than a crude container for local file paths names and very simple web addresses.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 if (!defined('URI_SLASH')) {

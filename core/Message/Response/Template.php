@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Template.php
- * Creates HTTP response from template stored in database and data supplied at runtime.
+ * @file      polecat/Message/Response/Template.php
+ * @brief     Creates HTTP response from template stored in database and data supplied at runtime.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
@@ -32,47 +36,89 @@ class AblePolecat_Message_Response_Template extends AblePolecat_Message_Response
    */
   private $resource_id;
   
-  /**
-   * Default command invoker.
-   *
-   * @return AblePolecat_AccessControl_SubjectInterface or NULL.
-   */
-  protected function getDefaultCommandInvoker() {
-    return $this->CommandInvoker;
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_DynamicObjectInterface.
+   ********************************************************************************/
   
   /**
-   * Sets the default command handlers (invoker/target).
-   * 
-   * @param AblePolecat_AccessControl_SubjectInterface $Invoker
-   */
-  protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
-    $this->CommandInvoker = $Invoker;
-  }
-  
-  /**
-   * Set substitution NVPs.
+   * Create a concrete instance of AblePolecat_Message_Response_Template.
    *
-   * @param Array NVPs of template place holders and values to insert therein.
+   * @param string $resource_id Id of the template to load from database.
+   * @param Array $substitutions Values to insert into template ordered by name.
+   * @param string $status_code HTTP response status code.
+   * @param Array $fields Optional header fields.
+   *
+   * @return AblePolecat_Message_Response_Template Concrete instance of message or NULL.
    */
-  protected function setSubstitions($substitutions) {
+  public static function create() {
     
-    if (isset($substitutions) && is_array($substitutions)) {
-      $this->substitutions = $substitutions;
+    $Response = new AblePolecat_Message_Response_Template();
+    
+    //
+    // Unmarshall (from numeric keyed index to named properties) variable args list.
+    //
+    $ArgsList = AblePolecat_Message_Response_Template::unmarshallArgsList(__FUNCTION__, func_get_args());
+    
+    //
+    // Assign properties from variable args list.
+    //
+    $Response->setDefaultCommandInvoker(
+      $ArgsList->getArgumentValue(AblePolecat_Message_Response_Template::COMMAND_INVOKER, NULL)
+    );
+    $Response->setResourceId(
+      $ArgsList->getArgumentValue(
+        AblePolecat_Message_Response_Template::RESOURCE_ID, 
+        AblePolecat_Message_Response_Template::DEFAULT_STATUS
+      )
+    );
+    $Response->setSubstitions(
+      $ArgsList->getArgumentValue(AblePolecat_Message_Response_Template::SUBSTITUTIONS, array())
+    );
+    $Response->setStatusCode(
+      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
+    );
+    $Response->appendHeaderFields(
+      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
+    );
+    
+    //
+    // Load template from database.
+    //
+    $Invoker = $Response->getDefaultCommandInvoker();
+    if (isset($Invoker)) {
+      $sql = __SQL()->          
+        select('mimeType', 'defaultHeaders', 'body')->
+        from('template')->
+        where("resourceId = '" . $Response->resource_id . "'");
+      $Result = AblePolecat_Command_DbQuery::invoke($Invoker, $sql);
+      if($Result->success()) {
+        $Template = $Result->value();
+        
+        //
+        // Append headers to response
+        // @todo: handle conflicts/merging
+        //
+        $headers = unserialize($Template[0]['defaultHeaders']);
+        $headers[] = $Template[0]['mimeType'];
+        $Response->appendHeaderFields($headers);
+        
+        //
+        // Insert substitutions into template body
+        //
+        $body = $Template[0]['body'];
+        foreach($Response->substitutions as $name => $value) {
+          $body = str_replace('{' . $name . '}', $value, $body);
+        }
+        $Response->body = $body;
+      }
     }
+    
+    return $Response;
   }
   
-  /**
-   * Set Id of template to load from database.
-   *
-   * @param string Id of the template to load from database.
-   */
-  protected function setResourceId($resource_id) {
-    
-    if (isset($resource_id)) {
-      $this->resource_id = strval($resource_id);
-    }
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_OverloadableInterface.
+   ********************************************************************************/
   
   /**
    * Marshall numeric-indexed array of variable method arguments.
@@ -115,79 +161,49 @@ class AblePolecat_Message_Response_Template extends AblePolecat_Message_Response
     return $ArgsList;
   }
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
   /**
-   * Create a concrete instance of AblePolecat_Message_Response_Template.
+   * Default command invoker.
    *
-   * @param string $resource_id Id of the template to load from database.
-   * @param Array $substitutions Values to insert into template ordered by name.
-   * @param string $status_code HTTP response status code.
-   * @param Array $fields Optional header fields.
-   *
-   * @return AblePolecat_Message_Response_Template Concrete instance of message or NULL.
+   * @return AblePolecat_AccessControl_SubjectInterface or NULL.
    */
-  public static function create() {
+  protected function getDefaultCommandInvoker() {
+    return $this->CommandInvoker;
+  }
+  
+  /**
+   * Sets the default command handlers (invoker/target).
+   * 
+   * @param AblePolecat_AccessControl_SubjectInterface $Invoker
+   */
+  protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
+    $this->CommandInvoker = $Invoker;
+  }
+  
+  /**
+   * Set substitution NVPs.
+   *
+   * @param Array NVPs of template place holders and values to insert therein.
+   */
+  protected function setSubstitions($substitutions) {
     
-    $Response = new AblePolecat_Message_Response_Template();
-    
-    //
-    // Unmarshall (from numeric keyed index to named properties) variable args list.
-    //
-    $ArgsList = AblePolecat_Message_Response_Template::unmarshallArgsList(__FUNCTION__, func_get_args());
-    
-    //
-    // Assign properties from variable args list.
-    //
-    $Response->setDefaultCommandInvoker(
-      $ArgsList->getPropertySafe(AblePolecat_Message_Response_Template::COMMAND_INVOKER, NULL)
-    );
-    $Response->setResourceId(
-      $ArgsList->getPropertySafe(
-        AblePolecat_Message_Response_Template::RESOURCE_ID, 
-        AblePolecat_Message_Response_Template::DEFAULT_STATUS
-      )
-    );
-    $Response->setSubstitions(
-      $ArgsList->getPropertySafe(AblePolecat_Message_Response_Template::SUBSTITUTIONS, array())
-    );
-    $Response->setStatusCode(
-      $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
-    );
-    $Response->appendHeaderFields(
-      $ArgsList->getPropertySafe(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
-    );
-    
-    //
-    // Load template from database.
-    //
-    $Invoker = $Response->getDefaultCommandInvoker();
-    if (isset($Invoker)) {
-      $sql = __SQL()->          
-        select('mimeType', 'defaultHeaders', 'body')->
-        from('template')->
-        where("resourceId = '" . $Response->resource_id . "'");
-      $Result = AblePolecat_Command_DbQuery::invoke($Invoker, $sql);
-      if($Result->success()) {
-        $Template = $Result->value();
-        
-        //
-        // Append headers to response
-        // @todo: handle conflicts/merging
-        //
-        $headers = unserialize($Template[0]['defaultHeaders']);
-        $headers[] = $Template[0]['mimeType'];
-        $Response->appendHeaderFields($headers);
-        
-        //
-        // Insert substitutions into template body
-        //
-        $body = $Template[0]['body'];
-        foreach($Response->substitutions as $name => $value) {
-          $body = str_replace('{' . $name . '}', $value, $body);
-        }
-        $Response->body = $body;
-      }
+    if (isset($substitutions) && is_array($substitutions)) {
+      $this->substitutions = $substitutions;
     }
+  }
+  
+  /**
+   * Set Id of template to load from database.
+   *
+   * @param string Id of the template to load from database.
+   */
+  protected function setResourceId($resource_id) {
     
-    return $Response;
+    if (isset($resource_id)) {
+      $this->resource_id = strval($resource_id);
+    }
   }
 }

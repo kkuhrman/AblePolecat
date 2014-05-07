@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: User.php
- * Base class for Able Polecat user access control agent.
+ * @file      polecat/core/AccessControl/Agent/User.php
+ * @brief     Base class for Able Polecat user access control agent.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
@@ -13,12 +17,6 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    */
   const UUID = 'f5aa51b1-3d12-45e3-abfd-276588032652';
   const NAME = 'User';
-  
-  /**
-   * Extends __construct().
-   */
-  protected function initialize() {
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -68,5 +66,15 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
     //
     $Agent = new AblePolecat_AccessControl_Agent_User();
     return $Agent;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
   }
 }

@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Registry/Interface.php
- * Manages registry of supported interfaces and implementations.
+ * @file      polecat/core/Registry/Interface.php
+ * @brief     Manages registry of supported interfaces and implementations.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -19,29 +23,11 @@ class AblePolecat_Registry_Interface extends AblePolecat_RegistryAbstract {
    */
   private $Interfaces = NULL;
   
-    /**
-   * Extends constructor.
-   */
-  protected function initialize() {
-    
-    //
-    // Supported interfaces.
-    //
-    $this->Interfaces = array();
-    
-    $sql = __SQL()->          
-      select('interfaceName')->
-      from('interface');
-    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    if($Result->success()) {
-      $Interfaces = $Result->value();
-      foreach($Interfaces as $key => $interface) {
-        $this->Interfaces['interfaceName'] = $interface;
-      }
-    }
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
   
-    /**
+  /**
    * Serialize object to cache.
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
@@ -68,5 +54,31 @@ class AblePolecat_Registry_Interface extends AblePolecat_RegistryAbstract {
       }
     }
     return self::$Registry;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+    /**
+   * Extends constructor.
+   */
+  protected function initialize() {
+    
+    //
+    // Supported interfaces.
+    //
+    $this->Interfaces = array();
+    
+    $sql = __SQL()->          
+      select('interfaceName')->
+      from('interface');
+    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    if($Result->success()) {
+      $Interfaces = $Result->value();
+      foreach($Interfaces as $key => $interface) {
+        $this->Interfaces['interfaceName'] = $interface;
+      }
+    }
   }
 }

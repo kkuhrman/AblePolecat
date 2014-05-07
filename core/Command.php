@@ -1,10 +1,13 @@
 <?php
 /**
- * @file: Command.php
- * Encapsulates synchronous interaction between two objects within scope of single script execution.
+ * @file      polecat/core/Command.php
+ * @brief     Encapsulates synchronous interaction between two objects within scope of single script execution.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'ArgsList.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Result.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Command.php')));
@@ -60,6 +63,19 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
   
   /********************************************************************************
    * Implementation of AblePolecat_CommandInterface.
+   ********************************************************************************/
+  
+  /**
+   * Return reference to object which invoked command.
+   *
+   * @return AblePolecat_AccessControl_SubjectInterface Object which invoked command.
+   */
+  public function getInvoker() {
+    return $this->Invoker;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
    ********************************************************************************/
   
   /**
@@ -149,15 +165,6 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
       throw new AblePolecat_Command_Exception($msg);
     }
     return $Result;
-  }
-   
-  /**
-   * Return reference to object which invoked command.
-   *
-   * @return AblePolecat_AccessControl_SubjectInterface Object which invoked command.
-   */
-  public function getInvoker() {
-    return $this->Invoker;
   }
   
   /**

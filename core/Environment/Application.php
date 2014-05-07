@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Application.php
- * Environment for Able Polecat Application Mode.
+ * @file      polecat/core/Environment/Application.php
+ * @brief     Environment for Able Polecat Application Mode.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
@@ -16,13 +20,6 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
    * @var AblePolecat_Environment_Server Singleton instance.
    */
   private static $Environment = NULL;
-  
-  /**
-   * Extends __construct(). 
-   */
-  protected function initialize() {
-    parent::initialize();
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -74,5 +71,16 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
       self::$Environment = new AblePolecat_Environment_Application($Subject);
     }
     return self::$Environment;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
+  /**
+   * Extends __construct(). 
+   */
+  protected function initialize() {
+    parent::initialize();
   }
 }

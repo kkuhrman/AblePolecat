@@ -1,7 +1,11 @@
 <?php 
 /**
- * @file: Exception/AccessControl.php
- * Exceptions thrown by Able Polecat Access Control objects.
+ * @file      polecat/Exception/AccessControl.php
+ * @brief     Exceptions thrown by Able Polecat Access Control objects.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));

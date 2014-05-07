@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Error.php
- * Almost entirely data: Able Polecat default error codes/messages.
+ * @file      polecat/Error.php
+ * @brief     Able Polecat default error codes/messages.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 class AblePolecat_Error {

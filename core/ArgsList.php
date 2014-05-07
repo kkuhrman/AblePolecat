@@ -1,34 +1,28 @@
 <?php
 /**
- * @file: ArgsList.php
- * Encapsulates an argument list passed to a function or class method.
+ * @file      polecat/ArgsList.php
+ * @brief     Encapsulates an argument list passed to a function or class method.
  *
  * Pirates! Args.
  *
- * The argument list object is used in Able Polecat to support function/
- * method overloading in the classic OOP sense by passing a single parameter.
- * Functions/methods can leverage this polymorphic feature by knowing the 
- * named parameters expected and what to do with them or having some other
- * intrinsic behavior to handle them (e.g. building a column list in a SQL 
- * SELECT statement etc).
- *
- * Two basic implementations of this interface are provided. The first, the 
- * 'standard' argument list must be initialized by naming arguments and 
- * assigning values at runtime like so:
- * 
- * $Instance->myProperty = $myValue; 
- *
- * The second, the 'overloaded' argument list allows user to pass a variable
- * argument list to the creational routine but must define ahead of time how
- * to marshal and unmarshal such a list. 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 
-/**
- * Interface for argument lists.
- */
 interface AblePolecat_ArgsListInterface extends AblePolecat_DynamicObjectInterface {
+  
+  /**
+   * Returns assigned or default value and will not trigger an error.
+   * 
+   * @param string $name Name of given argument.
+   * @param mixed $default Default value to return if not assigned.
+   *
+   * @return mixed Assigned value of argument given by $name if set, otherwise $default.
+   */
+  public function getArgumentValue($name, $default = NULL);
 }
 
 /**
@@ -36,13 +30,9 @@ interface AblePolecat_ArgsListInterface extends AblePolecat_DynamicObjectInterfa
  */
 class AblePolecat_ArgsList extends AblePolecat_DynamicObjectAbstract implements AblePolecat_ArgsListInterface {
   
-  /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize arguments.
-   */
-  protected function initialize() {
-  }
+  /********************************************************************************
+   * Implementation of AblePolecat_DynamicObjectInterface.
+   ********************************************************************************/
   
   /**
    * Creational method.
@@ -51,5 +41,33 @@ class AblePolecat_ArgsList extends AblePolecat_DynamicObjectAbstract implements 
    */
   public static function create() {
     return new AblePolecat_ArgsList();
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_ArgsListInterface.
+   ********************************************************************************/
+  
+  /**
+   * Returns assigned or default value and will not trigger an error.
+   * 
+   * @param string $name Name of given argument.
+   * @param mixed $default Default value to return if not assigned.
+   *
+   * @return mixed Assigned value of argument given by $name if set, otherwise $default.
+   */
+  public function getArgumentValue($name, $default = NULL) {
+    return $this->getPropertyValue($name, $default);
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   *
+   * Sub-classes should override to initialize arguments.
+   */
+  protected function initialize() {
   }
 }

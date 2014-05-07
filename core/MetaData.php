@@ -110,17 +110,17 @@ class AblePolecat_MetaData extends AblePolecat_DynamicObjectAbstract implements 
     // Assign properties from variable args list.
     //
     $MetaData->{AblePolecat_MetaDataInterface::CLIENT_ID} = 
-      $ArgsList->getPropertySafe(AblePolecat_MetaDataInterface::CLIENT_ID, NULL);
+      $ArgsList->getArgumentValue(AblePolecat_MetaDataInterface::CLIENT_ID, NULL);
     $MetaData->{AblePolecat_MetaDataInterface::SUBJECT} = 
-      $ArgsList->getPropertySafe(AblePolecat_MetaDataInterface::SUBJECT, NULL);
+      $ArgsList->getArgumentValue(AblePolecat_MetaDataInterface::SUBJECT, NULL);
     $MetaData->{AblePolecat_MetaDataInterface::PREDICATE} = 
-      $ArgsList->getPropertySafe(AblePolecat_MetaDataInterface::PREDICATE, NULL);
+      $ArgsList->getArgumentValue(AblePolecat_MetaDataInterface::PREDICATE, NULL);
     $MetaData->{AblePolecat_MetaDataInterface::OBJECT} = 
-      $ArgsList->getPropertySafe(AblePolecat_MetaDataInterface::OBJECT, NULL);
+      $ArgsList->getArgumentValue(AblePolecat_MetaDataInterface::OBJECT, NULL);
     $MetaData->{AblePolecat_MetaDataInterface::REPRESENTATION} = 
-      $ArgsList->getPropertySafe(AblePolecat_MetaDataInterface::REPRESENTATION, NULL);
+      $ArgsList->getArgumentValue(AblePolecat_MetaDataInterface::REPRESENTATION, NULL);
     $MetaData->{AblePolecat_MetaDataInterface::OPTIONS} = 
-      $ArgsList->getPropertySafe(AblePolecat_MetaDataInterface::OPTIONS, NULL);
+      $ArgsList->getArgumentValue(AblePolecat_MetaDataInterface::OPTIONS, NULL);
     
     //
     // Return initialized object.

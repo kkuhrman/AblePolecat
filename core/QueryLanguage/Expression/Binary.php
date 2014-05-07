@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Binary.php
- * Interface for a binary query language expression.
+ * @file      polecat/core/QueryLanguage/Expression/Binary.php
+ * @brief     Interface for a binary query language expression.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.5.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression.php')));
@@ -34,6 +38,35 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
    * @var raw expression data.
    */
   private $expression;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_QueryLanguage_Expression_BinaryInterface.
+   ********************************************************************************/
+  
+  /**
+   * @return string 'Left' value of binary expression.
+   */
+  public function lvalue() {
+    return $this->expression[self::LVALUE];
+  }
+  
+  /**
+   * @return string Binary expression operator.
+   */
+  public function operator() {
+    return $this->expression[self::OPERATOR];
+  }
+  
+  /**
+   * @return string 'Right' value of binary expression.
+   */
+  public function rvalue() {
+    return $this->expression[self::RVALUE];
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Populate data members.
@@ -72,27 +105,6 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
         );
       }
     }
-  }
-  
-  /**
-   * @return string 'Left' value of binary expression.
-   */
-  public function lvalue() {
-    return $this->expression[self::LVALUE];
-  }
-  
-  /**
-   * @return string Binary expression operator.
-   */
-  public function operator() {
-    return $this->expression[self::OPERATOR];
-  }
-  
-  /**
-   * @return string 'Right' value of binary expression.
-   */
-  public function rvalue() {
-    return $this->expression[self::RVALUE];
   }
   
   final public function __construct() {
