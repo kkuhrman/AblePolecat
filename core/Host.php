@@ -153,7 +153,7 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
   /**
    * @return string Base URL (host name[/alias]).
    */
-  public function getBaseUrl($trailing_slash = TRUE) {
+  public static function getBaseUrl($trailing_slash = TRUE) {
     
     $host_url = NULL;
     
