@@ -316,6 +316,10 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
           }
           else {
             //
+            // @todo: log error in event request is for script, CSS etc that does not exist at given path.
+            //
+            
+            //
             // No, an invalid resource name was given; redirect to search.
             //
             $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_SEARCH;
@@ -379,6 +383,8 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
     // Turn on output buffering.
     //
     ob_start();
+    
+    self::$Host = $this;
     
     //
     // aka 'base' URL.
