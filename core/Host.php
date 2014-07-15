@@ -174,13 +174,6 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
    * Filter (sanitize) entity body if sent (e.g. POST data).
    */
   protected function filterEntityBody() {
-    
-    //
-    // Allocate array in any case - container for invalid path parts
-    // @see getRequestPathInfo()
-    //
-    $this->entity_body = array();
-    
     //
     // Is the search parameter present in the POST data or query string?
     //
@@ -288,6 +281,14 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
     
     isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = 'GET';
     
+    //
+    // @todo: if method is POST and not the result of search form action, we bypass default POST
+    // processing by spoofing a GET request here; not elegant but functional.
+    //
+    if (isset($_POST) && count($_POST) && !isset($this->entity_body[self::URI_SEARCH_PARAM])) {
+      $method = 'GET';
+    }
+    
     switch ($method) {
       default:        
         //
@@ -336,9 +337,14 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
         break;
       case 'POST':
         //
+        // Process search form action
         // Build a query string from the POST data
         //
         $query_string = $this->makeRequestQueryString($this->entity_body);
+        
+        //
+        // Redirect to search feature
+        //
         $redirect_uri = sprintf("%s%s%s?%s",
           $this->host_url,
           self::RESOURCE_NAME_SEARCH,
@@ -375,6 +381,11 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
    * Extends __construct().
    */
   protected function initialize() {
+    //
+    // Allocate array in any case - container for invalid path parts
+    // @see getRequestPathInfo()
+    //
+    $this->entity_body = array();
   }
   
   final protected function __construct() {
