@@ -76,9 +76,13 @@ class  AblePolecat_Data_Scalar_String extends AblePolecat_Data_Scalar {
    *
    * @return AblePolecat_Data_Scalar_String The output text.
    */
-  public static function removeNonNumeric($input) {
-    // return AblePolecat_Data_Scalar_String::typeCast(preg_replace('/\D/', '', $input));
-    return AblePolecat_Data_Scalar_String::typeCast(trim(preg_replace('/[^0-9.]/', '', $input)));
+  public static function removeNonNumeric($input, $strict = TRUE) {
+    switch ($strict) {
+      case TRUE:
+        return AblePolecat_Data_Scalar_String::typeCast(preg_replace('/\D/', '', $input));
+      case FALSE:
+        return AblePolecat_Data_Scalar_String::typeCast(trim(preg_replace('/[^0-9.,]/', '', $input)));
+    }
   }
   
   /**
