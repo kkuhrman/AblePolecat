@@ -108,6 +108,29 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Create XML DOM Document.
+   * 
+   * @param string $rootElementName Name of top-level document element.
+   * @param string $namespaceURI  The namespace URI of the document element to create.
+   * @param string $xmlVersion
+   * @param string $xmlEncoding
+   *
+   * @return DOMDocument
+   */
+  public static function createXmlDocument(
+    $rootElementName = 'root',
+    $namespaceURI = NULL,
+    $xmlVersion = '1.0',
+    $xmlEncoding = 'UTF-8'
+  ) {
+    $DOMImpl = new DOMImplementation();
+    $Document = $DOMImpl->createDocument($namespaceURI, $rootElementName);
+    $Document->xmlVersion = $xmlVersion;
+    // $Document->xmlEncoding = $xmlEncoding;
+    return $Document;
+  }
+  
+  /**
    * Create XHTML DOM Document
    *
    * @param string $namespaceURI  The namespace URI of the document element to create.
