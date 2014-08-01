@@ -126,6 +126,7 @@ class AblePolecat_Dom {
     $DOMImpl = new DOMImplementation();
     $Document = $DOMImpl->createDocument($namespaceURI, $rootElementName);
     $Document->xmlVersion = $xmlVersion;
+    $Document->xmlStandalone = TRUE;
     // $Document->xmlEncoding = $xmlEncoding;
     return $Document;
   }
