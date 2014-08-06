@@ -30,6 +30,7 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
     const LIMIT       = 'limit';
     const OFFSET      = 'offset';
     const VALUES      = 'values';
+    const INNER_JOIN  = 'join';
     
     /**
    * Supported DML ops (default).
@@ -194,6 +195,10 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
           $tokens[] = 'FROM';
           $tokens[] = $this->getTables();
         }
+        if ($this->getJoinStatement()) {
+          $tokens[] = 'JOIN';
+          $tokens[] = $this->getJoinStatement();
+        }
         if ($this->getWhereCondition()) {
           $tokens[] = 'WHERE';
           $tokens[] = $this->getWhereCondition();
@@ -336,6 +341,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
           AblePolecat_QueryLanguage_Statement_Sql_Interface::ORDERBY => TRUE,
           AblePolecat_QueryLanguage_Statement_Sql_Interface::LIMIT => TRUE,
           AblePolecat_QueryLanguage_Statement_Sql_Interface::OFFSET => TRUE,
+          AblePolecat_QueryLanguage_Statement_Sql_Interface::INNER_JOIN => TRUE,
         ),
         AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT => array(
           AblePolecat_QueryLanguage_Statement_Sql_Interface::TABLES => TRUE,
@@ -448,6 +454,13 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    */
   public function getColumns() {
     return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS, NULL);
+  }
+  
+  /**
+   * @return string INNER JOIN statement.
+   */
+  public function getJoinStatement() {
+    return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::INNER_JOIN, NULL);
   }
   
   /**
@@ -600,6 +613,26 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     }
     else {
       throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp | $Element].",
+        AblePolecat_Error::INVALID_SYNTAX);
+    }
+  }
+  
+  /**
+   * Set INNER JOIN statement.
+   *
+   * @param string $JoinStatement JOIN condition.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setJoinStatement($JoinStatement) {
+    
+    $DmlOp = $this->getDmlOp();
+    $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::INNER_JOIN;
+    if ($this->supportsSyntax($DmlOp, $Element)) {
+      parent::__set($Element, strval($JoinStatement));
+    }
+    else {
+      throw new AblePolecat_QueryLanguage_Exception("Invalid SQL Syntax [$DmlOp | $Element].",
         AblePolecat_Error::INVALID_SYNTAX);
     }
   }
@@ -838,6 +871,30 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   public function set() {
     $Columns = func_get_args();
     $this->setColumns($Columns);
+    return $this;
+  }
+  
+  public function join() {
+    
+    $JoinStatement = NULL;
+    
+    foreach(func_get_args() as $key => $arg) {
+      try{
+        !isset($JoinStatement) ? $JoinStatement = array() : NULL;
+        $JoinStatement[] = AblePolecat_Data_Scalar_String::typeCast($arg);
+        ($key === 0) ? $JoinStatement[] = "ON" : NULL;
+      }
+      catch (AblePolecat_Data_Exception $Exception) {
+        throw new AblePolecat_QueryLanguage_Exception(
+          sprintf("%s INNER JOIN parameter must be scalar or implement __toString(). %s passed.", 
+            get_class($this), 
+            gettype($arg)
+          ), 
+          AblePolecat_Error::INVALID_TYPE_CAST
+        );
+      }
+    }
+    $this->setJoinStatement(implode(' ', $JoinStatement));
     return $this;
   }
   
