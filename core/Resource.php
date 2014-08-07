@@ -24,10 +24,10 @@
  */ 
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article.php')));
+include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Resource.php')));
 
-interface AblePolecat_ResourceInterface extends AblePolecat_CacheObjectInterface, AblePolecat_AccessControl_ArticleInterface {
+interface AblePolecat_ResourceInterface extends AblePolecat_CacheObjectInterface, AblePolecat_AccessControl_ResourceInterface {
   
   /**
    * Returns resource URI.
@@ -98,6 +98,7 @@ abstract class AblePolecat_ResourceAbstract extends AblePolecat_CacheObjectAbstr
    * @return string URI or NULL.
    */
   public function getUri() {
+    return $this->uri;
   }
   
   /**

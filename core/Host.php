@@ -97,7 +97,7 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-  
+    
   /**
    * Extends __construct().
    */
@@ -112,8 +112,6 @@ abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delega
     // Turn on output buffering.
     //
     ob_start();
-    
-    // self::$Host = $this;
     
     //
     // Sub-classes can extend constructor via initialize().
