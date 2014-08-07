@@ -1,7 +1,7 @@
 <?php
 /**
- * @file      polecat/core/Message/Request/Put.php
- * @brief     Encapsulates an Able Poelcat PUT request.
+ * @file      polecat/core/Message/Request/Unsupported.php
+ * @brief     Encapsulates an Able Polecat request for an unsupported method.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -10,7 +10,7 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
 
-class AblePolecat_Message_Request_Put extends AblePolecat_Message_RequestAbstract {
+class AblePolecat_Message_Request_Unsupported extends AblePolecat_Message_RequestAbstract {
   
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
@@ -22,34 +22,7 @@ class AblePolecat_Message_Request_Put extends AblePolecat_Message_RequestAbstrac
    * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
    */
   public static function create() {
-    
-    $Request = new AblePolecat_Message_Request_Put();
-    
-    //
-    // Unmarshall (from numeric keyed index to named properties) variable args list.
-    //
-    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-    
-    $Request->setResource(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::URI, 
-        URI_SLASH
-      )
-    );
-    
-    $Request->setHead(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::HEAD, 
-        ''
-      )
-    );
-    $Request->setBody(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::ENTITY_BODY, 
-        ''
-      )
-    );
-    
+    $Request = new AblePolecat_Message_Request_Unsupported();
     return $Request;
   }
   
@@ -61,6 +34,7 @@ class AblePolecat_Message_Request_Put extends AblePolecat_Message_RequestAbstrac
    * @return string Request method.
    */
   public function getMethod() {
-    return 'PUT';
+    isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
+    return $method;
   }
 }

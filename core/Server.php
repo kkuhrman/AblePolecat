@@ -14,16 +14,16 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.5.0
+ * @version   0.6.0
  */
 
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.5.0');
-define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_5_0_DEV');
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.0');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_0_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
-define('ABLE_POLECAT_VERSION_MINOR', '5');
+define('ABLE_POLECAT_VERSION_MINOR', '6');
 define('ABLE_POLECAT_VERSION_REVISION', '0');
 
 /**
@@ -240,6 +240,124 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
    ********************************************************************************/
   
   /**
+   * Return the data model (resource) corresponding to request URI/path.
+   *
+   * Able Polecat expects the part of the URI, which follows the host or virtual host
+   * name to define a 'resource' on the system. This function returns the data (model)
+   * corresponding to request. If no corresponding resource is located on the system, 
+   * or if an application error is encountered along the way, Able Polecat has a few 
+   * built-in resources to deal with these situations.
+   *
+   * NOTE: Although a 'resource' may comprise more than one path component (e.g. 
+   * ./books/[ISBN] or ./products/[SKU] etc), an Able Polecat resource is identified by
+   * the first part only (e.g. 'books' or 'products') combined with a UUID. Additional
+   * path parts are passed to the top-level resource for further resolution. This is 
+   * why resource classes validate the URI, to ensure it follows expectations for syntax
+   * and that request for resource can be fulfilled. In short, the Able Polecat server
+   * really only fulfils the first part of the resource request and delegates the rest to
+   * the 'resource' itself.
+   *
+   * @see AblePolecat_ResourceAbstract::validateRequestPath()
+   *
+   * @param AblePolecat_Message_RequestInterface $Request
+   * 
+   * @return AblePolecat_ResourceInterface
+   */
+  public function getRequestedResource(AblePolecat_Message_RequestInterface $Request) {
+    
+    $Resource = NULL;
+    
+    //
+    // Extract the part of the URI, which defines the resource.
+    //
+    $request_path_info = $Request->getRequestPathInfo();
+    isset($request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resource_name = $request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resource_name  = NULL;    
+    if (isset($resource_name)) {
+      //
+      // Look up (first part of) resource name in database
+      //
+      $sql = __SQL()->          
+        select('className')->
+        from('resource')->
+        where("resourceName = '$resource_name'");      
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->CommandChain[self::RING_SERVER_MODE], $sql);
+      $className = NULL;
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $classInfo = $CommandResult->value();
+        isset($classInfo[0]['className']) ? $className = $classInfo[0]['className'] : NULL;
+      }
+      if (isset($className)) {
+        //
+        // Resource request resolves to registered class name, try to load.
+        //
+        $CommandResult = AblePolecat_Command_GetRegistry::invoke(self::$Host->CommandChain[self::RING_SERVER_MODE], 'AblePolecat_Registry_Class');
+        if ($CommandResult->success()) {
+          //
+          // Save reference to class registry.
+          //
+          $ClassRegistry = $CommandResult->value();
+          
+          //
+          // Get agent from user mode
+          //
+          $Agent = NULL;
+          $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
+          if ($CommandResult->success()) {
+            $Agent = $CommandResult->value();
+          }
+          
+          //
+          // Attempt to load resource class
+          //
+          $Resource = $ClassRegistry->loadClass($className, $Agent);
+        }
+      }
+      else {
+        //
+        // Request did not resolve to a registered resource class.
+        // Return one of the 'built-in' resources.
+        //
+        if ($resource_name === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
+          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
+          $Resource = AblePolecat_Resource_Ack::wakeup();
+        }
+        else {
+          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Search.php')));
+          $Resource = AblePolecat_Resource_Search::wakeup();
+        }
+      }
+    }
+    else {
+      //
+      // @todo: why would we ever get here but wouldn't it be bad to not return a resource?
+      //
+    }
+    return $Resource;
+  }
+  
+  /**
+   * @param AblePolecat_ResourceInterface $Resource
+   *
+   * @return AblePolecat_Message_ResponseInterface
+   */
+  public function getResponse(AblePolecat_ResourceInterface $Resource) {
+    
+    $Response = NULL;
+    $ResourceClassName = get_class($Resource);
+    switch($ResourceClassName) {
+      default:
+        break;
+      case 'AblePolecat_Resource_Ack':
+        $version = AblePolecat_Server::getVersion();
+        $body = sprintf("<AblePolecat>%s</AblePolecat>", $version);
+        $Response = AblePolecat_Message_Response::create(200);
+        $Response->body = $body;
+        break;
+    }
+    return $Response;
+  }
+  
+  /**
    * Main point of entry for all Able Polecat page and service requests.
    *
    */
@@ -252,28 +370,37 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       self::$Host = new AblePolecat_Server();
       
       //
-      // Build request.
+      // @todo: special case no db connection
       //
-      $Request = NULL;
-      isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
-      switch ($method) {
-        default:
-          break;
-        case 'GET':
-          $Request = AblePolecat_Message_Request_Get::create();
-          break;
-        case 'POST':
-          $Request = AblePolecat_Message_Request_Post::create();
-          break;
-        case 'PUT':
-          $Request = AblePolecat_Message_Request_Put::create();
-          break;
-        case 'DELETE':
-          $Request = AblePolecat_Message_Request_Delete::create();
-          break;
-      }
       
-      if (!isset($Request)) {
+      //
+      // Log raw request.
+      //
+      $sql = __SQL()->          
+        insert(
+          'requestTime', 
+          'remoteAddress', 
+          'remotePort', 
+          'userAgent', 
+          'requestMethod', 
+          'requestUri')->
+        into('request')->
+        values(
+          $_SERVER['REQUEST_TIME'], 
+          $_SERVER['REMOTE_ADDR'],
+          $_SERVER['REMOTE_PORT'],
+          $_SERVER['HTTP_USER_AGENT'],
+          $_SERVER['REQUEST_METHOD'],
+          $_SERVER['REQUEST_URI']
+        );
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->CommandChain[self::RING_SERVER_MODE], $sql);
+      
+      
+      //
+      // Map the request path to a specific resource (model)...
+      //
+      $Request = self::getRequest();
+      if (is_a($Request, 'AblePolecat_Message_Request_Unsupported')) {
         //
         // @todo: 405 Method not allowed.
         // The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. 
@@ -281,28 +408,8 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         //
       }
       else {
-        $requestPathInfo = self::$Host->getRequestPathInfo();
-        switch ($requestPathInfo[self::URI_RESOURCE_NAME]) {
-          default:
-            //
-            // @todo: get agent from user mode
-            //
-            $Agent = NULL;
-            $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
-            if ($CommandResult->success()) {
-              $Agent = $CommandResult->value();
-            }
-            
-            //
-            // Dispatch the request
-            //
-            $ServiceBus = AblePolecat_Service_Bus::wakeup(self::$Host->CommandChain[self::RING_SERVER_MODE]);
-            self::$Host->Response = $ServiceBus->dispatch($Agent, $Request);
-            break;
-          case self::URI_SLASH:
-            self::$Host->sendDefaultResponse();
-            break;
-        }
+        $Resource = self::$Host->getRequestedResource($Request);
+        self::$Host->Response = self::$Host->getResponse($Resource);
       }
     }
     else {
@@ -374,80 +481,31 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     }
     return $Result;
   }
-  
-  /********************************************************************************
-   * Sends HTML status page if requested or otherwise if request cannot be routed.
-   *
-   * Able Polecat is not designed to intended to serve up web pages. However, there
-   * will be instances where it is necessary to display *something* more than XML
-   * without style rules; for example, something goes wrong during an installation 
-   * or update.
-   *
-   * @param mixed $content Content of status page.
-   * 
-   ********************************************************************************/
-   
-  protected function sendDefaultResponse($content = NULL) {
-    
-    $Response = NULL;
-    
-    if (isset(self::$Host) && isset(self::$Host->CommandChain[self::RING_SERVER_MODE])) {
-      //
-      // Create an array of data to be inserted into template
-      //
-      $dbState = self::$Host->CommandChain[self::RING_SERVER_MODE]->getDatabaseState(self::$Host);
-      $dbState['connected'] ? $dbStateStr = 'Connected to ' : $dbStateStr = 'Not connected to ';
-      $dbStateStr .= $dbState['name'] . ' database.';
-      
-      $substitutions = array(
-        'POLECAT_VERSION' => AblePolecat_Server::getVersion(TRUE, 'HTML'),
-        'POLECAT_DBSTATE' => $dbStateStr,
-        
-      );
-      
-      //
-      // Load response template
-      //
-      self::$Host->Response = AblePolecat_Message_Response_Template::create(
-        self::$Host->CommandChain[self::RING_SERVER_MODE],
-        AblePolecat_Message_Response_Template::DEFAULT_STATUS,
-        $substitutions
-      );
-      
-      if (isset(self::$Host->CommandChain[self::RING_USER_MODE])) {
-        AblePolecat_Command_Log::invoke(self::$Host->CommandChain[self::RING_USER_MODE], 'status page requested', 'debug');
-      }
-      
-      //
-      // Shutdown and send response.
-      //
-      self::shutdown();
-    }
-    else {
-      $Response = AblePolecat_Message_Response::create(200);
-      $Response->body = "<error><message>Able Polecat server is being directed to send HTTP response but has failed to initialize 
-        or has already shut down.</message><content>$content</content></error>";      
-      $Response->send();
-      exit(1);
-    }
-  }
     
   /**
    * Shut down Able Polecat server and send HTTP response.
    */
   public static function shutdown() {
     
-    $ResponseSent = FALSE;
-    
-    if (isset(self::$Host)) {
-      if (isset(self::$Host->Response)) {
-        self::$Host->Response->send();
-        $ResponseSent = TRUE;
-      }
+    if (isset(self::$Host) && isset(self::$Host->Response)) {
+      self::$Host->Response->send();
     }
-    if (!$ResponseSent) {
+    else {
+      $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
+      $body = sprintf("<AblePolecat><error>
+        <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
+        <file>%s</file>
+        <line>%d</line>
+        <class>%s</class>
+        <function>%s</function>
+        </error></AblePolecat>",
+        isset($backtrace['file']) ? $backtrace['file'] : '',
+        isset($backtrace['line']) ? $backtrace['line'] : 0,
+        isset($backtrace['class']) ? $backtrace['class'] : '',
+        isset($backtrace['function']) ? $backtrace['function'] : ''
+      );
       $Response = AblePolecat_Message_Response::create(200);
-      $Response->body = "<errorMessage>Able Polecat server is being directed to shut down but has failed to generate a response to last request.</errorMessage>";
+      $Response->body = $body;
       $Response->send();
     }
     exit(0);
@@ -535,6 +593,22 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       }
     }
     return $version;
+  }
+  
+  /**
+   * Debug information helper.
+   */
+  public static function getFunctionCallBacktrace($stackPos = NULL) {
+    $backtrace = debug_backtrace();
+    if (isset($stackPos) && is_scalar($stackPos) && isset($backtrace[$stackPos])) {
+      //
+      // @todo: this is an uncertain hack to get line # to correspond/sync with function/method and file
+      //
+      isset($backtrace[$stackPos - 1]['line']) ? $line = $backtrace[$stackPos - 1]['line'] : $line = $backtrace[$stackPos]['line'];
+      $backtrace = $backtrace[$stackPos];
+      $backtrace['line'] = $line;
+    }
+    return $backtrace;
   }
       
   /**

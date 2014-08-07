@@ -1,22 +1,27 @@
 <?php
 /**
- * @file      Application.php
- * @brief     Base class for access control for applications using Able Polecat.
+ * @file      polecat/core/Resource/Error.php
+ * @brief     The default resource in the event of application error.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.0
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
 
-class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessControl_AgentAbstract {
+class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
+  
+  /**
+   * @var resource Instance of singleton.
+   */
+  private static $Resource;
   
   /**
    * Constants.
    */
-  const UUID = '6c1c36d0-60bd-11e2-bcfd-0800200c9a66';
-  const NAME = 'Application';
+  const UUID = '9a5d85e0-1e43-11e4-8c21-0800200c9a66';
+  const NAME = 'err';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -41,36 +46,22 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_CacheObjectInterface.
+   * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
   
   /**
    * Create a new instance of object or restore cached object to previous state.
    *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
+   * @return Instance of AblePolecat_Resource_Error
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Agent = NULL;
-    if (is_a($Subject, 'AblePolecat_Mode_Application')) {
-      $Agent = new AblePolecat_AccessControl_Agent_Application();
+    if (!isset(self::$Resource)) {
+      self::$Resource = new AblePolecat_Resource_Error();
     }
-    else {
-      $msg = "Access denied to application agent.";
-      isset($Subject) ? $msg .= ' ' . get_class($Subject) . ' does not have sufficient privilege.' : NULL;
-      throw new AblePolecat_AccessControl_Exception($msg, AblePolecat_Error::ACCESS_DENIED);
-    }
-    return $Agent;
+    return self::$Resource;
   }
   
   /********************************************************************************
@@ -78,8 +69,20 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
    ********************************************************************************/
   
   /**
+   * Validates request URI path to ensure resource request can be fulfilled.
+   *
+   * @throw AblePolecat_Resource_Exception If request URI path is not validated.
+   */
+  protected function validateRequestPath() {
+    $this->requestPath = AblePolecat_Server::getRequest()->getRequestPath(FALSE);
+  }
+  
+  /**
    * Extends __construct().
    */
   protected function initialize() {
+    //
+    // @todo: gather error info
+    //
   }
 }

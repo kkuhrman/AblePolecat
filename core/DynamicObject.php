@@ -22,7 +22,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.5.0
+ * @version   0.6.0
  */
 
 interface AblePolecat_DynamicObjectInterface {

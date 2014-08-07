@@ -1,11 +1,11 @@
 <?php
 /**
  * @file      polecat/core/Message/Request/Delete.php
- * @brief     Encapsulates an Able Poelcat DELETE request.
+ * @brief     Encapsulates an Able Polecat DELETE request.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.5.0
+ * @version   0.6.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));

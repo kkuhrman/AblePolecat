@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.5.0
+ * @version   0.6.0
  */
 
 class AblePolecat_Dom {
@@ -288,6 +288,21 @@ class AblePolecat_Dom {
     
     // global $Clock;
     
+    $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
+    $message = '<p>' . __METHOD__ . ' called. context: ';
+    if (isset($backtrace['class'])) {
+      $message .= $backtrace['class'];
+      isset($backtrace['type']) ? $message .= $backtrace['type'] : $message .= '.';
+      // isset($backtrace['type']) ? $message .= $backtrace['type'] : $message .= '.';
+      isset($backtrace['function']) ? $message .= $backtrace['function'] : NULL;
+      $message .= '<br />';
+    }
+    $message .= '<br />';
+    isset($backtrace['line']) ? $message .= ' line ' . $backtrace['line'] : NULL;
+    isset($backtrace['file']) ? $message .= ' in file ' . $backtrace['file'] : NULL;
+    $message .= '</p>';
+    echo $message;
+    
     $properties = array(
       'DOMDocument' => array(
         'actualEncoding',
@@ -366,7 +381,7 @@ class AblePolecat_Dom {
       ),
     );
     
-    if (isset($object)) {
+    if (isset($object) && is_object($object)) {
       $className = @get_class($object);
       if (isset($properties[$className])) {
         echo "<h2>$className</h2>";
@@ -402,7 +417,10 @@ class AblePolecat_Dom {
         var_dump($object);
       }
     }
+    else {
+      var_dump($object);
+    }
     // print('<p><strong>stop: ' . $Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, TRUE) . '</strong></p>');
-    die(__METHOD__);
+    exit(1);
   }
 }

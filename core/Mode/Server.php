@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.5.0
+ * @version   0.6.0
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
@@ -299,6 +299,8 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   
   /**
    * Handle exceptions thrown by child objects.
+   * 
+   * @todo: hand control back to the server or otherwise fail gracefully. no WSOD
    */
   public static function handleException(Exception $Exception) {
     $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
@@ -307,7 +309,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       $Exception->getLine(),
       $Exception->getMessage()
     );
-    AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
+    AblePolecat_Command_Log::invoke(self::$Mode, $msg, AblePolecat_LogInterface::WARNING);
   }
   
   /********************************************************************************
