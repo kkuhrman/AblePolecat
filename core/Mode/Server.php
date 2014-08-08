@@ -24,6 +24,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'D
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAgent.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetRegistry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Log.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Shutdown.php')));
 
 class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   
@@ -198,9 +199,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     switch ($Command::getId()) {
       default:
         break;
-      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
-        $Result = new AblePolecat_Command_Result($this->Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
-        break;
       case 'ef797050-715c-11e3-981f-0800200c9a66':
         //
         // DbQuery
@@ -303,6 +301,9 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * @todo: hand control back to the server or otherwise fail gracefully. no WSOD
    */
   public static function handleException(Exception $Exception) {
+    //
+    // Log exception to database.
+    //
     $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
       $Exception->getCode(),
       $Exception->getFile(),
@@ -310,6 +311,18 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       $Exception->getMessage()
     );
     AblePolecat_Command_Log::invoke(self::$Mode, $msg, AblePolecat_LogInterface::WARNING);
+    
+    //
+    // Send shut down command to server
+    //
+    $reason = '<reason>Unhandled exception</reason>';
+    $message = sprintf("<file>%s</file><line>%s</line><message>%s</message>",
+      $Exception->getFile(),
+      $Exception->getLine(),
+      $Exception->getMessage()
+    );
+    $code = $Exception->getCode();
+    AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $message, $code);
   }
   
   /********************************************************************************

@@ -72,6 +72,7 @@ if (!defined('ABLE_POLECAT_USR')) {
   define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
 }
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Host.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Template.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
@@ -174,6 +175,32 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
             $Result = $this->CommandChain[self::RING_SERVER_MODE]->execute($Command);
           }
         }
+        break;
+      case 'c7587ad0-74a4-11e3-981f-0800200c9a66':
+      case 'ef797050-715c-11e3-981f-0800200c9a66':
+        //
+        // A few reverse type commands must be forward-delegated to server mode by server.
+        // This is a security hack so only server itself can directly wakeup Access Control.
+        //
+        if (isset($this->CommandChain[self::RING_SERVER_MODE])) {
+          $Result = $this->CommandChain[self::RING_SERVER_MODE]->execute($Command);
+        }
+        break;
+      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
+        $Agent = AblePolecat_AccessControl::wakeup($this)->getAgent($Command->getInvoker());
+        $Result = new AblePolecat_Command_Result($Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        break;
+      case '7ca0f570-1f22-11e4-8c21-0800200c9a66':
+        //
+        // Command to shut down indicates abnormal termination
+        //
+        $body = sprintf("<AblePolecat><notice>Able Polecat shut down unexpectedly.</notice>%s%s</AblePolecat>", 
+          $Command->getReason(),
+          $Command->getMessage()
+        );
+        self::$Host->Response = AblePolecat_Message_Response::create(200);
+        self::$Host->Response->body = $body;
+        self::shutdown($Command->getStatus());
         break;
       case '85fc7590-724d-11e3-981f-0800200c9a66':
         //
@@ -300,11 +327,13 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
           //
           // Get agent from user mode
           //
-          $Agent = NULL;
-          $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
-          if ($CommandResult->success()) {
-            $Agent = $CommandResult->value();
-          }
+          
+          $Agent = AblePolecat_AccessControl::wakeup($this)->getAgent(self::$Host->CommandChain[self::RING_USER_MODE]);
+          // $Agent = NULL;
+          // $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
+          // if ($CommandResult->success()) {
+            // $Agent = $CommandResult->value();
+          // }
           
           //
           // Attempt to load resource class
@@ -444,6 +473,37 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
    ********************************************************************************/
   
   /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param int $status Return code.
+   */
+  protected static function shutdown($status = 0) {
+    
+    if (isset(self::$Host) && isset(self::$Host->Response)) {
+      self::$Host->Response->send();
+    }
+    else {
+      $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
+      $body = sprintf("<AblePolecat><error>
+        <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
+        <file>%s</file>
+        <line>%d</line>
+        <class>%s</class>
+        <function>%s</function>
+        </error></AblePolecat>",
+        isset($backtrace['file']) ? $backtrace['file'] : '',
+        isset($backtrace['line']) ? $backtrace['line'] : 0,
+        isset($backtrace['class']) ? $backtrace['class'] : '',
+        isset($backtrace['function']) ? $backtrace['function'] : ''
+      );
+      $Response = AblePolecat_Message_Response::create(200);
+      $Response->body = $body;
+      $Response->send();
+    }
+    exit($status);
+  }
+  
+  /**
    * Request to server to issue command to chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
@@ -480,35 +540,6 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       }
     }
     return $Result;
-  }
-    
-  /**
-   * Shut down Able Polecat server and send HTTP response.
-   */
-  public static function shutdown() {
-    
-    if (isset(self::$Host) && isset(self::$Host->Response)) {
-      self::$Host->Response->send();
-    }
-    else {
-      $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
-      $body = sprintf("<AblePolecat><error>
-        <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
-        <file>%s</file>
-        <line>%d</line>
-        <class>%s</class>
-        <function>%s</function>
-        </error></AblePolecat>",
-        isset($backtrace['file']) ? $backtrace['file'] : '',
-        isset($backtrace['line']) ? $backtrace['line'] : 0,
-        isset($backtrace['class']) ? $backtrace['class'] : '',
-        isset($backtrace['function']) ? $backtrace['function'] : ''
-      );
-      $Response = AblePolecat_Message_Response::create(200);
-      $Response->body = $body;
-      $Response->send();
-    }
-    exit(0);
   }
     
   /**

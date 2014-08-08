@@ -118,6 +118,10 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
           }
         }
         else {
+          //
+          // expecting undefined object
+          //
+          $exceptionMsg = NULL;
         }
       }
       else {

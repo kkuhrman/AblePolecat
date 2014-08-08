@@ -18,6 +18,11 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
   const UUID = 'f5aa51b1-3d12-45e3-abfd-276588032652';
   const NAME = 'User';
   
+  /**
+   * @var AblePolecat_AccessControl Instance of singleton.
+   */
+  private static $Agent;
+  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
@@ -61,11 +66,20 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    //
-    // @todo: if $Subject is session restore agent from session
-    //
-    $Agent = new AblePolecat_AccessControl_Agent_User();
-    return $Agent;
+    if (!isset(self::$Agent)) {
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_User')) {
+        self::$Agent = new AblePolecat_AccessControl_Agent_User($Subject);
+        
+        //
+        // @todo: if $Subject is session restore agent from session
+        //
+      }
+      else {
+        $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+        throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
+      }
+    }
+    return self::$Agent;
   }
   
   /********************************************************************************

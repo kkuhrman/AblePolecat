@@ -19,6 +19,11 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
   const UUID = '4d29bf99-beb7-44b1-bd3b-83f5bba31165';
   const NAME = 'Server Agent';
   
+  /**
+   * @var AblePolecat_AccessControl Instance of singleton.
+   */
+  private static $Agent;
+  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
@@ -62,16 +67,16 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Agent = NULL;
-    if (is_a($Subject, 'AblePolecat_Mode_Server')) {
-      $Agent = new AblePolecat_AccessControl_Agent_Server();
+    if (!isset(self::$Agent)) {
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_Server')) {
+        self::$Agent = new AblePolecat_AccessControl_Agent_Server($Subject);
+      }
+      else {
+        $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+        throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
+      }
     }
-    else {
-      $msg = "Access denied to server agent.";
-      isset($Subject) ? $msg .= ' ' . get_class($Subject) . ' does not have sufficient privilege.' : NULL;
-      throw new AblePolecat_AccessControl_Exception($msg, AblePolecat_Error::ACCESS_DENIED);
-    }
-    return $Agent;
+    return self::$Agent;
   }
   
   /********************************************************************************
