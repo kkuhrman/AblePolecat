@@ -41,6 +41,26 @@ abstract class AblePolecat_DataAbstract implements AblePolecat_DataInterface {
   }
   
   /**
+   * Given a variable, return it's native data type name.
+   *
+   * @param mixed $variable The variable for which type check is requested.
+   *
+   * @return string Name of given data type.
+   */
+  public static function getDataTypeName($variable = NULL) {
+    
+    $typeName = 'null';
+    
+    if (isset($variable)) {
+      $typeName = @gettype($variable);
+      if ($typeName === 'object') {
+        $typeName = @get_class($variable);
+      }
+    }
+    return $typeName;
+  }
+  
+  /**
    * @return mixed Encapsulated (scalar or not scalar) data.
    */
   public function getData() {
@@ -63,10 +83,4 @@ abstract class AblePolecat_DataAbstract implements AblePolecat_DataInterface {
       $this->mData = NULL;
     }
   }
-}
-
-/**
-  * Exceptions thrown by Able Polecat data sub-classes.
-  */
-class AblePolecat_Data_Exception extends AblePolecat_Exception {
 }
