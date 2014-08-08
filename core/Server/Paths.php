@@ -48,6 +48,39 @@ class AblePolecat_Server_Paths {
   private static $conf_paths = array();
   
   /**
+   * Includes file if found, gives application a chance to fail gracefully if not.
+   *
+   * @param $file_name Name of file to include.
+   * @param $default_directory_name Name of default directory to look in.
+   * @param $directories Optional Array of other directories to search.
+   * @param $once If TRUE calls include_once(), otherwise calls include().
+   *
+   * @return string Full path name of included file or FALSE.
+   */
+  public static function includeFile($file_name,
+    $default_directory_name = ABLE_POLECAT_CORE, 
+    $directories = array(),
+    $once = TRUE) {
+    
+    $ret = FALSE;
+    
+    $search_path = $default_directory_name . DIRECTORY_SEPARATOR . $file_name;
+    if (file_exists($search_path)) {
+      $once ? include_once($search_path) : include($search_path);
+      $ret = $search_path;
+    }
+    else if (isset($directories) && is_array($directories)){
+      foreach($directories as $key => $directory) {
+        $ret = self::includeFile($file_name, $directory, NULL, $once);
+        if ($ret) {
+          break;
+        }
+      }
+    }
+    return $ret;
+  }
+  
+  /**
    * Attempt to create configurable directory if it does not exist.
    *
    * @param string $path Full (unsanitized) path of directory or regular file to create.

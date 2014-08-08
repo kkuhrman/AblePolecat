@@ -144,6 +144,70 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   }
   
   /**
+   * Attempt to include class definition file and make it loadable.
+   *
+   * This function will determine location of include file from class name, assuming
+   * class name follows standard core class library naming convention.
+   *
+   * This function assumes class name will follow proper naming and include file location 
+   * convention (above) where name of class follows AblePolecat_Some_Class_Name and the 
+   * include file is ./core/path/to/Some/Class/Name.php.
+   *
+   * @param $className Name of class to get include file path for.
+   * @param $extension File extension.
+   *
+   * @return Array include file path and creation method, otherwise FALSE.
+   */
+  public function registerByConvention($className, $extension = 'php') {
+    
+    $response = FALSE;
+    
+    if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
+      $response = $this->Classes[self::KEY_CLASS_NAME][$className];
+    }
+    else {
+      //
+      // The relative path is contructed by trimming the file name (sans extension) from the end 
+      // and the root directory name from the beginning of the class name. Underscores are then 
+      // converted to directory separators.
+      //
+      $paths = explode('_', $className);
+      $nesting_levels = count($paths) - 1;
+      if ($nesting_levels >= 0) {
+        $file_name = sprintf("%s.%s", array_pop($paths), $extension);
+        $root_directory_name = array_shift($paths);
+        $relative_path = implode(DIRECTORY_SEPARATOR, $paths);
+        $default_directory_name = ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . $relative_path;
+        $include_path = AblePolecat_Server_Paths::includeFile($file_name, $default_directory_name);
+        if ($include_path) {
+          //
+          // Register class
+          // @todo: the guessing of create method is very limited here.
+          //
+          $method = '__construct';
+          if ($interfaces = class_implements($className)) {
+            foreach($interfaces as $key => $interface) {
+              switch ($interface) {
+                default:
+                  break;
+                case 'AblePolecat_CacheObjectInterface';
+                  $method = 'wakeup';
+                  break;
+              }
+            }
+          }
+          $this->Classes[self::KEY_CLASS_NAME][$className] = array(
+            self::KEY_CLASS_FULL_PATH => $include_path,
+            self::KEY_CLASS_FACTORY_METHOD => $method,
+          );
+          $response = $this->Classes[self::KEY_CLASS_NAME][$className];
+        }
+      }
+    }
+    return $response;
+  }
+  
+  /**
    * Check if class can be loaded in current environment.
    * 
    * @param string $className The name of class to check for.
@@ -155,6 +219,9 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     $response = FALSE;
     if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
       $response = $this->Classes[self::KEY_CLASS_NAME][$className];
+    }
+    else {
+      $response = $this->registerByConvention($className);
     }
     return $response;
   }
