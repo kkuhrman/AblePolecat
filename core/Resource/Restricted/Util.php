@@ -49,27 +49,19 @@ class AblePolecat_Resource_Util extends AblePolecat_ResourceAbstract {
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_CacheObjectInterface
+   * Helper functions.
    ********************************************************************************/
   
   /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
+   * Create class and return instance.
+   * 
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Util
+   * @return concrete instance of AblePolecat_Resource_RestrictedAbstract.
    */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Util($Subject);
-    }
-    return self::$Resource;
+  protected static function getInstance(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    return new AblePolecat_Resource_Util($Subject);
   }
-  
-  /********************************************************************************
-   * Helper functions.
-   ********************************************************************************/
   
   /**
    * Validates request URI path to ensure resource request can be fulfilled.
