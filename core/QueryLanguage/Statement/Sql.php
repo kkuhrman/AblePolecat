@@ -45,6 +45,7 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
    * Other constants.
    */
   const LIST_DELIMITER = ', ';
+  const NAME_LIST_DELIMITER = '`, `';
     
     /**
      * Verifies if given syntax element is supported.
@@ -563,7 +564,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       if (is_array($Tables)) {
         switch ($DmlOp) {
           default:
-            parent::__set($Element, implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Tables));
+            parent::__set($Element, sprintf("`%s`", implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER, $Tables)));
             break;
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE:
@@ -573,7 +574,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
             // Otherwise, complain...
             //
             if (count($Tables) == 1) {
-              parent::__set($Element, strval($Tables[0]));
+              parent::__set($Element, sprintf("`%s`", strval($Tables[0])));
             }
             else {
               throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp]. Only one table can be referenced. " . count($Tables) . " given.",
@@ -583,7 +584,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         }
       }
       else {
-        parent::__set($Element, strval($Tables));
+        parent::__set($Element, sprintf("`%s`", strval($Tables)));
       }
     }
     else {
@@ -605,10 +606,10 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS;
     if ($this->supportsSyntax($DmlOp, $Element)) {
       if (is_array($Columns)) {
-        parent::__set($Element, implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Columns));
+        parent::__set($Element, sprintf("`%s`", implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER, $Columns)));
       }
       else {
-        parent::__set($Element, strval($Columns));
+        parent::__set($Element, sprintf("`%s`", strval($Columns)));
       }
     }
     else {

@@ -119,7 +119,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_Session or NULL.
+   * @return AblePolecat_Database_Pdo or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     

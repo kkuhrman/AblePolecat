@@ -11,14 +11,9 @@
  * @version   0.6.0
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Restricted.php')));
 
-class AblePolecat_Resource_Util extends AblePolecat_ResourceAbstract {
-  
-  /**
-   * @var resource Instance of singleton.
-   */
-  private static $Resource;
+class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract {
   
   /**
    * Constants.
@@ -49,20 +44,28 @@ class AblePolecat_Resource_Util extends AblePolecat_ResourceAbstract {
   }
   
   /********************************************************************************
-   * Helper functions.
+   * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/
   
   /**
-   * Create class and return instance.
-   * 
+   * Create a new instance of object or restore cached object to previous state.
+   *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return concrete instance of AblePolecat_Resource_RestrictedAbstract.
+   * @return Instance of AblePolecat_Resource_Util
    */
-  protected static function getInstance(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    return new AblePolecat_Resource_Util($Subject);
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    if (!isset(self::$Resource)) {
+      self::$Resource = new AblePolecat_Resource_Util($Subject);
+    }
+    return parent::wakeup($Subject);
   }
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+    
   /**
    * Validates request URI path to ensure resource request can be fulfilled.
    *
@@ -85,5 +88,12 @@ class AblePolecat_Resource_Util extends AblePolecat_ResourceAbstract {
       $this->SubDir = $request_path;
     }
     $this->Args = AblePolecat_Server::getRequest()->getRequestQueryString(FALSE);
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    parent::initialize();
   }
 }

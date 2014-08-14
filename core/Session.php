@@ -45,6 +45,11 @@ interface AblePolecat_SessionInterface extends AblePolecat_AccessControl_Subject
  */
 class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements AblePolecat_SessionInterface {
   
+  /**
+   * @var AblePolecat_Session Instance of singleton.
+   */
+  private static $Session;
+  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
@@ -89,11 +94,17 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    * @return AblePolecat_Session or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $Session = NULL;
-    if (@session_start()) {
-      $Session = new AblePolecat_Session();
+    if (!isset(self::$Session)) {
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl') && @session_start()) {
+        self::$Session = new AblePolecat_Session();
+        self::$Session->CommandInvoker = $Subject->getDefaultCommandInvoker();
+      }
+      else {
+        $error_msg = sprintf("%s is not permitted to manage sessions.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+        throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
+      }
     }
-    return $Session;
+    return self::$Session;
   }
   
   /********************************************************************************

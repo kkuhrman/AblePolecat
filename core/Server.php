@@ -104,6 +104,11 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   const NAME                    = 'Able Polecat Server';
     
   /**
+   * @var AblePolecat_AccessControl.
+   */
+  private $AccessControl;
+  
+  /**
    * @var AblePolecat_Command_TargetInterface.
    */
   private $CommandChain;
@@ -124,7 +129,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   private $version;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_SubjectInterface.
    ********************************************************************************/
   
   /**
@@ -176,6 +181,21 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
           }
         }
         break;
+      case 'bed41310-2174-11e4-8c21-0800200c9a66':
+        //
+        // Check if given agent has requested permission for given resource.
+        //
+        if ($this->getAccessControl()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
+          //
+          // @todo: Access is permitted. Get security token.
+          //
+          $SecurityToken = '@todo';
+          $Result = new AblePolecat_Command_Result($SecurityToken, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        }
+        else {
+          $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_FAIL);
+        }
+        break;
       case 'c7587ad0-74a4-11e3-981f-0800200c9a66':
       case 'ef797050-715c-11e3-981f-0800200c9a66':
         //
@@ -187,7 +207,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         }
         break;
       case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
-        $Agent = AblePolecat_AccessControl::wakeup($this)->getAgent($Command->getInvoker());
+        $Agent = $this->getAccessControl()->getAgent($Command->getInvoker());
         $Result = new AblePolecat_Command_Result($Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
       case '7ca0f570-1f22-11e4-8c21-0800200c9a66':
@@ -267,126 +287,6 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
    ********************************************************************************/
   
   /**
-   * Return the data model (resource) corresponding to request URI/path.
-   *
-   * Able Polecat expects the part of the URI, which follows the host or virtual host
-   * name to define a 'resource' on the system. This function returns the data (model)
-   * corresponding to request. If no corresponding resource is located on the system, 
-   * or if an application error is encountered along the way, Able Polecat has a few 
-   * built-in resources to deal with these situations.
-   *
-   * NOTE: Although a 'resource' may comprise more than one path component (e.g. 
-   * ./books/[ISBN] or ./products/[SKU] etc), an Able Polecat resource is identified by
-   * the first part only (e.g. 'books' or 'products') combined with a UUID. Additional
-   * path parts are passed to the top-level resource for further resolution. This is 
-   * why resource classes validate the URI, to ensure it follows expectations for syntax
-   * and that request for resource can be fulfilled. In short, the Able Polecat server
-   * really only fulfils the first part of the resource request and delegates the rest to
-   * the 'resource' itself.
-   *
-   * @see AblePolecat_ResourceAbstract::validateRequestPath()
-   *
-   * @param AblePolecat_Message_RequestInterface $Request
-   * 
-   * @return AblePolecat_ResourceInterface
-   */
-  public function getRequestedResource(AblePolecat_Message_RequestInterface $Request) {
-    
-    $Resource = NULL;
-    
-    //
-    // Extract the part of the URI, which defines the resource.
-    //
-    $request_path_info = $Request->getRequestPathInfo();
-    isset($request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resource_name = $request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resource_name  = NULL;    
-    if (isset($resource_name)) {
-      //
-      // Look up (first part of) resource name in database
-      //
-      $sql = __SQL()->          
-        select('className')->
-        from('resource')->
-        where("resourceName = '$resource_name'");      
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->CommandChain[self::RING_SERVER_MODE], $sql);
-      $className = NULL;
-      if ($CommandResult->success() && is_array($CommandResult->value())) {
-        $classInfo = $CommandResult->value();
-        isset($classInfo[0]['className']) ? $className = $classInfo[0]['className'] : NULL;
-      }
-      if (isset($className)) {
-        //
-        // Resource request resolves to registered class name, try to load.
-        //
-        $CommandResult = AblePolecat_Command_GetRegistry::invoke(self::$Host->CommandChain[self::RING_SERVER_MODE], 'AblePolecat_Registry_Class');
-        if ($CommandResult->success()) {
-          //
-          // Save reference to class registry.
-          //
-          $ClassRegistry = $CommandResult->value();
-          
-          //
-          // Get agent from user mode
-          //
-          
-          $Agent = AblePolecat_AccessControl::wakeup($this)->getAgent(self::$Host->CommandChain[self::RING_USER_MODE]);
-          // $Agent = NULL;
-          // $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
-          // if ($CommandResult->success()) {
-            // $Agent = $CommandResult->value();
-          // }
-          
-          //
-          // Attempt to load resource class
-          //
-          $Resource = $ClassRegistry->loadClass($className, $Agent);
-        }
-      }
-      else {
-        //
-        // Request did not resolve to a registered resource class.
-        // Return one of the 'built-in' resources.
-        //
-        if ($resource_name === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
-          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
-          $Resource = AblePolecat_Resource_Ack::wakeup();
-        }
-        else {
-          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Search.php')));
-          $Resource = AblePolecat_Resource_Search::wakeup();
-        }
-      }
-    }
-    else {
-      //
-      // @todo: why would we ever get here but wouldn't it be bad to not return a resource?
-      //
-    }
-    return $Resource;
-  }
-  
-  /**
-   * @param AblePolecat_ResourceInterface $Resource
-   *
-   * @return AblePolecat_Message_ResponseInterface
-   */
-  public function getResponse(AblePolecat_ResourceInterface $Resource) {
-    
-    $Response = NULL;
-    $ResourceClassName = get_class($Resource);
-    switch($ResourceClassName) {
-      default:
-        break;
-      case 'AblePolecat_Resource_Ack':
-        $version = AblePolecat_Server::getVersion();
-        $body = sprintf("<AblePolecat>%s</AblePolecat>", $version);
-        $Response = AblePolecat_Message_Response::create(200);
-        $Response->body = $body;
-        break;
-    }
-    return $Response;
-  }
-  
-  /**
    * Main point of entry for all Able Polecat page and service requests.
    *
    */
@@ -437,8 +337,16 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         //
       }
       else {
-        $Resource = self::$Host->getRequestedResource($Request);
-        self::$Host->Response = self::$Host->getResponse($Resource);
+        // 
+        // Get user agent and dispatch request to service bus.
+        //
+        $Agent = NULL;
+        $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Host->CommandChain[self::RING_USER_MODE]);
+        if ($CommandResult->success()) {
+          $Agent = $CommandResult->value();
+        }
+        self::$Host->Response = AblePolecat_Service_Bus::wakeup(self::$Host->CommandChain[self::RING_USER_MODE])->
+          dispatch($Agent, $Request);
       }
     }
     else {
@@ -641,6 +549,13 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     }
     return $backtrace;
   }
+  
+  /**
+   * @return AblePolecat_AccessControl
+   */
+  protected function getAccessControl() {
+    return $this->AccessControl;
+  }
       
   /**
    * Initialize resources in protection ring '0' (e.g. kernel).
@@ -650,12 +565,21 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     parent::initialize();
     
     //
-    // Initiate command-processing chain of responsibility.
-    // (each object wakes up it's subordinate down the chain).
+    // Initiate lowest link in command-processing chain of responsibility.
     //
     $this->CommandChain = array();
     $this->CommandChain[self::RING_SERVER_MODE] = 
       AblePolecat_Mode_Server::wakeup($this);
+    
+    //
+    // Server mode restores connection to database, which is needed to 
+    // restore session state.
+    //
+    $this->AccessControl = AblePolecat_AccessControl::wakeup($this);
+    
+    //
+    // Initiate rest of CoR (each object wakes up it's subordinate down the chain).
+    //
     $this->CommandChain[self::RING_APPLICATION_MODE] = 
       AblePolecat_Mode_Application::wakeup($this->CommandChain[self::RING_SERVER_MODE]);
     $this->CommandChain[self::RING_USER_MODE] = 

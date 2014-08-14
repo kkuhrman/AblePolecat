@@ -21,6 +21,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')))
  * Core Commands
  */
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'DbQuery.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAccessToken.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAgent.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetRegistry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Log.php')));
@@ -72,7 +73,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   private $Log;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_SubjectInterface.
    ********************************************************************************/
    
   /**

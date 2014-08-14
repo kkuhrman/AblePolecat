@@ -36,7 +36,7 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   private $Environment;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_SubjectInterface.
    ********************************************************************************/  
   /**
    * Return unique, system-wide identifier.

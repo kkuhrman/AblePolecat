@@ -90,5 +90,6 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    * Extends __construct().
    */
   protected function initialize() {
+    parent::initialize();
   }
 }

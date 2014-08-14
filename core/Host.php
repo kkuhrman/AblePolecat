@@ -13,30 +13,20 @@ if (!defined('URI_SLASH')) {
   define('URI_SLASH', $URI_SLASH);
 }
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Delegate', 'System.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Post.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Put.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Host.php')));
 
-interface AblePolecat_HostInterface {
+interface AblePolecat_HostInterface extends AblePolecat_AccessControl_SubjectInterface {
   
   /**
    * @return AblePolecat_Message_RequestInterface
    */
   public static function getRequest();
-  
-  /**
-   * @param AblePolecat_Message_RequestInterface $Request
-   * 
-   * @return AblePolecat_ResourceInterface
-   */
-  public function getRequestedResource(AblePolecat_Message_RequestInterface $Request);
-  
-  /**
-   * @param AblePolecat_ResourceInterface $Resource
-   *
-   * @return AblePolecat_Message_ResponseInterface
-   */
-  public function getResponse(AblePolecat_ResourceInterface $Resource);
-  
+    
   /**
    * Main point of entry for all Able Polecat page and service requests.
    *
@@ -44,7 +34,7 @@ interface AblePolecat_HostInterface {
   public static function routeRequest();
 }
 
-abstract class AblePolecat_HostAbstract extends AblePolecat_AccessControl_Delegate_SystemAbstract implements AblePolecat_HostInterface {
+abstract class AblePolecat_HostAbstract implements AblePolecat_HostInterface {
   
   /**
    * @var Instance of concrete singleton class.

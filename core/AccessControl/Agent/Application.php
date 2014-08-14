@@ -86,5 +86,6 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
    * Extends __construct().
    */
   protected function initialize() {
+    parent::initialize();
   }
 }

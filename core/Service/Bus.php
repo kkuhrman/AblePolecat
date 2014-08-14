@@ -14,10 +14,6 @@
  * @version   0.6.0
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Post.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Put.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
 
 /**
@@ -25,7 +21,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'I
  * between these and the application in scope.
  */
 
-class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
+class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_SubjectInterface {
   
   const UUID              = '3d50dbb0-715e-11e2-bcfd-0800200c9a66';
   const NAME              = 'Able Polecat Service Bus';
@@ -37,6 +33,11 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
    * @var object Singleton instance
    */
   private static $ServiceBus;
+  
+  /**
+   * @var AblePolecat_Registry_Class Class Registry.
+   */
+  private $ClassRegistry;
   
   /**
    * @var Array of objects, which implement AblePolecat_Service_InitiatorInterface.
@@ -116,63 +117,117 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
    */
   public function dispatch(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_MessageInterface $Message) {
     
-    if (isset($this->ClassRegistry)) {
+    try { 
+      $Resource = $this->getRequestedResource($Agent, $Message);
+      $Response = $this->getResponse($Resource);
+    } 
+    catch(AblePolecat_Service_Exception $Exception) {
       //
-      // Prepare response
+      // @todo: save transaction, prepare to listen for next request...
       //
-      $Response = $this->ClassRegistry->loadClass('AblePolecat_Message_Response');
-      
+      throw new AblePolecat_Service_Exception($Exception->getMessage());
+    }
+    return $Response;
+  }
+  
+    /**
+   * Return the data model (resource) corresponding to request URI/path.
+   *
+   * Able Polecat expects the part of the URI, which follows the host or virtual host
+   * name to define a 'resource' on the system. This function returns the data (model)
+   * corresponding to request. If no corresponding resource is located on the system, 
+   * or if an application error is encountered along the way, Able Polecat has a few 
+   * built-in resources to deal with these situations.
+   *
+   * NOTE: Although a 'resource' may comprise more than one path component (e.g. 
+   * ./books/[ISBN] or ./products/[SKU] etc), an Able Polecat resource is identified by
+   * the first part only (e.g. 'books' or 'products') combined with a UUID. Additional
+   * path parts are passed to the top-level resource for further resolution. This is 
+   * why resource classes validate the URI, to ensure it follows expectations for syntax
+   * and that request for resource can be fulfilled. In short, the Able Polecat server
+   * really only fulfils the first part of the resource request and delegates the rest to
+   * the 'resource' itself.
+   *
+   * @see AblePolecat_ResourceAbstract::validateRequestPath()
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent with access to requested service.
+   * @param AblePolecat_Message_RequestInterface $Request
+   * 
+   * @return AblePolecat_ResourceInterface
+   */
+  protected function getRequestedResource(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_Message_RequestInterface $Request) {
+    
+    $Resource = NULL;
+    
+    //
+    // Extract the part of the URI, which defines the resource.
+    //
+    $request_path_info = $Request->getRequestPathInfo();
+    isset($request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resource_name = $request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resource_name  = NULL;    
+    if (isset($resource_name)) {
       //
-      // Is it request or response?
+      // Look up (first part of) resource name in database
       //
-      $subclass = FALSE;
-      if (is_a($Message, 'AblePolecat_Message_RequestInterface')) {
-        $subclass = self::REQUEST;
+      $sql = __SQL()->          
+        select('resourceClassName', 'resourceAuthorityClassName')->
+        from('resource')->
+        where("resourceName = '$resource_name'");      
+      $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+      $resourceClassName = NULL;
+      $resourceAuthorityClassName = NULL;
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $classInfo = $CommandResult->value();
+        isset($classInfo[0]['resourceClassName']) ? $resourceClassName = $classInfo[0]['resourceClassName'] : NULL;
+        isset($classInfo[0]['resourceAuthorityClassName']) ? $resourceAuthorityClassName = $classInfo[0]['resourceAuthorityClassName'] : NULL;
       }
-      else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
-        $subclass = self::RESPONSE;
+      if (isset($resourceClassName)) {
+        //
+        // Resource request resolves to registered class name, try to load.
+        // Attempt to load resource class
+        //
+        $Resource = $this->getClassRegistry()->loadClass($resourceClassName, $Agent);
       }
-      
-      //
-      // @todo: serialize message to log.
-      // Log is used to reload unhandled messages in event of unexpected shutdown.
-      //
-      
-      //
-      // Determine target initiator
-      //
-      $initiatorId = NULL;
-      switch ($subclass) {
-        default:
-          break;
-        case self::REQUEST:
-          $initiatorId = $Message->getResource();
-          break;
-        case self::RESPONSE:
-          break;
+      else {
+        //
+        // Request did not resolve to a registered resource class.
+        // Return one of the 'built-in' resources.
+        //
+        if ($resource_name === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
+          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
+          $Resource = AblePolecat_Resource_Ack::wakeup();
+        }
+        else {
+          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Search.php')));
+          $Resource = AblePolecat_Resource_Search::wakeup();
+        }
       }
-      
-      try { 
-        $ServiceInitiator = $this->getServiceInitiator($initiatorId);
-        $Response = $ServiceInitiator->prepare($Agent, $Message)->dispatch(); 
-      } 
-      catch(AblePolecat_Service_Exception $Exception) {
-        //
-        // Create an array of data to be inserted into template
-        //
-        $substitutions = array(
-          'POLECAT_EXCEPTION_MESSAGE' => $Exception->getMessage(),
-        );
-        
-        //
-        // Load response template
-        //
-        $Response = AblePolecat_Message_Response_Template::create(
-          $this->getDefaultCommandInvoker(),
-          AblePolecat_Message_Response_Template::DEFAULT_404,
-          $substitutions
-        );
-      }
+    }
+    else {
+      //
+      // @todo: why would we ever get here but wouldn't it be bad to not return a resource?
+      //
+    }
+    return $Resource;
+  }
+  
+  /**
+   * @param AblePolecat_ResourceInterface $Resource
+   *
+   * @return AblePolecat_Message_ResponseInterface
+   */
+  protected function getResponse(AblePolecat_ResourceInterface $Resource) {
+    
+    $Response = NULL;
+    $ResourceClassName = get_class($Resource);
+    switch($ResourceClassName) {
+      default:
+        break;
+      case 'AblePolecat_Resource_Ack':
+        $version = AblePolecat_Server::getVersion();
+        $body = sprintf("<AblePolecat>%s</AblePolecat>", $version);
+        $Response = AblePolecat_Message_Response::create(200);
+        $Response->body = $body;
+        break;
     }
     return $Response;
   }
@@ -180,6 +235,25 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * @return AblePolecat_Registry_Class.
+   */
+  protected function getClassRegistry() {
+    if (!isset($this->ClassRegistry)) {
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
+      if ($CommandResult->success()) {
+        //
+        // Save reference to class registry.
+        //
+        $this->ClassRegistry = $CommandResult->value();
+      }
+      else {
+        throw new AblePolecat_AccessControl_Exception("Failed to retrieve class registry.");
+      }
+    }
+    return $this->ClassRegistry;
+  }
   
   /**
    * Returns a service initiator by class id.
@@ -192,13 +266,25 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
     
     $ServiceInitiator = NULL;
     
-    if (isset($this->ClassRegistry)) {
-      if (isset($this->ServiceInitiators[$id])) {
+    if (!isset($this->ServiceInitiators)) {
+      $this->ServiceInitiators = array();
+      
+      //
+      // Map registered service clients client id => class name
+      // These are not loaded unless needed to avoid unnecessary overhead of creating a 
+      // client connection.
+      //
+      $ServiceInitiators = $this->getClassRegistry()->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Service_InitiatorInterface');
+      foreach ($ServiceInitiators as $className => $classInfo) {
+        $Id = $classInfo[AblePolecat_Registry_Class::KEY_ARTICLE_ID];
+        $this->ServiceInitiators[$Id] = $className;
+      }
+    }
+    if (isset($this->ServiceInitiators[$id])) {
+      $ServiceInitiator = $this->ServiceInitiators[$id];
+      if (!is_object($ServiceInitiator)) {
+        $this->ServiceInitiators[$id] = $this->getClassRegistry()->loadClass($ServiceInitiator);
         $ServiceInitiator = $this->ServiceInitiators[$id];
-        if (!is_object($ServiceInitiator)) {
-          $this->ServiceInitiators[$id] = $this->ClassRegistry->loadClass($ServiceInitiator);
-          $ServiceInitiator = $this->ServiceInitiators[$id];
-        }
       }
     }
     if (!isset($ServiceInitiator) || !is_a($ServiceInitiator, 'AblePolecat_Service_InitiatorInterface')) {
@@ -213,23 +299,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract {
    * @return bool TRUE if configuration is valid, otherwise FALSE.
    */
   protected function initialize() {
-    
-    $this->ServiceInitiators = array();
-    
-    //
-    // Map registered service clients client id => class name
-    // These are not loaded unless needed to avoid unnecessary overhead of creating a 
-    // client connection.
-    //
-    $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
-    $this->ClassRegistry = $CommandResult->value();
-    
-    if (isset($this->ClassRegistry)) {
-      $ServiceInitiators = $this->ClassRegistry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Service_InitiatorInterface');
-      foreach ($ServiceInitiators as $className => $classInfo) {
-        $Id = $classInfo[AblePolecat_Registry_Class::KEY_ARTICLE_ID];
-        $this->ServiceInitiators[$Id] = $className;
-      }
-    }
+    $this->ServiceInitiators = NULL;
+    $this->Messages = NULL;
+    $this->Transactions = NULL;
   }
 }

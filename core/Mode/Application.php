@@ -48,7 +48,7 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   private $CommandChain;
       
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_SubjectInterface.
    ********************************************************************************/
    
   /**
