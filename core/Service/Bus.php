@@ -185,6 +185,16 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       }
       if (isset($resourceClassName)) {
         //
+        // Start a transaction
+        //
+        $Transaction = $Resource = $this->getClassRegistry()->loadClass(
+          'AblePolecat_Transaction_Get_Resource',
+          $this->getDefaultCommandInvoker(),
+          $Agent,
+          $Request
+        );
+        
+        //
         // Resource request resolves to registered class name, try to load.
         // Attempt to load resource class
         //
