@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/AccessControl.php
+ * @file      polecat/core/AccessControl/Agent/Administrator.php
  * @brief     Manages role based access control (RBAC).
  * 
  * 1. A subject can execute a transaction only if the subject has selected or 
@@ -8,9 +8,7 @@
  * 2. A subject's active role must be authorized for the subject.
  * 3. A subject can execute a transaction only if the transaction is authorized 
  *    for the subject's active role.
- * 
- * @see http://csrc.nist.gov/rbac/ferraiolo-kuhn-92.pdf
- * 
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.0
@@ -20,7 +18,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessContro
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Session.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
 
-class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_SubjectInterface {
+class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessControl_AgentAbstract {
   
   /**
    * Constraint data keys.
@@ -44,9 +42,9 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
   const NAME = 'Able Polecat Access Control';
   
   /**
-   * @var AblePolecat_AccessControl Instance of singleton.
+   * @var AblePolecat_AccessControl_Agent_Administrator Instance of singleton.
    */
-  private static $AccessControl;
+  private static $Administrator;
   
   /**
    * @var Array() Registry of active access control agents.
@@ -112,45 +110,43 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_AccessControl Initialized access control service or NULL.
+   * @return AblePolecat_AccessControl_Agent_Administrator Initialized access control service or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    if (!isset(self::$AccessControl)) {
+    if (!isset(self::$Administrator)) {
       if (isset($Subject) && is_a($Subject, 'AblePolecat_Server')) {
-        self::$AccessControl = new AblePolecat_AccessControl($Subject);
+        self::$Administrator = new AblePolecat_AccessControl_Agent_Administrator($Subject);
       }
       else {
         $error_msg = sprintf("%s is not permitted to administer access control privileges.", AblePolecat_DataAbstract::getDataTypeName($Subject));
         throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }
     }
-    return self::$AccessControl;
+    return self::$Administrator;
   }
   
   /********************************************************************************
-   * Helper functions.
+   * Access control administration functions.
    ********************************************************************************/
-  
+   
   /**
-   * @return AblePolecat_Registry_Class.
+   * Verify that agent is authorized to assume given role.
+   *
+   * @param string $agentId ID of agent.
+   * @param string $roleId ID of role.
+   *
+   * @return bool TRUE if role is authorized for agent, otherwise FALSE.
    */
-  protected function getClassRegistry() {
-    if (!isset($this->ClassRegistry)) {
-      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
-      if ($CommandResult->success()) {
-        //
-        // Save reference to class registry.
-        //
-        $this->ClassRegistry = $CommandResult->value();
-      }
-      else {
-        throw new AblePolecat_AccessControl_Exception("Failed to retrieve class registry.");
-      }
-    }
-    return $this->ClassRegistry;
-  }
+  public function agentAuthorizedForRole($agentId, $roleId) {
     
+    //
+    // @todo:
+    //
+    $authorized = TRUE;
+    return $authorized;
+  }
+  
   /**
    * Return access control agent for given environment context.
    *
@@ -180,7 +176,7 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
           $agentClassName = 'AblePolecat_AccessControl_Agent_User';
           break;
       }
-      $Agent = $this->getClassRegistry()->loadClass($agentClassName, $Mode);
+      $Agent = $this->getClassRegistry()->loadClass($agentClassName, $this, $Mode, $this->getSession());
       if (isset($Agent)) {
         //
         // cache agent
@@ -198,175 +194,6 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
       throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
     }
     return $Agent;
-  }
-  
-  /**
-   * Return active roles for given access control agent.
-   *
-   * @param AblePolecat_AccessControl_AgentInterface The access control subject (agent).
-   *
-   * @return AblePolecat_AccessControl_AgentInterface.
-   */
-  public function getAgentRoles(AblePolecat_AccessControl_AgentInterface $Agent) {
-    
-    $AgentRoles = array();
-    //
-    // At present only user roles can be customized.
-    //
-    if (is_a($Agent, 'AblePolecat_AccessControl_Agent_User')) {
-      if (isset($this->AgentRoles['AblePolecat_AccessControl_Agent_User'])) {
-        //
-        // Agent roles have already been cached.
-        //
-        $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
-      }
-      else {
-        //
-        // Agent roles have not been cached. Do that now.
-        //
-        $this->AgentRoles['AblePolecat_AccessControl_Agent_User'] = array();
-        $sql = __SQL()->
-          select('session_id', 'interface', 'userId', 'session_data')->
-          from('role')->
-          where(sprintf("session_id = '%s'", $this->getSession()->getId()));
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-        if ($CommandResult->success()) {
-          $results = $CommandResult->value();
-          try {
-            foreach($results as $key => $role) {
-              //
-              // assign roles to agent
-              //
-              $roleClassName = $role['interface'];
-              $Role = $this->getClassRegistry()->loadClass($roleClassName, $this->getSession());
-              if (isset($Role)) {
-                $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
-                $Agent->assignActiveRole($this, $Role);
-              }
-              else {
-                //
-                // @todo: complain
-                //
-                AblePolecat_Command_Log::invoke($this, "Failed to load user role $roleClassName.", AblePolecat_LogInterface::WARNING);
-              }
-            }
-          }
-          catch (AblePolecat_Exception $Exception) {
-            AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
-          }
-        }
-        if (0 === count($this->AgentRoles['AblePolecat_AccessControl_Agent_User'])) {
-          //
-          // No roles assigned, assume anonymous user.
-          //
-          $Role = $this->getClassRegistry()->loadClass(
-            'AblePolecat_AccessControl_Role_User_Anonymous', 
-            $this->getSession()
-          );
-          $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
-          $Agent->assignActiveRole($this, $Role);
-        }
-        $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
-      }
-    }
-    
-    return $AgentRoles;
-  }
-  
-  /**
-   * @return AblePolecat_SessionInterface.
-   */
-  public function getSession() {
-    return $this->Session;
-  }
-  
-  /********************************************************************************
-   * Helper functions.
-   ********************************************************************************/
-  
-  /**
-   * Assign given role(s) to agent(s).
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
-   * @param mixed $agent_id i.e. AblePolecat_AccessControl_AgentInterface::getId() or Array of Ids.
-   * @param string $role_id i.e. AblePolecat_AccessControl_RoleInterface::getId() or Array of Ids.
-   * 
-   * @throw AblePolecat_AccessControl_Exception if any role cannot be assigned to given agent(s)
-   */
-  public function assignRoleToAgent(
-    AblePolecat_AccessControl_SubjectInterface $Authority,
-    $agent_id,
-    $role_id
-  ) {
-    //
-    // @todo:
-    //
-  }
-  
-  /**
-   * Authorize agent(s) to assume given role(s).
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
-   * @param mixed $agent_id i.e. AblePolecat_AccessControl_AgentInterface::getId() or Array of Ids.
-   * @param string $role_id i.e. AblePolecat_AccessControl_RoleInterface::getId() or Array of Ids.
-   * 
-   * @throw AblePolecat_AccessControl_Exception if any role cannot be authorized for given agent(s).
-   */
-   public function authorizeRoleForAgent(
-    AblePolecat_AccessControl_SubjectInterface $Authority,
-    $agent_id,
-    $role_id
-  ) {
-    //
-    // @todo:
-    //
-  }
-  
-  /**
-   * Verify that agent is authorized to assume given role.
-   *
-   * @param string $agentId ID of agent.
-   * @param string $roleId ID of role.
-   *
-   * @return bool TRUE if role is authorized for agent, otherwise FALSE.
-   */
-  public function agentAuthorizedForRole($agentId, $roleId) {
-    $authorized = TRUE;
-    return $authorized;
-  }
-  
-  /**
-   * Grants permission (removes constraint) to given agent or role.
-   *
-   * In actuality, unless a constraint is set on the resource, all agents and roles 
-   * have permission for corresponding action. If constraint is set, grant() 
-   * simply exempts agent or role from that constraint (i.e. 'unblocks' them).
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Authority Access control subject making the request.
-   * @param mixed $subject_id i.e. AblePolecat_AccessControl_SubjectInterface::getId() or Array of Ids.
-   * @param mixed $requestedConstraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
-   * @param mixed $resourceId i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
-   *
-   * @throw AblePolecat_AccessControl_Exception if any permission cannot be granted to given agent/role(s).
-   */
-  public function grantPermission(
-    AblePolecat_AccessControl_SubjectInterface $Authority,
-    $subject_id, 
-    $requestedConstraintId, 
-    $resourceId
-  ) {
-    
-    //
-    // @todo: validate authority
-    //
-    
-    //
-    // First check if given constraint is placed on resource.
-    //
-    if (isset($this->Constraints[$requestedConstraintId][self::CONSTRAINT_RES][$resourceId])) {
-      $this->Constraints[$requestedConstraintId][self::CONSTRAINT_RES][$resourceId][self::CONSTRAINT_PERM][$Subject::getId()] =
-        array(self::CONSTRAINT_AUTH => $Authority::getId());
-    }
   }
   
   /**
@@ -476,82 +303,56 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
     return $hasPermission;
   }
   
-  /**
-   * Sets given constraint on the resource.
-   *
-   * By default, setting constraint on this resource denies this action to all 
-   * agents and roles. 
+  /** 
+   * Looks up a constraint based on given id.
    *
    * @param string $authorityId Access control subject making the request.
    * @param mixed $requestedConstraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
-   * @param mixed $resourceId i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
    *
-   * @return bool TRUE if constraint is set, otherwise FALSE.
-   * @throw AblePolecat_AccessControl_Exception if any constraint(s) cannot be set on given resource(s).
+   * @return AblePolecat_AccessControl_ConstraintInterface or NULL.
+   * @throw AblePolecat_AccessControl_Exception if $Authority is not permitted to lookup constraints.
    */
-  protected function setConstraint(
+  public static function lookupConstraint(
     $authorityId,
-    $constraintId, 
-    $resourceId
+    $requestedConstraintId
   ) {
-    
     //
-    // @todo: validate authority
+    // @todo: Get more specific info about constraint.
     //
-    $constraints = self::putArguments($constraintId);
-    $resources = self::putArguments($resourceId);
-
-    foreach ($constraints as $key => $constraint_id) {
-      if (!isset($this->Constraints[$constraint_id])) {
-        $this->Constraints[$constraint_id] = array(
-          self::CONSTRAINT_INFO => self::lookupConstraint(self::getId(), $constraint_id),
-          self::CONSTRAINT_RES  => array(),
-        );
-      }
-      foreach($resources as $key => $resource_id) {
-        if (!isset($this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id])) {
-          $this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id] = array(
-            self::CONSTRAINT_AUTH => $authorityId,
-            self::CONSTRAINT_PERM => array(),
-          );
-        }
-      }
-    }
+    return $requestedConstraintId;
   }
   
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
   /**
-   * Exempts subject from given constraint, if it exists, on requested resource.
+   * Helper function formats exception message in event of access control violation.
    *
-   * @param string $authorityId Access control subject making the request.
-   * @param mixed $constraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
-   * @param mixed $resourceId i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
-   * @param mixed $subjectId AblePolecat_AccessControl_SubjectInterface::getId() or Array of ids.
+   * @param mixed $Subject Subject attempting to access restricted object.
+   * @param mixed $Object Object subject is attempting to access.
+   * @param mixed $Authority Access control authority attempting to grant acccess.
+   *
+   * @throw string formatted message.
    */
-  protected function setPermission(
-    $authorityId,
-    $constraintId, 
-    $resourceId,
-    $subjectId
-  ) {
+  public static function formatDenyAccessMessage (
+    AblePolecat_AccessControl_SubjectInterface $Subject = NULL,
+    AblePolecat_AccessControl_ArticleInterface $Object = NULL, 
+    AblePolecat_AccessControl_SubjectInterface $Authority = NULL) {
     
-    //
-    // @todo: validate authority
-    //
-    $constraints = self::putArguments($constraintId);
-    $subjects = self::putArguments($subjectId);
-    $resources = self::putArguments($resourceId);
-
-    foreach ($constraints as $key => $constraint_id) {
-      if (isset($this->Constraints[$constraint_id])) {
-        foreach($resources as $key => $resource_id) {
-          if (isset($this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id])) {
-            foreach($subjects as $key => $subject_id) {
-              $this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id][self::CONSTRAINT_PERM][$subject_id] = TRUE;
-            }
-          }
-        }
-      }
+    $message = sprintf("[%s] identified by '%s' is denied access to [%s] identified by '%s'.",
+      isset($Subject) ? $Subject::getName() : 'null',
+      isset($Subject) ? $Subject::getId() : 'null',
+      isset($Object) ? $Object::getName() : 'null',
+      isset($Object) ? $Object::getId() : 'null'
+    );
+    if (isset($Authority)) {
+      $message .= ' ' . sprintf("[%s] identified by '%s' is not authorized to grant this request.",
+        $Authority::getName(),
+        $Authority::getId()
+      );
     }
+    return $message;
   }
   
   /**
@@ -590,58 +391,109 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
   }
   
   /**
-   * Helper function formats exception message in event of access control violation.
+   * Return active roles for given access control agent.
    *
-   * @param mixed $Subject Subject attempting to access restricted object.
-   * @param mixed $Object Object subject is attempting to access.
-   * @param mixed $Authority Access control authority attempting to grant acccess.
+   * @param AblePolecat_AccessControl_AgentInterface The access control subject (agent).
    *
-   * @throw AblePolecat_AccessControl_Exception
+   * @return AblePolecat_AccessControl_AgentInterface.
    */
-  public static function throwDenyAccessException(
-    AblePolecat_AccessControl_SubjectInterface $Subject = NULL,
-    AblePolecat_AccessControl_ArticleInterface $Object = NULL, 
-    AblePolecat_AccessControl_SubjectInterface $Authority = NULL) {
+  protected function getAgentRoles(AblePolecat_AccessControl_AgentInterface $Agent) {
     
-    $message = sprintf("[%s] identified by '%s' is denied access to [%s] identified by '%s'.",
-      isset($Subject) ? $Subject::getName() : 'null',
-      isset($Subject) ? $Subject::getId() : 'null',
-      isset($Object) ? $Object::getName() : 'null',
-      isset($Object) ? $Object::getId() : 'null'
-    );
-    if (isset($Authority)) {
-      $message .= ' ' . sprintf("[%s] identified by '%s' is not authorized to grant this request.",
-        $Authority::getName(),
-        $Authority::getId()
-      );
+    $AgentRoles = array();
+    //
+    // At present only user roles can be customized.
+    //
+    if (is_a($Agent, 'AblePolecat_AccessControl_Agent_User')) {
+      if (isset($this->AgentRoles['AblePolecat_AccessControl_Agent_User'])) {
+        //
+        // Agent roles have already been cached.
+        //
+        $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
+      }
+      else {
+        //
+        // Agent roles have not been cached. Do that now.
+        //
+        $this->AgentRoles['AblePolecat_AccessControl_Agent_User'] = array();
+        $sql = __SQL()->
+          select('session_id', 'interface', 'userId', 'session_data')->
+          from('role')->
+          where(sprintf("session_id = '%s'", $this->getSession()->getId()));
+        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+        if ($CommandResult->success()) {
+          $results = $CommandResult->value();
+          try {
+            foreach($results as $key => $role) {
+              //
+              // assign roles to agent
+              //
+              $roleClassName = $role['interface'];
+              $Role = $this->getClassRegistry()->loadClass($roleClassName);
+              if (isset($Role)) {
+                $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
+                $Agent->assignActiveRole($this, $Role);
+              }
+              else {
+                //
+                // @todo: complain
+                //
+                AblePolecat_Command_Log::invoke($this, "Failed to load user role $roleClassName.", AblePolecat_LogInterface::WARNING);
+              }
+            }
+          }
+          catch (AblePolecat_Exception $Exception) {
+            AblePolecat_Command_Log::invoke($this, $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
+          }
+        }
+        if (0 === count($this->AgentRoles['AblePolecat_AccessControl_Agent_User'])) {
+          //
+          // No roles assigned, assume anonymous user.
+          //
+          $Role = $this->getClassRegistry()->loadClass(
+            'AblePolecat_AccessControl_Role_User_Anonymous', 
+            $this->getSession()
+          );
+          $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
+          $Agent->assignActiveRole($this, $Role);
+        }
+        $AgentRoles = $this->AgentRoles['AblePolecat_AccessControl_Agent_User'];
+      }
     }
-    throw new AblePolecat_AccessControl_Exception($message);
+    
+    return $AgentRoles;
   }
   
-  /** 
-   * Looks up a constraint based on given id.
-   *
-   * @param string $authorityId Access control subject making the request.
-   * @param mixed $requestedConstraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
-   *
-   * @return AblePolecat_AccessControl_ConstraintInterface or NULL.
-   * @throw AblePolecat_AccessControl_Exception if $Authority is not permitted to lookup constraints.
+  /**
+   * @return AblePolecat_Registry_Class.
    */
-  public static function lookupConstraint(
-    $authorityId,
-    $requestedConstraintId
-  ) {
-    //
-    // @todo: Get more specific info about constraint.
-    //
-    return $requestedConstraintId;
+  protected function getClassRegistry() {
+    if (!isset($this->ClassRegistry)) {
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
+      if ($CommandResult->success()) {
+        //
+        // Save reference to class registry.
+        //
+        $this->ClassRegistry = $CommandResult->value();
+      }
+      else {
+        throw new AblePolecat_AccessControl_Exception("Failed to retrieve class registry.");
+      }
+    }
+    return $this->ClassRegistry;
+  }
+  
+  /**
+   * @return AblePolecat_SessionInterface.
+   */
+  protected function getSession() {
+    return $this->Session;
   }
   
   /**
    * Helper function accepts string or array as input and returns array of string(s).
    * @throw AblePolecat_Command_Exception 
    */
-  private static function putArguments($arguments) {
+  protected function putArguments($arguments) {
     
     $output = NULL;
     $invalid_type = 'NULL';
@@ -671,7 +523,87 @@ class AblePolecat_AccessControl extends AblePolecat_CacheObjectAbstract implemen
     }
     return $output;
   }
-   
+  
+  /**
+   * Sets given constraint on the resource.
+   *
+   * By default, setting constraint on this resource denies this action to all 
+   * agents and roles. 
+   *
+   * @param string $authorityId Access control subject making the request.
+   * @param mixed $requestedConstraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
+   * @param mixed $resourceId i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
+   *
+   * @return bool TRUE if constraint is set, otherwise FALSE.
+   * @throw AblePolecat_AccessControl_Exception if any constraint(s) cannot be set on given resource(s).
+   */
+  protected function setConstraint(
+    $authorityId,
+    $constraintId, 
+    $resourceId
+  ) {
+    
+    //
+    // @todo: validate authority
+    //
+    $constraints = $this->putArguments($constraintId);
+    $resources = $this->putArguments($resourceId);
+
+    foreach ($constraints as $key => $constraint_id) {
+      if (!isset($this->Constraints[$constraint_id])) {
+        $this->Constraints[$constraint_id] = array(
+          self::CONSTRAINT_INFO => self::lookupConstraint(self::getId(), $constraint_id),
+          self::CONSTRAINT_RES  => array(),
+        );
+      }
+      foreach($resources as $key => $resource_id) {
+        if (!isset($this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id])) {
+          $this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id] = array(
+            self::CONSTRAINT_AUTH => $authorityId,
+            self::CONSTRAINT_PERM => array(),
+          );
+        }
+      }
+    }
+  }
+  
+  /**
+   * Exempts subject from given constraint, if it exists, on requested resource.
+   *
+   * @param string $authorityId Access control subject making the request.
+   * @param mixed $constraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
+   * @param mixed $resourceId i.e. AblePolecat_AccessControl_ResourceInterface::getId() or Array of ids.
+   * @param mixed $subjectId AblePolecat_AccessControl_SubjectInterface::getId() or Array of ids.
+   */
+  protected function setPermission(
+    $authorityId,
+    $constraintId, 
+    $resourceId,
+    $subjectId
+  ) {
+    
+    //
+    // @todo: validate authority
+    //
+    $constraints = $this->putArguments($constraintId);
+    $subjects = $this->putArguments($subjectId);
+    $resources = $this->putArguments($resourceId);
+
+    foreach ($constraints as $key => $constraint_id) {
+      if (isset($this->Constraints[$constraint_id])) {
+        foreach($resources as $key => $resource_id) {
+          if (isset($this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id])) {
+            foreach($subjects as $key => $subject_id) {
+              $this->Constraints[$constraint_id][self::CONSTRAINT_RES][$resource_id][self::CONSTRAINT_PERM][$subject_id] = TRUE;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  
+  
   /**
    * Extends __construct().
    * Sub-classes should override to initialize properties.
