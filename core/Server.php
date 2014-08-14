@@ -72,7 +72,7 @@ if (!defined('ABLE_POLECAT_USR')) {
   define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
 }
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Administrator.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Host.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Template.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
@@ -104,9 +104,9 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   const NAME                    = 'Able Polecat Server';
     
   /**
-   * @var AblePolecat_AccessControl.
+   * @var AblePolecat_AccessControl_Agent_Administrator.
    */
-  private $AccessControl;
+  private $Administrator;
   
   /**
    * @var AblePolecat_Command_TargetInterface.
@@ -185,7 +185,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         //
         // Check if given agent has requested permission for given resource.
         //
-        if ($this->getAccessControl()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
+        if ($this->getAdministrator()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
           //
           // @todo: Access is permitted. Get security token.
           //
@@ -207,7 +207,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         }
         break;
       case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
-        $Agent = $this->getAccessControl()->getAgent($Command->getInvoker());
+        $Agent = $this->getAdministrator()->getAgent($Command->getInvoker());
         $Result = new AblePolecat_Command_Result($Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
       case '7ca0f570-1f22-11e4-8c21-0800200c9a66':
@@ -551,10 +551,10 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
   }
   
   /**
-   * @return AblePolecat_AccessControl
+   * @return AblePolecat_AccessControl_Agent_Administrator
    */
-  protected function getAccessControl() {
-    return $this->AccessControl;
+  protected function getAdministrator() {
+    return $this->Administrator;
   }
       
   /**
@@ -575,7 +575,7 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
     // Server mode restores connection to database, which is needed to 
     // restore session state.
     //
-    $this->AccessControl = AblePolecat_AccessControl::wakeup($this);
+    $this->Administrator = AblePolecat_AccessControl_Agent_Administrator::wakeup($this);
     
     //
     // Initiate rest of CoR (each object wakes up it's subordinate down the chain).

@@ -117,15 +117,18 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    */
   public function dispatch(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_MessageInterface $Message) {
     
+    $Response = NULL;
+    
     try { 
       $Resource = $this->getRequestedResource($Agent, $Message);
       $Response = $this->getResponse($Resource);
     } 
-    catch(AblePolecat_Service_Exception $Exception) {
+    catch(AblePolecat_AccessControl_Exception $Exception) {
       //
       // @todo: save transaction, prepare to listen for next request...
       //
-      throw new AblePolecat_Service_Exception($Exception->getMessage());
+      // throw new AblePolecat_Service_Exception($Exception->getMessage());
+      // AblePolecat_Dom::kill($Agent);
     }
     return $Response;
   }

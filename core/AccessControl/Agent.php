@@ -26,6 +26,11 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
    */
   private $ActiveRoles;
   
+  /**
+   * @var AblePolecat_SessionInterface.
+   */
+  private $Session;
+  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_AgentInterface.
    ********************************************************************************/
@@ -44,7 +49,7 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
     
     $authorized = FALSE;
     
-    if (isset($Authority) && is_a($Authority, 'AblePolecat_AccessControl')) {
+    if (isset($Authority) && is_a($Authority, 'AblePolecat_AccessControl_Agent_Administrator')) {
       if ($Authority->agentAuthorizedForRole($this->getId(), $Role->getId())) {
         if (!isset($this->ActiveRoles[$Role->getId()])) {
           $this->ActiveRoles[$Role->getId()] = $Role;
@@ -53,7 +58,9 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
       }
     }
     if (!$authorized) {
-      AblePolecat_AccessControl::throwDenyAccessException($this, $Role, $Authority);
+      throw new AblePolecat_AccessControl_Exception(
+        AblePolecat_AccessControl_Agent_Administrator::formatDenyAccessMessage($this, $Role, $Authority)
+      );
     }
     return $authorized;
   }
@@ -86,12 +93,26 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * @return AblePolecat_SessionInterface.
+   */
+  protected function getSession() {
+    return $this->Session;
+  }
+  
+  /**
+   * @param AblePolecat_SessionInterface $Session.
+   */
+  protected function setSession(AblePolecat_SessionInterface $Session = NULL) {
+    $this->Session = $Session;
+  }
     
   /**
    * Extends __construct().
    */
   protected function initialize() {
-    
     $this->ActiveRoles = array();
+    $this->Session = NULL;
   }
 }

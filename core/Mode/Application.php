@@ -104,9 +104,12 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
         self::$Mode->setReverseCommandLink($Subject);
         
         //
-        // Access control agent (super user).
+        // Access control agent.
         //
-        self::$Mode->Agent = AblePolecat_AccessControl_Agent_Application::wakeup(self::$Mode);
+        $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Mode);
+        if ($CommandResult->success()) {
+          self::$Mode->Agent = $CommandResult->value();
+        }
         
         //
         // Load environment/configuration

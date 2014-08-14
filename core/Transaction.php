@@ -1,10 +1,13 @@
 <?php
 /**
  * @file      polecat/core/Transaction.php
- * @brief     Encapsulates an ACID transaction between two or more service clients.
+ * @brief     Transactions manage session state and user work flow across HTTP requests.
  *
  * Implements AblePolecat_CacheObjectInterface using wakeup() to start or resume a 
  * transaction and sleep() to create a save point.
+ * 
+ * This object may encapsulate an ACID transaction between two or more service clients or
+ * simply manage user work flow and/or session state from one request to another.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)

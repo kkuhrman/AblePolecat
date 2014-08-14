@@ -135,6 +135,10 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         // Access control agent (super user).
         //
         self::$Mode->Agent = AblePolecat_AccessControl_Agent_Server::wakeup(self::$Mode);
+        // $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Mode);
+        // if ($CommandResult->success()) {
+          // self::$Mode->Agent = $CommandResult->value();
+        // }
         
         //
         // Load environment/configuration

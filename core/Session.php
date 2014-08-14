@@ -95,7 +95,7 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Session)) {
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl') && @session_start()) {
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_Administrator') && @session_start()) {
         self::$Session = new AblePolecat_Session();
         self::$Session->CommandInvoker = $Subject->getDefaultCommandInvoker();
       }

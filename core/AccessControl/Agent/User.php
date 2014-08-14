@@ -19,7 +19,7 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
   const NAME = 'User';
   
   /**
-   * @var AblePolecat_AccessControl Instance of singleton.
+   * @var AblePolecat_AccessControl_Agent_User Instance of singleton.
    */
   private static $Agent;
   
@@ -65,14 +65,14 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
     if (!isset(self::$Agent)) {
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_User')) {
-        self::$Agent = new AblePolecat_AccessControl_Agent_User($Subject);
-        
-        //
-        // @todo: if $Subject is session restore agent from session
-        //
+      $Args = func_get_args();
+      isset($Args[0]) ? $Subject = $Args[0] : $Subject = NULL;
+      isset($Args[1]) ? $Mode = $Args[1] : $Mode = NULL;
+      isset($Args[2]) ? $Session = $Args[2] : $Session = NULL;
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_Administrator')) {
+        self::$Agent = new AblePolecat_AccessControl_Agent_User($Mode);
+        self::$Agent->setSession($Session);
       }
       else {
         $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_DataAbstract::getDataTypeName($Subject));
@@ -85,6 +85,16 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * @param AblePolecat_SessionInterface $Session.
+   */
+  protected function setSession(AblePolecat_SessionInterface $Session = NULL) {
+    //
+    // @todo: if $Subject is session restore agent from session
+    //
+    parent::setSession($Session);
+  }
   
   /**
    * Extends __construct().

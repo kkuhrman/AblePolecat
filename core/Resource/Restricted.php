@@ -47,7 +47,9 @@ abstract class AblePolecat_Resource_RestrictedAbstract extends AblePolecat_Resou
         $Resource = self::$Resource;
       }
       else {
-        AblePolecat_AccessControl::throwDenyAccessException($Subject, self::$Resource);
+        throw new AblePolecat_AccessControl_Exception(
+          AblePolecat_AccessControl_Agent_Administrator::formatDenyAccessMessage($Subject, self::$Resource)
+        );
       }
     }
     return $Resource;

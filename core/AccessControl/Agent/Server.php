@@ -20,7 +20,7 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
   const NAME = 'Server Agent';
   
   /**
-   * @var AblePolecat_AccessControl Instance of singleton.
+   * @var AblePolecat_AccessControl_Agent_Server Instance of singleton.
    */
   private static $Agent;
   
@@ -66,7 +66,6 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
     if (!isset(self::$Agent)) {
       if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_Server')) {
         self::$Agent = new AblePolecat_AccessControl_Agent_Server($Subject);
