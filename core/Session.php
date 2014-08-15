@@ -16,6 +16,8 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 //
 interface AblePolecat_SessionInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
   
+  const SESSION_VAR_TRANSACTIONS      = 'transactions';
+  
   /**
    * Destroy a session.
    *
@@ -50,6 +52,11 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    */
   private static $Session;
   
+  /**
+   * @var Array Transaction log.
+   */
+  private $transactions;
+  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
@@ -83,6 +90,12 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    !isset($_SESSION[self::SESSION_VAR_TRANSACTIONS]) ? $_SESSION[self::SESSION_VAR_TRANSACTIONS] = array() : NULL;
+    $transactionId = $this->popTransaction();
+    while (isset($transactionId)) {
+      $_SESSION[self::SESSION_VAR_TRANSACTIONS][] = $transactionId;
+      $transactionId = $this->popTransaction();
+    }
     session_write_close();
   }
   
@@ -98,6 +111,11 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
       if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_Administrator') && @session_start()) {
         self::$Session = new AblePolecat_Session();
         self::$Session->CommandInvoker = $Subject->getDefaultCommandInvoker();
+        if (isset($_SESSION[self::SESSION_VAR_TRANSACTIONS])) {
+          foreach($_SESSION[self::SESSION_VAR_TRANSACTIONS] as $key => $transactionId) {
+            self::$Session->pushTransaction($transactionId);
+          }
+        }
       }
       else {
         $error_msg = sprintf("%s is not permitted to manage sessions.", AblePolecat_DataAbstract::getDataTypeName($Subject));
@@ -151,6 +169,28 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
     return session_id($session_id);
   }
   
+  /**
+   * Pushes given transaction on top of stack.
+   * 
+   * @param string $tansactionId ID of given transaction.
+   *
+   * @return int Number of transactions on stack.
+   */
+  public function pushTransaction($transactionId) {
+    $this->transactions[] = $transactionId;
+    return count($this->transactions);
+  }
+  
+  /**
+   * Pops transaction off top of stack.
+   * 
+   * @return string $tansactionId ID of given transaction.
+   */
+  public function popTransaction() {
+    $transactionId = array_pop($this->transactions);
+    return $transactionId;
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -160,5 +200,6 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    * Sub-classes initialize properties here.
    */
   protected function initialize() {
+    $this->transactions = array();
   }
 }

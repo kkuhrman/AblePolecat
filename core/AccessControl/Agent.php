@@ -102,6 +102,36 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
     return $SessionId;
   }
   
+  /**
+   * Pushes given transaction on top of stack.
+   * 
+   * @param string $tansactionId ID of given transaction.
+   *
+   * @return int Number of transactions on stack.
+   */
+  public function enterTransaction($transactionId) {
+    if (isset($this->Session)) {
+      $this->Session->pushTransaction($transactionId);
+    }
+    else {
+      throw new AblePolecat_Transaction_Exception("Agent cannot enter transaction because no session is not started.");
+    }
+  }
+  
+  /**
+   * Get ID of transaction on top of stack.
+   * 
+   * @return string $tansactionId ID of given transaction.
+   */
+  public function getCurrentTransactionId() {
+    
+    $transactionId = NULL;
+    if (isset($this->Session)) {
+      $transactionId = $this->Session->popTransaction();
+    }
+    return $transactionId;
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/

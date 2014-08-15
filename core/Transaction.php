@@ -98,7 +98,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     //
     $sql = __SQL()->
       select(
-        'COUNT(*)'
+        'transactionId'
         )->
       from('transaction')->
       where(sprintf("transactionId = '%s'", $this->getTransactionId()));
@@ -192,6 +192,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     //
     // @todo: what to do with orphaned save points (clean up aborted transactions)
     //
+    $this->getAgent()->enterTransaction($this->getTransactionId());
     $this->save($name);
   }
   

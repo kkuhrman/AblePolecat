@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 15, 2014 at 03:50 PM
+-- Generation Time: Aug 15, 2014 at 06:03 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `eventMessage` text NOT NULL,
   PRIMARY KEY (`eventId`),
   KEY `user_id` (`userId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=32 ;
 
 -- --------------------------------------------------------
 
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `requestUri` varchar(255) NOT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=163 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=179 ;
 
 -- --------------------------------------------------------
 

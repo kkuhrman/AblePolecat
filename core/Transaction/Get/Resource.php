@@ -76,17 +76,18 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       if (isset($Subject) && is_a($Subject, 'AblePolecat_Command_TargetInterface')) {
         self::$Transaction = new AblePolecat_Transaction_Get_Resource($Subject);
         
-        //
-        // @todo: restore transaction state
-        //
         // self::$Transaction->setRequest($Request);
+        
+        //
+        // Resume transaction or start new one
+        //
         self::$Transaction->setAgent($Agent);
-        // AblePolecat_Dom::kill(self::$Transaction);
-        //
-        // @todo: how to tell if starting new transaction or resuming existing
-        //
-        self::$Transaction->setTransactionId(uniqid());
-        self::$Transaction->start();
+        $transactionId = self::$Transaction->getAgent()->getCurrentTransactionId();
+        if (!isset($transactionId)) {
+          $transactionId = uniqid();
+        }
+        self::$Transaction->setTransactionId($transactionId);
+        self::$Transaction->start(__FUNCTION__);
       }
       else {
         $error_msg = sprintf("%s is not permitted to start or resume a transaction.", AblePolecat_DataAbstract::getDataTypeName($Subject));
