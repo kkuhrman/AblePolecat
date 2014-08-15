@@ -80,8 +80,13 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
         // @todo: restore transaction state
         //
         // self::$Transaction->setRequest($Request);
-        // self::$Transaction->setAgent($Agent);
-        AblePolecat_Dom::kill($Agent);
+        self::$Transaction->setAgent($Agent);
+        // AblePolecat_Dom::kill(self::$Transaction);
+        //
+        // @todo: how to tell if starting new transaction or resuming existing
+        //
+        self::$Transaction->setTransactionId(uniqid());
+        self::$Transaction->start();
       }
       else {
         $error_msg = sprintf("%s is not permitted to start or resume a transaction.", AblePolecat_DataAbstract::getDataTypeName($Subject));

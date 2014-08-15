@@ -606,7 +606,16 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     $Element = AblePolecat_QueryLanguage_Statement_Sql_Interface::COLUMNS;
     if ($this->supportsSyntax($DmlOp, $Element)) {
       if (is_array($Columns)) {
-        parent::__set($Element, sprintf("`%s`", implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER, $Columns)));
+        $delimiter = AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER;
+        switch($DmlOp) {
+          default:
+            parent::__set($Element, sprintf("`%s`", implode($delimiter, $Columns)));
+            break;
+          case self::UPDATE:
+            $delimiter = AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER;
+            parent::__set($Element, sprintf("%s", implode($delimiter, $Columns)));
+            break;
+        }
       }
       else {
         parent::__set($Element, sprintf("`%s`", strval($Columns)));
@@ -794,7 +803,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
                 //
                 // @todo: handle quoting
                 //
-                $setExpr[] = sprintf("%s = %s",
+                $setExpr[] = sprintf("`%s` = %s",
                   $name,
                   $this->getLiteralExpression($Values[$key])
                 );

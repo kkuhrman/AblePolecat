@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 07, 2014 at 08:39 PM
+-- Generation Time: Aug 15, 2014 at 03:50 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -63,6 +63,21 @@ CREATE TABLE IF NOT EXISTS `classlib` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `constraint`
+--
+
+DROP TABLE IF EXISTS `constraint`;
+CREATE TABLE IF NOT EXISTS `constraint` (
+  `resourceId` char(36) NOT NULL,
+  `constraintId` char(36) NOT NULL,
+  `authorityId` char(36) NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `permissionId` (`resourceId`,`constraintId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `interface`
 --
 
@@ -104,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `eventMessage` text NOT NULL,
   PRIMARY KEY (`eventId`),
   KEY `user_id` (`userId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
 
 -- --------------------------------------------------------
 
@@ -138,6 +153,22 @@ CREATE TABLE IF NOT EXISTS `outh2_token` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `permission`
+--
+
+DROP TABLE IF EXISTS `permission`;
+CREATE TABLE IF NOT EXISTS `permission` (
+  `resourceId` char(36) NOT NULL,
+  `constraintId` char(36) NOT NULL,
+  `subjectId` char(36) NOT NULL,
+  `authorityId` char(36) NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `permissionId` (`resourceId`,`constraintId`,`subjectId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `request`
 --
 
@@ -152,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `requestUri` varchar(255) NOT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=163 ;
 
 -- --------------------------------------------------------
 
@@ -164,10 +195,12 @@ DROP TABLE IF EXISTS `resource`;
 CREATE TABLE IF NOT EXISTS `resource` (
   `resourceName` varchar(255) NOT NULL,
   `resourceId` char(36) DEFAULT NULL,
-  `className` varchar(255) NOT NULL,
+  `resourceClassName` varchar(255) NOT NULL,
+  `resourceAuthorityClassName` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`resourceName`),
   UNIQUE KEY `resourceId` (`resourceId`),
-  KEY `className` (`className`)
+  KEY `resourceClassName` (`resourceClassName`),
+  KEY `resourceAuthorityClassName` (`resourceAuthorityClassName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -204,6 +237,21 @@ CREATE TABLE IF NOT EXISTS `role` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `savepoint`
+--
+
+DROP TABLE IF EXISTS `savepoint`;
+CREATE TABLE IF NOT EXISTS `savepoint` (
+  `savepointId` varchar(24) NOT NULL,
+  `transactionId` varchar(24) NOT NULL,
+  `savepointName` varchar(255) NOT NULL,
+  PRIMARY KEY (`savepointId`),
+  KEY `transactionId` (`transactionId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `template`
 --
 
@@ -215,6 +263,24 @@ CREATE TABLE IF NOT EXISTS `template` (
   `defaultHeaders` text,
   `body` text,
   PRIMARY KEY (`resourceId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transaction`
+--
+
+DROP TABLE IF EXISTS `transaction`;
+CREATE TABLE IF NOT EXISTS `transaction` (
+  `transactionId` varchar(24) NOT NULL,
+  `sessionId` varchar(36) NOT NULL,
+  `createTime` int(11) NOT NULL,
+  `updateTime` int(11) NOT NULL,
+  `savepointId` varchar(24) NOT NULL DEFAULT 'OPEN',
+  PRIMARY KEY (`transactionId`),
+  KEY `sessionId` (`sessionId`,`savepointId`),
+  KEY `savepointId` (`savepointId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

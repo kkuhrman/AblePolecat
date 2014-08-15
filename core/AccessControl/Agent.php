@@ -90,6 +90,18 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
     return array_keys($this->ActiveRoles);
   }
   
+  /**
+   * @return Session ID.
+   */
+  public function getSessionId() {
+    
+    $SessionId = NULL;
+    if (isset($this->Session)) {
+      $SessionId = $this->Session->getId();
+    }
+    return $SessionId;
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
