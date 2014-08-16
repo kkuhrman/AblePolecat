@@ -20,6 +20,15 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterface {
   
   /**
+   * Transaction states.
+   */
+  const TX_STATE_COMPLETED      = 'COMPLETED'; // done but not committed.
+  const TX_STATE_COMMITTED      = 'COMMITTED'; // done and flushed
+  const TX_STATE_PENDING        = 'PENDING';   // in progress
+  // const TX_STATE_INCOMPLETE     = 'INCOMPLETE';
+  const TX_STATE_ABORTED        = 'ABORTED';   // incomplete, to be discarded
+  
+  /**
    * Commit
    */
   public function commit();
@@ -28,6 +37,14 @@ interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterf
    * Rollback
    */
   public function rollback();
+  
+  /**
+   * Executes as many steps in the transaction as possible.
+   *
+   * @return object The result of the work, partial or completed.
+   * @throw AblePolecat_Transaction_Exception If cannot be brought to a satisfactory state.
+   */
+  public function run();
 }
 
 abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_TransactionInterface {
@@ -38,6 +55,21 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   private $Agent;
   
   /**
+   * @var AblePolecat_Registry_Class Class Registry.
+   */
+  private $ClassRegistry;
+  
+  /**
+   * @var AblePolecat_Message_RequestInterface.
+   */
+  private $Request;
+  
+  /**
+   * @var string Status of transaction.
+   */
+  private $status;
+  
+  /**
    * @var string ID of current transaction.
    */
   private $transactionId;
@@ -46,7 +78,36 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    * @return AblePolecat_AccessControl_AgentInterface or NULL.
    */
   public function getAgent() {
-    return $this->Agent;
+    
+    $Agent = NULL;
+    if (isset($this->Agent)) {
+      $Agent = $this->Agent;
+    }
+    else {
+      throw new AblePolecat_Transaction_Exception(sprint("Transaction [ID:%s] Agent is null.", $this->getTransactionId()));
+    }
+    return $Agent;
+  }
+  
+  /**
+   * @return AblePolecat_Message_RequestInterface.
+   */
+  public function getRequest() {
+    $Request = NULL;
+    if (isset($this->Request)) {
+      $Request = $this->Request;
+    }
+    else {
+      throw new AblePolecat_Transaction_Exception(sprint("Transaction [ID:%s] Request is null.", $this->getTransactionId()));
+    }
+    return $Request;
+  }
+  
+  /**
+   * @return string Status of transaction.
+   */
+  public function getStatus() {
+    return $this->status;
   }
   
   /**
@@ -61,10 +122,43 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    ********************************************************************************/
   
   /**
+   * @return AblePolecat_Registry_Class.
+   */
+  protected function getClassRegistry() {
+    if (!isset($this->ClassRegistry)) {
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
+      if ($CommandResult->success()) {
+        //
+        // Save reference to class registry.
+        //
+        $this->ClassRegistry = $CommandResult->value();
+      }
+      else {
+        throw new AblePolecat_AccessControl_Exception("Failed to retrieve class registry.");
+      }
+    }
+    return $this->ClassRegistry;
+  }
+  
+  /**
    * @param AblePolecat_AccessControl_AgentInterface $Agent.
    */
   protected function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
     $this->Agent = $Agent;
+  }
+  
+  /**
+   * @param AblePolecat_Message_RequestInterface.
+   */
+  protected function setRequest(AblePolecat_Message_RequestInterface $Request) {
+    $this->Request = $Request;
+  }
+  
+  /**
+   * @param string $status Status of transaction.
+   */
+  protected function setStatus($status) {
+    $this->status = $status;
   }
   
   /**
@@ -203,6 +297,9 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    */
   protected function initialize() {
     $this->Agent = NULL;
+    $this->ClassRegistry = NULL;
+    $this->Request = NULL;
     $this->transactionId = NULL;
+    $this->status = self::TX_STATE_PENDING;
   }
 }

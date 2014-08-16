@@ -120,7 +120,17 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $Response = NULL;
     
     try { 
-      $Resource = $this->getRequestedResource($Agent, $Message);
+      // $Resource = $this->getRequestedResource($Agent, $Message);
+      //
+      // Start/resume transaction
+      //
+      $Transaction = $Resource = $this->getClassRegistry()->loadClass(
+        'AblePolecat_Transaction_Get_Resource',
+        $this->getDefaultCommandInvoker(),
+        $Agent,
+        $Message
+      );
+      $Resource = $Transaction->run();
       $Response = $this->getResponse($Resource);
     } 
     catch(AblePolecat_AccessControl_Exception $Exception) {
@@ -133,7 +143,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     return $Response;
   }
   
-    /**
+  /**
    * Return the data model (resource) corresponding to request URI/path.
    *
    * Able Polecat expects the part of the URI, which follows the host or virtual host
@@ -172,7 +182,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // Look up (first part of) resource name in database
       //
       $sql = __SQL()->          
-        select('resourceClassName', 'resourceAuthorityClassName')->
+        select('resourceClassName', 'resourceAuthorityClassName', 'resourceDenyCode')->
         from('resource')->
         where("resourceName = '$resource_name'");      
       $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
@@ -312,6 +322,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    * @return bool TRUE if configuration is valid, otherwise FALSE.
    */
   protected function initialize() {
+    $this->ClassRegistry = NULL;
     $this->ServiceInitiators = NULL;
     $this->Messages = NULL;
     $this->Transactions = NULL;
