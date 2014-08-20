@@ -25,12 +25,7 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
    * @var Array[AblePolecat_AccessControl_RoleInterface].
    */
   private $ActiveRoles;
-  
-  /**
-   * @var AblePolecat_SessionInterface.
-   */
-  private $Session;
-  
+    
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_AgentInterface.
    ********************************************************************************/
@@ -89,72 +84,15 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
   public function getActiveRoleIds() {
     return array_keys($this->ActiveRoles);
   }
-  
-  /**
-   * @return Session ID.
-   */
-  public function getSessionId() {
     
-    $SessionId = NULL;
-    if (isset($this->Session)) {
-      $SessionId = $this->Session->getId();
-    }
-    return $SessionId;
-  }
-  
-  /**
-   * Pushes given transaction on top of stack.
-   * 
-   * @param string $tansactionId ID of given transaction.
-   *
-   * @return int Number of transactions on stack.
-   */
-  public function enterTransaction($transactionId) {
-    if (isset($this->Session)) {
-      $this->Session->pushTransaction($transactionId);
-    }
-    else {
-      throw new AblePolecat_Transaction_Exception("Agent cannot enter transaction because no session is not started.");
-    }
-  }
-  
-  /**
-   * Get ID of transaction on top of stack.
-   * 
-   * @return string $tansactionId ID of given transaction.
-   */
-  public function getCurrentTransactionId() {
-    
-    $transactionId = NULL;
-    if (isset($this->Session)) {
-      $transactionId = $this->Session->popTransaction();
-    }
-    return $transactionId;
-  }
-  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
   
   /**
-   * @return AblePolecat_SessionInterface.
-   */
-  protected function getSession() {
-    return $this->Session;
-  }
-  
-  /**
-   * @param AblePolecat_SessionInterface $Session.
-   */
-  protected function setSession(AblePolecat_SessionInterface $Session = NULL) {
-    $this->Session = $Session;
-  }
-    
-  /**
    * Extends __construct().
    */
   protected function initialize() {
     $this->ActiveRoles = array();
-    $this->Session = NULL;
   }
 }

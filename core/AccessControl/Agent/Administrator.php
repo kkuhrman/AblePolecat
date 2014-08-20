@@ -15,7 +15,6 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Session.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
 
 class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessControl_AgentAbstract {
@@ -65,12 +64,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
    * @var Constraints assigned to resource.
    */
   private $Constraints;
-  
-  /**
-   * @var encapsulates session data.
-   */
-  private $Session;
-  
+    
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_SubjectInterface.
    ********************************************************************************/
@@ -115,7 +109,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Administrator)) {
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_Server')) {
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_HostInterface')) {
         self::$Administrator = new AblePolecat_AccessControl_Agent_Administrator($Subject);
       }
       else {
@@ -176,7 +170,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
           $agentClassName = 'AblePolecat_AccessControl_Agent_User';
           break;
       }
-      $Agent = $this->getClassRegistry()->loadClass($agentClassName, $this, $Mode, $this->getSession());
+      $Agent = $this->getClassRegistry()->loadClass($agentClassName, $this, $Mode);
       if (isset($Agent)) {
         //
         // cache agent
@@ -418,7 +412,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
         $sql = __SQL()->
           select('session_id', 'interface', 'userId', 'session_data')->
           from('role')->
-          where(sprintf("session_id = '%s'", $this->getSession()->getId()));
+          where(sprintf("session_id = '%s'", AblePolecat_Session::getId()));
         $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
         if ($CommandResult->success()) {
           $results = $CommandResult->value();
@@ -449,10 +443,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
           //
           // No roles assigned, assume anonymous user.
           //
-          $Role = $this->getClassRegistry()->loadClass(
-            'AblePolecat_AccessControl_Role_User_Anonymous', 
-            $this->getSession()
-          );
+          $Role = $this->getClassRegistry()->loadClass('AblePolecat_AccessControl_Role_User_Anonymous');
           $this->AgentRoles['AblePolecat_AccessControl_Agent_User'][] = $Role;
           $Agent->assignActiveRole($this, $Role);
         }
@@ -480,13 +471,6 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
       }
     }
     return $this->ClassRegistry;
-  }
-  
-  /**
-   * @return AblePolecat_SessionInterface.
-   */
-  protected function getSession() {
-    return $this->Session;
   }
   
   /**
@@ -613,6 +597,5 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
     $this->AgentRoles = array();
     $this->ClassRegistry = NULL;
     $this->Constraints = array();
-    $this->Session = AblePolecat_Session::wakeup($this);
   }
 }

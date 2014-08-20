@@ -11,7 +11,7 @@
  * The simplest COR hierarchy in Able Polecat:
  * Server Mode - Receives HTTP request, sends HTTP response
  * Application Mode - Handles interaction between Able Polecat objects via class methods. 
- * Session Mode - Handles interaction between Able Polecat objects and web server session state.
+ * User Mode - Handles interaction between Able Polecat objects and user session.
  *
  * Important responsibilities of the Mode class:
  * 1. Handle errors and exceptions.

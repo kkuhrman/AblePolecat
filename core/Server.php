@@ -391,19 +391,26 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       self::$Host->Response->send();
     }
     else {
-      $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
+      $backtrace = AblePolecat_Server::getFunctionCallBacktrace('xml');
       $body = sprintf("<AblePolecat><error>
         <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
-        <file>%s</file>
-        <line>%d</line>
-        <class>%s</class>
-        <function>%s</function>
+        %s
         </error></AblePolecat>",
-        isset($backtrace['file']) ? $backtrace['file'] : '',
-        isset($backtrace['line']) ? $backtrace['line'] : 0,
-        isset($backtrace['class']) ? $backtrace['class'] : '',
-        isset($backtrace['function']) ? $backtrace['function'] : ''
+        $backtrace
       );
+      // $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
+      // $body = sprintf("<AblePolecat><error>
+        // <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
+        // <file>%s</file>
+        // <line>%d</line>
+        // <class>%s</class>
+        // <function>%s</function>
+        // </error></AblePolecat>",
+        // isset($backtrace['file']) ? $backtrace['file'] : '',
+        // isset($backtrace['line']) ? $backtrace['line'] : 0,
+        // isset($backtrace['class']) ? $backtrace['class'] : '',
+        // isset($backtrace['function']) ? $backtrace['function'] : ''
+      // );
       $Response = AblePolecat_Message_Response::create(200);
       $Response->body = $body;
       $Response->send();
@@ -539,13 +546,26 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
    */
   public static function getFunctionCallBacktrace($stackPos = NULL) {
     $backtrace = debug_backtrace();
-    if (isset($stackPos) && is_scalar($stackPos) && isset($backtrace[$stackPos])) {
+    if (isset($stackPos) && isset($backtrace[$stackPos])) {
       //
       // @todo: this is an uncertain hack to get line # to correspond/sync with function/method and file
       //
       isset($backtrace[$stackPos - 1]['line']) ? $line = $backtrace[$stackPos - 1]['line'] : $line = $backtrace[$stackPos]['line'];
       $backtrace = $backtrace[$stackPos];
       $backtrace['line'] = $line;
+    }
+    else if (isset($stackPos) && ($stackPos == 'xml')) {
+      $backtrace_xml = '<backtrace>';
+      foreach($backtrace as $key => $frame) {
+        $backtrace_xml .= sprintf("<frame id=\"%d\">", $key);
+        isset($frame['file']) ? $backtrace_xml .= sprintf("<file>%s</file>", $frame['file']) : NULL;
+        isset($frame['line']) ? $backtrace_xml .= sprintf("<line>%d</line>", $frame['line']) : NULL;
+        isset($frame['class']) ? $backtrace_xml .= sprintf("<class>%s</class>", $frame['class']) : NULL;
+        isset($frame['function']) ? $backtrace_xml .= sprintf("<function>%s</function>", $frame['function']) : NULL;
+        $backtrace_xml .= '</frame>';
+      }
+      $backtrace_xml .= '</backtrace>';
+      $backtrace = $backtrace_xml;
     }
     return $backtrace;
   }

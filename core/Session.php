@@ -2,7 +2,10 @@
 /**
  * @file      polecat/core/Session.php
  * @brief     Default class for Able Polecat user sessions.
-  *
+ *
+ * The main purpose of the Able Polecat session object is to prevent tampering with the global
+ * session variable and session ID by application and user modes.
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.0
@@ -15,8 +18,6 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 // @todo: PHP 5.4 support for SessionHandlerInterface
 //
 interface AblePolecat_SessionInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
-  
-  const SESSION_VAR_TRANSACTIONS      = 'transactions';
   
   /**
    * Destroy a session.
@@ -53,10 +54,15 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
   private static $Session;
   
   /**
-   * @var Array Transaction log.
+   * @var string PHP session ID.
    */
-  private $transactions;
+  private $sessionId;
   
+  /**
+   * @var Array Initial PHP session state.
+   */
+  private $sessionGlobal;
+    
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
@@ -64,11 +70,24 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
   /**
    * Ideally unique id will be UUID.
    *
-   * @return string Subject unique identifier.
+   * @return string PHP session ID.
+   * @throw AblePolecat_Session if session appears to have been tampered with.
    */
   public static function getId() {
-    $session_id = session_id();
-    return $session_id;
+    
+    $sessionId = NULL;
+    
+    if (isset(self::$Session)) {
+      $sessionId = session_id();
+      if (self::$Session->sessionId !== $sessionId) {
+        $sessionId = NULL;
+        throw new AblePolecat_Session("Session ID has been changed.");
+      }
+    }
+    else {
+      throw new AblePolecat_Session("Session has not been initiated.");
+    }
+    return $sessionId;
   }
   
   /**
@@ -90,12 +109,6 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    !isset($_SESSION[self::SESSION_VAR_TRANSACTIONS]) ? $_SESSION[self::SESSION_VAR_TRANSACTIONS] = array() : NULL;
-    $transactionId = $this->popTransaction();
-    while (isset($transactionId)) {
-      $_SESSION[self::SESSION_VAR_TRANSACTIONS][] = $transactionId;
-      $transactionId = $this->popTransaction();
-    }
     session_write_close();
   }
   
@@ -108,18 +121,12 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Session)) {
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_Administrator') && @session_start()) {
-        self::$Session = new AblePolecat_Session();
-        self::$Session->CommandInvoker = $Subject->getDefaultCommandInvoker();
-        if (isset($_SESSION[self::SESSION_VAR_TRANSACTIONS])) {
-          foreach($_SESSION[self::SESSION_VAR_TRANSACTIONS] as $key => $transactionId) {
-            self::$Session->pushTransaction($transactionId);
-          }
-        }
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_HostInterface')) {
+        self::$Session = new AblePolecat_Session($Subject);
       }
       else {
         $error_msg = sprintf("%s is not permitted to manage sessions.", AblePolecat_DataAbstract::getDataTypeName($Subject));
-        throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
+        throw new AblePolecat_Session($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }
     }
     return self::$Session;
@@ -169,28 +176,6 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
     return session_id($session_id);
   }
   
-  /**
-   * Pushes given transaction on top of stack.
-   * 
-   * @param string $tansactionId ID of given transaction.
-   *
-   * @return int Number of transactions on stack.
-   */
-  public function pushTransaction($transactionId) {
-    $this->transactions[] = $transactionId;
-    return count($this->transactions);
-  }
-  
-  /**
-   * Pops transaction off top of stack.
-   * 
-   * @return string $tansactionId ID of given transaction.
-   */
-  public function popTransaction() {
-    $transactionId = array_pop($this->transactions);
-    return $transactionId;
-  }
-  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -200,6 +185,16 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    * Sub-classes initialize properties here.
    */
   protected function initialize() {
-    $this->transactions = array();
+    //
+    // Start or resume session.
+    //
+    session_start();
+    $this->sessionId = session_id();
+  
+    //
+    // Cache session global variable to ensure that it is not used/tampered with by
+    // application/user mode.
+    //
+    $this->sessionGlobal = $_SESSION;
   }
 }

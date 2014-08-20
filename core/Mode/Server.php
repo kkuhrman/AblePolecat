@@ -268,15 +268,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     // Get error information
     //
     $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
-    isset($errfile) ? $msg .= " in $errfile" : NULL;
-    isset($errline) ? $msg .= " line $errline" : NULL;
-    
-    //
-    // @todo: perhaps better diagnostics.
-    // serialize() is not supported for all types
-    //
-    // isset($errcontext) ? $msg .= ' : ' . serialize($errcontext) : NULL;
-    // isset($errcontext) ? $msg .= ' : ' . get_class($errcontext) : NULL;
     
     //
     // Send error information to syslog
@@ -294,8 +285,36 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         break;
     }
     AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
+    
+    $errorFile = str_replace("\\", "\\\\", $errfile);
+    $errorLine = $errline;    
+    $errorMessage = $msg;
+    $sql = __SQL()->          
+      insert(
+        'errorType',
+        'errorFile', 
+        'errorLine', 
+        'errorClass', 
+        'errorFunction',
+        'errorMessage')->
+      into('error')->
+      values(
+        $type,
+        $errorFile,
+        $errorLine,
+        __CLASS__,
+        __FUNCTION__,
+        $errorMessage
+    );
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Mode, $sql);
+    
     if ($shutdown) {
-      AblePolecat_Server::shutdown();
+      $reason = '<reason>Critical Error</reason>';
+      $message = sprintf("<message>%s</message>",
+        $errorMessage
+      );
+      $code = $errno;
+      AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $message, $code);
     }
     return $shutdown;
   }
@@ -309,21 +328,33 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Log exception to database.
     //
-    $msg = sprintf("Unhandled exception (%d) in Able Polecat. %s line %d : %s", 
-      $Exception->getCode(),
-      $Exception->getFile(),
-      $Exception->getLine(),
-      $Exception->getMessage()
+    $errorFile = str_replace("\\", "\\\\", $Exception->getFile());
+    $errorLine = $Exception->getLine();    
+    $errorMessage = $Exception->getMessage();
+    $sql = __SQL()->          
+      insert(
+        'errorType',
+        'errorFile', 
+        'errorLine', 
+        'errorClass', 
+        'errorFunction',
+        'errorMessage')->
+      into('error')->
+      values(
+        'exception',
+        $errorFile,
+        $errorLine,
+        __CLASS__,
+        __FUNCTION__,
+        $errorMessage
     );
-    AblePolecat_Command_Log::invoke(self::$Mode, $msg, AblePolecat_LogInterface::WARNING);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Mode, $sql);
     
     //
     // Send shut down command to server
     //
     $reason = '<reason>Unhandled exception</reason>';
-    $message = sprintf("<file>%s</file><line>%s</line><message>%s</message>",
-      $Exception->getFile(),
-      $Exception->getLine(),
+    $message = sprintf("<message>%s</message>",
       $Exception->getMessage()
     );
     $code = $Exception->getCode();

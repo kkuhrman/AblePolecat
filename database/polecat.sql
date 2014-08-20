@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 15, 2014 at 06:03 PM
+-- Generation Time: Aug 20, 2014 at 08:24 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -78,6 +78,25 @@ CREATE TABLE IF NOT EXISTS `constraint` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `error`
+--
+
+DROP TABLE IF EXISTS `error`;
+CREATE TABLE IF NOT EXISTS `error` (
+  `errorId` bigint(20) NOT NULL AUTO_INCREMENT,
+  `errorTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `errorType` varchar(16) NOT NULL DEFAULT 'info',
+  `errorFile` varchar(255) NOT NULL,
+  `errorLine` int(11) NOT NULL,
+  `errorClass` varchar(255) NOT NULL,
+  `errorFunction` varchar(255) NOT NULL,
+  `errorMessage` text NOT NULL,
+  PRIMARY KEY (`errorId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `interface`
 --
 
@@ -119,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `eventMessage` text NOT NULL,
   PRIMARY KEY (`eventId`),
   KEY `user_id` (`userId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=32 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -183,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `requestUri` varchar(255) NOT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=179 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=351 ;
 
 -- --------------------------------------------------------
 
@@ -197,6 +216,7 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `resourceId` char(36) DEFAULT NULL,
   `resourceClassName` varchar(255) NOT NULL,
   `resourceAuthorityClassName` varchar(255) DEFAULT NULL,
+  `resourceDenyCode` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`resourceName`),
   UNIQUE KEY `resourceId` (`resourceId`),
   KEY `resourceClassName` (`resourceClassName`),
@@ -275,12 +295,17 @@ DROP TABLE IF EXISTS `transaction`;
 CREATE TABLE IF NOT EXISTS `transaction` (
   `transactionId` varchar(24) NOT NULL,
   `sessionId` varchar(36) NOT NULL,
+  `requestMethod` varchar(16) NOT NULL,
+  `resourceId` varchar(36) NOT NULL,
   `createTime` int(11) NOT NULL,
   `updateTime` int(11) NOT NULL,
   `savepointId` varchar(24) NOT NULL DEFAULT 'OPEN',
+  `status` varchar(32) NOT NULL DEFAULT 'PENDING',
+  `parentTransactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`transactionId`),
-  KEY `sessionId` (`sessionId`,`savepointId`),
-  KEY `savepointId` (`savepointId`)
+  KEY `sessionId` (`sessionId`),
+  KEY `requestMethod` (`requestMethod`),
+  KEY `resourceId` (`resourceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

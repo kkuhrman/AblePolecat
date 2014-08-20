@@ -19,6 +19,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Put.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Host.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Session.php')));
 
 interface AblePolecat_HostInterface extends AblePolecat_AccessControl_SubjectInterface {
   
@@ -45,6 +46,11 @@ abstract class AblePolecat_HostAbstract implements AblePolecat_HostInterface {
    * @var Instance of AblePolecat_Message_RequestInterface.
    */
   protected $Request;
+  
+  /**
+   * @var Instance of AblePolecat_SessionInterface.
+   */
+  private $Session;
   
   /********************************************************************************
    * Implementation of AblePolecat_HostInterface
@@ -92,11 +98,15 @@ abstract class AblePolecat_HostAbstract implements AblePolecat_HostInterface {
    * Extends __construct().
    */
   protected function initialize() {
-    
     $this->Request = NULL;
   }
   
   final protected function __construct() {
+    
+    //
+    // Start or resume session.
+    //
+    $this->Session = AblePolecat_Session::wakeup($this);
     
     //
     // Turn on output buffering.

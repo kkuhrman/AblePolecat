@@ -14,7 +14,9 @@
  * @version   0.6.0
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Registration.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
 
 /**
  * Manages multiple web services initiator connections and routes messages
@@ -28,6 +30,16 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   
   const REQUEST           = 'request';
   const RESPONSE          = 'response';
+  
+  /**
+   * 'Home' resource ID.
+   */
+  const DEFAULT_RESOURCE_ID = '9f0d8882-887e-460f-ada3-40e8bd8f2372';
+  
+  /**
+   * 'Home' resource ID.
+   */
+  const NOT_FOUND_RESOURCE_ID = '57d072b0-2879-11e4-8c21-0800200c9a66';
   
   /**
    * @var object Singleton instance
@@ -50,9 +62,9 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   protected $Messages;
   
   /**
-   * @todo: transaction log
+   * @var Array transaction log
    */
-  protected $Transactions;
+  protected $transactions;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -119,18 +131,71 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     
     $Response = NULL;
     
-    try { 
-      // $Resource = $this->getRequestedResource($Agent, $Message);
-      //
-      // Start/resume transaction
-      //
-      $Transaction = $Resource = $this->getClassRegistry()->loadClass(
-        'AblePolecat_Transaction_Get_Resource',
-        $this->getDefaultCommandInvoker(),
-        $Agent,
-        $Message
-      );
-      $Resource = $Transaction->run();
+    try {
+      if (is_a($Message, 'AblePolecat_Message_RequestInterface')) {
+        //
+        // Get resource registration info.
+        //
+        $ResourceRegistration = $this->getResourceRegistration($Message);
+        
+        //
+        // Check for open transactions matching request for given method/resource by same agent.
+        //
+        $transactionId = NULL;
+        $savepointId = NULL;
+        $parentTransactionId = NULL;
+        $sql = __SQL()->
+          select(
+            'transactionId', 'savepointId', 'parentTransactionId')->
+          from('transaction')->
+          where(sprintf("`sessionId` = '%s' AND `requestMethod` = '%s' AND `resourceId` = '%s' AND `status` != '%s'", 
+            AblePolecat_Session::getId(),
+            $Message->getMethod(),
+            $ResourceRegistration->getPropertyValue('resourceId'), 
+            AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
+          );
+        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+        if ($CommandResult->success() && count($CommandResult->value())) {
+          //
+          // Resume existing transaction.
+          //
+          $Records = $CommandResult->value();
+          $transactionId = $Records[0]['transactionId'];
+          $savepointId = $Records[0]['savepointId'];
+          isset($Records[0]['parentTransactionId']) ? $parentTransactionId = $Records[0]['parentTransactionId'] : NULL;
+        }
+        else {
+          //
+          // Start new transaction.
+          //
+          // $transactionId = $Records[0]['transactionId'];
+          // $savepointId = $Records[0]['savepointId'];
+        }
+        
+        //
+        // Start or resume the transaction
+        //
+        $Transaction = $this->getClassRegistry()->loadClass(
+          'AblePolecat_Transaction_Get_Resource',
+          $this->getDefaultCommandInvoker(),
+          $Agent,
+          $Message,
+          $ResourceRegistration,
+          $transactionId,
+          $savepointId,
+          $parentTransactionId
+        );
+        $Resource = $Transaction->start();
+      }
+      else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
+        //
+        // @todo: handle response message
+        //
+      }
+      else {
+        throw new AblePolecat_Service_Exception(sprintf("Able Polecat refused to dispatch message of type %s", AblePolecat_DataAbstract::getDataTypeName($Message)));
+      }
+            
       $Response = $this->getResponse($Resource);
     } 
     catch(AblePolecat_AccessControl_Exception $Exception) {
@@ -163,74 +228,58 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    *
    * @see AblePolecat_ResourceAbstract::validateRequestPath()
    *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent with access to requested service.
    * @param AblePolecat_Message_RequestInterface $Request
    * 
    * @return AblePolecat_ResourceInterface
    */
-  protected function getRequestedResource(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_Message_RequestInterface $Request) {
+  protected function getResourceRegistration(AblePolecat_Message_RequestInterface $Request) {
     
-    $Resource = NULL;
+    $ResourceRegistration = AblePolecat_Resource_Registration::create();
     
     //
     // Extract the part of the URI, which defines the resource.
     //
-    $request_path_info = $Request->getRequestPathInfo();
-    isset($request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resource_name = $request_path_info[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resource_name  = NULL;    
-    if (isset($resource_name)) {
+    $requestPathInfo = $Request->getRequestPathInfo();
+    isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resourceName  = NULL;    
+    if (isset($resourceName)) {
+      $ResourceRegistration->resourceName = $resourceName;
       //
       // Look up (first part of) resource name in database
       //
       $sql = __SQL()->          
-        select('resourceClassName', 'resourceAuthorityClassName', 'resourceDenyCode')->
-        from('resource')->
-        where("resourceName = '$resource_name'");      
+          select('resourceClassName', 'resourceId', 'resourceAuthorityClassName', 'resourceDenyCode')->
+          from('resource')->
+          where(sprintf("resourceName = '%s'", $resourceName));
       $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-      $resourceClassName = NULL;
-      $resourceAuthorityClassName = NULL;
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $classInfo = $CommandResult->value();
-        isset($classInfo[0]['resourceClassName']) ? $resourceClassName = $classInfo[0]['resourceClassName'] : NULL;
-        isset($classInfo[0]['resourceAuthorityClassName']) ? $resourceAuthorityClassName = $classInfo[0]['resourceAuthorityClassName'] : NULL;
+        if (isset($classInfo[0])) {
+          $ResourceRegistration->resourceId = $classInfo[0]['resourceId'];
+          $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
+          $ResourceRegistration->resourceAuthorityClassName = $classInfo[0]['resourceAuthorityClassName'];
+          $ResourceRegistration->resourceDenyCode = $classInfo[0]['resourceDenyCode'];
+        }
       }
-      if (isset($resourceClassName)) {
-        //
-        // Start/resume transaction
-        //
-        $Transaction = $Resource = $this->getClassRegistry()->loadClass(
-          'AblePolecat_Transaction_Get_Resource',
-          $this->getDefaultCommandInvoker(),
-          $Agent,
-          $Request
-        );
-        
-        //
-        // Resource request resolves to registered class name, try to load.
-        // Attempt to load resource class
-        //
-        $Resource = $this->getClassRegistry()->loadClass($resourceClassName, $Agent);
+    }
+    if (!isset($ResourceRegistration->resourceClassName)) {
+      //
+      // Request did not resolve to a registered resource class.
+      // Return one of the 'built-in' resources.
+      //
+      if ($resourceName === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
+        $ResourceRegistration->resourceId = self::DEFAULT_RESOURCE_ID;
+        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
+        $ResourceRegistration->resourceAuthorityClassName = NULL;
+        $ResourceRegistration->resourceDenyCode = 0;
       }
       else {
-        //
-        // Request did not resolve to a registered resource class.
-        // Return one of the 'built-in' resources.
-        //
-        if ($resource_name === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
-          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
-          $Resource = AblePolecat_Resource_Ack::wakeup();
-        }
-        else {
-          require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Search.php')));
-          $Resource = AblePolecat_Resource_Search::wakeup();
-        }
+        $ResourceRegistration->resourceId = self::NOT_FOUND_RESOURCE_ID;
+        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Search';
+        $ResourceRegistration->resourceAuthorityClassName = NULL;
+        $ResourceRegistration->resourceDenyCode = 0;
       }
     }
-    else {
-      //
-      // @todo: why would we ever get here but wouldn't it be bad to not return a resource?
-      //
-    }
-    return $Resource;
+    return $ResourceRegistration;
   }
   
   /**
@@ -258,6 +307,60 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Pops transaction off top of stack.
+   * 
+   * @return string $tansactionId ID of given transaction or NULL.
+   */
+  protected function popTransaction() {
+    $transactionId = array_pop($this->transactions);
+    return $transactionId;
+  }
+  
+  /**
+   * Pushes given transaction on top of stack.
+   * 
+   * @param string $tansactionId ID of given transaction.
+   *
+   * @return int Number of transactions on stack.
+   */
+  protected function pushTransaction($transactionId) {
+    //
+    // Transaction can only be added to list once.
+    //
+    $keys = array_flip($this->transactions);
+    if (!isset($keys[$transactionId])) {
+      $this->transactions[] = $transactionId;
+    }
+    else {
+      throw new AblePolecat_Session_Exception(sprintf("Transaction [id:%s] is already on session stack.", $transactionId));
+    }
+    return count($this->transactions);
+  }
+  
+  /**
+   * Removes given transaction from session stack.
+   * 
+   * @param string $tansactionId ID of given transaction.
+   *
+   * @return int Number of transactions on stack.
+   */
+  protected function removeTransaction($transactionId) {
+    //
+    // Transaction can only be added to list once.
+    //
+    $key = array_search($transactionId, $this->transactions);
+    if ($key) {
+      unset($this->transactions[$key]);
+    }
+    else {
+      $message = sprintf("Transaction [id:%s] is not on session stack.", $transactionId);
+      // throw new AblePolecat_Session_Exception($message);
+      trigger_error($message, E_USER_ERROR);
+    }
+    return count($this->transactions);
+  }
   
   /**
    * @return AblePolecat_Registry_Class.
@@ -325,6 +428,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $this->ClassRegistry = NULL;
     $this->ServiceInitiators = NULL;
     $this->Messages = NULL;
-    $this->Transactions = NULL;
+    $this->transactions = array();
   }
 }

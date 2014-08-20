@@ -80,7 +80,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     try {
       if (isset($token)) {
         $interface = get_class($this);
-        $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+        $session_id = AblePolecat_Session::getId();
         $session_data = serialize($token);    
         $Database = AblePolecat_Server::getDatabase();
         $sql = NULL;
@@ -130,7 +130,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     
     try {
       $interface = get_class($this);
-      $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+      $session_id = AblePolecat_Session::getId();
       // $session_data = serialize($this->token);    
       $Database = AblePolecat_Server::getDatabase();
       $sql = __SQL()->
@@ -163,7 +163,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     
     try {
       $interface = get_class($this);
-      $session_id = AblePolecat_Server::getAccessControl()->getSession()->getId();
+      $session_id = AblePolecat_Session::getId();
       $Database = AblePolecat_Server::getDatabase();
       $sql = __SQL()->
         delete()->
