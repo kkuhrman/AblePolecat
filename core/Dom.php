@@ -14,6 +14,8 @@
  * @version   0.6.0
  */
 
+require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Data.php');
+
 class AblePolecat_Dom {
   
   /**
@@ -81,6 +83,23 @@ class AblePolecat_Dom {
       throw new Exception(sprintf("Failed to merge element given by [%s] with document body.", $child->nodeName));
     }
     return $Node;
+  }
+  
+  /**
+   * Append child element to given parent or one identified by tag or id.
+   *
+   * @param AblePolecat_DataInterface $data Child node data.
+   * @param DOMDocument $document DOM Document.
+   * @param mixed $parent Parent node | Array['id' => Array[ID attribute name => ID value]] | ['tag' => Array[tag name => DOMNodeList index]]
+   * @param bool $recursive IF TRUE, recursively import the subtree under $child. 
+   *
+   * @return DOMNode The appended child node.
+   * @see expressIdAttribute()
+   * @see expressNodeListTag()
+   */
+  public static function appendData(AblePolecat_DataInterface $data, DOMDocument $document, $parent = NULL, $recursive = TRUE) {
+    // DOMNode $child;
+    return self::appendChildToParent($child, $document, $parent, $recursive);
   }
   
   /**

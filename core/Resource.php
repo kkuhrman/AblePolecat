@@ -23,8 +23,9 @@
  * @version   0.6.0
  */ 
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
-include_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Resource.php')));
 
 interface AblePolecat_ResourceInterface extends AblePolecat_CacheObjectInterface, AblePolecat_AccessControl_ResourceInterface {
@@ -105,7 +106,11 @@ abstract class AblePolecat_ResourceAbstract extends AblePolecat_CacheObjectAbstr
    * PHP magic method.
    */
   public function __set($name, $value) {
+    
     $this->checkAlloc();
+    if (!is_a($value, 'AblePolecat_DataInterface')) {
+      $value = AblePolecat_Data_Scalar_String::typeCast($value);
+    }
     $this->properties[$name] = $value;
   }
   
@@ -150,6 +155,10 @@ abstract class AblePolecat_ResourceAbstract extends AblePolecat_CacheObjectAbstr
   
   /**
    * Allocates array if not already allocated.
+   *
+   * It seems intuitively inefficient to step into this function every time.
+   * It is a protection against failure to call parent method in subclasses.
+   * (for example, subclass overrides initialize()).
    */
   private function checkAlloc() {
     if (!isset($this->properties)) {

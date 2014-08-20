@@ -113,7 +113,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
         self::$Administrator = new AblePolecat_AccessControl_Agent_Administrator($Subject);
       }
       else {
-        $error_msg = sprintf("%s is not permitted to administer access control privileges.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+        $error_msg = sprintf("%s is not permitted to administer access control privileges.", AblePolecat_Data::getDataTypeName($Subject));
         throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }
     }
@@ -151,7 +151,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
   public function getAgent(AblePolecat_ModeInterface $Mode) {
     
     $Agent = NULL;
-    $class_name = AblePolecat_DataAbstract::getDataTypeName($Mode);
+    $class_name = AblePolecat_Data::getDataTypeName($Mode);
     
     if (isset($this->Agents[$class_name])) {
       $Agent = $this->Agents[$class_name];

@@ -71,7 +71,7 @@ class AblePolecat_AccessControl_Agent_Server extends AblePolecat_AccessControl_A
         self::$Agent = new AblePolecat_AccessControl_Agent_Server($Subject);
       }
       else {
-        $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+        $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_Data::getDataTypeName($Subject));
         throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }
     }

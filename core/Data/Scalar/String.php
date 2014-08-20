@@ -1,9 +1,12 @@
 <?php
 /**
- * @file: String.php
- * Encapsulates text data.
+ * @file      polecat/core/Data/Scalar/String.php
+ * @brief     Encapsulates both text data types.
+ * 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.6.0
  */
-
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar.php')));
 
 class  AblePolecat_Data_Scalar_String extends AblePolecat_Data_Scalar {

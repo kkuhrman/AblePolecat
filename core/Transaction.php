@@ -117,13 +117,10 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     //
-    // @todo: save transaction state.
+    // If transaction is complete but not committed, commit now.
     //
     if ($this->getStatus() == self::TX_STATE_COMPLETED) {
       $this->commit();
-    }
-    else {
-      $this->save(__METHOD__);
     }
   }
   
@@ -176,7 +173,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
             }
           }
           else {
-            $error_msg = sprintf("%s is not permitted to start or resume a transaction.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+            $error_msg = sprintf("%s is not permitted to start or resume a transaction.", AblePolecat_Data::getDataTypeName($Subject));
             throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
           }          
           break;

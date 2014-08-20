@@ -193,7 +193,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         //
       }
       else {
-        throw new AblePolecat_Service_Exception(sprintf("Able Polecat refused to dispatch message of type %s", AblePolecat_DataAbstract::getDataTypeName($Message)));
+        throw new AblePolecat_Service_Exception(sprintf("Able Polecat refused to dispatch message of type %s", AblePolecat_Data::getDataTypeName($Message)));
       }
             
       $Response = $this->getResponse($Resource);

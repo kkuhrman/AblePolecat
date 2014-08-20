@@ -125,7 +125,7 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
         self::$Session = new AblePolecat_Session($Subject);
       }
       else {
-        $error_msg = sprintf("%s is not permitted to manage sessions.", AblePolecat_DataAbstract::getDataTypeName($Subject));
+        $error_msg = sprintf("%s is not permitted to manage sessions.", AblePolecat_Data::getDataTypeName($Subject));
         throw new AblePolecat_Session($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }
     }

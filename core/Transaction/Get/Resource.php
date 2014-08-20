@@ -123,8 +123,16 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
         //
         // @todo: handle different resourceDenyCode
         //
-        require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
-        $Resource = AblePolecat_Resource_Error::wakeup();
+        switch ($this->getResourceRegistration()->getResourceDenyCode()) {
+          default:
+            //
+            // Return access denied notification.
+            //
+            require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
+            $Resource = AblePolecat_Resource_Error::wakeup();
+            $this->setStatus(self::TX_STATE_COMPLETED);
+            break;
+        }
       }
     }
     else {
