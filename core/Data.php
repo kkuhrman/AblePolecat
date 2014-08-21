@@ -8,7 +8,7 @@
  * @version   0.6.0
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Exception.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Data.php')));
 
 /**
  * Static data handling methods.
@@ -39,66 +39,10 @@ class AblePolecat_Data {
 interface AblePolecat_DataInterface extends Serializable {
   
   /**
-   * @return mixed Encapsulated (scalar or not scalar) data.
-   */
-  public function getData();
-  
-  /**
-   * @return bool TRUE if data has NULL value, otherwise FALSE.
-   */
-  public function isNull();
-  
-  /**
    * @param DOMDocument $Document.
    * @param string $tagName Name of element tag (default is data type).
    *
    * @return DOMElement Encapsulated data expressed as DOM node.
    */
   public function getDomNode(DOMDocument $Document, $tagName = NULL);
-  
-  /**
-   * Casts the given parameter into an instance of data class.
-   *
-   * @param mixed $data
-   *
-   * @return Concrete instance of AblePolecat_DataInterface
-   * @throw AblePolecat_Data_Exception if type cast is invalid.
-   */
-  public static function typeCast($data);
-}
-
-abstract class AblePolecat_DataAbstract implements AblePolecat_DataInterface {
-  
-  /**
-   * @var mixed The value of the encapsulated data.
-   */
-  private $mData;
-  
-  protected function setData($data) {
-    $this->mData = $data;
-  }
-  
-  /**
-   * @return mixed Encapsulated (scalar or not scalar) data.
-   */
-  public function getData() {
-    return $this->mData;
-  }
-  
-  /**
-   * @return bool TRUE if data has NULL value, otherwise FALSE.
-   */
-  public function isNull() {
-    return isset($this->mData);
-  }
-  
-  final protected function __construct() {
-    $args = func_get_args();
-    if (isset($args[0])) {
-      $this->mData = $args[0];
-    }
-    else {
-      $this->mData = NULL;
-    }
-  }
 }

@@ -186,6 +186,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $parentTransactionId
         );
         $Resource = $Transaction->start();
+        $Response = $this->getResponse($Transaction, $Resource);
       }
       else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
         //
@@ -195,15 +196,12 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       else {
         throw new AblePolecat_Service_Exception(sprintf("Able Polecat refused to dispatch message of type %s", AblePolecat_Data::getDataTypeName($Message)));
       }
-            
-      $Response = $this->getResponse($Resource);
     } 
     catch(AblePolecat_AccessControl_Exception $Exception) {
       //
       // @todo: save transaction, prepare to listen for next request...
       //
       // throw new AblePolecat_Service_Exception($Exception->getMessage());
-      // AblePolecat_Dom::kill($Agent);
     }
     return $Response;
   }
@@ -283,24 +281,18 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   }
   
   /**
+   * @param AblePolecat_TransactionInterface $Transaction
    * @param AblePolecat_ResourceInterface $Resource
    *
    * @return AblePolecat_Message_ResponseInterface
    */
-  protected function getResponse(AblePolecat_ResourceInterface $Resource) {
+  protected function getResponse(AblePolecat_TransactionInterface $Transaction, AblePolecat_ResourceInterface $Resource) {
     
-    $Response = NULL;
-    $ResourceClassName = get_class($Resource);
-    switch($ResourceClassName) {
-      default:
-        break;
-      case 'AblePolecat_Resource_Ack':
-        $version = AblePolecat_Server::getVersion();
-        $body = sprintf("<AblePolecat>%s</AblePolecat>", $version);
-        $Response = AblePolecat_Message_Response::create(200);
-        $Response->body = $body;
-        break;
-    }
+    //
+    // @todo: deal with different status codes.
+    //
+    $Response = AblePolecat_Message_Response::create($Transaction->getStatusCode());
+    $Response->setEntityBody($Resource);
     return $Response;
   }
   

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 20, 2014 at 08:24 PM
+-- Generation Time: Aug 21, 2014 at 05:50 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -200,9 +200,10 @@ CREATE TABLE IF NOT EXISTS `request` (
   `userAgent` varchar(255) NOT NULL,
   `requestMethod` varchar(16) NOT NULL,
   `requestUri` varchar(255) NOT NULL,
+  `transactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=351 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 

@@ -51,6 +51,11 @@ interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterf
   public function commit();
   
   /**
+   * @return string HTTP status code.
+   */
+  public function getStatusCode();
+  
+  /**
    * Rollback
    */
   public function rollback();
@@ -100,6 +105,11 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    * @var string Status of transaction.
    */
   private $status;
+  
+  /**
+   * @var string HTTP status code.
+   */
+  private $statusCode;
   
   /**
    * @var string ID of current transaction.
@@ -187,6 +197,13 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    ********************************************************************************/
   
   /**
+   * @return string HTTP status code.
+   */
+  public function getStatusCode() {
+    return $this->statusCode;
+  }
+  
+  /**
    * Begin or resume the transaction.
    *
    * @return AblePolecat_ResourceInterface The result of the work, partial or completed.
@@ -195,6 +212,16 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   public function start() {
     
     $Resource = NULL;
+    
+    //
+    // Update raw request log entry with delegate transaction ID.
+    //
+    $sql = __SQL()-> 
+      update('request')->
+      set('transactionId')->
+      values($this->getTransactionId())->
+      where(sprintf("`requestId` = %d", $this->getRequest()->getRawRequestLogRecordId()));
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
     
     //
     // check save point
@@ -361,6 +388,13 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
+   * @param string HTTP status code.
+   */
+  protected function setStatusCode($statusCode) {
+    $this->statusCode = $statusCode;
+  }
+  
+  /**
    * @param string $transactionId ID of current transaction.
    */
   protected function setTransactionId($transactionId) {
@@ -515,7 +549,11 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         $Transaction->setResourceRegistration($ArgsList->getArgumentValue(self::TX_ARG_RESOURCE_REG));
         $Transaction->setTransactionId($ArgsList->getArgumentValue(self::TX_ARG_TRANSACTION_ID));
         $Transaction->setSavepointId($ArgsList->getArgumentValue(self::TX_ARG_SAVEPOINT_ID));
-        $Transaction->setParent($ArgsList->getArgumentValue(self::TX_ARG_PARENT));
+        $parentId = $ArgsList->getArgumentValue(self::TX_ARG_PARENT);
+        if ($parentId == '') {
+          $parentId = NULL;
+        }
+        $Transaction->setParent($parentId);
       }
       else {
         throw new AblePolecat_Transaction_Exception("Failed to prepare transaction because constructor arguments are invalid.");
@@ -557,5 +595,6 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     $this->ResourceRegistration = NULL;
     $this->savepointId = NULL;
     $this->status = self::TX_STATE_PENDING;
+    $this->statusCode = 200;
   }
 }

@@ -130,6 +130,9 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
             //
             require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
             $Resource = AblePolecat_Resource_Error::wakeup();
+            $Resource->Reason = 'Access Denied';
+            $Resource->Message = $Exception->getMessage();
+            $this->setStatusCode(401);
             $this->setStatus(self::TX_STATE_COMPLETED);
             break;
         }

@@ -63,6 +63,10 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
     
     if (!isset(self::$Resource)) {
       self::$Resource = new AblePolecat_Resource_Ack();
+      $version = AblePolecat_Server::getVersion(FALSE);
+      foreach($version as $propertyName => $propertyValue) {
+        self::$Resource->{$propertyName} = $propertyValue;
+      }
     }
     return self::$Resource;
   }

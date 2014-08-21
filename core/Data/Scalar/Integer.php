@@ -6,7 +6,7 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar.php')));
 
-class  AblePolecat_Data_Scalar_Integer extends AblePolecat_Data_Scalar {
+class  AblePolecat_Data_Scalar_Integer extends AblePolecat_Data_ScalarAbstract {
   
   /**
    * Casts the given parameter into an instance of data class.

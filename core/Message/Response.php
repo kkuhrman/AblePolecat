@@ -8,7 +8,9 @@
  * @version   0.6.0
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Message.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource.php')));
 
 interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInterface {
   
@@ -24,6 +26,11 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   const BODY_DOCTYPE_XML        = "<?xml version='1.0' standalone='yes'?>";
   
   /**
+   * DOM element tag names.
+   */
+  const DOM_ELEMENT_TAG_ROOT    = 'AblePolecat';
+  
+  /**
    * @return string The response status code.
    */
   public function getStatusCode();
@@ -37,24 +44,70 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
    * Send HTTP Response.
    */
   public function send();
+  
+  /**
+   * @param AblePolecat_ResourceInterface $Resource
+   */
+  public function setEntityBody(AblePolecat_ResourceInterface $Resource);
 }
 
 abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_ResponseInterface {
   
   /**
+   * @var DOMDocument contains the response.
+   */
+  private $Document;
+  
+  /**
    * @var string The response status code (e.g. HTTP example would be 200).
    */
-  private $m_status_code;
+  private $statusCode;
   
   /**
    * @var string The response reason phrase (e.g. HTTP example would be 'OK').
    */
-  private $m_reason_phrase;
+  private $reasonPhrase;
   
   /**
    * @var array Fields to be sent in the response header.
    */
   private $headerFields;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_OverloadableInterface.
+   ********************************************************************************/
+  
+  /**
+   * Marshall numeric-indexed array of variable method arguments.
+   *
+   * @param string $method_name __METHOD__ is good enough.
+   * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
+   * @param mixed $options Reserved for future use.
+   *
+   * @return Array Associative array representing [argument name] => [argument value]
+   */
+  public static function unmarshallArgsList($method_name, $args, $options = NULL) {
+    
+    $ArgsList = AblePolecat_ArgsList::create();
+    
+    foreach($args as $key => $value) {
+      switch ($method_name) {
+        default:
+          break;
+        case 'create':
+          switch($key) {
+            case 0:
+              $ArgsList->{AblePolecat_Message_ResponseInterface::STATUS_CODE} = $value;
+              break;
+            case 1:
+              $ArgsList->{AblePolecat_Message_ResponseInterface::HEADER_FIELDS} = $value;
+              break;
+          }
+          break;
+      }
+    }
+    return $ArgsList;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_Message_ResponseInterface.
@@ -64,14 +117,14 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    * @return string The response status code.
    */
   public function getStatusCode() {
-    return $this->m_status_code;
+    return $this->statusCode;
   }
   
   /**
    * @return string The response reason phrase.
    */
   public function getReasonPhrase() {
-    return $this->m_reason_phrase;
+    return $this->reasonPhrase;
   }
   
   /**
@@ -81,10 +134,36 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     $this->sendHead();
     $this->sendBody();
   }
+  
+  /**
+   * @param AblePolecat_ResourceInterface $Resource
+   */
+  public function setEntityBody(AblePolecat_ResourceInterface $Resource) {
+    
+    if (!isset($this->Document)) {
+      $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
+      $parentElement = $this->Document->firstChild;
+      $Element = $Resource->getDomNode($this->Document);
+      $Element = AblePolecat_Dom::appendChildToParent($Element, $this->Document, $parentElement);
+    }
+    else {
+      throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $this->getName()));
+    }
+  }
    
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * @return DOMDocument contains the response.
+   */
+  protected function getDocument() {
+    if (!isset($this->Document)) {
+      $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
+    }
+    return $this->Document;
+  }
   
   /**
    * Send HTTP response headers.
@@ -109,12 +188,13 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    */
   protected function sendBody() {
     //
-    // Echo response bodies (will note be sent before HTTP headers because
+    // Echo response bodies (will not be sent before HTTP headers because
     // output buffer is not flushed until server goes out of scope).
     //
-    if (isset($this->body)) {
-      echo $this->body;
-    }
+    // if (isset($this->body)) {
+      // echo $this->body;
+    // }
+    echo $this->getDocument()->saveXML();
   }
   
   /**
@@ -126,134 +206,134 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     
     switch ($status_code) {
       default:
-        $this->m_reason_phrase = NULL;
+        $this->reasonPhrase = NULL;
         break;
       case '100':
-        $this->m_reason_phrase = 'Continue';
+        $this->reasonPhrase = 'Continue';
         break;
       case '101':
-        $this->m_reason_phrase = 'Switching Protocols';
+        $this->reasonPhrase = 'Switching Protocols';
         break;
       case '200':
-        $this->m_reason_phrase = 'OK';
+        $this->reasonPhrase = 'OK';
         break;
       case '201':
-        $this->m_reason_phrase = 'Created';
+        $this->reasonPhrase = 'Created';
         break;
       case '202':
-        $this->m_reason_phrase = 'Accepted';
+        $this->reasonPhrase = 'Accepted';
         break;
       case '203':
-        $this->m_reason_phrase = 'Non-Authoritative Information';
+        $this->reasonPhrase = 'Non-Authoritative Information';
         break;
       case '204':
-        $this->m_reason_phrase = 'No Content';
+        $this->reasonPhrase = 'No Content';
         break;
       case '205':
-        $this->m_reason_phrase = 'Reset Content';
+        $this->reasonPhrase = 'Reset Content';
         break;
       case '206':
-        $this->m_reason_phrase = 'Partial Content';
+        $this->reasonPhrase = 'Partial Content';
         break;
       case '300':
-        $this->m_reason_phrase = 'Multiple Choices';
+        $this->reasonPhrase = 'Multiple Choices';
         break;
       case '301':
-        $this->m_reason_phrase = 'Moved Permanently';
+        $this->reasonPhrase = 'Moved Permanently';
         break;
       case '302':
-        $this->m_reason_phrase = 'Found';
+        $this->reasonPhrase = 'Found';
         break;
       case '303':
-        $this->m_reason_phrase = 'See Other';
+        $this->reasonPhrase = 'See Other';
         break;
       case '304':
-        $this->m_reason_phrase = 'Not Modified';
+        $this->reasonPhrase = 'Not Modified';
         break;
       case '305':
-        $this->m_reason_phrase = 'Use Proxy';
+        $this->reasonPhrase = 'Use Proxy';
         break;
       case '307':
-        $this->m_reason_phrase = 'Temporary Redirect';
+        $this->reasonPhrase = 'Temporary Redirect';
         break;
       case '400':
-        $this->m_reason_phrase = 'Bad Request';
+        $this->reasonPhrase = 'Bad Request';
         break;
       case '401':
-        $this->m_reason_phrase = 'Unauthorized';
+        $this->reasonPhrase = 'Unauthorized';
         break;
       case '402':
-        $this->m_reason_phrase = 'Payment Required';
+        $this->reasonPhrase = 'Payment Required';
         break;
       case '403':
-        $this->m_reason_phrase = 'Forbidden';
+        $this->reasonPhrase = 'Forbidden';
         break;
       case '404':
-        $this->m_reason_phrase = 'Not Found';
+        $this->reasonPhrase = 'Not Found';
         break;
       case '405':
-        $this->m_reason_phrase = 'Method Not Allowed';
+        $this->reasonPhrase = 'Method Not Allowed';
         break;
       case '406':
-        $this->m_reason_phrase = 'Not Acceptable';
+        $this->reasonPhrase = 'Not Acceptable';
         break;
       case '407':
-        $this->m_reason_phrase = 'Proxy Authentication Required';
+        $this->reasonPhrase = 'Proxy Authentication Required';
         break;
       case '408':
-        $this->m_reason_phrase = 'Request Time-out';
+        $this->reasonPhrase = 'Request Time-out';
         break;
       case '409':
-        $this->m_reason_phrase = 'Conflict';
+        $this->reasonPhrase = 'Conflict';
         break;
       case '410':
-        $this->m_reason_phrase = 'Gone';
+        $this->reasonPhrase = 'Gone';
         break;
       case '411':
-        $this->m_reason_phrase = 'Length Required';
+        $this->reasonPhrase = 'Length Required';
         break;
       case '412':
-        $this->m_reason_phrase = 'Precondition Failed';
+        $this->reasonPhrase = 'Precondition Failed';
         break;
       case '413':
-        $this->m_reason_phrase = 'Request Entity Too Large';
+        $this->reasonPhrase = 'Request Entity Too Large';
         break;
       case '414':
-        $this->m_reason_phrase = 'Request-URI Too Large';
+        $this->reasonPhrase = 'Request-URI Too Large';
         break;
       case '415':
-        $this->m_reason_phrase = 'Unsupported Media Type';
+        $this->reasonPhrase = 'Unsupported Media Type';
         break;
       case '416':
-        $this->m_reason_phrase = 'Requested range not satisfiable';
+        $this->reasonPhrase = 'Requested range not satisfiable';
         break;
       case '417':
-        $this->m_reason_phrase = 'Expectation Failed';
+        $this->reasonPhrase = 'Expectation Failed';
         break;
       case '500':
-        $this->m_reason_phrase = 'Internal Server Error';
+        $this->reasonPhrase = 'Internal Server Error';
         break;
       case '501':
-        $this->m_reason_phrase = 'Not Implemented';
+        $this->reasonPhrase = 'Not Implemented';
         break;
       case '502':
-        $this->m_reason_phrase = 'Bad Gateway';
+        $this->reasonPhrase = 'Bad Gateway';
         break;
       case '503':
-        $this->m_reason_phrase = 'Service Unavailable';
+        $this->reasonPhrase = 'Service Unavailable';
         break;
       case '504':
-        $this->m_reason_phrase = 'Gateway Time-out';
+        $this->reasonPhrase = 'Gateway Time-out';
         break;
       case '505':
-        $this->m_reason_phrase = 'HTTP Version not supported';
+        $this->reasonPhrase = 'HTTP Version not supported';
         break;
     }
-    if (isset($this->m_reason_phrase)) {
-      $this->m_status_code = $status_code;
+    if (isset($this->reasonPhrase)) {
+      $this->statusCode = $status_code;
     }
     else {
-      $this->m_status_code = NULL;
+      $this->statusCode = NULL;
     }
   }
   
@@ -285,8 +365,9 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
-    $this->m_status_code = 0;
-    $this->m_reason_phrase = '';
+    $this->Document = NULL;
+    $this->statusCode = 200;
+    $this->reasonPhrase = '';
     $this->headerFields = array();
     // AblePolecat_Error::INVALID_HTTP_RESPONSE
   }
@@ -335,41 +416,5 @@ class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract 
     // Return initialized object.
     //
     return $Response;
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_OverloadableInterface.
-   ********************************************************************************/
-  
-  /**
-   * Marshall numeric-indexed array of variable method arguments.
-   *
-   * @param string $method_name __METHOD__ is good enough.
-   * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
-   * @param mixed $options Reserved for future use.
-   *
-   * @return Array Associative array representing [argument name] => [argument value]
-   */
-  public static function unmarshallArgsList($method_name, $args, $options = NULL) {
-    
-    $ArgsList = AblePolecat_ArgsList::create();
-    
-    foreach($args as $key => $value) {
-      switch ($method_name) {
-        default:
-          break;
-        case 'create':
-          switch($key) {
-            case 0:
-              $ArgsList->{AblePolecat_Message_ResponseInterface::STATUS_CODE} = $value;
-              break;
-            case 1:
-              $ArgsList->{AblePolecat_Message_ResponseInterface::HEADER_FIELDS} = $value;
-              break;
-          }
-          break;
-      }
-    }
-    return $ArgsList;
   }
 }

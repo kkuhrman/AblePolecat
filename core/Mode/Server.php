@@ -284,7 +284,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         $type = AblePolecat_LogInterface::WARNING;
         break;
     }
-    AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
+    // AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
     
     $errorFile = str_replace("\\", "\\\\", $errfile);
     $errorLine = $errline;    
@@ -309,12 +309,9 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Mode, $sql);
     
     if ($shutdown) {
-      $reason = '<reason>Critical Error</reason>';
-      $message = sprintf("<message>%s</message>",
-        $errorMessage
-      );
+      $reason = 'Critical Error';
       $code = $errno;
-      AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $message, $code);
+      AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $msg, $code);
     }
     return $shutdown;
   }
@@ -353,12 +350,9 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Send shut down command to server
     //
-    $reason = '<reason>Unhandled exception</reason>';
-    $message = sprintf("<message>%s</message>",
-      $Exception->getMessage()
-    );
+    $reason = 'Unhandled exception';
     $code = $Exception->getCode();
-    AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $message, $code);
+    AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $Exception->getMessage(), $code);
   }
   
   /********************************************************************************
@@ -382,8 +376,15 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     if (isset($this->Database)) {
       $Stmt = $this->Database->prepareStatement($sql);
       if ($Stmt->execute()) {
-        while ($result = $Stmt->fetch(PDO::FETCH_ASSOC)) {
-          $QueryResult[] = $result;
+        switch ($sql->getDmlOp()) {
+          default:
+            while ($result = $Stmt->fetch(PDO::FETCH_ASSOC)) {
+              $QueryResult[] = $result;
+            }
+            break;
+          case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
+            $lastInsertId = $this->Database->getLastInsertId();
+            $QueryResult['lastInsertId'] = $lastInsertId;
         }
       }
     }

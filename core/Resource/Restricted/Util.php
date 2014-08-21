@@ -84,10 +84,10 @@ class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract 
     }
     $util_directive = array_shift($request_path);
     $this->Name = array_shift($request_path);
-    if (count($request_path)) {
-      $this->SubDir = $request_path;
-    }
-    $this->Args = AblePolecat_Server::getRequest()->getRequestQueryString(FALSE);
+    // if (count($request_path)) {
+      // $this->SubDir = $request_path;
+    // }
+    // $this->Args = AblePolecat_Server::getRequest()->getRequestQueryString(FALSE);
   }
   
   /**

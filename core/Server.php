@@ -214,12 +214,12 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
         //
         // Command to shut down indicates abnormal termination
         //
-        $body = sprintf("<AblePolecat><notice>Able Polecat shut down unexpectedly.</notice>%s%s</AblePolecat>", 
-          $Command->getReason(),
-          $Command->getMessage()
-        );
-        self::$Host->Response = AblePolecat_Message_Response::create(200);
-        self::$Host->Response->body = $body;
+        require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
+        $Resource = AblePolecat_Resource_Error::wakeup();
+        $Resource->Reason = $Command->getReason();
+        $Resource->Message = $Command->getMessage();
+        self::$Host->Response = AblePolecat_Message_Response::create(500);
+        self::$Host->Response->setEntityBody($Resource);
         self::shutdown($Command->getStatus());
         break;
       case '85fc7590-724d-11e3-981f-0800200c9a66':
@@ -323,12 +323,17 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
           $_SERVER['REQUEST_URI']
         );
       $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->CommandChain[self::RING_SERVER_MODE], $sql);
-      
+      $requestId = NULL;
+      if ($CommandResult->success() && count($CommandResult->value())) {
+        $Records = $CommandResult->value();
+        isset($Records['lastInsertId']) ? $requestId = $Records['lastInsertId'] : NULL;
+      }
       
       //
       // Map the request path to a specific resource (model)...
       //
       $Request = self::getRequest();
+      $Request->setRawRequestLogRecordId($requestId);
       if (is_a($Request, 'AblePolecat_Message_Request_Unsupported')) {
         //
         // @todo: 405 Method not allowed.
@@ -391,28 +396,11 @@ class AblePolecat_Server extends AblePolecat_HostAbstract implements AblePolecat
       self::$Host->Response->send();
     }
     else {
-      $backtrace = AblePolecat_Server::getFunctionCallBacktrace('xml');
-      $body = sprintf("<AblePolecat><error>
-        <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
-        %s
-        </error></AblePolecat>",
-        $backtrace
-      );
-      // $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
-      // $body = sprintf("<AblePolecat><error>
-        // <message>Able Polecat server was directed to shut down before generating response to request URI.</message>
-        // <file>%s</file>
-        // <line>%d</line>
-        // <class>%s</class>
-        // <function>%s</function>
-        // </error></AblePolecat>",
-        // isset($backtrace['file']) ? $backtrace['file'] : '',
-        // isset($backtrace['line']) ? $backtrace['line'] : 0,
-        // isset($backtrace['class']) ? $backtrace['class'] : '',
-        // isset($backtrace['function']) ? $backtrace['function'] : ''
-      // );
-      $Response = AblePolecat_Message_Response::create(200);
-      $Response->body = $body;
+      require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
+      $Resource = AblePolecat_Resource_Error::wakeup();
+      $Resource->notice = "Able Polecat server was directed to shut down before generating response to request URI.";
+      $Response = AblePolecat_Message_Response::create(500);
+      $Response->setEntityBody($Resource);
       $Response->send();
     }
     exit($status);

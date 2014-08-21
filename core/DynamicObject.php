@@ -25,16 +25,8 @@
  * @version   0.6.0
  */
 
-interface AblePolecat_DynamicObjectInterface {
-  
-  /**
-   * Creational method.
-   *
-   * @return AblePolecat_DynamicObjectInterface Concrete instance of class.
-   */
-  public static function create();
-  
-  /**
+interface AblePolecat_StdObjectInterface {
+    /**
    * PHP magic method is run when writing data to inaccessible properties.
    *
    * @param string $name  Name of property to set.
@@ -74,6 +66,16 @@ interface AblePolecat_DynamicObjectInterface {
    * @return mixed Assigned value of property given by $name if set, otherwise $default.
    */
   public function getPropertyValue($name, $default = NULL);
+}
+
+interface AblePolecat_DynamicObjectInterface extends AblePolecat_StdObjectInterface {
+  
+  /**
+   * Creational method.
+   *
+   * @return AblePolecat_DynamicObjectInterface Concrete instance of class.
+   */
+  public static function create();
 }
 
 abstract class AblePolecat_DynamicObjectAbstract implements AblePolecat_DynamicObjectInterface {

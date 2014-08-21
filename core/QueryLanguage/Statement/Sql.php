@@ -181,6 +181,13 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    ********************************************************************************/
   
   /**
+   * @return string DML operation.
+   */
+  public function getDmlOp() {
+    return $this->DmlOp;
+  }
+  
+  /**
    * @return query langauge statement as a string.
    */
   public function __toString() {
@@ -434,13 +441,6 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       }
     }
     return $expression;
-  }
-  
-  /**
-   * @return string DML operation.
-   */
-  public function getDmlOp() {
-    return $this->DmlOp;
   }
   
   /**

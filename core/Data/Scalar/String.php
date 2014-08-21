@@ -9,7 +9,7 @@
  */
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar.php')));
 
-class  AblePolecat_Data_Scalar_String extends AblePolecat_Data_Scalar {
+class  AblePolecat_Data_Scalar_String extends AblePolecat_Data_ScalarAbstract {
   
   const ESC_CHARSET_PHP = 'ESC_CHARSET_PHP';
   const ESC_CHARSET_CSV = 'ESC_CHARSET_CSV';

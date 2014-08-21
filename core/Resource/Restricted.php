@@ -118,6 +118,6 @@ abstract class AblePolecat_Resource_RestrictedAbstract extends AblePolecat_Resou
    */
   protected function initialize() {
     parent::initialize();
-    self::$Resource->SecurityTokens = array();
+    $this->SecurityTokens = array();
   }
 }

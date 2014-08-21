@@ -65,6 +65,11 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   public function getBaseUrl($trailing_slash = TRUE);
   
   /**
+   * @return mixed ID corresponding to record of raw request in database.
+   */
+  public function getRawRequestLogRecordId();
+  
+  /**
    * Check resource name against list of allowable characters etc.
    *
    * @param string $requestedResourceName Name of requested resource.
@@ -114,6 +119,11 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * @var Array Query string arguments.
    */
   private $query_string;
+  
+  /**
+   * @var mixed ID of raw request log entry in database.
+   */
+  private $rawRequestLogRecordId;
   
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
@@ -204,6 +214,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
   }
   
   /**
+   * @return mixed ID corresponding to record of raw request in database.
+   */
+  public function getRawRequestLogRecordId() {
+    return $this->rawRequestLogRecordId;
+  }
+  
+  /**
    * Check resource name against list of allowable characters etc.
    *
    * @param string $requestedResourceName Name of requested resource.
@@ -224,6 +241,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * @param mixed $rawRequestLogRecordId
+   */
+  public function setRawRequestLogRecordId($rawRequestLogRecordId) {
+    $this->rawRequestLogRecordId = $rawRequestLogRecordId;
+  }
   
   /**
    * Break off path from host name and analyze components.
@@ -449,6 +473,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     
     $this->m_resource = NULL;
     $this->request_path_info = NULL;
+    $this->rawRequestLogRecordId = NULL;
     
     //
     // Allocate array in any case - container for invalid path parts
