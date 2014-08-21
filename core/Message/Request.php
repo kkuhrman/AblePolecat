@@ -88,7 +88,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
   /**
    * @var string Request resource (URI/URL).
    */
-  private $m_resource;
+  private $resourceUri;
   
   /**
    * @var Array Analysis of request URI.
@@ -235,7 +235,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * @return string Request resource (URI/URL).
    */
   public function getResource() {
-    return $this->m_resource;
+    return $this->resourceUri;
   }
   
   /********************************************************************************
@@ -460,8 +460,56 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
   /**
    * @param string $resource (URI/URL).
    */
-  protected function setResource($resource) {
-    $this->m_resource = $resource;
+  protected function setResource($resource = NULL) {
+    
+    if (!isset($resource)) {
+      //
+      // Resource URI is not specified. Use current HTTP request.
+      // Allocate array in any case - container for invalid path parts
+      // @see getRequestPathInfo()
+      //
+      $this->entity_body = array();
+      
+      //
+      // aka 'base' URL.
+      //
+      $this->initializeHostUrl();
+      
+      //
+      // Filter (sanitize) entity body if sent (e.g. POST data).
+      //
+      $this->filterEntityBody();
+      
+      //
+      // Filter (sanitize) query string if sent.
+      //
+      $this->filterQueryString();
+      
+      //
+      // Break off path from host name and analyze components.
+      //
+      $this->analyzeRequestPath();
+      
+      //
+      // Initialize full resource URI from incoming request.
+      //
+      $this->resourceUri = $this->getBaseUrl() . $this->getRequestPath(TRUE);
+    }
+    else {
+      //
+      // Resource URI is specified.
+      //
+      $url_parts = parse_url($resource);
+      isset($url_parts['scheme']) ? $protocol = $url_parts['scheme'] . "://" : $protocol = '';
+      isset($url_parts['host']) ? $host = $url_parts['host'] : $host = '';
+      $this->host_url = $protocol . $host;
+      isset($url_parts['host']) ? $this->request_path = $url_parts['host'] : $this->request_path = '';
+      
+      $this->resourceUri = $resource;
+      $this->request_path_info = array();
+      $this->request_path_info[self::URI_RESOURCE_NAME] = $resource;
+      $this->request_path_info[self::URI_REDIRECT] = TRUE;
+    }
   }
   
   /**
@@ -470,35 +518,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
-    
-    $this->m_resource = NULL;
+    $this->resourceUri = NULL;
     $this->request_path_info = NULL;
     $this->rawRequestLogRecordId = NULL;
-    
-    //
-    // Allocate array in any case - container for invalid path parts
-    // @see getRequestPathInfo()
-    //
-    $this->entity_body = array();
-    
-    //
-    // aka 'base' URL.
-    //
-    $this->initializeHostUrl();
-    
-    //
-    // Filter (sanitize) entity body if sent (e.g. POST data).
-    //
-    $this->filterEntityBody();
-    
-    //
-    // Filter (sanitize) query string if sent.
-    //
-    $this->filterQueryString();
-    
-    //
-    // Break off path from host name and analyze components.
-    //
-    $this->analyzeRequestPath();
   }
 }

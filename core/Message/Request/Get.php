@@ -30,12 +30,7 @@ class AblePolecat_Message_Request_Get extends AblePolecat_Message_RequestAbstrac
     //
     $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
     
-    $Request->setResource(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::URI, 
-        URI_SLASH
-      )
-    );
+    $Request->setResource($ArgsList->getArgumentValue(AblePolecat_Message_RequestInterface::URI));
     
     return $Request;
   }

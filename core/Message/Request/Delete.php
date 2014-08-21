@@ -30,12 +30,7 @@ class AblePolecat_Message_Request_Delete extends AblePolecat_Message_RequestAbst
     //
     $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
     
-    $Request->setResource(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::URI, 
-        URI_SLASH
-      )
-    );
+    $Request->setResource($ArgsList->getArgumentValue(AblePolecat_Message_RequestInterface::URI));
     
     $Request->setHead(
       $ArgsList->getArgumentValue(
