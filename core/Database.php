@@ -32,12 +32,12 @@ interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_Resour
    * NOTE: USE execute() for INSERT, DELETE, UPDATE, REPLACE.
    *       USE query() for SELECT.
    *
-   * @param string $sql SQL DML statement.
+   * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
    *
-   * @return int Number of rows effected by operation.
+   * @return Array Results/rowset.
    * @see query()
    */
-  public function execute($sql);
+  public function execute(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql);
   
   /**
    * Execute SQL DML and return results as an array.
@@ -45,12 +45,12 @@ interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_Resour
    * NOTE: USE query() for SELECT.
    *       USE execute() for INSERT, DELETE, UPDATE, REPLACE.
    *
-   * @param string $sql SQL DML statement.
+   * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
    *
-   * @return int Number of rows effected by operation.
+   * @return Array Results/rowset.
    * @see execute()
    */
-  public function query($sql);
+  public function query(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql);
 }
 
 abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_DatabaseInterface {

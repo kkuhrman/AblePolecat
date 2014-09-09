@@ -167,7 +167,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       // the case if setting up a local WAMP/MAMP environment with default settings).
       //
       if (($dbUser === '') || ($dbPass === '')) {
-        $this->error_info[] = sprintf("Access denied. Able Tabby database connection requires user with password. user='%s' password='%s' given.",
+        $this->error_info[] = sprintf("Access denied. Able Polecat database connection requires user with password. user='%s' password='%s' given.",
           $dbUser,
           $dbPass
         );
@@ -196,23 +196,46 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * NOTE: USE execute() for INSERT, DELETE, UPDATE, REPLACE.
    *       USE query() for SELECT.
    *
-   * @param string $sql SQL DML statement.
+   * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
    *
-   * @return int Number of rows effected by operation.
+   * @return Array Results/rowset.
    * @see query()
    */
-  public function execute($sql) {
+  public function execute(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql) {
     
-    $Results = 0;
+    $Results = array();
     
     if (isset($this->DatabaseConnection)) {
-      $Results = $this->DatabaseConnection->exec($sql);
-      if (!$Results) {
-        $this->error_info[] = $this->DatabaseConnection->errorInfo();
+      switch ($sql->getDmlOp()) {
+        default:
+          $RecordCount = $this->DatabaseConnection->exec($sql);
+          if (!$RecordCount) {
+            $Results['recordsEffected'] = 0;
+            $Results['errorInfo'] = $this->DatabaseConnection->errorInfo();
+            $this->error_info[] = $this->DatabaseConnection->errorInfo();
+          }
+          else {
+            $Results['recordsEffected'] = $RecordCount;
+            if (AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT == $sql->getDmlOp()) {
+              $lastInsertId = $this->DatabaseConnection->lastInsertId();
+              $Results['lastInsertId'] = $lastInsertId;
+            }
+          }
+          break;
+        case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
+          $message = 'query() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
+          $Results['errorInfo'] = $message;
+          $this->error_info[] = $message;
+          throw new AblePolecat_Database_Exception($message);
+          break;
       }
+      
     }
     else {
-      $this->error_info[] = 'Cannot execute SQL. No database connection is available.';
+      $message = 'Cannot execute SQL. No database connection is available.';
+      $Results['errorInfo'] = $message;
+      $this->error_info[] = $message;
+      throw new AblePolecat_Database_Exception($message);
     }
     return $Results;
   }
@@ -223,26 +246,38 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * NOTE: USE query() for SELECT.
    *       USE execute() for INSERT, DELETE, UPDATE, REPLACE.
    *
-   * @param string $sql SQL DML statement.
+   * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
    *
-   * @return int Number of rows effected by operation.
+   * @return Array Results/rowset.
    * @see execute()
    */
-  public function query($sql) {
+  public function query(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql) {
     
     $Results = array();
     
     if (isset($this->DatabaseConnection)) {
-      $PreparedStatement = $this->DatabaseConnection->prepare($sql);
-      if($PreparedStatement->execute()) {
-        $Results = $PreparedStatement->fetchAll(PDO::FETCH_ASSOC);
-      }
-      else {
-        $this->error_info[] = $PreparedStatement->errorInfo();
+      switch ($sql->getDmlOp()) {
+        default:
+          $message = 'query() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
+          $this->error_info[] = $message;
+          throw new AblePolecat_Database_Exception($message);
+          break;
+        case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
+          $PreparedStatement = $this->DatabaseConnection->prepare($sql);
+          if($PreparedStatement->execute()) {
+            $Results = $PreparedStatement->fetchAll(PDO::FETCH_ASSOC);
+          }
+          else {
+            $this->error_info[] = $PreparedStatement->errorInfo();
+          }
+          break;
       }
     }
     else {
-      $this->error_info[] = 'Cannot execute SQL. No database connection is available.';
+      $message = 'Cannot execute SQL. No database connection is available.';
+      $Results['errorInfo'] = $message;
+      $this->error_info[] = $message;
+      throw new AblePolecat_Database_Exception($message);
     }
     return $Results;
   }

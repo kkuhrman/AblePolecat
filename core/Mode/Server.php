@@ -374,18 +374,13 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     $QueryResult = array();
     
     if (isset($this->Database)) {
-      $Stmt = $this->Database->prepareStatement($sql);
-      if ($Stmt->execute()) {
-        switch ($sql->getDmlOp()) {
-          default:
-            while ($result = $Stmt->fetch(PDO::FETCH_ASSOC)) {
-              $QueryResult[] = $result;
-            }
-            break;
-          case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
-            $lastInsertId = $this->Database->getLastInsertId();
-            $QueryResult['lastInsertId'] = $lastInsertId;
-        }
+      switch ($sql->getDmlOp()) {
+        default:
+          $QueryResult = $this->Database->execute($sql);
+          break;
+        case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
+          $QueryResult = $this->Database->query($sql);
+          break;
       }
     }
     return $QueryResult;
