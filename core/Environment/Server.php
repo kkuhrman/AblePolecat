@@ -89,7 +89,19 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         $DbNodes = AblePolecat_Dom::getElementsByTagName($Conf, 'database');
         $db_state = array();
         foreach($DbNodes as $key => $Node) {
-          if (($Node->getAttribute('name') == 'polecat') && ($Node->getAttribute('use'))) {
+          //
+          // Only one instance of core (server mode) database can be active.
+          // Otherwise, Able Polecat stops boot and throws exception.
+          // @see ./polecat/etc/conf/host.xml
+          // <database id="core" name="polecat" mode="server" use="1">
+          //   <dsn>mysql://user:pass@localhost/polecat</dsn>
+          // </database>
+          //
+          if (($Node->getAttribute('id') == 'core') &&
+              ($Node->getAttribute('name') == 'polecat') && 
+              ($Node->getAttribute('mode') == 'server') && 
+              ($Node->getAttribute('use'))) 
+          {
             $db_state['name'] = $Node->getAttribute('name');
             $db_state['mode'] = $Node->getAttribute('mode');
             $db_state['use'] = $Node->getAttribute('use');
