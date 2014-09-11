@@ -111,8 +111,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$ServiceBus)) {
-      self::$ServiceBus = new AblePolecat_Service_Bus($Subject);
-      
+      self::$ServiceBus = new AblePolecat_Service_Bus($Subject);      
     }					
     return self::$ServiceBus;
   }
@@ -149,7 +148,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             'transactionId', 'savepointId', 'parentTransactionId')->
           from('transaction')->
           where(sprintf("`sessionId` = '%s' AND `requestMethod` = '%s' AND `resourceId` = '%s' AND `status` != '%s'", 
-            AblePolecat_Session::getId(),
+            AblePolecat_Host::getSessionId(),
             $Message->getMethod(),
             $ResourceRegistration->getPropertyValue('resourceId'), 
             AblePolecat_TransactionInterface::TX_STATE_COMMITTED)

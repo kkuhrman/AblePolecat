@@ -27,11 +27,10 @@ class AblePolecat_QueryLanguage_Expression_Binary_Sql extends AblePolecat_QueryL
     $str = '';
     
     try {
-      $Database = AblePolecat_Server::getDatabase();
       $str = sprintf("%s %s %s", 
         $this->lvalue(), 
         $this->operator(), 
-        $Database->quote($this->rvalue())
+        AblePolecat_Sql::getLiteralExpression($this->rvalue())
       );
     }
     catch (AblePolecat_Exception $Exception) {

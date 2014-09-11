@@ -16,6 +16,15 @@
  * @version   0.6.1
  */
 
+/**
+ * Most current version is loaded from conf file. These are defaults.
+ */
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.1');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_1_DEV');
+define('ABLE_POLECAT_VERSION_MAJOR', '0');
+define('ABLE_POLECAT_VERSION_MINOR', '6');
+define('ABLE_POLECAT_VERSION_REVISION', '1');
+
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Target.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Post.php')));
@@ -25,8 +34,9 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
 
-class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
+final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   
   //
   // Access control id
@@ -68,6 +78,21 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    * @var Instance of AblePolecat_SessionInterface.
    */
   private $Session;
+  
+  /**
+   * @var string Version number from server config settings file.
+   */
+  private $version;
+  
+  /**
+   * @var int Error display directive.
+   */
+  private static $display_errors;
+  
+  /**
+   * @var int Error reporting directive.
+   */
+  private static $report_errors;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_SubjectInterface.
@@ -130,7 +155,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_HostInterface
+   * Methods not required by implemented interface(s) but public.
    ********************************************************************************/
   
   /**
@@ -149,7 +174,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       // wakeup session mode and get user agent.
       //
       self::$Host->Session = AblePolecat_Mode_Session::wakeup(self::$Host);
-      
+            
       //
       // Preprocess HTTP request.
       //
@@ -167,13 +192,8 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         // Get user agent and dispatch request to service bus.
         //
         $Agent = self::$Host->Session->getUserAgent();
-        // self::$Host->Response = AblePolecat_Service_Bus::wakeup(self::$Host->CommandChain[self::RING_USER_MODE])->dispatch($Agent, $Request);
+        self::$Host->Response = AblePolecat_Service_Bus::wakeup(self::$Host->Session)->dispatch($Agent, $Request);
       }
-      
-      //
-      // @todo: Initiate service bus and dispatch request.
-      //
-      self::$Host->Response = NULL;
     }
     else {
       //
@@ -275,6 +295,65 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   }
   
   /**
+   * Get version number of server/core.
+   */
+  public static function getVersion($as_str = TRUE, $doc_type = 'XML') {
+    
+    $version = NULL;
+    
+    //
+    // @todo: override defaults with data from core conf file?
+    //
+    if (isset(self::$Host->version)) {
+      if ($as_str) {
+        switch ($doc_type) {
+          default:
+            $version = sprintf("Version %s.%s.%s (%s)",
+              self::$Host->version['major'],
+              self::$Host->version['minor'],
+              self::$Host->version['revision'],
+              self::$Host->version['name']
+            );
+            break;
+          case 'XML':
+            $version = sprintf("<polecat_version name=\"%s\"><major>%s</major><minor>%s</minor><revision>%s</revision></polecat_version>",
+              self::$Host->version['name'],
+              strval(self::$Host->version['major']),
+              strval(self::$Host->version['minor']),
+              strval(self::$Host->version['revision'])
+            );
+            break;
+          //
+          // @todo: case 'JSON':
+          //
+        }
+      }
+      else {
+        $version = self::$Host->version;
+      }
+    }
+    else {
+      if ($as_str) {
+        $version = sprintf("Version %s.%s.%s (%s)",
+          ABLE_POLECAT_VERSION_MAJOR,
+          ABLE_POLECAT_VERSION_MINOR,
+          ABLE_POLECAT_VERSION_REVISION,
+          ABLE_POLECAT_VERSION_NAME
+        );
+      }
+      else {
+        $version = array(
+          'name' => ABLE_POLECAT_VERSION_NAME,
+          'major' => ABLE_POLECAT_VERSION_MAJOR,
+          'minor' => ABLE_POLECAT_VERSION_MINOR,
+          'revision' => ABLE_POLECAT_VERSION_REVISION,
+        );
+      }
+    }
+    return $version;
+  }
+  
+  /**
    * Handle errors triggered by child objects.
    */
   public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
@@ -301,7 +380,6 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         $type = AblePolecat_LogInterface::WARNING;
         break;
     }
-    // AblePolecat_Command_Log::invoke(self::$Host, $msg, $type);
     
     $errorFile = str_replace("\\", "\\\\", $errfile);
     $errorLine = $errline;    
@@ -323,16 +401,39 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         __FUNCTION__,
         $errorMessage
     );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host, $sql);
-    //
-    // Apparently, no other log facility was available to handle the message
-    //
-    // AblePolecat_Log_Syslog::wakeup()->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+    if (!$CommandResult->success()) {
+      //
+      // Apparently, no other log facility was available to handle the message
+      //
+      AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
+    }
+    if (!isset(self::$Host->Request) || !isset(self::$Host->Request->setRawRequestLogRecordId)) {
+      //
+      // Error triggered before raw request logged.
+      //
+      AblePolecat_Log_Boot::wakeup()->putMessage($type, $errorMessage);
+    }
     
-    if ($shutdown) {
+    if ($shutdown && (self::$display_errors != 0)) {
       $reason = 'Critical Error';
       $code = $errno;
       AblePolecat_Command_Shutdown::invoke(self::$Host, $reason, $msg, $code);
+    }
+    else if (self::$display_errors != 0) {
+      //
+      // User induced script to vomit error on screen.
+      //
+      print('<p>display_errors set to ' . self::$display_errors . '</p>');
+      print('<p>' . 
+        $msg . 
+        '<ul><li>' .
+        $errfile . 
+        '</li><li>' .
+        $errline .
+        '</li></ul></p>'
+      );
+      exit($errno);
     }
     return $shutdown;
   }
@@ -366,7 +467,19 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         __FUNCTION__,
         $errorMessage
     );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host, $sql);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+    if (!$CommandResult->success()) {
+      //
+      // Apparently, no other log facility was available to handle the message
+      //
+      AblePolecat_Log_Syslog::wakeup()->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
+    }
+    if (!isset(self::$Host->Request) || !isset(self::$Host->Request->setRawRequestLogRecordId)) {
+      //
+      // Exception thrown before raw request logged.
+      //
+      AblePolecat_Log_Boot::wakeup()->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
+    }
     
     //
     // Send shut down command to server
@@ -379,6 +492,31 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Sets version information from core configuration file.
+   */
+  private function setVersion($version = NULL) {
+    
+    if (isset($version['name']) &&
+        isset($version['major']) &&
+        isset($version['minor']) &&
+        isset($version['revision'])) {
+        $this->version = array();
+      $this->version['name'] = $version['name'];
+      $this->version['major'] = $version['major'];
+      $this->version['minor'] = $version['minor'];
+      $this->version['revision'] = $version['revision'];
+    }
+    else {
+      $this->version = array(
+        'name' => ABLE_POLECAT_VERSION_NAME,
+        'major' => ABLE_POLECAT_VERSION_MAJOR,
+        'minor' => ABLE_POLECAT_VERSION_MINOR,
+        'revision' => ABLE_POLECAT_VERSION_REVISION,
+      );
+    }
+  }
   
   /**
    * Validates given command target as a forward or reverse COR link.
@@ -423,15 +561,35 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     exit($status);
   }
   
-  /**
-   * Extends __construct().
-   */
-  protected function initialize() {
-    $this->Request = NULL;
-  }
-  
-  final protected function __construct() {
+  protected function __construct() {
     
+    self::$report_errors = E_ALL;
+    self::$display_errors = 0;
+    if (isset($_REQUEST['display_errors'])) {
+      $display_errors = strval($_REQUEST['display_errors']);
+      switch ($display_errors) {
+        default:
+          self::$display_errors = E_ALL;
+          break;
+        case 'strict':
+          self::$report_errors = E_STRICT;
+          self::$display_errors = E_STRICT;
+          break;
+      }
+      
+      //
+      // Error settings for local development only
+      //
+      error_reporting(self::$report_errors);
+      ini_set('display_errors', self::$display_errors);
+    }
+    else {
+      //
+      // Error settings for production web server
+      //
+      error_reporting(self::$report_errors);
+      ini_set('display_errors', self::$display_errors);
+    }
     //
     // Default error/exception handling
     //
@@ -460,15 +618,16 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     ob_start();
     
     //
-    // Sub-classes can extend constructor via initialize().
+    // Initialize other members.
     //
-    $this->initialize();
+    $this->Request = NULL;
+    $this->setVersion(NULL);
   }
   
   /**
    * Serialization prior to going out of scope in sleep().
    */
-  final public function __destruct() {
+  public function __destruct() {
     //
     // Flush output buffer.
     //

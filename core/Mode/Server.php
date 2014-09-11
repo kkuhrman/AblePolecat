@@ -14,18 +14,10 @@
  * @version   0.6.1
  */
 
-/**
- * Most current version is loaded from conf file. These are defaults.
- */
-define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.1');
-define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_1_DEV');
-define('ABLE_POLECAT_VERSION_MAJOR', '0');
-define('ABLE_POLECAT_VERSION_MINOR', '6');
-define('ABLE_POLECAT_VERSION_REVISION', '1');
-
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Administrator.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Syslog.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
@@ -84,11 +76,6 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
    * @var AblePolecat_AccessControl_AgentInterface
    */
   private $UserAgent;
-  
-  /**
-   * @var string Version number from server config settings file.
-   */
-  private $version;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_SubjectInterface.
@@ -226,31 +213,6 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
   }
   
   /**
-   * Sets version information from core configuration file.
-   */
-  private function setVersion($version = NULL) {
-    
-    if (isset($version['name']) &&
-        isset($version['major']) &&
-        isset($version['minor']) &&
-        isset($version['revision'])) {
-        $this->version = array();
-      $this->version['name'] = $version['name'];
-      $this->version['major'] = $version['major'];
-      $this->version['minor'] = $version['minor'];
-      $this->version['revision'] = $version['revision'];
-    }
-    else {
-      $this->version = array(
-        'name' => ABLE_POLECAT_VERSION_NAME,
-        'major' => ABLE_POLECAT_VERSION_MAJOR,
-        'minor' => ABLE_POLECAT_VERSION_MINOR,
-        'revision' => ABLE_POLECAT_VERSION_REVISION,
-      );
-    }
-  }
-  
-  /**
    * Execute database query and return results.
    *
    * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql
@@ -298,6 +260,9 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       // Load class registry.
       //
       $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception('Cannot access class registry.');
     }
     return $this->ClassRegistry;
   }
@@ -381,65 +346,6 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     }
     return $this->UserAgent;
   }
-  
-  /**
-   * Get version number of server/core.
-   */
-  public static function getVersion($as_str = TRUE, $doc_type = 'XML') {
-    
-    $version = NULL;
-    
-    //
-    // @todo: override defaults with data from core conf file?
-    //
-    if (isset(self::$Host->version)) {
-      if ($as_str) {
-        switch ($doc_type) {
-          default:
-            $version = sprintf("Version %s.%s.%s (%s)",
-              self::$Host->version['major'],
-              self::$Host->version['minor'],
-              self::$Host->version['revision'],
-              self::$Host->version['name']
-            );
-            break;
-          case 'XML':
-            $version = sprintf("<polecat_version name=\"%s\"><major>%s</major><minor>%s</minor><revision>%s</revision></polecat_version>",
-              self::$Host->version['name'],
-              strval(self::$Host->version['major']),
-              strval(self::$Host->version['minor']),
-              strval(self::$Host->version['revision'])
-            );
-            break;
-          //
-          // @todo: case 'JSON':
-          //
-        }
-      }
-      else {
-        $version = self::$Host->version;
-      }
-    }
-    else {
-      if ($as_str) {
-        $version = sprintf("Version %s.%s.%s (%s)",
-          ABLE_POLECAT_VERSION_MAJOR,
-          ABLE_POLECAT_VERSION_MINOR,
-          ABLE_POLECAT_VERSION_REVISION,
-          ABLE_POLECAT_VERSION_NAME
-        );
-      }
-      else {
-        $version = array(
-          'name' => ABLE_POLECAT_VERSION_NAME,
-          'major' => ABLE_POLECAT_VERSION_MAJOR,
-          'minor' => ABLE_POLECAT_VERSION_MINOR,
-          'revision' => ABLE_POLECAT_VERSION_REVISION,
-        );
-      }
-    }
-    return $version;
-  }
     
   /**
    * Extends constructor.
@@ -451,17 +357,12 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     //
     $Host = $this->getReverseCommandLink();
     $this->AdministratorAgent = AblePolecat_AccessControl_Agent_Administrator::wakeup($Host);
-    // $CommandResult = AblePolecat_Command_GetAgent::invoke($Host);
-    // if ($CommandResult->success()) {
-      // $this->AdministratorAgent = $CommandResult->value();
-    // }
     
     //
     // Load environment/configuration
     //
     //
     $this->ServerEnvironment = AblePolecat_Environment_Server::wakeup($this->AdministratorAgent);
-    $this->setVersion(NULL);
     
     //
     // Load core database configuration settings.

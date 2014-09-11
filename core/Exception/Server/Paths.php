@@ -8,7 +8,7 @@
  * @version   0.6.1
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));
 
-class AblePolecat_Server_Paths_Exception extends AblePolecat_Server_Exception {
+class AblePolecat_Server_Paths_Exception extends AblePolecat_Exception {
 }

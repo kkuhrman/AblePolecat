@@ -417,6 +417,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   
   /**
    * @todo: lots on this one, more of a placeholder for now.
+   * @todo: something like $Database->quote($this->rvalue())
    * Used to express literal values in DML (for example quotes around strings etc).
    *
    * @param mixed $literal The value of the literal being expressed.

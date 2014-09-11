@@ -96,6 +96,6 @@ abstract class AblePolecat_ResourceAbstract
     // throw exception if request URI path is not valid for resource
     //
     $this->validateRequestPath();
-    $this->uri = AblePolecat_Server::getRequest()->getBaseUrl() . AblePolecat_Server::getRequest()->getRequestPath(TRUE);
+    $this->uri = AblePolecat_Host::getRequest()->getBaseUrl() . AblePolecat_Host::getRequest()->getRequestPath(TRUE);
   }
 }

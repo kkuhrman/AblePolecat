@@ -14,14 +14,20 @@ class AblePolecat_Data_Txfr_String extends AblePolecat_Data_TxfrAbstract {
   protected function initialize() {
     //
     // transformation support class
+    // @todo: verify all core classes loadable by convention.
     //
-    if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
-      AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        'AblePolecat_Data_Scalar_String', 
-        implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
-        'typeCast'
-      );
-    }
+    // $ClassRegistry = NULL;
+    // $CommandResult = AblePolecat_Command_GetRegistry::invoke($this, 'AblePolecat_Registry_Class');
+    // if ($CommandResult->success()) {
+      // $ClassRegistry = $CommandResult->value();
+    // }
+    // if (isset($ClassRegistry) && !$ClassRegistry->isLoadable('AblePolecat_Data_Scalar_String')) {
+      // $ClassRegistry->registerLoadableClass(
+        // 'AblePolecat_Data_Scalar_String', 
+        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
+        // 'typeCast'
+      // );
+    // }
   }
   
   /**

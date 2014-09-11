@@ -80,9 +80,8 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     try {
       if (isset($token)) {
         $interface = get_class($this);
-        $session_id = AblePolecat_Session::getId();
+        $session_id = AblePolecat_Host::getSessionId();
         $session_data = serialize($token);    
-        $Database = AblePolecat_Server::getDatabase();
         $sql = NULL;
         
         if (!isset($this->token)) {
@@ -105,11 +104,9 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
         }
         
         if (isset($sql)) {
-          $PreparedStatement = $Database->prepareStatement($sql);
-          $result = $PreparedStatement->execute();
-          if (!$result) {
-            $this->token = NULL;
-            $Database->logErrorInfo();
+          $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+          if ($CommandResult->success() && count($CommandResult->value())) {
+            $result = $CommandResult->value();
           }
         }
       }
@@ -130,22 +127,22 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     
     try {
       $interface = get_class($this);
-      $session_id = AblePolecat_Session::getId();
-      // $session_data = serialize($this->token);    
-      $Database = AblePolecat_Server::getDatabase();
+      $session_id = AblePolecat_Host::getSessionId();
       $sql = __SQL()->
         select('session_data')->
         from('role')->
         where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
-      $PreparedStatement = $Database->prepareStatement($sql);
-      $result = $PreparedStatement->execute();
+      $result = FALSE;
+      $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+      if ($CommandResult->success() && count($CommandResult->value())) {
+        $result = $CommandResult->value();
+      }
       if ($result) {
         $data = $PreparedStatement->fetch();
         isset($data['session_data']) ? $this->token = unserialize($data['session_data']) : $this->token = NULL;
       }
       else {
         $this->token = NULL;
-        $Database->logErrorInfo();
       }
     }
     catch (AblePolecat_Exception $Exception) {
@@ -163,16 +160,15 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
     
     try {
       $interface = get_class($this);
-      $session_id = AblePolecat_Session::getId();
-      $Database = AblePolecat_Server::getDatabase();
+      $session_id = AblePolecat_Host::getSessionId();
       $sql = __SQL()->
         delete()->
         from('role')->
         where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
-      $PreparedStatement = $Database->prepareStatement($sql);
-      $result = $PreparedStatement->execute();
-      if (!$result) {
-        $Database->logErrorInfo();
+      $result = FALSE;
+      $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+      if ($CommandResult->success() && count($CommandResult->value())) {
+        $result = $CommandResult->value();
       }
       $this->token = NULL;
     }

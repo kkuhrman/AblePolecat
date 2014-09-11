@@ -497,7 +497,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         //
         // Create record of transaction.
         //
-        $sessionId = AblePolecat_Session::getId();
+        $sessionId = AblePolecat_Host::getSessionId();
         $sql = __SQL()->          
           insert(
             'transactionId',

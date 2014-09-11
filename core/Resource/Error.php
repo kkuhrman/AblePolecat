@@ -74,7 +74,7 @@ class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
    * @throw AblePolecat_Resource_Exception If request URI path is not validated.
    */
   protected function validateRequestPath() {
-    $this->requestPath = AblePolecat_Server::getRequest()->getRequestPath(FALSE);
+    $this->requestPath = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
   }
   
   /**

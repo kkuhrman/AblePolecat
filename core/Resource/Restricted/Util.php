@@ -77,9 +77,9 @@ class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract 
     // Expected syntax: ./[util]/[name], where 'util' is directive for running application 
     // utilities (e.g. util) and 'name' is actual name of utility to run (e.g. www.example.com/util/update).
     //
-    $request_path = AblePolecat_Server::getRequest()->getRequestPath(FALSE);
+    $request_path = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
     if (!isset($request_path[0]) || ($request_path[0] == '') || (count($request_path) < 2)) {
-      $request_path = AblePolecat_Server::getRequest()->getRequestPath();
+      $request_path = AblePolecat_Host::getRequest()->getRequestPath();
       throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
     }
     $util_directive = array_shift($request_path);
@@ -87,7 +87,7 @@ class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract 
     // if (count($request_path)) {
       // $this->SubDir = $request_path;
     // }
-    // $this->Args = AblePolecat_Server::getRequest()->getRequestQueryString(FALSE);
+    // $this->Args = AblePolecat_Host::getRequest()->getRequestQueryString(FALSE);
   }
   
   /**

@@ -169,7 +169,15 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
    */
   protected function mapInputField($field_name, $txfr_class_name) {
     if (!isset($this->fieldMap[$field_name]) && is_string($field_name)) {
-      if (AblePolecat_Server::getClassRegistry()->isLoadable($txfr_class_name) && method_exists($txfr_class_name , 'transform')) {
+      $ClassRegistry = NULL;
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this, 'AblePolecat_Registry_Class');
+      if ($CommandResult->success()) {
+        //
+        // Save reference to class registry.
+        //
+        $ClassRegistry = $CommandResult->value();
+      }
+      if (isset($ClassRegistry) && $ClassRegistry->isLoadable($txfr_class_name) && method_exists($txfr_class_name , 'transform')) {
         $this->fieldMap[$field_name] = $txfr_class_name;
       }
       else {

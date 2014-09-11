@@ -77,9 +77,9 @@ class AblePolecat_Resource_Search extends AblePolecat_ResourceAbstract {
    */
   protected function validateRequestPath() {
     
-    $request_path = AblePolecat_Server::getRequest()->getRequestPath(FALSE);
+    $request_path = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
     if (!isset($request_path[0]) || ($request_path[0] === '')) {
-      $request_path = AblePolecat_Server::getRequest()->getRequestPath();
+      $request_path = AblePolecat_Host::getRequest()->getRequestPath();
       throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
     }
     $this->requestPath = $request_path;
