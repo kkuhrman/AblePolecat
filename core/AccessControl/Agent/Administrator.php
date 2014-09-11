@@ -11,11 +11,11 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role.php')));
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
 
 class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessControl_AgentAbstract {
   
@@ -109,8 +109,13 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Administrator)) {
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_HostInterface')) {
-        self::$Administrator = new AblePolecat_AccessControl_Agent_Administrator($Subject);
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_Host')) {
+        //
+        // Intentionally do not pass AblePolecat_Host to constructor as this would save
+        // it as default command invoker. By default, commands will be dispatched to top
+        // of system CoR hierarchy.
+        //
+        self::$Administrator = new AblePolecat_AccessControl_Agent_Administrator();
       }
       else {
         $error_msg = sprintf("%s is not permitted to administer access control privileges.", AblePolecat_Data::getDataTypeName($Subject));
@@ -159,14 +164,15 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
     else {
       switch ($class_name) {
         default:
+          $agentClassName = 'AblePolecat_AccessControl_Agent_User';
           break;
-        case 'AblePolecat_Mode_Server':
-          $agentClassName = 'AblePolecat_AccessControl_Agent_Server';
-          break;
-        case 'AblePolecat_Mode_Application':
-          $agentClassName = 'AblePolecat_AccessControl_Agent_Application';
-          break;
-        case 'AblePolecat_Mode_User':
+        // case 'AblePolecat_Mode_Server':
+          // $agentClassName = 'AblePolecat_AccessControl_Agent_Server';
+          // break;
+        // case 'AblePolecat_Mode_Application':
+          // $agentClassName = 'AblePolecat_AccessControl_Agent_Application';
+          // break;
+        case 'AblePolecat_Mode_Session':
           $agentClassName = 'AblePolecat_AccessControl_Agent_User';
           break;
       }
@@ -259,7 +265,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
         select('constraintId', 'authorityId')->
         from('constraint')->
         where(sprintf("resourceId = '%s'", $resourceId));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+      $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
       if ($CommandResult->success()) {
         $results = $CommandResult->value();
         foreach($results as $key => $Record) {
@@ -276,7 +282,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
         select('constraintId', 'subjectId', 'authorityId')->
         from('permission')->
         where(sprintf("resourceId = '%s'", $resourceId));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+      $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
       if ($CommandResult->success()) {
         $results = $CommandResult->value();
         foreach($results as $key => $Record) {
@@ -412,8 +418,8 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
         $sql = __SQL()->
           select('session_id', 'interface', 'userId', 'session_data')->
           from('role')->
-          where(sprintf("session_id = '%s'", AblePolecat_Session::getId()));
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+          where(sprintf("session_id = '%s'", AblePolecat_Host::getSessionId()));
+        $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
         if ($CommandResult->success()) {
           $results = $CommandResult->value();
           try {
@@ -459,7 +465,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
    */
   protected function getClassRegistry() {
     if (!isset($this->ClassRegistry)) {
-      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this, 'AblePolecat_Registry_Class');
       if ($CommandResult->success()) {
         //
         // Save reference to class registry.

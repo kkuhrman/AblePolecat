@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Get.php')));
@@ -127,14 +127,23 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
           default:
             //
             // Return access denied notification.
+            // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+            // 403 means server will refuses to fulfil request regardless of authentication.
             //
             require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
             $Resource = AblePolecat_Resource_Error::wakeup();
             $Resource->Reason = 'Access Denied';
             $Resource->Message = $Exception->getMessage();
-            $this->setStatusCode(401);
+            $this->setStatusCode(403);
             $this->setStatus(self::TX_STATE_COMPLETED);
             break;
+          case 401:
+            //
+            // 401 means user requires authentication before request will be granted.
+            //
+            $authorityClassName = $this->getResourceRegistration()->getResourceAuthorityClassName();
+            $ChildTransaction = $this->enlistTransaction($authorityClassName);
+            $Resource = $ChildTransaction->run();
         }
       }
     }

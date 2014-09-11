@@ -5,15 +5,24 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   
   const UUID = '318df280-5def-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Server Environment';
+  
+  /**
+   * System environment variable names
+   */
+  // const SYSVAR_CORE_VERSION     = 'coreVersion';
+  // const SYSVAR_CORE_CLASSES     = 'coreClasses';
+  // const SYSVAR_CORE_INTERFACES  = 'coreInterfaces';
+  const SYSVAR_CORE_DATABASE    = 'coreDatabase';
   
   /**
    * Configuration file constants.
@@ -118,7 +127,7 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         //
         self::$Environment->setVariable(
           $Subject,
-          AblePolecat_Server::SYSVAR_CORE_DATABASE,
+          self::SYSVAR_CORE_DATABASE,
           $db_state
         );
       }

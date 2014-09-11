@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Data.php');
@@ -299,6 +299,35 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Debug information helper.
+   */
+  public static function getFunctionCallBacktrace($stackPos = NULL) {
+    $backtrace = debug_backtrace();
+    if (isset($stackPos) && isset($backtrace[$stackPos])) {
+      //
+      // @todo: this is an uncertain hack to get line # to correspond/sync with function/method and file
+      //
+      isset($backtrace[$stackPos - 1]['line']) ? $line = $backtrace[$stackPos - 1]['line'] : $line = $backtrace[$stackPos]['line'];
+      $backtrace = $backtrace[$stackPos];
+      $backtrace['line'] = $line;
+    }
+    else if (isset($stackPos) && ($stackPos == 'xml')) {
+      $backtrace_xml = '<backtrace>';
+      foreach($backtrace as $key => $frame) {
+        $backtrace_xml .= sprintf("<frame id=\"%d\">", $key);
+        isset($frame['file']) ? $backtrace_xml .= sprintf("<file>%s</file>", $frame['file']) : NULL;
+        isset($frame['line']) ? $backtrace_xml .= sprintf("<line>%d</line>", $frame['line']) : NULL;
+        isset($frame['class']) ? $backtrace_xml .= sprintf("<class>%s</class>", $frame['class']) : NULL;
+        isset($frame['function']) ? $backtrace_xml .= sprintf("<function>%s</function>", $frame['function']) : NULL;
+        $backtrace_xml .= '</frame>';
+      }
+      $backtrace_xml .= '</backtrace>';
+      $backtrace = $backtrace_xml;
+    }
+    return $backtrace;
+  }
+  
+  /**
    * die and vomit on screen.
    *
    * @param mixed $object A DOM object to examine.
@@ -307,7 +336,7 @@ class AblePolecat_Dom {
     
     // global $Clock;
     
-    $backtrace = AblePolecat_Server::getFunctionCallBacktrace(2);
+    $backtrace = self::getFunctionCallBacktrace(2);
     $message = '<p>' . __METHOD__ . ' called. context: ';
     if (isset($backtrace['class'])) {
       $message .= $backtrace['class'];

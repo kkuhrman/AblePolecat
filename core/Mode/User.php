@@ -5,117 +5,19 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'User.php')));
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
 
-class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
-  
-  /**
-   * Constants.
-   */
-  const UUID = 'e7f5dd90-5f4c-11e3-949a-0800200c9a66';
-  const NAME = 'Able Polecat User Mode';
-  
-  /**
-   * @var Instance of Singleton.
-   */
-  private static $Mode;
-  
-  /**
-   * @var AblePolecat_AccessControl_AgentInterface
-   */
-  private $Agent;
+abstract class AblePolecat_Mode_UserAbstract extends AblePolecat_Mode_ApplicationAbstract {
   
   /**
    * @var AblePolecat_EnvironmentInterface.
    */
-  private $Environment;
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_SubjectInterface.
-   ********************************************************************************/  
-  /**
-   * Return unique, system-wide identifier.
-   *
-   * @return UUID.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return Common name.
-   *
-   * @return string Common name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_CacheObjectInterface.
-   ********************************************************************************/
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Mode_User or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$Mode)) {
-      try {
-        //
-        // Create instance of user mode
-        //
-        self::$Mode = new AblePolecat_Mode_User($Subject);
-        
-        //
-        // Set chain of responsibility relationship
-        //
-        $Subject->setForwardCommandLink(self::$Mode);
-        self::$Mode->setReverseCommandLink($Subject);
-        
-        //
-        // Access control agent.
-        //
-        $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Mode);
-        if ($CommandResult->success()) {
-          self::$Mode->Agent = $CommandResult->value();
-        }
-        
-        //
-        // Load environment/configuration
-        //
-        //
-        self::$Mode->Environment = AblePolecat_Environment_User::wakeup(self::$Mode->Agent);
-      }
-      catch(Exception $Exception) {
-        self::$Mode = NULL;
-        throw new AblePolecat_Server_Exception(
-          'Failed to initialize user mode. ' . $Exception->getMessage(),
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
-      }
-       
-    }
-      
-    return self::$Mode;
-  }
+  private $UserEnvironment;
   
   /********************************************************************************
    * Implementation of AblePolecat_Command_TargetInterface.
@@ -159,48 +61,29 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
         }
         break;
     }
-    if (!isset($Result)) {
-      //
-      // Pass command to next link in chain of responsibility
-      //
-      $Result = $this->delegateCommand($Command);
-    }
+    //
+    // Pass command to next link in chain of responsibility
+    //
+    $Result = $this->delegateCommand($Command, $Result);
     return $Result;
   }
   
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-   
-  /**
-   * Validates given command target as a forward or reverse COR link.
-   *
-   * @param AblePolecat_Command_TargetInterface $Target.
-   * @param string $direction 'forward' | 'reverse'
-   *
-   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
-   */
-  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
-    
-    $ValidLink = FALSE;
-    
-    switch ($direction) {
-      default:
-        break;
-      case 'forward':
-        $ValidLink = is_a($Target, 'AblePolecat_ModeInterface');
-        break;
-      case 'reverse':
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
-        break;
-    }
-    return $ValidLink;
-  }
   
   /**
    * Extends constructor.
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
+    
+    parent::initialize();
+    
+    //
+    // Load environment/configuration
+    //
+    //
+    // $this->UserEnvironment = AblePolecat_Environment_User::wakeup($this->UserAgent);
   }
 }

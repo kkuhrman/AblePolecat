@@ -29,10 +29,10 @@ if (!defined('ABLE_POLECAT_CORE')) {
  * This constant IS used to locate the server configuration file and must define 
  * the full path of the parent of the conf directory if other than ABLE_POLECAT_ROOT/etc/conf.
  */
-// if (!defined('ABLE_POLECAT_ETC')) {
-  // $ABLE_POLECAT_ETC = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'etc';
-  // define('ABLE_POLECAT_ETC', $ABLE_POLECAT_ETC);
-// }
+if (!defined('ABLE_POLECAT_ETC')) {
+  $ABLE_POLECAT_ETC = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'etc';
+  define('ABLE_POLECAT_ETC', $ABLE_POLECAT_ETC);
+}
 
 /**
  * Variable files directory.
@@ -41,23 +41,23 @@ if (!defined('ABLE_POLECAT_CORE')) {
  * to a directory, for which the web agent has write privilege if other than 
  * ABLE_POLECAT_ROOT/files.
  */
-// if (!defined('ABLE_POLECAT_FILES')) {
-  // $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
-  // define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
-// }
+if (!defined('ABLE_POLECAT_FILES')) {
+  $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
+  define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
+}
 
 /**
  * Secondary directory hierarchy contains third-party modules, custom pages, services, 
  * utilities, etc.
  */
-// if (!defined('ABLE_POLECAT_USR')) {
-  // $ABLE_POLECAT_USR = ABLE_POLECAT_ROOT  . DIRECTORY_SEPARATOR . 'usr';;
-  // define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
-// }
+if (!defined('ABLE_POLECAT_USR')) {
+  $ABLE_POLECAT_USR = ABLE_POLECAT_ROOT  . DIRECTORY_SEPARATOR . 'usr';;
+  define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
+}
 
 /**
  * Route HTTP request.
  */
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Host.php')));
 
-AblePolecat_Server::routeRequest();
+AblePolecat_Host::routeRequest();

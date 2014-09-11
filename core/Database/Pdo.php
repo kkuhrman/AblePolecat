@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
  
 require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');
@@ -125,13 +125,11 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $Database = NULL;
     
-    if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_Server')) {
+    if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_Session')) {
       if (!isset(self::$Database)) {
         self::$Database = new AblePolecat_Database_Pdo();
       }
       $Database = self::$Database;
-    }
-    else {
     }
     return $Database;
   }
@@ -171,17 +169,16 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
           $dbUser,
           $dbPass
         );
-        $this->Connection = NULL;
+        $this->DatabaseConnection = NULL;
       }
-      else {
+      else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_Administrator')) {
         try {
           $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass);
           $this->setLocater($Url);
         } 
         catch (PDOException $Exception) {
           $this->error_info[] = $Exception->getMessage();
-          $this->Connection = NULL;
-          throw new AblePolecat_Database_Exception('DatabaseConnection failed: ' . $Exception->getMessage());
+          $this->DatabaseConnection = NULL;
         }
       }
     }

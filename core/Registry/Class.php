@@ -1,11 +1,13 @@
 <?php
 /**
  * @file      polecat/core/Registry/Class.php
- * @brief     Handles registration and lazy loading of Able Polecat classes.
+ * @brief     Encapsulates core database table [class].
+ *
+ * Handles registration and lazy loading of Able Polecat classes
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -88,7 +90,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     // Populate class from application database
     // Query application database for registered classes.
     //
-    $sql = __SQL()->          
+    $sql = __SQL()->
       select('className', 'classId', 'classScope', 'isRequired', 'classFullPath', 'classFactoryMethod')->
       from('class');
     $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
@@ -103,13 +105,6 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
           $msg .= ' ' . $error_info;
         }
       }
-    }
-    
-    if (0 == count($Classes)) {
-      throw new AblePolecat_Registry_Exception(
-        'There are no class definitions saved in the database class registry.', 
-        AblePolecat_Error::BOOTSTRAP_CLASS_REG
-      );
     }
   }
   

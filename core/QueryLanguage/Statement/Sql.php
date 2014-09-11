@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Statement.php')));
@@ -17,22 +17,28 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
   AblePolecat_OverloadableInterface, 
   AblePolecat_QueryLanguage_StatementInterface {
     
-    /**
-     * SQL syntax element properties.
-     */
-    const DML         = 'dml';
-    const TABLES      = 'tables';
-    const COLUMNS     = 'columns';
-    const WHERE       = 'where_condition';
-    const HAVING      = 'having_condition';
-    const GROUPBY     = 'group_by_expression';
-    const ORDERBY     = 'order_by_expression';
-    const LIMIT       = 'limit';
-    const OFFSET      = 'offset';
-    const VALUES      = 'values';
-    const INNER_JOIN  = 'join';
+  /**
+   * SQL syntax element properties.
+   */
+  const DML           = 'dml';
+  const TABLES        = 'tables';
+  const COLUMNS       = 'columns';
+  const WHERE         = 'where_condition';
+  const HAVING        = 'having_condition';
+  const GROUPBY       = 'group_by_expression';
+  const ORDERBY       = 'order_by_expression';
+  const LIMIT         = 'limit';
+  const OFFSET        = 'offset';
+  const VALUES        = 'values';
+  const INNER_JOIN    = 'join';
+  const DATABASE_NAME = 'dbname';
     
-    /**
+  /**
+   * Supported utility statements.
+   */
+  const USEDB       = 'USEDB';
+  
+  /**
    * Supported DML ops (default).
    */
   const SELECT    = 'SELECT';
@@ -46,16 +52,26 @@ interface AblePolecat_QueryLanguage_Statement_Sql_Interface extends AblePolecat_
    */
   const LIST_DELIMITER = ', ';
   const NAME_LIST_DELIMITER = '`, `';
-    
-    /**
-     * Verifies if given syntax element is supported.
-     *
-     * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
-     * @param string $element One of the predefined SQL syntax element constants.
-     *
-     * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
-     */
-    public static function supportsSyntax($dml, $element = NULL);
+  
+  /**
+   * @return string Name of database against which to execute statement.
+   */
+  public function getDatabaseName();
+  
+  /**
+   * @return string DML operation.
+   */
+  public function getDmlOp();
+  
+  /**
+   * Verifies if given syntax element is supported.
+   *
+   * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
+   * @param string $element One of the predefined SQL syntax element constants.
+   *
+   * @return bool TRUE if syntax is supported by concrete class, otherwise FALSE.
+   */
+  public static function supportsSyntax($dml, $element = NULL);
 }
 
 abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_QueryLanguage_Statement_Sql_Interface {
@@ -69,6 +85,11 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    * @var supported sql syntax.
    */
   private static $supportedSql = NULL;
+  
+  /**
+   * @var string Name of database against which to execute statement.
+   */
+  private $databaseName;
   
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
@@ -181,13 +202,6 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    ********************************************************************************/
   
   /**
-   * @return string DML operation.
-   */
-  public function getDmlOp() {
-    return $this->DmlOp;
-  }
-  
-  /**
    * @return query langauge statement as a string.
    */
   public function __toString() {
@@ -278,6 +292,20 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
   /********************************************************************************
    * Implementation of AblePolecat_QueryLanguage_Statement_Sql_Interface.
    ********************************************************************************/
+  
+  /**
+   * @return string Name of database against which to execute statement.
+   */
+  public function getDatabaseName() {
+    return $this->databaseName;
+  }
+  
+  /**
+   * @return string DML operation.
+   */
+  public function getDmlOp() {
+    return $this->DmlOp;
+  }
   
   /**
    * Verifies if given syntax element is supported.
@@ -526,6 +554,17 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    */
   public function getValues() {
     return $this->getPropertyValue(AblePolecat_QueryLanguage_Statement_Sql_Interface::VALUES, NULL);
+  }
+  
+  /**
+   * Set name of database against which to execute statement 
+   *
+   * @param string $databaseName Name of database.
+   *
+   * @throw AblePolecat_QueryLanguage_Exception if syntax is not supported.
+   */
+  public function setDatabaseName($databaseName) {
+    $this->databaseName = $databaseName;
   }
   
   /**
@@ -966,6 +1005,14 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     return $this;
   }
   
+  public function usedb() {
+    $Values = func_get_args();
+    if (isset($Values[0]) && is_string($Values[0])) {
+      $this->databaseName = $Values[0];
+    }
+    return $this;
+  }
+  
   public function values() {
     $Values = func_get_args();
     $ValuesQuotes = array();
@@ -984,22 +1031,9 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
    *
    * Sub-classes should override to initialize arguments.
    */
-  protected function initialize() {
+  protected function initialize() {    
     
-    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_QueryLanguage_Expression_Binary_Sql')) {
-      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        // 'AblePolecat_QueryLanguage_Expression_Binary_Sql', 
-        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary', 'Sql.php')),
-        // '__construct'
-      // );
-    // }
-    // if (!AblePolecat_Server::getClassRegistry()->isLoadable('AblePolecat_Data_Scalar_String')) {
-      // AblePolecat_Server::getClassRegistry()->registerLoadableClass(
-        // 'AblePolecat_Data_Scalar_String', 
-        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
-        // 'typeCast'
-      // );
-    // }
+    $this->databaseName = NULL;
     
     //
     // Initialize SQL support settings (for static method calls).

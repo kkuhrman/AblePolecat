@@ -19,7 +19,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
@@ -30,70 +30,10 @@ interface AblePolecat_ModeInterface extends
   AblePolecat_CacheObjectInterface, 
   AblePolecat_AccessControl_SubjectInterface, 
   AblePolecat_Command_TargetInterface {
-  
-  /**
-   * Handle access control violations.
-   */
-  // public static function handleAccessControlViolation();
-  
-  /**
-   * Handle errors triggered by child objects.
-   */
-  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL);
-  
-  /**
-   * Handle exceptions thrown by child objects.
-   */
-  public static function handleException(Exception $Exception);
-  
 }
 
 abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstract implements AblePolecat_ModeInterface {
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_ModeInterface.
-   ********************************************************************************/
-  
-  /**
-   * Handle errors triggered by child objects.
-   */
-  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
     
-    $Result = NULL;
-    
-    try {
-      $Result = $this->getReverseCommandLink()->handleError($errno, $errstr, $errfile, $errline, $errcontext);
-    }
-    catch(AblePolecat_Command_Exception $Exception) {
-      $message = sprintf("Error [%d] in Able Polecat. %s No command target was able to intercept.",
-        $errno, $errstr
-      );
-      trigger_error($message, E_USER_ERROR);
-    }
-    
-    return $Result;
-  }
-  
-  /**
-   * Handle exceptions thrown by child objects.
-   */
-  public static function handleException(Exception $Exception) {
-    
-    $Result = NULL;
-    
-    try {
-      $Result = $this->getReverseCommandLink()->handleException($Exception);
-    }
-    catch(AblePolecat_Command_Exception $Exception) {
-      $message = sprintf("Unhandled exception [%d] in Able Polecat. %s No command target was able to intercept.",
-        $Exception->getCode(), 
-        $Exception->getMessage()
-      );
-      throw new AblePolecat_Mode_Exception($message);
-    }
-    
-    return $Result;
-  }
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -115,7 +55,7 @@ abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstra
     // Process constructor arguments
     //
     $args = func_get_args();
-    if (isset($args[0]) && is_a($args[0], 'AblePolecat_ModeInterface')) {
+    if (isset($args[0]) && is_a($args[0], 'AblePolecat_Host')) {
       $this->setReverseCommandLink($args[0]);
     }
     

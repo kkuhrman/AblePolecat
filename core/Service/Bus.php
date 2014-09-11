@@ -11,7 +11,7 @@
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Registration.php')));
@@ -174,6 +174,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         
         //
         // Start or resume the transaction
+        // @todo: $parentTransactionId must be parent (object)
         //
         $Transaction = $this->getClassRegistry()->loadClass(
           'AblePolecat_Transaction_Get_Resource',
@@ -183,9 +184,14 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $ResourceRegistration,
           $transactionId,
           $savepointId,
-          $parentTransactionId
+          NULL
         );
         $Resource = $Transaction->start();
+        if (!isset($Resource) || !is_a($Resource, 'AblePolecat_ResourceInterface')) {
+          throw new AblePolecat_Service_Exception(sprintf("%s failed to return object which implements AblePolecat_ResourceInterface",
+            AblePolecat_Data::getDataTypeName($Transaction)
+          ));
+        }
         $Response = $this->getResponse($Transaction, $Resource);
       }
       else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {

@@ -1,18 +1,31 @@
 <?php
 /**
  * @file      polecat/core/Mode/Server.php
- * @brief     Highest level in command processing chain of responsibility hierarchy.
+ * @brief     Second highest level in command processing chain of responsibility hierarchy.
+ *
+ *
+ * Server mode has the following duties:
+ * 1. Act as binding access control arbitrator
+ * 2. Load and configure server environment.
+ * 3. Encapsulate core database.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Server.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
+/**
+ * Most current version is loaded from conf file. These are defaults.
+ */
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.1');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_1_DEV');
+define('ABLE_POLECAT_VERSION_MAJOR', '0');
+define('ABLE_POLECAT_VERSION_MINOR', '6');
+define('ABLE_POLECAT_VERSION_REVISION', '1');
+
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Administrator.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Interface.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Syslog.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
@@ -27,20 +40,15 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'G
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Log.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Shutdown.php')));
 
-class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
+abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract {
   
   const UUID = '2621ce80-5df4-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Server Mode';
   
   /**
-   * @var AblePolecat_Mode_Server Instance of singleton.
-   */
-  private static $Mode = NULL;
-  
-  /**
    * @var AblePolecat_AccessControl_AgentInterface
    */
-  private $Agent;
+  private $AdministratorAgent;
   
   /**
    * @var AblePolecat_Registry_Class
@@ -50,12 +58,12 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   /**
    * @var AblePolecat_Registry_Interface
    */
-  private $InterfaceRegistry;
+  // private $InterfaceRegistry;
   
   /**
    * @var AblePolecat_Database_Pdo
    */
-  private $Database;
+  private $CoreDatabase;
   
   /**
    * @var Array Information about state of the server database.
@@ -65,12 +73,22 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   /**
    * @var AblePolecat_EnvironmentInterface.
    */
-  private $Environment;
+  private $ServerEnvironment;
   
   /**
    * @var AblePolecat_Log_Pdo
    */
   private $Log;
+  
+  /**
+   * @var AblePolecat_AccessControl_AgentInterface
+   */
+  private $UserAgent;
+  
+  /**
+   * @var string Version number from server config settings file.
+   */
+  private $version;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_SubjectInterface.
@@ -98,91 +116,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * Implementation of AblePolecat_CacheObjectInterface.
    ********************************************************************************/
   
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   *
-   * @return AblePolecat_Mode_Dev or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$Mode)) {
-      //
-      // Only server can wakeup server mode.
-      //
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_Server')) {
-        //
-        // Create instance of server mode.
-        //
-        self::$Mode = new AblePolecat_Mode_Server($Subject);
-        
-        //
-        // Set chain of responsibility relationship
-        //
-        $Subject->setForwardCommandLink(self::$Mode);
-        self::$Mode->setReverseCommandLink($Subject);
-        
-        //
-        // Access control agent (super user).
-        //
-        self::$Mode->Agent = AblePolecat_AccessControl_Agent_Server::wakeup(self::$Mode);
-        // $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Mode);
-        // if ($CommandResult->success()) {
-          // self::$Mode->Agent = $CommandResult->value();
-        // }
-        
-        //
-        // Load environment/configuration
-        //
-        //
-        self::$Mode->Environment = AblePolecat_Environment_Server::wakeup(self::$Mode->Agent);
-        
-        //
-        // Load core database configuration settings.
-        //
-        self::$Mode->db_state = self::$Mode->Environment->getVariable(self::$Mode->Agent, AblePolecat_Server::SYSVAR_CORE_DATABASE);
-        self::$Mode->db_state['connected'] = FALSE;
-        if (isset(self::$Mode->db_state['dsn'])) {
-          //
-          // Attempt a connection.
-          // @todo: access control
-          //
-          self::$Mode->Database = AblePolecat_Database_Pdo::wakeup(self::$Mode);
-          $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create(self::$Mode->db_state['dsn']);
-          self::$Mode->Database->open(self::$Mode->Agent, $DbUrl);           
-          self::$Mode->db_state['connected'] = TRUE;
-        }
-        
-        //
-        // Start logging to database.
-        //
-        self::$Mode->Log = AblePolecat_Log_Pdo::wakeup(self::$Mode);
-        
-        //
-        // Load interface registry.
-        //
-        self::$Mode->InterfaceRegistry = AblePolecat_Registry_Interface::wakeup(self::$Mode);
-        
-        //
-        // Load class registry.
-        //
-        self::$Mode->ClassRegistry = AblePolecat_Registry_Class::wakeup(self::$Mode);
-      }
-      else {
-      }
-    }
-    return self::$Mode;
-  }
-  
   /********************************************************************************
    * Implementation of AblePolecat_Command_TargetInterface.
    ********************************************************************************/
@@ -204,20 +137,41 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     switch ($Command::getId()) {
       default:
         break;
+      case 'bed41310-2174-11e4-8c21-0800200c9a66':
+        //
+        // Check if given agent has requested permission for given resource.
+        //
+        if ($this->getAdministrator()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
+          //
+          // @todo: Access is permitted. Get security token.
+          //
+          $SecurityToken = '@todo';
+          $Result = new AblePolecat_Command_Result($SecurityToken, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        }
+        else {
+          $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_FAIL);
+        }
+        break;
+      case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
+        $Agent = $this->getAdministrator()->getAgent($Command->getInvoker());
+        $Result = new AblePolecat_Command_Result($Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        break;
       case 'ef797050-715c-11e3-981f-0800200c9a66':
         //
         // DbQuery
         //
         $QueryResult = $this->executeDbQuery($Command->getArguments());
-        $Result = new AblePolecat_Command_Result($QueryResult, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        count($QueryResult) ? $success = AblePolecat_Command_Result::RESULT_RETURN_SUCCESS : $success = AblePolecat_Command_Result::RESULT_RETURN_FAIL;
+        $Result = new AblePolecat_Command_Result($QueryResult, $success);
         break;
       case 'c7587ad0-74a4-11e3-981f-0800200c9a66':
         switch($Command->getArguments()) {
           default:
             break;
           case 'AblePolecat_Registry_Class':
-            if (isset(self::$Mode->ClassRegistry)) {
-              $Result = new AblePolecat_Command_Result(self::$Mode->ClassRegistry, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+            $ClassRegistry = $this->getClassRegistry();
+            if (isset($ClassRegistry)) {
+              $Result = new AblePolecat_Command_Result($ClassRegistry, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
             }
             break;
         }
@@ -226,8 +180,8 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         //
         // Log
         //
-        if (isset(self::$Mode->Log)) {
-          self::$Mode->Log->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
+        if (isset($this->Log)) {
+          $this->Log->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
         }
         else {
           AblePolecat_Log_Syslog::wakeup()->putMessage($Command->getEventSeverity(), $Command->getEventMessage());
@@ -244,12 +198,10 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         }
         break;
     }
-    if (!isset($Result)) {
-      //
-      // Pass command to next link in chain of responsibility
-      //
-      $Result = $this->delegateCommand($Command);
-    }
+    //
+    // Pass command to next link in chain of responsibility
+    //
+    $Result = $this->delegateCommand($Command, $Result);
     return $Result;
   }
   
@@ -257,108 +209,47 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * Implementation of AblePolecat_ModeInterface.
    ********************************************************************************/
   
-  /**
-   * Handle errors triggered by child objects.
-   */
-  public static function handleError($errno, $errstr, $errfile = NULL, $errline = NULL, $errcontext = NULL) {
-    
-    $shutdown = (($errno == E_ERROR) || ($errno == E_USER_ERROR));
-    
-    //
-    // Get error information
-    //
-    $msg = sprintf("Error in Able Polecat. %d %s", $errno, $errstr);
-    
-    //
-    // Send error information to syslog
-    //
-    $type = AblePolecat_LogInterface::STATUS;
-    switch($errno) {
-      default:
-        break;
-      case E_USER_ERROR:
-      case E_ERROR:
-        $type = AblePolecat_LogInterface::ERROR;
-        break;
-      case E_USER_WARNING:
-        $type = AblePolecat_LogInterface::WARNING;
-        break;
-    }
-    // AblePolecat_Command_Log::invoke(self::$Mode, $msg, $type);
-    
-    $errorFile = str_replace("\\", "\\\\", $errfile);
-    $errorLine = $errline;    
-    $errorMessage = $msg;
-    $sql = __SQL()->          
-      insert(
-        'errorType',
-        'errorFile', 
-        'errorLine', 
-        'errorClass', 
-        'errorFunction',
-        'errorMessage')->
-      into('error')->
-      values(
-        $type,
-        $errorFile,
-        $errorLine,
-        __CLASS__,
-        __FUNCTION__,
-        $errorMessage
-    );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Mode, $sql);
-    
-    if ($shutdown) {
-      $reason = 'Critical Error';
-      $code = $errno;
-      AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $msg, $code);
-    }
-    return $shutdown;
-  }
   
-  /**
-   * Handle exceptions thrown by child objects.
-   * 
-   * @todo: hand control back to the server or otherwise fail gracefully. no WSOD
-   */
-  public static function handleException(Exception $Exception) {
-    //
-    // Log exception to database.
-    //
-    $errorFile = str_replace("\\", "\\\\", $Exception->getFile());
-    $errorLine = $Exception->getLine();    
-    $errorMessage = $Exception->getMessage();
-    $sql = __SQL()->          
-      insert(
-        'errorType',
-        'errorFile', 
-        'errorLine', 
-        'errorClass', 
-        'errorFunction',
-        'errorMessage')->
-      into('error')->
-      values(
-        'exception',
-        $errorFile,
-        $errorLine,
-        __CLASS__,
-        __FUNCTION__,
-        $errorMessage
-    );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Mode, $sql);
-    
-    //
-    // Send shut down command to server
-    //
-    $reason = 'Unhandled exception';
-    $code = $Exception->getCode();
-    AblePolecat_Command_Shutdown::invoke(self::$Mode, $reason, $Exception->getMessage(), $code);
-  }
   
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-   
+  
+  /**
+   * @return AblePolecat_AccessControl_Agent_Administrator
+   */
+  private function getAdministrator() {
+    if (!isset($this->AdministratorAgent)) {
+      throw new AblePolecat_Mode_Exception('Administrator agent is not available.');
+    }
+    return $this->AdministratorAgent;
+  }
+  
+  /**
+   * Sets version information from core configuration file.
+   */
+  private function setVersion($version = NULL) {
+    
+    if (isset($version['name']) &&
+        isset($version['major']) &&
+        isset($version['minor']) &&
+        isset($version['revision'])) {
+        $this->version = array();
+      $this->version['name'] = $version['name'];
+      $this->version['major'] = $version['major'];
+      $this->version['minor'] = $version['minor'];
+      $this->version['revision'] = $version['revision'];
+    }
+    else {
+      $this->version = array(
+        'name' => ABLE_POLECAT_VERSION_NAME,
+        'major' => ABLE_POLECAT_VERSION_MAJOR,
+        'minor' => ABLE_POLECAT_VERSION_MINOR,
+        'revision' => ABLE_POLECAT_VERSION_REVISION,
+      );
+    }
+  }
+  
   /**
    * Execute database query and return results.
    *
@@ -366,24 +257,49 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    *
    * @return Array Results/rowset.
    */
-  protected function executeDbQuery(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql) {
+  private function executeDbQuery(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql) {
     
     //
     // @todo: handle invalid query
     //
     $QueryResult = array();
     
-    if (isset($this->Database)) {
-      switch ($sql->getDmlOp()) {
-        default:
-          $QueryResult = $this->Database->execute($sql);
-          break;
-        case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
-          $QueryResult = $this->Database->query($sql);
-          break;
+    //
+    // Server mode can only execute query against core database.
+    //
+    if (isset($this->db_state['connected']) && $this->db_state['connected']) {
+      $databaseName = $sql->getDatabaseName();
+      isset($this->db_state['name']) ? $coreDatabaseName = $this->db_state['name'] : $coreDatabaseName = NULL;
+      if (isset($databaseName) && ($databaseName != $coreDatabaseName)) {
+        $message = "Server mode can only execute query against core database. [$databaseName] given.";
+        throw new AblePolecat_Database_Exception($message);
+      }
+      
+      if (isset($this->CoreDatabase)) {
+        switch ($sql->getDmlOp()) {
+          default:
+            $QueryResult = $this->CoreDatabase->execute($sql);
+            break;
+          case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
+            $QueryResult = $this->CoreDatabase->query($sql);
+            break;
+        }
       }
     }
     return $QueryResult;
+  }
+  
+  /**
+   * @return AblePolecat_Registry_Class.
+   */
+  protected function getClassRegistry() {
+    if (!isset($this->ClassRegistry)) {
+      //
+      // Load class registry.
+      //
+      $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this);
+    }
+    return $this->ClassRegistry;
   }
   
   /**
@@ -401,11 +317,8 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     switch ($direction) {
       default:
         break;
-      case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
-        break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-        $ValidLink = is_a($Target, 'AblePolecat_Server');
+        $ValidLink = is_a($Target, 'AblePolecat_Host');
         break;
     }
     return $ValidLink;
@@ -458,15 +371,134 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     
     return $state;
   }
+  
+  /**
+   * @return AblePolecat_AccessControl_AgentInterface
+   */
+  public function getUserAgent() {
+    if (!isset($this->UserAgent)) {
+      $this->UserAgent = $this->getAdministrator()->getAgent($this);
+    }
+    return $this->UserAgent;
+  }
+  
+  /**
+   * Get version number of server/core.
+   */
+  public static function getVersion($as_str = TRUE, $doc_type = 'XML') {
+    
+    $version = NULL;
+    
+    //
+    // @todo: override defaults with data from core conf file?
+    //
+    if (isset(self::$Host->version)) {
+      if ($as_str) {
+        switch ($doc_type) {
+          default:
+            $version = sprintf("Version %s.%s.%s (%s)",
+              self::$Host->version['major'],
+              self::$Host->version['minor'],
+              self::$Host->version['revision'],
+              self::$Host->version['name']
+            );
+            break;
+          case 'XML':
+            $version = sprintf("<polecat_version name=\"%s\"><major>%s</major><minor>%s</minor><revision>%s</revision></polecat_version>",
+              self::$Host->version['name'],
+              strval(self::$Host->version['major']),
+              strval(self::$Host->version['minor']),
+              strval(self::$Host->version['revision'])
+            );
+            break;
+          //
+          // @todo: case 'JSON':
+          //
+        }
+      }
+      else {
+        $version = self::$Host->version;
+      }
+    }
+    else {
+      if ($as_str) {
+        $version = sprintf("Version %s.%s.%s (%s)",
+          ABLE_POLECAT_VERSION_MAJOR,
+          ABLE_POLECAT_VERSION_MINOR,
+          ABLE_POLECAT_VERSION_REVISION,
+          ABLE_POLECAT_VERSION_NAME
+        );
+      }
+      else {
+        $version = array(
+          'name' => ABLE_POLECAT_VERSION_NAME,
+          'major' => ABLE_POLECAT_VERSION_MAJOR,
+          'minor' => ABLE_POLECAT_VERSION_MINOR,
+          'revision' => ABLE_POLECAT_VERSION_REVISION,
+        );
+      }
+    }
+    return $version;
+  }
     
   /**
    * Extends constructor.
    */
   protected function initialize() {
+    
     //
-    // Default error/exception handling
+    // Access control agent (super user).
     //
-    set_error_handler(array('AblePolecat_Mode_Server', 'handleError'));
-    set_exception_handler(array('AblePolecat_Mode_Server', 'handleException'));
+    $Host = $this->getReverseCommandLink();
+    $this->AdministratorAgent = AblePolecat_AccessControl_Agent_Administrator::wakeup($Host);
+    // $CommandResult = AblePolecat_Command_GetAgent::invoke($Host);
+    // if ($CommandResult->success()) {
+      // $this->AdministratorAgent = $CommandResult->value();
+    // }
+    
+    //
+    // Load environment/configuration
+    //
+    //
+    $this->ServerEnvironment = AblePolecat_Environment_Server::wakeup($this->AdministratorAgent);
+    $this->setVersion(NULL);
+    
+    //
+    // Load core database configuration settings.
+    //
+    $this->db_state = $this->ServerEnvironment->getVariable($this->AdministratorAgent, AblePolecat_Environment_Server::SYSVAR_CORE_DATABASE);
+    $this->db_state['connected'] = FALSE;
+    if (isset($this->db_state['dsn'])) {
+      //
+      // Attempt a connection.
+      // @todo: access control
+      //
+      $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this);
+      $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->db_state['dsn']);
+      $this->db_state['connected'] = $this->CoreDatabase->open($this->AdministratorAgent, $DbUrl);
+    }
+    // AblePolecat_Dom::kill($this->CoreDatabase);
+    
+    //
+    // Stop loading if there is no connection to the core database.
+    //
+    $this->ServerEnvironment->setVariable(
+      $this->AdministratorAgent, 
+      AblePolecat_Environment_Server::SYSVAR_CORE_DATABASE,
+      $this->db_state
+    );
+    if ($this->db_state['connected']) {
+      //
+      // Start logging to database.
+      //
+      $this->Log = AblePolecat_Log_Pdo::wakeup($this);
+      
+      //
+      // Load interface registry.
+      //
+      // $this->InterfaceRegistry = AblePolecat_Registry_Interface::wakeup($this);
+    }
+    
+    $this->UserAgent = NULL;
   }
 }

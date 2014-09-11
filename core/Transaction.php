@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
@@ -195,6 +195,31 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   /********************************************************************************
    * Implementation of AblePolecat_TransactionInterface.
    ********************************************************************************/
+  
+  /**
+   * Commit
+   */
+  public function commit() {
+    //
+    // Transaction already started so update
+    //
+    $updateTime = time();
+    $sql = __SQL()->
+      update('transaction')->
+      set(
+        'updateTime', 
+        'status')->
+      values(
+        $updateTime,
+        self::TX_STATE_COMMITTED)->
+      where(sprintf("`transactionId` = '%s'", $this->getTransactionId()));
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    if ($CommandResult->success() == FALSE) {
+      //
+      // @todo:
+      //
+    }
+  }
   
   /**
    * @return string HTTP status code.
@@ -527,6 +552,55 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
+   * Load requested transaction and prepare to run as child of transaction in progress.
+   *
+   * Able Polecat uses the phrase 'enlist transaction' to mean:
+   * 1. Load child transaction class.
+   * 2. Prepare child transaction to run.
+   * 3. Push on top of current transaction stack.
+   *
+   * @param string $transactionClassName Name of transaction class.
+   * @param AblePolecat_Message_RequestInterface $Message Optional request to enlisted transaction.
+   * @param AblePolecat_Resource_RegistrationInterface $ResourceRegistration Optional, accompanies $Message.
+   *
+   * @return Instance of AblePolecat_TransactionInterface ready to run.
+   * @throw AblePolecat_Transaction_Exception if transaction could not be loaded, prepared or enlisted.
+   */
+  protected function enlistTransaction(
+    $transactionClassName,
+    AblePolecat_Message_RequestInterface $Message = NULL,
+    AblePolecat_Resource_RegistrationInterface $ResourceRegistration = NULL
+  ) {
+    
+    //
+    // Verify requested class implements AblePolecat_TransactionInterface.
+    //
+    if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
+      throw new AblePolecat_Transaction_Exception(
+        sprintf("Transaction classes must implement AblePolecat_TransactionInterface. %s does not.",
+          $transactionClassName
+        )
+      );
+    }
+            
+    //
+    // Start or resume the transaction
+    //
+    $Transaction = $this->getClassRegistry()->loadClass(
+      $transactionClassName,
+      $this->getDefaultCommandInvoker(),
+      $this->getAgent(),
+      $Message,
+      $ResourceRegistration,
+      NULL,
+      NULL,
+      $this
+    );
+    
+    return $Transaction;
+  }
+  
+  /**
    * Finalize transaction initiation prior to start.
    *
    * @param AblePolecat_TransactionInterface &$Transaction Reference to transaction to start.
@@ -545,15 +619,17 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       //
       if (isset($ArgsList)) {
         $Transaction->setAgent($ArgsList->getArgumentValue(self::TX_ARG_AGENT));
-        $Transaction->setRequest($ArgsList->getArgumentValue(self::TX_ARG_REQUEST));
-        $Transaction->setResourceRegistration($ArgsList->getArgumentValue(self::TX_ARG_RESOURCE_REG));
+        $Request = $ArgsList->getArgumentValue(self::TX_ARG_REQUEST);
+        isset($Request) ? $Transaction->setRequest($Request) : NULL;
+        $ResourceRegistration = $ArgsList->getArgumentValue(self::TX_ARG_RESOURCE_REG);
+        isset($ResourceRegistration) ? $Transaction->setResourceRegistration($ResourceRegistration) : NULL;
         $Transaction->setTransactionId($ArgsList->getArgumentValue(self::TX_ARG_TRANSACTION_ID));
         $Transaction->setSavepointId($ArgsList->getArgumentValue(self::TX_ARG_SAVEPOINT_ID));
-        $parentId = $ArgsList->getArgumentValue(self::TX_ARG_PARENT);
-        if ($parentId == '') {
-          $parentId = NULL;
+        $parent = $ArgsList->getArgumentValue(self::TX_ARG_PARENT);
+        if ($parent == '') {
+          $parent = NULL;
         }
-        $Transaction->setParent($parentId);
+        $Transaction->setParent($parent);
       }
       else {
         throw new AblePolecat_Transaction_Exception("Failed to prepare transaction because constructor arguments are invalid.");

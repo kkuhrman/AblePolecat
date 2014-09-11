@@ -5,10 +5,11 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  *
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource', 'Locater.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Message.php');
 
 interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterface {

@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
@@ -162,7 +162,7 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
       //
       // $Invoker cannot handle command, send it to server for further handling.
       //
-      $Result = AblePolecat_Server::dispatchCommand($this);
+      $Result = AblePolecat_Mode_Session::dispatchCommand($this);
     }
     if (!isset($Result) || !is_a($Result, 'AblePolecat_Command_Result')) {
       $msg = __CLASS__ . '::invoke() failed to return a valid result object. Check log for details.';

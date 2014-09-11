@@ -1,11 +1,11 @@
 <?php
 /**
  * @file      polecat/core/Registry.php
- * @brief     Object model of an RDBMS table/view for static (changes infrequently) data.
+ * @brief     Encapsulates a single core database table and provides system defaults.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));

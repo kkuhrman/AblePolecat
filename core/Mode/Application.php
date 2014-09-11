@@ -5,15 +5,15 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.0
+ * @version   0.6.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Mode.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 
-class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
+abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_ServerAbstract {
 
   /**
    * Constants.
@@ -23,9 +23,10 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   const RESOURCE_ALL = 'all';
   
   /**
-   * @var AblePolecat_Mode_ApplicationAbstract Concrete Mode instance.
+   * Names of supported application interfaces.
    */
-  protected static $Mode;
+  const APP_INTERFACE_COMMAND_TARGET      = 'AblePolecat_Command_TargetInterface';
+  const APP_INTERFACE_DATABASE            = 'AblePolecat_DatabaseInterface';
   
   /**
    * @var AblePolecat_AccessControl_AgentInterface
@@ -43,9 +44,9 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   private $ClassLibraryRegistry;
   
   /**
-   * @var AblePolecat_Command_TargetInterface.
+   * @var Array Container for instances of application interfaces.
    */
-  private $CommandChain;
+  private $ApplicationInterfaces;
       
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_SubjectInterface.
@@ -72,78 +73,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
    ********************************************************************************/
-  
-  /**
-   * Serialize object to cache.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
-   */
-  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-  }
-  
-  /**
-   * Create a new instance of object or restore cached object to previous state.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
-   *
-   * @return AblePolecat_Mode_Application or NULL.
-   */
-  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    if (!isset(self::$Mode)) {
-      try {
-        //
-        // Create instance of application mode
-        //
-        self::$Mode = new AblePolecat_Mode_Application($Subject);
-        
-        //
-        // Set chain of responsibility relationship
-        //
-        $Subject->setForwardCommandLink(self::$Mode);
-        self::$Mode->setReverseCommandLink($Subject);
-        
-        //
-        // Access control agent.
-        //
-        $CommandResult = AblePolecat_Command_GetAgent::invoke(self::$Mode);
-        if ($CommandResult->success()) {
-          self::$Mode->Agent = $CommandResult->value();
-        }
-        
-        //
-        // Load environment/configuration
-        //
-        //
-        self::$Mode->Environment = AblePolecat_Environment_Application::wakeup(self::$Mode->Agent);
-                
-        //
-        // Load registry of class libraries.
-        //
-        self::$Mode->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup(self::$Mode);
-        
-        //
-        // Load application command targets.
-        //
-        $CommandResult = AblePolecat_Command_GetRegistry::invoke($Subject, 'AblePolecat_Registry_Class');
-        $Registry = $CommandResult->value();
-        if (isset($Registry)) {
-          $CommandTargets = $Registry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Command_TargetInterface');
-          foreach ($CommandTargets as $className => $classInfo) {
-            self::$Mode->CommandChain[$className] = $Registry->loadClass($className);
-          }
-        }
-      }
-      catch(Exception $Exception) {
-        self::$Mode = NULL;
-        throw new AblePolecat_Server_Exception(
-          'Failed to initialize application mode. ' . $Exception->getMessage(),
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
-      }
-    }
-    return self::$Mode;
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_Command_TargetInterface.
@@ -179,6 +108,15 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     switch ($Command::getId()) {
       default:
         break;
+      case 'ef797050-715c-11e3-981f-0800200c9a66':
+        //
+        // DbQuery
+        //
+        $message = 'SQL from ' . $Command->getInvoker()->getName() . ' ' . $Command->getArguments()->__toString();
+        AblePolecat_Command_Log::invoke($Command->getInvoker(), $message, AblePolecat_LogInterface::INFO);
+        // $QueryResult = $this->executeDbQuery($Command->getArguments());
+        // $Result = new AblePolecat_Command_Result($QueryResult, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+        break;
       case '85fc7590-724d-11e3-981f-0800200c9a66':
         //
         // Log
@@ -204,19 +142,16 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     // They are given a chance to hook into command based on their
     // order of being registered.
     //
-    foreach($this->CommandChain as $targetClassName => $Target) {
+    foreach($this->ApplicationInterfaces[self::APP_INTERFACE_COMMAND_TARGET] as $targetClassName => $Target) {
       //
       // @todo: handle accumulated command execution results
       //
       $SubResult = $Target->execute($Command);
     }
-    
-    if (!isset($Result)) {
-      //
-      // Pass command to next link in chain of responsibility
-      //
-      $Result = $this->delegateCommand($Command);
-    }
+    //
+    // Pass command to next link in chain of responsibility
+    //
+    $Result = $this->delegateCommand($Command, $Result);
     return $Result;
   }
     
@@ -225,28 +160,21 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    ********************************************************************************/
   
   /**
-   * Validates given command target as a forward or reverse COR link.
+   * Send command or forward or back the chain of responsibility.
    *
-   * @param AblePolecat_Command_TargetInterface $Target.
-   * @param string $direction 'forward' | 'reverse'
+   * @param AblePolecat_CommandInterface $Command
+   * @param AblePolecat_Command_Result $Result Optional, do delegate if set.
    *
-   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
+   * @return AblePolecat_Command_Result
    */
-  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
-    
-    $ValidLink = FALSE;
-    
-    switch ($direction) {
-      default:
-        break;
-      case 'forward':
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_User');
-        break;
-      case 'reverse':
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Server');
-        break;
+  protected function delegateCommand(AblePolecat_CommandInterface $Command, AblePolecat_Command_Result $Result = NULL) {
+    if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
+      parent::delegateCommand($Command, $Result);
     }
-    return $ValidLink;
+    else if (!isset($Result)) {
+      $Result = parent::execute($Command);
+    }
+    return $Result;
   }
   
   /**
@@ -254,6 +182,46 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * Sub-classes should override to initialize members.
    */
   protected function initialize() {
-    $this->CommandChain = array();
+    parent::initialize();
+    
+    $this->ApplicationInterfaces = array(
+      self::APP_INTERFACE_COMMAND_TARGET => array(),
+      self::APP_INTERFACE_DATABASE => array(),
+    );
+    
+    //
+    // Access control agent.
+    //
+    // $CommandResult = AblePolecat_Command_GetAgent::invoke($this);
+    // if ($CommandResult->success()) {
+      // $this->Agent = $CommandResult->value();
+    // }
+    
+    //
+    // Load environment/configuration
+    //
+    //
+    // $this->Environment = AblePolecat_Environment_Application::wakeup($this->Agent);
+            
+    //
+    // Load registry of class libraries.
+    //
+    // $this->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup($this);
+    
+    //
+    // Load application command targets.
+    //
+    // $CommandResult = AblePolecat_Command_GetRegistry::invoke($Subject, 'AblePolecat_Registry_Class');
+    // $Registry = $CommandResult->value();
+    // if (isset($Registry)) {
+      // $CommandTargets = $Registry->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Command_TargetInterface');
+      // foreach ($CommandTargets as $className => $classInfo) {
+        // $this->ApplicationInterfaces[self::APP_INTERFACE_COMMAND_TARGET][$className] = $Registry->loadClass($className);
+      // }
+    // }
+    
+    //
+    // @todo: Load application database(s).
+    //
   }
 }
