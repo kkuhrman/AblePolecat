@@ -545,8 +545,8 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     
     if (($transactionStarted == FALSE) || ($transactionUpdated == FALSE) || ($savepointCreated == FALSE)) {
       throw new AblePolecat_Transaction_Exception(sprintf("Failed to create save point given by $savepointName on transaction %s [ID:%s]",
-          $savepointName, $this->getTransactionId()
-      ));
+          $savepointName, $this->getTransactionId()), AblePolecat_Transaction_Exception::CODE_DATABASE_ERROR
+      );
     }
     return $savepointId;
   }

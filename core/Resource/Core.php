@@ -1,18 +1,17 @@
 <?php
 /**
- * @file      polecat/core/Resource/Search.php
- * @brief     The default resource for 404 - not found.
- *
- * Intent is that sub-classes extend and redirect to search feature.
+ * @file      polecat/core/Resource/Core.php
+ * @brief     A helper class for loading one of the core (built-in) resources.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.1
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
 
-class AblePolecat_Resource_Search extends AblePolecat_ResourceAbstract {
+class AblePolecat_Resource_Core extends AblePolecat_ResourceAbstract {
   
   /**
    * @var resource Instance of singleton.
@@ -22,8 +21,8 @@ class AblePolecat_Resource_Search extends AblePolecat_ResourceAbstract {
   /**
    * Constants.
    */
-  const UUID = 'a4933370-1e43-11e4-8c21-0800200c9a66';
-  const NAME = 'search';
+  const UUID = '80d53f20-3a93-11e4-916c-0800200c9a66';
+  const NAME = 'Able Polecat Core Resource';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -56,12 +55,23 @@ class AblePolecat_Resource_Search extends AblePolecat_ResourceAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Search
+   * @return Instance of AblePolecat_ResourceInterface
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Search();
+      $args = func_get_args();
+      isset($args[1]) ? $className = $args[1] : $className = 'null';      
+      switch ($className) {
+        default:
+          self::$Resource = AblePolecat_Resource_Error::wakeup();
+          isset($args[2]) ? self::$Resource->Reason = $args[2] : self::$Resource->Reason = 'Unknown';
+          isset($args[3]) ? self::$Resource->Message = $args[3] : self::$Resource->Message = 'Unknown error in Able Polecat.';
+          break;
+        case 'AblePolecat_Resource_Ack':
+          self::$Resource = AblePolecat_Resource_Ack::wakeup();
+          break;
+      }
     }
     return self::$Resource;
   }
@@ -73,15 +83,11 @@ class AblePolecat_Resource_Search extends AblePolecat_ResourceAbstract {
   /**
    * Validates request URI path to ensure resource request can be fulfilled.
    *
-   * @throw AblePolecat_Resource_Exception If request URI path is not validated.
+   * @throw AblePolecat_Exception If request URI path is not validated.
    */
   protected function validateRequestPath() {
-    
-    $request_path = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
-    if (!isset($request_path[0]) || ($request_path[0] === '')) {
-      $request_path = AblePolecat_Host::getRequest()->getRequestPath();
-      throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
-    }
-    $this->requestPath = $request_path;
+    //
+    // Request path is irrelevant in this case.
+    //
   }
 }

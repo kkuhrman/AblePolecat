@@ -130,10 +130,12 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
             // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
             // 403 means server will refuses to fulfil request regardless of authentication.
             //
-            require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
-            $Resource = AblePolecat_Resource_Error::wakeup();
-            $Resource->Reason = 'Access Denied';
-            $Resource->Message = $Exception->getMessage();
+            $Resource = AblePolecat_Resource_Core::wakeup(
+              $this->getDefaultCommandInvoker(),
+              'AblePolecat_Resource_Error',
+              'Access Denied',
+              $Exception->getMessage()
+            );
             $this->setStatusCode(403);
             $this->setStatus(self::TX_STATE_COMPLETED);
             break;
@@ -153,13 +155,20 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       // Return one of the 'built-in' resources.
       //
       if ($this->getResourceName() === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
-        require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
-        $Resource = AblePolecat_Resource_Ack::wakeup();
+        $Resource = AblePolecat_Resource_Core::wakeup(
+          $this->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Ack'
+        );
         $this->setStatus(self::TX_STATE_COMPLETED);
       }
       else {
-        require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Search.php')));
-        $Resource = AblePolecat_Resource_Search::wakeup();
+        $Resource = AblePolecat_Resource_Core::wakeup(
+          $this->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Error',
+          'Resource not found',
+          sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceName())
+        );
+        $this->setStatus(self::TX_STATE_COMPLETED);
       }
     }
     return $Resource;

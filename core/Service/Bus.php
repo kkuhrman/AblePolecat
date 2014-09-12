@@ -163,33 +163,36 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $savepointId = $Records[0]['savepointId'];
           isset($Records[0]['parentTransactionId']) ? $parentTransactionId = $Records[0]['parentTransactionId'] : NULL;
         }
-        else {
-          //
-          // Start new transaction.
-          //
-          // $transactionId = $Records[0]['transactionId'];
-          // $savepointId = $Records[0]['savepointId'];
-        }
         
-        //
-        // Start or resume the transaction
-        // @todo: $parentTransactionId must be parent (object)
-        //
-        $Transaction = $this->getClassRegistry()->loadClass(
-          'AblePolecat_Transaction_Get_Resource',
-          $this->getDefaultCommandInvoker(),
-          $Agent,
-          $Message,
-          $ResourceRegistration,
-          $transactionId,
-          $savepointId,
-          NULL
-        );
-        $Resource = $Transaction->start();
-        if (!isset($Resource) || !is_a($Resource, 'AblePolecat_ResourceInterface')) {
-          throw new AblePolecat_Service_Exception(sprintf("%s failed to return object which implements AblePolecat_ResourceInterface",
-            AblePolecat_Data::getDataTypeName($Transaction)
-          ));
+        try {
+          //
+          // Start or resume the transaction
+          // @todo: $parentTransactionId must be parent (object)
+          //
+          $Transaction = $this->getClassRegistry()->loadClass(
+            'AblePolecat_Transaction_Get_Resource',
+            $this->getDefaultCommandInvoker(),
+            $Agent,
+            $Message,
+            $ResourceRegistration,
+            $transactionId,
+            $savepointId,
+            NULL
+          );
+          $Resource = $Transaction->start();
+          if (!isset($Resource) || !is_a($Resource, 'AblePolecat_ResourceInterface')) {
+            throw new AblePolecat_Service_Exception(sprintf("%s failed to return object which implements AblePolecat_ResourceInterface",
+              AblePolecat_Data::getDataTypeName($Transaction)
+            ));
+          }
+        }
+        catch (AblePolecat_Transaction_Exception $Exception) {
+          //
+          // Failure in the transaction work-flow. 
+          // Able Polecat will attempt to recover as gracefully as possible.
+          //
+          // AblePolecat_Dom::kill($ResourceRegistration);
+          $Resource = $this->recoverFromTransactionFailure($Exception, $ResourceRegistration);
         }
         $Response = $this->getResponse($Transaction, $Resource);
       }
@@ -277,7 +280,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       }
       else {
         $ResourceRegistration->resourceId = self::NOT_FOUND_RESOURCE_ID;
-        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Search';
+        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Error';
         $ResourceRegistration->resourceAuthorityClassName = NULL;
         $ResourceRegistration->resourceDenyCode = 0;
       }
@@ -299,6 +302,43 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $Response = AblePolecat_Message_Response::create($Transaction->getStatusCode());
     $Response->setEntityBody($Resource);
     return $Response;
+  }
+  
+  /**
+   * Recover from a thrown AblePolecat_Transaction_Exception
+   * 
+   * @param AblePolecat_Transaction_Exception $Exception The thrown exception.
+   * @param AblePolecat_Resource_RegistrationInterface $ResourceRegistration Registration of the requested resource.
+   *
+   * @return AblePolecat_ResourceInterface.
+   */
+  protected function recoverFromTransactionFailure(
+    AblePolecat_Transaction_Exception $Exception,
+    AblePolecat_Resource_RegistrationInterface $ResourceRegistration
+  ) {
+    
+    $Resource = NULL;
+    
+    switch($ResourceRegistration->getPropertyValue('resourceClassName')) {
+      default:
+        $Resource = AblePolecat_Resource_Core::wakeup(
+          $this->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Error',
+          'Transaction failed',
+          $Exception->getMessage()
+        );
+        break;
+      case 'AblePolecat_Resource_Ack':
+        //
+        // If requested resource is ACK, ignore.
+        //
+        $Resource = AblePolecat_Resource_Core::wakeup(
+          $this->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Ack'
+        );
+        break;
+    }
+    return $Resource;
   }
   
   /********************************************************************************

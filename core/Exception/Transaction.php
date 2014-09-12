@@ -11,4 +11,5 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception.php')));
 
 class AblePolecat_Transaction_Exception extends AblePolecat_Exception {
+  const CODE_DATABASE_ERROR     = 0x002710;
 }

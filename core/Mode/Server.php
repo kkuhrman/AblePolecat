@@ -261,9 +261,6 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       //
       $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this);
     }
-    else {
-      throw new AblePolecat_Mode_Exception('Cannot access class registry.');
-    }
     return $this->ClassRegistry;
   }
   

@@ -33,7 +33,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Host.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
 
 final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
@@ -142,9 +142,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         //
         // Command to shut down indicates abnormal termination
         //
-        $Resource = AblePolecat_Resource_Error::wakeup();
-        $Resource->Reason = $Command->getReason();
-        $Resource->Message = $Command->getMessage();
+        $Resource = AblePolecat_Resource_Core::wakeup(
+          $this->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Error',
+          $Command->getReason(),
+          $Command->getMessage()
+        );
         self::$Host->Response = AblePolecat_Message_Response::create(500);
         self::$Host->Response->setEntityBody($Resource);
         self::shutdown($Command->getStatus());
@@ -551,9 +554,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       self::$Host->Response->send();
     }
     else {
-      require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
-      $Resource = AblePolecat_Resource_Error::wakeup();
-      $Resource->notice = "Able Polecat server was directed to shut down before generating response to request URI.";
+      $Resource = AblePolecat_Resource_Core::wakeup(
+        $this,
+        'AblePolecat_Resource_Error',
+        'Forced shut down',
+        'Able Polecat server was directed to shut down before generating response to request URI.'
+      );
       $Response = AblePolecat_Message_Response::create(500);
       $Response->setEntityBody($Resource);
       $Response->send();
