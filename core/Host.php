@@ -162,6 +162,22 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    ********************************************************************************/
   
   /**
+   * @return mixed Name of core database or FALSE if no connection exists.
+   */
+  public static function getActiveCoreDatabaseName() {
+    
+    $activeCoreDatabaseName = FALSE;
+    
+    if (isset(self::$Host) && isset(self::$Host->Session)) {
+      $db_state = self::$Host->Session->getDatabaseState(self::$Host);
+      if (isset($db_state['connected']) && $db_state['connected']) {
+        isset($db_state['name']) ? $activeCoreDatabaseName = $db_state['name'] : NULL;
+      }
+    }
+    return $activeCoreDatabaseName;
+  }
+  
+  /**
    * Main point of entry for all Able Polecat page and service requests.
    *
    */

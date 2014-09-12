@@ -21,7 +21,7 @@ class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
    * Constants.
    */
   const UUID = '9a5d85e0-1e43-11e4-8c21-0800200c9a66';
-  const NAME = 'err';
+  const NAME = AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -74,15 +74,8 @@ class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
    * @throw AblePolecat_Resource_Exception If request URI path is not validated.
    */
   protected function validateRequestPath() {
-    $this->requestPath = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
-  }
-  
-  /**
-   * Extends __construct().
-   */
-  protected function initialize() {
     //
-    // @todo: gather error info
+    // Request path is irrelevant in this case.
     //
   }
 }

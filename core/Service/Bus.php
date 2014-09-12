@@ -191,7 +191,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           // Failure in the transaction work-flow. 
           // Able Polecat will attempt to recover as gracefully as possible.
           //
-          // AblePolecat_Dom::kill($ResourceRegistration);
           $Resource = $this->recoverFromTransactionFailure($Exception, $ResourceRegistration);
         }
         $Response = $this->getResponse($Transaction, $Resource);
@@ -272,18 +271,23 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // Request did not resolve to a registered resource class.
       // Return one of the 'built-in' resources.
       //
-      if ($resourceName === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
-        $ResourceRegistration->resourceId = self::DEFAULT_RESOURCE_ID;
-        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
-        $ResourceRegistration->resourceAuthorityClassName = NULL;
-        $ResourceRegistration->resourceDenyCode = 0;
-      }
-      else {
-        $ResourceRegistration->resourceId = self::NOT_FOUND_RESOURCE_ID;
-        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Error';
-        $ResourceRegistration->resourceAuthorityClassName = NULL;
-        $ResourceRegistration->resourceDenyCode = 0;
-      }
+      switch ($resourceName) {
+        default:
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Error::getId();
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Error';
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Ack::getId();
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Install::getId();
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
+          break;
+      }      
+      $ResourceRegistration->resourceAuthorityClassName = NULL;
+      $ResourceRegistration->resourceDenyCode = 0;
     }
     return $ResourceRegistration;
   }
@@ -299,7 +303,15 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     //
     // @todo: deal with different status codes.
     //
-    $Response = AblePolecat_Message_Response::create($Transaction->getStatusCode());
+    $headerFields = array();
+    switch ($Resource::getName()) {
+      default:
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+        $headerFields = array(AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML);
+        break;
+    }
+    $Response = AblePolecat_Message_Response::create($Transaction->getStatusCode(), $headerFields);
     $Response->setEntityBody($Resource);
     return $Response;
   }
@@ -319,7 +331,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     
     $Resource = NULL;
     
-    switch($ResourceRegistration->getPropertyValue('resourceClassName')) {
+    $resourceClassName = $ResourceRegistration->getPropertyValue('resourceClassName');
+    switch($resourceClassName) {
       default:
         $Resource = AblePolecat_Resource_Core::wakeup(
           $this->getDefaultCommandInvoker(),
@@ -329,12 +342,13 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         );
         break;
       case 'AblePolecat_Resource_Ack':
+      case 'AblePolecat_Resource_Install':
         //
         // If requested resource is ACK, ignore.
         //
         $Resource = AblePolecat_Resource_Core::wakeup(
           $this->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Ack'
+          $resourceClassName
         );
         break;
     }

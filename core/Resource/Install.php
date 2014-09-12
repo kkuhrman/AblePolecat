@@ -1,10 +1,7 @@
 <?php
 /**
- * @file      polecat/core/Resource/Ack.php
- * @brief     The default resource for normal operation if none other is defined.
- *
- * A throwback to the good, old days of programming... sometimes all you want to hear from
- * a computer is ACK.
+ * @file      polecat/core/Resource/Install.php
+ * @brief     Starting point for interactive install procedure.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -13,7 +10,7 @@
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
 
-class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
+class AblePolecat_Resource_Install extends AblePolecat_ResourceAbstract {
   
   /**
    * @var resource Instance of singleton.
@@ -23,8 +20,8 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
   /**
    * Constants.
    */
-  const UUID = '8de22e10-1e43-11e4-8c21-0800200c9a66';
-  const NAME = AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK;
+  const UUID = '3f3630b0-3a9d-11e4-916c-0800200c9a66';
+  const NAME = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -57,16 +54,18 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Ack
+   * @return Instance of AblePolecat_Resource_Install
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Ack();
-      $version = AblePolecat_Host::getVersion(FALSE);
-      foreach($version as $propertyName => $propertyValue) {
-        self::$Resource->{$propertyName} = $propertyValue;
-      }
+      self::$Resource = new AblePolecat_Resource_Install();
+      self::$Resource->activeCoreDatabase = AblePolecat_Host::getActiveCoreDatabaseName();
+      
+      $version = AblePolecat_Host::getVersion(TRUE, 'HTML');
+      self::$Resource->Head = sprintf("<title>%s | Install</title>", $version);
+      self::$Resource->Body = "<p>Detailed installation instructions are at <a href=\"https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started\" target=\"new\">
+        https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started</a></p>";
     }
     return self::$Resource;
   }
@@ -81,8 +80,10 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
    * @throw AblePolecat_Exception If request URI path is not validated.
    */
   protected function validateRequestPath() {
-    //
-    // Request path is irrelevant in this case.
-    //
+    $request_path = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
+    if (!isset($request_path[0]) || ($request_path[0] != 'install') || (count($request_path) > 1)) {
+      $request_path = AblePolecat_Host::getRequest()->getRequestPath();
+      throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
+    }
   }
 }

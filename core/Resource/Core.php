@@ -10,6 +10,7 @@
 
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Error.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Install.php')));
 
 class AblePolecat_Resource_Core extends AblePolecat_ResourceAbstract {
   
@@ -65,11 +66,19 @@ class AblePolecat_Resource_Core extends AblePolecat_ResourceAbstract {
       switch ($className) {
         default:
           self::$Resource = AblePolecat_Resource_Error::wakeup();
-          isset($args[2]) ? self::$Resource->Reason = $args[2] : self::$Resource->Reason = 'Unknown';
-          isset($args[3]) ? self::$Resource->Message = $args[3] : self::$Resource->Message = 'Unknown error in Able Polecat.';
+          self::$Resource->Reason = 'Core class does not exist.';
+          self::$Resource->Message = sprintf("Able Polecat cannot load core class given by [%s].", $className);
+          break;
+        case 'AblePolecat_Resource_Error':
+          self::$Resource = AblePolecat_Resource_Error::wakeup();
+          isset($args[2]) ? self::$Resource->Reason = $args[2] : self::$Resource->Reason = 'Unknown Error.';
+          isset($args[3]) ? self::$Resource->Message = $args[3] : self::$Resource->Message = 'Able Polecat directed to issue error response but no reason or message was given.';
           break;
         case 'AblePolecat_Resource_Ack':
           self::$Resource = AblePolecat_Resource_Ack::wakeup();
+          break;
+        case 'AblePolecat_Resource_Install':
+          self::$Resource = AblePolecat_Resource_Install::wakeup();
           break;
       }
     }

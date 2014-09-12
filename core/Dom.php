@@ -24,7 +24,7 @@ class AblePolecat_Dom {
   const XHTML_1_1_QUALIFIED_NAME  = 'html';
   const XHTML_1_1_PUBLIC_ID       = "-//W3C//DTD XHTML 1.1//EN";
   const XHTML_1_1_SYSTEM_ID       = "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";
-  const XHTML_1_1_NAMESPACE_URI   = NULL;
+  const XHTML_1_1_NAMESPACE_URI   = "http://www.w3.org/1999/xhtml";
   
   /**
    * Append child element to given parent or one identified by tag or id.

@@ -25,6 +25,10 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   
   const BODY_DOCTYPE_XML        = "<?xml version='1.0' standalone='yes'?>";
   
+  const ELEMENT_HTML            = 'html';
+  const ELEMENT_HEAD            = 'head';
+  const ELEMENT_BODY            = 'body';
+  
   /**
    * DOM element tag names.
    */
@@ -141,10 +145,37 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   public function setEntityBody(AblePolecat_ResourceInterface $Resource) {
     
     if (!isset($this->Document)) {
-      $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
-      $parentElement = $this->Document->firstChild;
-      $Element = $Resource->getDomNode($this->Document);
-      $Element = AblePolecat_Dom::appendChildToParent($Element, $this->Document, $parentElement);
+      if ($this->isHTML()) {
+        $this->Document = AblePolecat_Dom::createDocument(
+          AblePolecat_Dom::XHTML_1_1_NAMESPACE_URI,
+          AblePolecat_Dom::XHTML_1_1_QUALIFIED_NAME,
+          AblePolecat_Dom::XHTML_1_1_PUBLIC_ID,
+          AblePolecat_Dom::XHTML_1_1_SYSTEM_ID
+        );
+        
+        //
+        // Creates empty <head> element.
+        //
+        $HeadElement = $this->Document->createElement(self::ELEMENT_HEAD);
+        $DocumentHead = AblePolecat_Dom::appendChildToParent($HeadElement, $this->Document);
+        // @todo: insert document title into head
+        // $HeadContent = AblePolecat_Dom::getDocumentElementFromString($Resource->Head);
+        // $HeadContent = AblePolecat_Dom::appendChildToParent($HeadContent, $this->Document, $DocumentHead);
+        
+        //
+        // Create empty <body> element.
+        //
+        $BodyElement = $this->Document->createElement(self::ELEMENT_BODY);
+        $DocumentBody = AblePolecat_Dom::appendChildToParent($BodyElement, $this->Document);
+        $BodyContent = AblePolecat_Dom::getDocumentElementFromString($Resource->Body);
+        $BodyContent = AblePolecat_Dom::appendChildToParent($BodyContent, $this->Document, $DocumentBody);
+      }
+      else {
+        $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
+        $parentElement = $this->Document->firstChild;
+        $Element = $Resource->getDomNode($this->Document);
+        $Element = AblePolecat_Dom::appendChildToParent($Element, $this->Document, $parentElement);
+      }
     }
     else {
       throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $this->getName()));
@@ -163,6 +194,29 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
       $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
     }
     return $this->Document;
+  }
+  
+  /**
+   * @return bool TRUE if mime type is HTML otherwise FALSE.
+   */
+  protected function isHTML() {
+    
+    $isHTML = FALSE;
+    
+    //
+    // Handle special case of sending response as HTML
+    //
+    $headers_list = array_flip(headers_list());
+    if (isset($headers_list[AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML])) {
+      $isHTML = TRUE;
+    }
+    else if (count($this->headerFields)) {
+      $headers_list = array_flip($this->headerFields);
+      if (isset($headers_list[AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML])) {
+        $isHTML = TRUE;
+      }
+    }
+    return $isHTML;
   }
   
   /**
@@ -194,7 +248,12 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     // if (isset($this->body)) {
       // echo $this->body;
     // }
-    echo $this->getDocument()->saveXML();
+    if ($this->isHTML()) {
+      echo $this->getDocument()->saveHTML();
+    }
+    else {
+      echo $this->getDocument()->saveXML();
+    }
   }
   
   /**

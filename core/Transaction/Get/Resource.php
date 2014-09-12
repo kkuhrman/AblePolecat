@@ -154,21 +154,31 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       // Request did not resolve to a registered resource class.
       // Return one of the 'built-in' resources.
       //
-      if ($this->getResourceName() === AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME) {
-        $Resource = AblePolecat_Resource_Core::wakeup(
-          $this->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Ack'
-        );
-        $this->setStatus(self::TX_STATE_COMPLETED);
-      }
-      else {
-        $Resource = AblePolecat_Resource_Core::wakeup(
-          $this->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Error',
-          'Resource not found',
-          sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceName())
-        );
-        $this->setStatus(self::TX_STATE_COMPLETED);
+      switch ($this->getResourceName()) {
+        default:
+          $Resource = AblePolecat_Resource_Core::wakeup(
+            $this->getDefaultCommandInvoker(),
+            'AblePolecat_Resource_Error',
+            'Resource not found',
+            sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceName())
+          );
+          $this->setStatus(self::TX_STATE_COMPLETED);
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+          $Resource = AblePolecat_Resource_Core::wakeup(
+            $this->getDefaultCommandInvoker(),
+            'AblePolecat_Resource_Ack'
+          );
+          $this->setStatus(self::TX_STATE_COMPLETED);
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+          $Resource = AblePolecat_Resource_Core::wakeup(
+            $this->getDefaultCommandInvoker(),
+            'AblePolecat_Resource_Install'
+          );
+          $this->setStatus(self::TX_STATE_COMPLETED);
+          break;
       }
     }
     return $Resource;

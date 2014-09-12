@@ -375,7 +375,6 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->db_state['dsn']);
       $this->db_state['connected'] = $this->CoreDatabase->open($this->AdministratorAgent, $DbUrl);
     }
-    // AblePolecat_Dom::kill($this->CoreDatabase);
     
     //
     // Stop loading if there is no connection to the core database.

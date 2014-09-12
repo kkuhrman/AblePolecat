@@ -21,9 +21,15 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   const URI_REDIRECT        = 'uri_redirect'; // TRUE if resolved path is not the original request, otherwise FALSE.
   const URI_SEARCH_PARAM    = 'q'; // Parameter in query string identifying string to send to search feature.
   
-  const RESOURCE_NAME_HOME       = 'home'; // Home page
-  const RESOURCE_NAME_SEARCH     = 'search'; // list view of search results
-  const RESOURCE_NAME_UTIL       = 'util'; // Project utilities (install, update, more...)
+  /**
+   * Core (built-in) resource names (e.g. 'reserved').
+   */
+  const RESOURCE_NAME_ACK       = 'ack'; // ping
+  const RESOURCE_NAME_HOME      = 'home'; // Home page
+  const RESOURCE_NAME_ERROR     = 'error'; // extended error information
+  const RESOURCE_NAME_INSTALL   = 'install'; // interactive install
+  const RESOURCE_NAME_SEARCH    = 'search'; // list view of search results
+  const RESOURCE_NAME_UTIL      = 'util'; // Project utilities (install, update, more...)
   
   /**
    * @return string Request method.
