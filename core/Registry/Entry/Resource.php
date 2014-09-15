@@ -1,18 +1,16 @@
 <?php
 /**
- * @file      polecat/core/Resource/Resource_Registration.php
- * @brief     Encapsulates an argument list passed to a function or class method.
- *
- * Pirates! Args.
+ * @file      polecat/core/Registry/Entry/Resource.php
+ * @brief     Encapsulates record of a resource registered in [resource].
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.1
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
 
-interface AblePolecat_Resource_RegistrationInterface extends AblePolecat_DynamicObjectInterface {
+interface AblePolecat_Registry_Entry_ResourceInterface extends AblePolecat_Registry_EntryInterface {
   /**
    * @return string.
    */
@@ -42,7 +40,7 @@ interface AblePolecat_Resource_RegistrationInterface extends AblePolecat_Dynamic
 /**
  * Standard argument list.
  */
-class AblePolecat_Resource_Registration extends AblePolecat_DynamicObjectAbstract implements AblePolecat_Resource_RegistrationInterface {
+class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbstract implements AblePolecat_Registry_Entry_ResourceInterface {
   
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
@@ -54,11 +52,11 @@ class AblePolecat_Resource_Registration extends AblePolecat_DynamicObjectAbstrac
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Resource_Registration();
+    return new AblePolecat_Registry_Entry_Resource();
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Resource_RegistrationInterface.
+   * Implementation of AblePolecat_Registry_Entry_ResourceInterface.
    ********************************************************************************/
   
   /**
@@ -106,5 +104,6 @@ class AblePolecat_Resource_Registration extends AblePolecat_DynamicObjectAbstrac
    * Sub-classes should override to initialize arguments.
    */
   protected function initialize() {
+    parent::initialize();
   }
 }

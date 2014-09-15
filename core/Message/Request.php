@@ -235,7 +235,39 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * @return string Sanitized/normalized version of resource name.
    */
   public function validateResourceName($requestedResourceName) {
-    return strtolower(preg_replace(array('/[^a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
+    //
+    // @todo: URI security
+    //
+    $resolvedResourceName = AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME;
+    $sanitizedResourceName = strtolower(preg_replace(array('/[^a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
+    $sql = __SQL()->
+      select('resourceName')->
+      from('resource');
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+    if ($CommandResult->success() && count($CommandResult->value())) {
+      $ResourceNames = array_flip($CommandResult->value());
+      if (isset($ResourceNames[$sanitizedResourceName])) {
+        $resolvedResourceName = $sanitizedResourceName;
+      }
+    }
+    if ($resolvedResourceName != $sanitizedResourceName) {
+      //
+      // Check core (built-in) resource names (e.g. 'reserved').
+      //
+      switch ($sanitizedResourceName) {
+        default:
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+        // case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+          $resolvedResourceName = $sanitizedResourceName;
+          break;
+      }
+    }
+    return $resolvedResourceName;
   }
   
   /**

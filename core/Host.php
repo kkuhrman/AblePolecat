@@ -25,13 +25,13 @@ define('ABLE_POLECAT_VERSION_MAJOR', '0');
 define('ABLE_POLECAT_VERSION_MINOR', '6');
 define('ABLE_POLECAT_VERSION_REVISION', '1');
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Target.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Post.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Put.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Host.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
@@ -148,7 +148,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
           $Command->getReason(),
           $Command->getMessage()
         );
-        self::$Host->Response = AblePolecat_Message_Response::create(500);
+        self::$Host->Response = AblePolecat_Message_Response_Xml::create(500);
         self::$Host->Response->setEntityBody($Resource);
         self::shutdown($Command->getStatus());
         break;
@@ -298,6 +298,18 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       trigger_error($message, E_USER_ERROR);
     }
     return self::$Host->Request;
+  }
+  
+  /**
+   * @return AblePolecat_Agent_User.
+   */
+  public static function getUserAgent() {
+    
+    $Agent = NULL;
+    if (isset(self::$Host) && isset(self::$Host->Session)) {
+      $Agent = self::$Host->Session->getUserAgent();
+    }
+    return $Agent;
   }
   
   /**
@@ -571,12 +583,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     }
     else {
       $Resource = AblePolecat_Resource_Core::wakeup(
-        $this,
+        self::$Host,
         'AblePolecat_Resource_Error',
         'Forced shut down',
         'Able Polecat server was directed to shut down before generating response to request URI.'
       );
-      $Response = AblePolecat_Message_Response::create(500);
+      $Response = AblePolecat_Message_Response_Xml::create(500);
       $Response->setEntityBody($Resource);
       $Response->send();
     }

@@ -92,7 +92,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   private $Request;
   
   /**
-   * @var AblePolecat_Resource_RegistrationInterface.
+   * @var AblePolecat_Registry_Entry_ResourceInterface.
    */
   private $ResourceRegistration;
   
@@ -317,7 +317,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
-   * @return AblePolecat_Resource_RegistrationInterface.
+   * @return AblePolecat_Registry_Entry_ResourceInterface.
    */
   public function getResourceRegistration() {
     $ResourceRegistration = NULL;
@@ -392,9 +392,9 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
-   * @param AblePolecat_Resource_RegistrationInterface $ResourceRegistration.
+   * @param AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration.
    */
-  public function setResourceRegistration(AblePolecat_Resource_RegistrationInterface $ResourceRegistration) {
+  public function setResourceRegistration(AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration) {
     $this->ResourceRegistration = $ResourceRegistration;
   }
   
@@ -561,7 +561,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    *
    * @param string $transactionClassName Name of transaction class.
    * @param AblePolecat_Message_RequestInterface $Message Optional request to enlisted transaction.
-   * @param AblePolecat_Resource_RegistrationInterface $ResourceRegistration Optional, accompanies $Message.
+   * @param AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration Optional, accompanies $Message.
    *
    * @return Instance of AblePolecat_TransactionInterface ready to run.
    * @throw AblePolecat_Transaction_Exception if transaction could not be loaded, prepared or enlisted.
@@ -569,7 +569,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   protected function enlistTransaction(
     $transactionClassName,
     AblePolecat_Message_RequestInterface $Message = NULL,
-    AblePolecat_Resource_RegistrationInterface $ResourceRegistration = NULL
+    AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration = NULL
   ) {
     
     //

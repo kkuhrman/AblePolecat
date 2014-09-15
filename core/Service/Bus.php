@@ -14,7 +14,10 @@
  * @version   0.6.1
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Registration.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Response.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
 
@@ -214,7 +217,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   }
   
   /**
-   * Return the data model (resource) corresponding to request URI/path.
+   * Return registration data on resource corresponding to request URI/path.
    *
    * Able Polecat expects the part of the URI, which follows the host or virtual host
    * name to define a 'resource' on the system. This function returns the data (model)
@@ -235,11 +238,11 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    *
    * @param AblePolecat_Message_RequestInterface $Request
    * 
-   * @return AblePolecat_ResourceInterface
+   * @return AblePolecat_Registry_Entry_Resource
    */
   protected function getResourceRegistration(AblePolecat_Message_RequestInterface $Request) {
     
-    $ResourceRegistration = AblePolecat_Resource_Registration::create();
+    $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
     
     //
     // Extract the part of the URI, which defines the resource.
@@ -293,40 +296,93 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   }
   
   /**
+   * Prepare an HTTP response corresponding to the given resource and status code.
+   *
    * @param AblePolecat_TransactionInterface $Transaction
    * @param AblePolecat_ResourceInterface $Resource
-   *
+   * 
    * @return AblePolecat_Message_ResponseInterface
    */
   protected function getResponse(AblePolecat_TransactionInterface $Transaction, AblePolecat_ResourceInterface $Resource) {
     
+    $Response = NULL;
+    
     //
-    // @todo: deal with different status codes.
+    // Search core database for corresponding response registration.
     //
-    $headerFields = array();
-    switch ($Resource::getName()) {
-      default:
-        break;
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-        $headerFields = array(AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML);
-        break;
+    $resourceId = $Resource::getId();
+    $statusCode = $Transaction->getStatusCode();
+    $ResponseRegistration = $this->getResponseRegistration($resourceId, $statusCode);
+    $responseClassName = $ResponseRegistration->getResponseClassName();
+    if(isset($responseClassName)) {
+      //
+      // @todo: load response class and set entity body.
+      //
+      
     }
-    $Response = AblePolecat_Message_Response::create($Transaction->getStatusCode(), $headerFields);
-    $Response->setEntityBody($Resource);
+    else {
+      //
+      // No response registration record; use one of the core response classes.
+      //
+      $headerFields = array();
+      switch ($Resource::getName()) {
+        default:
+          $Response = AblePolecat_Message_Response_Xml::create($Transaction->getStatusCode(), $headerFields);
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+          $Response = AblePolecat_Message_Response_Xhtml::create($Transaction->getStatusCode(), $headerFields);
+          break;
+      }
+      $Response->setEntityBody($Resource);
+    }    
     return $Response;
+  }
+  
+  /**
+   * Return registration data on response corresponding to the given resource and status code.
+   *
+   * @param string $resourceId
+   * @param int $statusCode
+   * 
+   * @return AblePolecat_Message_ResponseInterface
+   */
+  protected function getResponseRegistration($resourceId, $statusCode) {
+    
+    $ResponseRegistration = AblePolecat_Registry_Entry_Response::create();
+    $ResponseRegistration->resourceId = $resourceId;
+    $ResponseRegistration->statusCode = $statusCode;
+    
+    //
+    // Search database table [response] for a corresponding registration record.
+    //
+    $sql = __SQL()->          
+      select('responseClassName', 'docType', 'defaultHeaders')->
+      from('response')->
+      where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    if ($CommandResult->success() && is_array($CommandResult->value())) {
+      $registrationInfo = $CommandResult->value();
+      if (isset($registrationInfo[0])) {
+        $ResponseRegistration->responseClassName = $registrationInfo[0]['responseClassName'];
+        isset($registrationInfo[0]['docType']) ? $ResponseRegistration->unserializeDocType($registrationInfo[0]['docType']) : NULL;
+        isset($registrationInfo[0]['defaultHeaders']) ? $ResponseRegistration->defaultHeaders = unserialize($registrationInfo[0]['defaultHeaders']) : NULL;
+      }
+    }
+    
+    return $ResponseRegistration;
   }
   
   /**
    * Recover from a thrown AblePolecat_Transaction_Exception
    * 
    * @param AblePolecat_Transaction_Exception $Exception The thrown exception.
-   * @param AblePolecat_Resource_RegistrationInterface $ResourceRegistration Registration of the requested resource.
+   * @param AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration Registration of the requested resource.
    *
    * @return AblePolecat_ResourceInterface.
    */
   protected function recoverFromTransactionFailure(
     AblePolecat_Transaction_Exception $Exception,
-    AblePolecat_Resource_RegistrationInterface $ResourceRegistration
+    AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration
   ) {
     
     $Resource = NULL;

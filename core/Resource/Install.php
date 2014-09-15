@@ -73,6 +73,33 @@ class AblePolecat_Resource_Install extends AblePolecat_ResourceAbstract {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+   
+  /**
+   * @see http://stackoverflow.com/questions/2583707/can-i-create-a-database-using-pdo-in-php
+   */
+  protected function createCoreDb() {
+    $host="localhost"; 
+
+    $root="root"; 
+    $root_password="rootpass"; 
+
+    $user='newuser';
+    $pass='newpass';
+    $db="newdb"; 
+
+    try {
+    $dbh = new PDO("mysql:host=$host", $root, $root_password);
+
+    $dbh->exec("CREATE DATABASE `$db`;
+            CREATE USER '$user'@'localhost' IDENTIFIED BY '$pass';
+            GRANT ALL ON `$db`.* TO '$user'@'localhost';
+            FLUSH PRIVILEGES;") 
+    or die(print_r($dbh->errorInfo(), true));
+
+    } catch (PDOException $e) {
+    die("DB ERROR: ". $e->getMessage());
+    }
+  }
   
   /**
    * Validates request URI path to ensure resource request can be fulfilled.

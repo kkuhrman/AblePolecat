@@ -17,22 +17,10 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   const STATUS_CODE             = 'status_code';
   const REASON_PHRASE           = 'reason_phrase';
   const HEADER_FIELDS           = 'header_fields';
+  const DOC_TYPE                = 'docType';
   const RESOURCE_ID             = 'resource_id';
   
-  const HEAD_CONTENT_TYPE_HTML  = 'Content-type: text/html';
-  const HEAD_CONTENT_TYPE_JSON  = 'Content-Type: application/json';
-  const HEAD_CONTENT_TYPE_XML   = 'Content-type: text/xml; charset=utf-8';
-  
-  const BODY_DOCTYPE_XML        = "<?xml version='1.0' standalone='yes'?>";
-  
-  const ELEMENT_HTML            = 'html';
-  const ELEMENT_HEAD            = 'head';
-  const ELEMENT_BODY            = 'body';
-  
-  /**
-   * DOM element tag names.
-   */
-  const DOM_ELEMENT_TAG_ROOT    = 'AblePolecat';
+  // const HEAD_CONTENT_TYPE_JSON  = 'Content-Type: application/json';
   
   /**
    * @return string The response status code.
@@ -138,50 +126,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     $this->sendHead();
     $this->sendBody();
   }
-  
-  /**
-   * @param AblePolecat_ResourceInterface $Resource
-   */
-  public function setEntityBody(AblePolecat_ResourceInterface $Resource) {
-    
-    if (!isset($this->Document)) {
-      if ($this->isHTML()) {
-        $this->Document = AblePolecat_Dom::createDocument(
-          AblePolecat_Dom::XHTML_1_1_NAMESPACE_URI,
-          AblePolecat_Dom::XHTML_1_1_QUALIFIED_NAME,
-          AblePolecat_Dom::XHTML_1_1_PUBLIC_ID,
-          AblePolecat_Dom::XHTML_1_1_SYSTEM_ID
-        );
-        
-        //
-        // Creates empty <head> element.
-        //
-        $HeadElement = $this->Document->createElement(self::ELEMENT_HEAD);
-        $DocumentHead = AblePolecat_Dom::appendChildToParent($HeadElement, $this->Document);
-        // @todo: insert document title into head
-        // $HeadContent = AblePolecat_Dom::getDocumentElementFromString($Resource->Head);
-        // $HeadContent = AblePolecat_Dom::appendChildToParent($HeadContent, $this->Document, $DocumentHead);
-        
-        //
-        // Create empty <body> element.
-        //
-        $BodyElement = $this->Document->createElement(self::ELEMENT_BODY);
-        $DocumentBody = AblePolecat_Dom::appendChildToParent($BodyElement, $this->Document);
-        $BodyContent = AblePolecat_Dom::getDocumentElementFromString($Resource->Body);
-        $BodyContent = AblePolecat_Dom::appendChildToParent($BodyContent, $this->Document, $DocumentBody);
-      }
-      else {
-        $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
-        $parentElement = $this->Document->firstChild;
-        $Element = $Resource->getDomNode($this->Document);
-        $Element = AblePolecat_Dom::appendChildToParent($Element, $this->Document, $parentElement);
-      }
-    }
-    else {
-      throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $this->getName()));
-    }
-  }
-   
+     
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -191,34 +136,18 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    */
   protected function getDocument() {
     if (!isset($this->Document)) {
-      $this->Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
+      throw new AblePolecat_Message_Exception('Attempt to dereference null DOM document object in response message.');
     }
     return $this->Document;
   }
   
   /**
-   * @return bool TRUE if mime type is HTML otherwise FALSE.
+   * @param DOMDocument $Document contains the response.
    */
-  protected function isHTML() {
-    
-    $isHTML = FALSE;
-    
-    //
-    // Handle special case of sending response as HTML
-    //
-    $headers_list = array_flip(headers_list());
-    if (isset($headers_list[AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML])) {
-      $isHTML = TRUE;
-    }
-    else if (count($this->headerFields)) {
-      $headers_list = array_flip($this->headerFields);
-      if (isset($headers_list[AblePolecat_Message_ResponseInterface::HEAD_CONTENT_TYPE_HTML])) {
-        $isHTML = TRUE;
-      }
-    }
-    return $isHTML;
+  protected function setDocument(DOMDocument $Document) {
+    $this->Document = $Document;
   }
-  
+    
   /**
    * Send HTTP response headers.
    */
@@ -231,29 +160,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
         header($field);
       }
     }
-    else {
-      header(self::HEAD_CONTENT_TYPE_XML);
-    }
     header('', TRUE, $this->getStatusCode());
-  }
-  
-  /**
-   * Send body of response.
-   */
-  protected function sendBody() {
-    //
-    // Echo response bodies (will not be sent before HTTP headers because
-    // output buffer is not flushed until server goes out of scope).
-    //
-    // if (isset($this->body)) {
-      // echo $this->body;
-    // }
-    if ($this->isHTML()) {
-      echo $this->getDocument()->saveHTML();
-    }
-    else {
-      echo $this->getDocument()->saveXML();
-    }
   }
   
   /**
@@ -428,52 +335,11 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     $this->statusCode = 200;
     $this->reasonPhrase = '';
     $this->headerFields = array();
-    // AblePolecat_Error::INVALID_HTTP_RESPONSE
   }
   
   /**
    * send HTTP headers.
    */
   final public function __destruct() {
-  }
-}
-
-class AblePolecat_Message_Response extends AblePolecat_Message_ResponseAbstract {
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_DynamicObjectInterface.
-   ********************************************************************************/
-  
-  /**
-   * Create a concrete instance of AblePolecat_MessageInterface.
-   *
-   * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
-   */
-  public static function create() {
-    
-    //
-    // Create a new response object.
-    //
-    $Response = new AblePolecat_Message_Response();
-    
-    //
-    // Unmarshall (from numeric keyed index to named properties) variable args list.
-    //
-    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-    
-    //
-    // Assign properties from variable args list.
-    //
-    $Response->setStatusCode(
-      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
-    );
-    $Response->appendHeaderFields(
-      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
-    );
-    
-    //
-    // Return initialized object.
-    //
-    return $Response;
   }
 }

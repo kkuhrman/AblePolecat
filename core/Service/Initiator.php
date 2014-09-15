@@ -11,7 +11,7 @@
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Service.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 
 interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_CacheObjectInterface {
   
@@ -69,7 +69,7 @@ abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheOb
     //
     // Prepare response.
     //
-    $Response = AblePolecat_Message_Response::create(200, 'OK');    
+    $Response = AblePolecat_Message_Response_Xml::create(200, 'OK');    
     
     //
     // Handle next prepared request.
