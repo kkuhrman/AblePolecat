@@ -10,9 +10,25 @@
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 
-interface AblePolecat_Registry_EntryInterface extends AblePolecat_DynamicObjectInterface {}
+interface AblePolecat_Registry_EntryInterface extends AblePolecat_DynamicObjectInterface {
+  /**
+   * @return int
+   */
+  public function getLastModifiedTime();
+}
 
 abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_Registry_EntryInterface {
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_Registry_EntryInterface.
+   ********************************************************************************/
+   
+  /**
+   * @return int
+   */
+  public function getLastModifiedTime() {
+    return $this->getPropertyValue('lastModifiedTime');
+  }
   
   /********************************************************************************
    * Helper functions.

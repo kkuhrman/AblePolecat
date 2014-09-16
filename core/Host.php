@@ -475,6 +475,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    * @todo: hand control back to the server or otherwise fail gracefully. no WSOD
    */
   public static function handleException(Exception $Exception) {
+    
     //
     // Log exception to database.
     //

@@ -17,6 +17,52 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   const ELEMENT_HEAD            = 'head';
   const ELEMENT_BODY            = 'body';
   
+  /**
+   * @var string.
+   */
+  private $namespaceUri;
+  
+  /**
+   * @var string.
+   */
+  private $qualifiedName;
+  
+  /**
+   * @var string.
+   */
+  private $publicId;
+  
+  /**
+   * @var string.
+   */
+  private $systemId;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_OverloadableInterface.
+   ********************************************************************************/
+  
+  /**
+   * Marshall numeric-indexed array of variable method arguments.
+   *
+   * @param string $method_name __METHOD__ is good enough.
+   * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
+   * @param mixed $options Reserved for future use.
+   *
+   * @return Array Associative array representing [argument name] => [argument value]
+   */
+  public static function unmarshallArgsList($method_name, $args, $options = NULL) {
+    
+    $ArgsList = parent::unmarshallArgsList($method_name, $args, $options);
+    $Response = self::getConcreteInstance();
+    if (isset($Response) && isset($ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION})) {
+      $Response->namespaceUri = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION}->getNamespaceUri();
+      $Response->qualifiedName = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION}->getQualifiedName();
+      $Response->publicId = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION}->getPublicId();
+      $Response->systemId = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION}->getSystemId();
+    }
+    return $ArgsList;
+  }
+  
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
    ********************************************************************************/
@@ -26,28 +72,9 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    *
    * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
    */
-  public static function create() {
-    
-    //
-    // Check if this sub-class extends another.
-    //
-    $Response = self::getConcreteInstance();
-    if (!isset($Response)) {
-      //
-      // Create concrete instance of response sub-class.
-      //
-      $Response = new AblePolecat_Message_Response_Xhtml();
-      self::setConcreteInstance($Response);
-      
-      //
-      // Unmarshall (from numeric keyed index to named properties) variable args list.
-      //
-      $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-    }
-    
-    //
-    // Return initialized object.
-    //
+  public static function create() {    
+    $Response = self::setConcreteInstance(new AblePolecat_Message_Response_Xhtml());
+    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
     return self::getConcreteInstance();
   }
   
@@ -95,7 +122,14 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-   
+  
+  /**
+   * @return string Entity body as text.
+   */
+  public function getEntityBody() {
+    return $this->getDocument()->saveHTML();
+  }
+  
   /**
    * Send HTTP response headers.
    */
@@ -105,13 +139,30 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   }
   
   /**
-   * Send body of response.
+   * @return string.
    */
-  protected function sendBody() {
-    //
-    // Echo response bodies (will not be sent before HTTP headers because
-    // output buffer is not flushed until server goes out of scope).
-    //
-    echo $this->getDocument()->saveHTML();
+  public function getNamespaceUri() {
+    return $this->namespaceUri;
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getQualifiedName() {
+    return $this->qualifiedName;
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getPublicId() {
+    return $this->publicId;
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getSystemId() {
+    return $this->systemId;
   }
 }

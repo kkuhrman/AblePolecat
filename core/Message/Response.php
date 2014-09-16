@@ -14,13 +14,22 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource.php
 
 interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInterface {
   
-  const STATUS_CODE             = 'status_code';
+  const RESOURCE_ID             = 'resourceId';
+  const STATUS_CODE             = 'statusCode';
   const REASON_PHRASE           = 'reason_phrase';
   const HEADER_FIELDS           = 'header_fields';
   const DOC_TYPE                = 'docType';
-  const RESOURCE_ID             = 'resource_id';
+  const RESPONSE_REGISTRATION   = 'ResponseRegistration';
   
-  // const HEAD_CONTENT_TYPE_JSON  = 'Content-Type: application/json';
+  /**
+   * @return string Entity body as text.
+   */
+  public function getEntityBody();
+  
+  /**
+   * @return string.
+   */
+  public function getResourceId();
   
   /**
    * @return string The response status code.
@@ -50,6 +59,11 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    * @see getConcreteInstance(), setConcreteInstance().
    */
   private static $Response;
+  
+  /**
+   * @var AblePolecat_Registry_Entry_ResponseInterface
+   */
+  private $ResponseRegistration;
   
   /**
    * @var DOMDocument contains the response.
@@ -95,7 +109,12 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
         case 'create':
           switch($key) {
             case 0:
-              $ArgsList->{AblePolecat_Message_ResponseInterface::STATUS_CODE} = $value;
+              if (is_numeric($value)) {
+                $ArgsList->{AblePolecat_Message_ResponseInterface::STATUS_CODE} = $value;
+              }
+              else if (is_object($value) && is_a($value, 'AblePolecat_Registry_Entry_ResponseInterface')) {
+                $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION} = $value;
+              }
               break;
             case 1:
               $ArgsList->{AblePolecat_Message_ResponseInterface::HEADER_FIELDS} = $value;
@@ -108,12 +127,20 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
       //
       // Assign properties from variable args list.
       //
-      self::$Response->setStatusCode(
-        $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
-      );
-      self::$Response->appendHeaderFields(
-        $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
-      );
+      if (isset($ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION})) {
+        self::$Response->ResponseRegistration = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION};
+        self::$Response->resourceId = self::$Response->ResponseRegistration->getResourceId();
+        self::$Response->setStatusCode(self::$Response->ResponseRegistration->getStatusCode());
+        self::$Response->appendHeaderFields(self::$Response->ResponseRegistration->getDefaultHeaders());
+      }
+      else {
+        self::$Response->setStatusCode(
+          $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
+        );
+        self::$Response->appendHeaderFields(
+          $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
+        );
+      }
     }
     return $ArgsList;
   }
@@ -121,6 +148,13 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   /********************************************************************************
    * Implementation of AblePolecat_Message_ResponseInterface.
    ********************************************************************************/
+  
+  /**
+   * @return string.
+   */
+  public function getResourceId() {
+    return $this->resourceId;
+  }
   
   /**
    * @return string The response status code.
@@ -178,6 +212,17 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
       }
     }
     header('', TRUE, $this->getStatusCode());
+  }
+  
+  /**
+   * Send body of response.
+   */
+  protected function sendBody() {
+    //
+    // Echo response bodies (will not be sent before HTTP headers because
+    // output buffer is not flushed until server goes out of scope).
+    //
+    echo $this->getEntityBody();
   }
   
   /**
@@ -349,6 +394,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    */
   protected function initialize() {
     $this->Document = NULL;
+    $this->resourceId = NULL;
     $this->statusCode = 200;
     $this->reasonPhrase = '';
     $this->headerFields = array();
@@ -363,12 +409,33 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    * @return Concrete instance of AblePolecat_Message_ResponseInterface or NULL
    */
   protected static function getConcreteInstance() {
-    isset(self::$Response) ? $Response = self::$Response : $Response = NULL;
+    
+    $Response = NULL;
+    
+    if (isset(self::$Response)) {
+      $Response = self::$Response;
+    }
     return $Response;
   }
    
+  /**
+   * Allows descendant sub-class to initialize private singleton member with its own concrete
+   * instance whilst subsequent calls to same method by parent get ignored.
+   *
+   * @return AblePolecat_Message_ResponseInterface Instance of sub-class for further initialization.
+   */
   protected static function setConcreteInstance(AblePolecat_Message_ResponseInterface $Response) {
-    self::$Response = $Response;
+    
+    //
+    // Has a descendant class already initialized singleton?
+    //
+    if (!isset(self::$Response)) {
+      //
+      // No. Allow initialization.
+      //
+      self::$Response = $Response;
+    }
+    return self::$Response;
   }
   
   /**

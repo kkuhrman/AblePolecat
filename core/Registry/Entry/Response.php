@@ -50,6 +50,11 @@ interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Regis
    * @return int.
    */
   public function getResponseClassName();
+  
+  /**
+   * @return string
+   */
+  public function getTemplateFullPath();
 }
 
 /**
@@ -128,6 +133,13 @@ class AblePolecat_Registry_Entry_Response extends AblePolecat_Registry_EntryAbst
    */
   public function getResponseClassName() {
     return $this->getPropertyValue('responseClassName');
+  }
+  
+  /**
+   * @return string
+   */
+  public function getTemplateFullPath() {
+    return $this->getPropertyValue('templateFullPath');
   }
     
   /********************************************************************************

@@ -34,34 +34,22 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
    *
    * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
    */
-  public static function create() {
-    
-    //
-    // Check if this sub-class extends another.
-    //
-    $Response = self::getConcreteInstance();
-    if (!isset($Response)) {
-      //
-      // Create concrete instance of response sub-class.
-      //
-      $Response = new AblePolecat_Message_Response_Xml();
-      self::setConcreteInstance($Response);
-      
-      //
-      // Unmarshall (from numeric keyed index to named properties) variable args list.
-      //
-      $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-    }
-    
-    //
-    // Return initialized object.
-    //
+  public static function create() {    
+    self::setConcreteInstance(new AblePolecat_Message_Response_Xml());
+    self::unmarshallArgsList(__FUNCTION__, func_get_args());
     return self::getConcreteInstance();
   }
   
   /********************************************************************************
    * Implementation of AblePolecat_Message_ResponseInterface.
    ********************************************************************************/
+  
+  /**
+   * @return string Entity body as text.
+   */
+  public function getEntityBody() {
+    return $this->getDocument()->saveXML();
+  }
   
   /**
    * @param AblePolecat_ResourceInterface $Resource
@@ -91,16 +79,5 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
   protected function sendHead() {
     header(self::HEAD_CONTENT_TYPE_XML);
     parent::sendHead();
-  }
-  
-  /**
-   * Send body of response.
-   */
-  protected function sendBody() {
-    //
-    // Echo response bodies (will not be sent before HTTP headers because
-    // output buffer is not flushed until server goes out of scope).
-    //
-    echo $this->getDocument()->saveXML();
   }
 }

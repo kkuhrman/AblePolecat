@@ -211,6 +211,33 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Create XHTML DOM Document from template stored in a file.
+   *
+   * @param string $fullPath  Full path to template file.
+   * @param string $qualifiedName The qualified name of the document element to create.
+   * @param string $publicId      The external subset public identifier.
+   * @param string $systemId      The external subset system identifier.
+   * @param array $documentProperties Array[DOMDocument property name => DOMDocument property value]
+   *
+   * @return DOMDocument
+   */
+  public static function createDocumentFromTemplate($fullPath) {
+    
+    $Document = NULL;
+    $realPath = realpath($fullPath);
+    if (file_exists($realPath)) {
+      $Document = AblePolecat_Dom::createDocument(
+        AblePolecat_Dom::XHTML_1_1_NAMESPACE_URI,
+        AblePolecat_Dom::XHTML_1_1_QUALIFIED_NAME,
+        AblePolecat_Dom::XHTML_1_1_PUBLIC_ID,
+        AblePolecat_Dom::XHTML_1_1_SYSTEM_ID
+      );
+      $Document->loadHTMLFile($realPath);
+    }
+    return $Document;
+  }
+  
+  /**
    * Load markup into DOM Document and detach document element.
    *
    * @param string $fileName Name of file containing markup.
