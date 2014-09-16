@@ -318,7 +318,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       //
       // @todo: load response class and set entity body.
       //
-      
+      $Response = $this->getClassRegistry()->loadClass($responseClassName);
+      $Response->setEntityBody($Resource);
     }
     else {
       //

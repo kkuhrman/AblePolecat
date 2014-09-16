@@ -23,7 +23,7 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
   /**
    * @var object Singleton instance
    */
-  private static $Response;
+  // private static $Response;
   
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
@@ -37,29 +37,26 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
   public static function create() {
     
     //
-    // Create a new response object.
+    // Check if this sub-class extends another.
     //
-    self::$Response = new AblePolecat_Message_Response_Xml();
-    
-    //
-    // Unmarshall (from numeric keyed index to named properties) variable args list.
-    //
-    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-    
-    //
-    // Assign properties from variable args list.
-    //
-    self::$Response->setStatusCode(
-      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
-    );
-    self::$Response->appendHeaderFields(
-      $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
-    );
+    $Response = self::getConcreteInstance();
+    if (!isset($Response)) {
+      //
+      // Create concrete instance of response sub-class.
+      //
+      $Response = new AblePolecat_Message_Response_Xml();
+      self::setConcreteInstance($Response);
+      
+      //
+      // Unmarshall (from numeric keyed index to named properties) variable args list.
+      //
+      $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
+    }
     
     //
     // Return initialized object.
     //
-    return self::$Response;
+    return self::getConcreteInstance();
   }
   
   /********************************************************************************

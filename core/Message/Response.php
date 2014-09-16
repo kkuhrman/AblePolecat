@@ -46,6 +46,12 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
 abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_ResponseInterface {
   
   /**
+   * @var object Singleton instance
+   * @see getConcreteInstance(), setConcreteInstance().
+   */
+  private static $Response;
+  
+  /**
    * @var DOMDocument contains the response.
    */
   private $Document;
@@ -97,6 +103,17 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
           }
           break;
       }
+    }
+    if (isset(self::$Response)) {
+      //
+      // Assign properties from variable args list.
+      //
+      self::$Response->setStatusCode(
+        $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::STATUS_CODE, 200)
+      );
+      self::$Response->appendHeaderFields(
+        $ArgsList->getArgumentValue(AblePolecat_Message_ResponseInterface::HEADER_FIELDS, array())
+      );
     }
     return $ArgsList;
   }
@@ -335,6 +352,23 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     $this->statusCode = 200;
     $this->reasonPhrase = '';
     $this->headerFields = array();
+  }
+  
+  /**
+   * Check if concrete instance of sub-class has been set.
+   * 
+   * Allows sub-classes to extend concrete (not abstract) classes overriding only which
+   * sub-class is implemented in create().
+   * 
+   * @return Concrete instance of AblePolecat_Message_ResponseInterface or NULL
+   */
+  protected static function getConcreteInstance() {
+    isset(self::$Response) ? $Response = self::$Response : $Response = NULL;
+    return $Response;
+  }
+   
+  protected static function setConcreteInstance(AblePolecat_Message_ResponseInterface $Response) {
+    self::$Response = $Response;
   }
   
   /**
