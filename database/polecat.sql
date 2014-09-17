@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 21, 2014 at 05:50 PM
+-- Generation Time: Sep 17, 2014 at 12:44 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -18,6 +18,21 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Database: `polecat`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cache`
+--
+
+DROP TABLE IF EXISTS `cache`;
+CREATE TABLE IF NOT EXISTS `cache` (
+  `resourceId` char(36) NOT NULL,
+  `statusCode` int(11) NOT NULL,
+  `lastModifiedTime` int(11) NOT NULL,
+  `cacheData` blob NOT NULL,
+  UNIQUE KEY `cacheEntryKey` (`resourceId`,`statusCode`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -92,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `error` (
   `errorFunction` varchar(255) NOT NULL,
   `errorMessage` text NOT NULL,
   PRIMARY KEY (`errorId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=122 ;
 
 -- --------------------------------------------------------
 
@@ -203,7 +218,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `transactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=89 ;
 
 -- --------------------------------------------------------
 
@@ -217,7 +232,8 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `resourceId` char(36) DEFAULT NULL,
   `resourceClassName` varchar(255) NOT NULL,
   `resourceAuthorityClassName` varchar(255) DEFAULT NULL,
-  `resourceDenyCode` int(11) NOT NULL DEFAULT '0',
+  `resourceDenyCode` int(11) NOT NULL DEFAULT '403',
+  `lastModifiedTime` int(11) NOT NULL,
   PRIMARY KEY (`resourceName`),
   UNIQUE KEY `resourceId` (`resourceId`),
   KEY `resourceClassName` (`resourceClassName`),
@@ -232,11 +248,15 @@ CREATE TABLE IF NOT EXISTS `resource` (
 
 DROP TABLE IF EXISTS `response`;
 CREATE TABLE IF NOT EXISTS `response` (
-  `statusCode` char(3) NOT NULL,
-  `mimeType` varchar(255) NOT NULL DEFAULT '<?xml version=''1.0'' standalone=''yes''?>',
+  `resourceId` char(36) NOT NULL,
+  `statusCode` int(11) NOT NULL,
+  `docType` text,
   `defaultHeaders` text,
-  `body` text,
-  PRIMARY KEY (`statusCode`)
+  `responseClassName` varchar(255) NOT NULL,
+  `templateFullPath` varchar(255) DEFAULT NULL,
+  `lastModifiedTime` int(11) NOT NULL,
+  UNIQUE KEY `responseKey` (`resourceId`,`statusCode`),
+  KEY `responseClassName` (`responseClassName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -268,22 +288,6 @@ CREATE TABLE IF NOT EXISTS `savepoint` (
   `savepointName` varchar(255) NOT NULL,
   PRIMARY KEY (`savepointId`),
   KEY `transactionId` (`transactionId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `template`
---
-
-DROP TABLE IF EXISTS `template`;
-CREATE TABLE IF NOT EXISTS `template` (
-  `resourceId` varchar(255) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `mimeType` varchar(255) NOT NULL DEFAULT 'Content-type: text/xml; charset=utf-8',
-  `defaultHeaders` text,
-  `body` text,
-  PRIMARY KEY (`resourceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
