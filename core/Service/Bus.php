@@ -14,9 +14,9 @@
  * @version   0.6.1
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Cache.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Response.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
@@ -162,68 +162,90 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         $ResourceRegistration = $this->getResourceRegistration($Message);
         
         //
-        // @todo: bypass transaction if request is GET and resource is not restricted.
-        // CASE 200 != $ResourceRegistration->getResourceDenyCode()
+        // If method is GET and resource is not restricted, check cache first.
         //
-        
-        
-        //
-        // Check for open transactions matching request for given method/resource by same agent.
-        //
-        $transactionId = NULL;
-        $savepointId = NULL;
-        $parentTransactionId = NULL;
-        $sql = __SQL()->
-          select(
-            'transactionId', 'savepointId', 'parentTransactionId')->
-          from('transaction')->
-          where(sprintf("`sessionId` = '%s' AND `requestMethod` = '%s' AND `resourceId` = '%s' AND `status` != '%s'", 
-            AblePolecat_Host::getSessionId(),
-            $Message->getMethod(),
-            $ResourceRegistration->getPropertyValue('resourceId'), 
-            AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
+        if (($Message->getMethod() == 'GET') && (200 == $ResourceRegistration->getResourceDenyCode())) {
+          //
+          // Check current cache entry against modified dates for both resource and response objects.
+          //
+          $ResponseRegistration = $this->getResponseRegistration(
+            $ResourceRegistration->getResourceId(), 
+            $ResourceRegistration->getResourceName(), 
+            200
           );
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-        if ($CommandResult->success() && count($CommandResult->value())) {
-          //
-          // Resume existing transaction.
-          //
-          $Records = $CommandResult->value();
-          $transactionId = $Records[0]['transactionId'];
-          $savepointId = $Records[0]['savepointId'];
-          isset($Records[0]['parentTransactionId']) ? $parentTransactionId = $Records[0]['parentTransactionId'] : NULL;
-        }
-        
-        try {
-          //
-          // Start or resume the transaction
-          // @todo: $parentTransactionId must be parent (object)
-          //
-          $Transaction = $this->getClassRegistry()->loadClass(
-            'AblePolecat_Transaction_Get_Resource',
-            $this->getDefaultCommandInvoker(),
-            $Agent,
-            $Message,
-            $ResourceRegistration,
-            $transactionId,
-            $savepointId,
-            NULL
-          );
-          $Resource = $Transaction->start();
-          if (!isset($Resource) || !is_a($Resource, 'AblePolecat_ResourceInterface')) {
-            throw new AblePolecat_Service_Exception(sprintf("%s failed to return object which implements AblePolecat_ResourceInterface",
-              AblePolecat_Data::getDataTypeName($Transaction)
-            ));
+          $CacheRegistration = $this->getCacheRegistration($ResourceRegistration->getResourceId(), 200);
+          if (($CacheRegistration->getLastModifiedTime() > $ResourceRegistration->getLastModifiedTime()) && 
+              ($CacheRegistration->getLastModifiedTime() > $ResponseRegistration->getLastModifiedTime())) {
+            //
+            // @todo: generate response from cache entry
+            //
+            $Response = AblePolecat_Message_Response_Cached::create();
+            $Response->setCachedResponse($CacheRegistration);
           }
         }
-        catch (AblePolecat_Transaction_Exception $Exception) {
+        
+        //
+        // If no cached response was available, generate a new response.
+        //
+        if (!isset($Response)) {
           //
-          // Failure in the transaction work-flow. 
-          // Able Polecat will attempt to recover as gracefully as possible.
+          // Check for open transactions matching request for given method/resource by same agent.
           //
-          $Resource = $this->recoverFromTransactionFailure($Exception, $ResourceRegistration);
+          $transactionId = NULL;
+          $savepointId = NULL;
+          $parentTransactionId = NULL;
+          $sql = __SQL()->
+            select(
+              'transactionId', 'savepointId', 'parentTransactionId')->
+            from('transaction')->
+            where(sprintf("`sessionId` = '%s' AND `requestMethod` = '%s' AND `resourceId` = '%s' AND `status` != '%s'", 
+              AblePolecat_Host::getSessionId(),
+              $Message->getMethod(),
+              $ResourceRegistration->getPropertyValue('resourceId'), 
+              AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
+            );
+          $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+          if ($CommandResult->success() && count($CommandResult->value())) {
+            //
+            // Resume existing transaction.
+            //
+            $Records = $CommandResult->value();
+            $transactionId = $Records[0]['transactionId'];
+            $savepointId = $Records[0]['savepointId'];
+            isset($Records[0]['parentTransactionId']) ? $parentTransactionId = $Records[0]['parentTransactionId'] : NULL;
+          }
+          
+          try {
+            //
+            // Start or resume the transaction
+            // @todo: $parentTransactionId must be parent (object)
+            //
+            $Transaction = $this->getClassRegistry()->loadClass(
+              'AblePolecat_Transaction_Get_Resource',
+              $this->getDefaultCommandInvoker(),
+              $Agent,
+              $Message,
+              $ResourceRegistration,
+              $transactionId,
+              $savepointId,
+              NULL
+            );
+            $Resource = $Transaction->start();
+            if (!isset($Resource) || !is_a($Resource, 'AblePolecat_ResourceInterface')) {
+              throw new AblePolecat_Service_Exception(sprintf("%s failed to return object which implements AblePolecat_ResourceInterface",
+                AblePolecat_Data::getDataTypeName($Transaction)
+              ));
+            }
+          }
+          catch (AblePolecat_Transaction_Exception $Exception) {
+            //
+            // Failure in the transaction work-flow. 
+            // Able Polecat will attempt to recover as gracefully as possible.
+            //
+            $Resource = $this->recoverFromTransactionFailure($Exception, $ResourceRegistration);
+          }
+          $Response = $this->getResponse($ResourceRegistration, $Transaction, $Resource);
         }
-        $Response = $this->getResponse($ResourceRegistration, $Transaction, $Resource);
       }
       else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
         //
@@ -320,6 +342,27 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       $ResourceRegistration->resourceAuthorityClassName = NULL;
       $ResourceRegistration->resourceDenyCode = 200;
     }
+    
+    //
+    // Update cache entry if resource class file has been modified since last resource registry entry update.
+    //
+    if (isset($ResourceRegistration->resourceClassName)) {
+      $ClassRegistration = $this->getClassRegistry()->isLoadable($ResourceRegistration->resourceClassName);
+      if ($ClassRegistration && isset($ClassRegistration->classLastModifiedTime)) {
+        if ($ClassRegistration->classLastModifiedTime > $ResourceRegistration->lastModifiedTime) {
+          $sql = __SQL()->          
+            update('resource')->
+            set('lastModifiedTime')->
+            values($ClassRegistration->classLastModifiedTime)->
+            where(sprintf("resourceId = '%s'", $ResourceRegistration->resourceId));
+          $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+          if ($CommandResult->success()) {
+            $ResourceRegistration->lastModifiedTime = $ClassRegistration->classLastModifiedTime;
+          }
+        }
+      }
+    }
+    
     return $ResourceRegistration;
   }
   
@@ -338,13 +381,14 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $CacheRegistration->statusCode = $statusCode;
     
     $sql = __SQL()->          
-      select('resourceId', 'statusCode', 'lastModifiedTime', 'cacheData')->
+      select('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
       into('cache')->
       where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
     $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
     if ($CommandResult->success() && is_array($CommandResult->value())) {
       $registrationInfo = $CommandResult->value();
       if (isset($registrationInfo[0])) {
+        isset($registrationInfo[0]['mimeType']) ? $CacheRegistration->mimeType = $registrationInfo[0]['mimeType'] : NULL;
         isset($registrationInfo[0]['lastModifiedTime']) ? $CacheRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         isset($registrationInfo[0]['cacheData']) ? $CacheRegistration->cacheData = $registrationInfo[0]['cacheData'] : NULL;
       }
@@ -377,7 +421,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     //
     // Search core database for corresponding response registration.
     //
-    $ResponseRegistration = $this->getResponseRegistration($Resource::getId(), $Transaction->getStatusCode());
+    $ResponseRegistration = $this->getResponseRegistration($Resource->getId(), $Resource->getName(), $Transaction->getStatusCode());
     $responseClassName = $ResponseRegistration->getResponseClassName();
     if(isset($responseClassName)) {
       //
@@ -417,10 +461,11 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    * 
    * @return AblePolecat_Message_ResponseInterface
    */
-  protected function getResponseRegistration($resourceId, $statusCode) {
+  protected function getResponseRegistration($resourceId, $resourceName, $statusCode) {
     
     $ResponseRegistration = AblePolecat_Registry_Entry_Response::create();
     $ResponseRegistration->resourceId = $resourceId;
+    $ResponseRegistration->resourceName = $resourceName;
     $ResponseRegistration->statusCode = $statusCode;
     
     //
@@ -429,7 +474,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $sql = __SQL()->          
       select('responseClassName', 'docType', 'defaultHeaders', 'templateFullPath', 'lastModifiedTime')->
       from('response')->
-      where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
+      where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $ResponseRegistration->resourceId, $ResponseRegistration->statusCode));
     $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
     if ($CommandResult->success() && is_array($CommandResult->value())) {
       $registrationInfo = $CommandResult->value();
@@ -439,6 +484,46 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         isset($registrationInfo[0]['defaultHeaders']) ? $ResponseRegistration->defaultHeaders = unserialize($registrationInfo[0]['defaultHeaders']) : NULL;
         isset($registrationInfo[0]['templateFullPath']) ? $ResponseRegistration->templateFullPath = $registrationInfo[0]['templateFullPath'] : NULL;
         isset($registrationInfo[0]['lastModifiedTime']) ? $ResponseRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+      }
+    }
+    
+    //
+    // Update cache entry if response class and corresponding template files have been modified since last 
+    // response registry entry update.
+    //
+    $lastModifiedTime = $ResponseRegistration->lastModifiedTime;
+    if (isset($ResponseRegistration->responseClassName)) {
+      $responseClassRegistration = $this->getClassRegistry()->isLoadable($ResponseRegistration->responseClassName);
+    }
+    if ($responseClassRegistration && isset($responseClassRegistration->classLastModifiedTime)) {
+      if ($responseClassRegistration->classLastModifiedTime > $ResponseRegistration->lastModifiedTime) {
+        //
+        // Response class file has been modified since last response registry entry.
+        //
+        $lastModifiedTime = $responseClassRegistration->classLastModifiedTime;
+      }
+    }
+    if (isset($ResponseRegistration->templateFullPath)) {
+      $templateStat = stat($ResponseRegistration->templateFullPath);
+      if ($templateStat && isset($templateStat['mtime'])) {
+        if ($templateStat['mtime'] > $ResponseRegistration->lastModifiedTime) {
+          //
+          // Template file has been modified since last response registry entry.
+          //
+          $lastModifiedTime = $templateStat['mtime'];
+        }
+      }
+    }
+    
+    if ($lastModifiedTime != $ResponseRegistration->lastModifiedTime) {
+      $sql = __SQL()->          
+        update('response')->
+        set('lastModifiedTime')->
+        values($lastModifiedTime)->
+        where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $ResponseRegistration->resourceId, $ResponseRegistration->statusCode));
+      $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+      if ($CommandResult->success()) {
+        $ResponseRegistration->lastModifiedTime = $lastModifiedTime;
       }
     }
     
@@ -626,15 +711,12 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   ) {
     
     if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
-        //
-        // @todo: check caching rules.
-        //
-        $now = time();
         
+        $now = time();
         $sql = __SQL()->          
-          replace('resourceId', 'statusCode', 'lastModifiedTime', 'cacheData')->
+          replace('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
           into('cache')->
-          values($Message->getResourceId(), $Message->getStatusCode(), $now, $Message->getEntityBody());
+          values($Message->getResourceId(), $Message->getStatusCode(), $Message->getMimeType(), $now, $Message->getEntityBody());
         $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
     }
     return $Message;

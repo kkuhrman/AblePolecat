@@ -24,6 +24,11 @@ interface AblePolecat_Registry_Entry_CacheInterface extends AblePolecat_Registry
   /**
    * @return string.
    */
+  public function getMimeType();
+  
+  /**
+   * @return string.
+   */
   public function getCacheData();
 }
 
@@ -61,6 +66,13 @@ class AblePolecat_Registry_Entry_Cache extends AblePolecat_Registry_EntryAbstrac
    */
   public function getStatusCode() {
     return $this->getPropertyValue('statusCode');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getMimeType() {
+    return $this->getPropertyValue('mimeType');
   }
   
   /**

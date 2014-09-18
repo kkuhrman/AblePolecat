@@ -22,9 +22,25 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   const RESPONSE_REGISTRATION   = 'ResponseRegistration';
   
   /**
+   * Some supported mime types.
+   */
+  const HEAD_CONTENT_TYPE_XML   = 'Content-type: text/xml; charset=utf-8';
+  const HEAD_CONTENT_TYPE_HTML  = 'Content-type: text/html';
+  
+  /**
    * @return string Entity body as text.
    */
   public function getEntityBody();
+  
+  /**
+   * @return string
+   */
+  public function getMimeType();
+  
+  /**
+   * @return string.
+   */
+  public function getResourceName();
   
   /**
    * @return string.
@@ -49,7 +65,7 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   /**
    * @param AblePolecat_ResourceInterface $Resource
    */
-  public function setEntityBody(AblePolecat_ResourceInterface $Resource);
+  public function setEntityBody(AblePolecat_ResourceInterface $Resource);  
 }
 
 abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_ResponseInterface {
@@ -129,7 +145,6 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
       //
       if (isset($ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION})) {
         self::$Response->ResponseRegistration = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION};
-        self::$Response->resourceId = self::$Response->ResponseRegistration->getResourceId();
         self::$Response->setStatusCode(self::$Response->ResponseRegistration->getStatusCode());
         self::$Response->appendHeaderFields(self::$Response->ResponseRegistration->getDefaultHeaders());
       }
@@ -152,8 +167,27 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   /**
    * @return string.
    */
+  public function getResourceName() {
+    
+    $resourceName = NULL;
+    
+    if (isset($this->ResponseRegistration)) {
+      $resourceName = $this->ResponseRegistration->getResourceName();
+    }
+    return $resourceName;
+  }
+  
+  /**
+   * @return string.
+   */
   public function getResourceId() {
-    return $this->resourceId;
+    
+    $resourceId = NULL;
+    
+    if (isset($this->ResponseRegistration)) {
+      $resourceId = $this->ResponseRegistration->getResourceId();
+    }
+    return $resourceId;
   }
   
   /**
@@ -394,7 +428,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    */
   protected function initialize() {
     $this->Document = NULL;
-    $this->resourceId = NULL;
+    $this->ResponseRegistration = NULL;
     $this->statusCode = 200;
     $this->reasonPhrase = '';
     $this->headerFields = array();

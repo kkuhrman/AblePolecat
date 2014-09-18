@@ -14,6 +14,11 @@ interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Regis
   /**
    * @return string.
    */
+  public function getResourceName();
+  
+  /**
+   * @return string.
+   */
   public function getResourceId();
   
   /**
@@ -78,6 +83,13 @@ class AblePolecat_Registry_Entry_Response extends AblePolecat_Registry_EntryAbst
   /********************************************************************************
    * Implementation of AblePolecat_Registry_Entry_ResponseInterface.
    ********************************************************************************/
+  
+  /**
+   * @return string.
+   */
+  public function getResourceName() {
+    return $this->getPropertyValue('resourceName');
+  }
   
   /**
    * @return string.

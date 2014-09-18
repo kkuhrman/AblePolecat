@@ -12,7 +12,6 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 
 class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbstract {
   
-  const HEAD_CONTENT_TYPE_HTML  = 'Content-type: text/html';
   const ELEMENT_HTML            = 'html';
   const ELEMENT_HEAD            = 'head';
   const ELEMENT_BODY            = 'body';
@@ -36,6 +35,11 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    * @var string.
    */
   private $systemId;
+  
+  /**
+   * @var Array String substitutions.
+   */
+  private $entityBodyStringSubstitutes;
   
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
@@ -83,6 +87,20 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    ********************************************************************************/
   
   /**
+   * @return string
+   */
+  public function getMimeType() {
+    return self::HEAD_CONTENT_TYPE_HTML;
+  }
+  
+  /**
+   * @return string Entity body as text.
+   */
+  public function getEntityBody() {
+    return $this->postProcessEntityBody($this->getDocument()->saveHTML());
+  }
+  
+  /**
    * @param AblePolecat_ResourceInterface $Resource
    */
   public function setEntityBody(AblePolecat_ResourceInterface $Resource) {
@@ -124,10 +142,17 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    ********************************************************************************/
   
   /**
-   * @return string Entity body as text.
+   * Post processing of entity body is final edit. Typically simple text substitutions.
+   *
+   * @param $string entityBody
+   *
+   * @return string.
    */
-  public function getEntityBody() {
-    return $this->getDocument()->saveHTML();
+  protected function postProcessEntityBody($entityBody) {
+    $substitutionMarkers = array_keys($this->entityBodyStringSubstitutes);
+    $substitutionValue = $this->entityBodyStringSubstitutes;
+    $entityBody = str_replace($substitutionMarkers, $substitutionValue, $entityBody);
+    return $entityBody;
   }
   
   /**
@@ -164,5 +189,66 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    */
   public function getSystemId() {
     return $this->systemId;
+  }
+  
+  /**
+   * Allows users to replace text formatted as {!sometext} in templates with given value.
+   *
+   * @param string $substitutionMarker Uniquely identifies a substitution marker.
+   * @param string $substitutionValue The text, which will replace the substitution marker.
+   * @param string $encoding Necessary if substitution string is to be used in URLs
+   *
+   * NOTE: This is method is destructive. It will overwrite previous value if already set.
+   * However, it will make note of such overwrites in [log].
+   */
+  public function setSubstitutionMarker($substitutionMarker, $substitutionValue, $encoding = 'domurl') {
+    //
+    // @todo: this is preg hell; following expression returns 1 if last character is NOT '}'
+    //
+    $matches = array();
+    $result = preg_match_all("{![0-9a-zA-Z._]}", $substitutionMarker, $matches);
+    if ($result && is_scalar($substitutionValue)) {
+      switch ($encoding) {
+        default:
+          break;
+        case 'RFC3986':
+          //
+          // @todo: some characters ({,}) get encoded,others do not (!)
+          //
+          $substitutionMarker = rawurlencode($substitutionMarker);
+          $substitutionValue = rawurlencode($substitutionValue);
+          break;
+        case 'domurl':
+          $substitutionMarker = str_replace(array('{', '}'), array('%7B', '%7D'), $substitutionMarker);
+          // $substitutionValue = urlencode($substitutionValue);
+          break;
+      }
+      if (isset($this->entityBodyStringSubstitutes[$substitutionMarker]) && ($this->entityBodyStringSubstitutes[$substitutionMarker] != strval($substitutionValue))) {
+        AblePolecat_Command_Log::invoke(
+          AblePolecat_Host::getUserAgent(), 
+          sprintf("substitution marker %s value = %s replaced with %s.", $substitutionMarker, $substitutionValue), 
+          'info'
+        );
+        $this->entityBodyStringSubstitutes[$substitutionMarker] = strval($substitutionValue);
+      }
+      else {
+        $this->entityBodyStringSubstitutes[$substitutionMarker] = strval($substitutionValue);
+      }
+    }
+    else {
+      AblePolecat_Command_Log::invoke(
+        AblePolecat_Host::getUserAgent(), 
+        sprintf("substitution marker %s (value = %s) is not valid. proper syntax is {![0-9a-zA-Z._]}.", $substitutionMarker, $substitutionValue), 
+        'info'
+      );
+    }
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    parent::initialize();
+    $this->entityBodyStringSubstitutes = array();
   }
 }

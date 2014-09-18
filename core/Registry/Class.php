@@ -11,6 +11,7 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Class.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
 
 class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
@@ -151,14 +152,14 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * @param $className Name of class to get include file path for.
    * @param $extension File extension.
    *
-   * @return Array include file path and creation method, otherwise FALSE.
+   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR FALSE.
    */
   public function registerByConvention($className, $extension = 'php') {
     
-    $response = FALSE;
+    $ClassRegistration = FALSE;
     
     if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
-      $response = $this->Classes[self::KEY_CLASS_NAME][$className];
+      $ClassRegistration = $this->Classes[self::KEY_CLASS_NAME][$className];
     }
     else {
       //
@@ -191,15 +192,25 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
               }
             }
           }
-          $this->Classes[self::KEY_CLASS_NAME][$className] = array(
-            self::KEY_CLASS_FULL_PATH => $include_path,
-            self::KEY_CLASS_FACTORY_METHOD => $method,
-          );
-          $response = $this->Classes[self::KEY_CLASS_NAME][$className];
+          $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+          $ClassRegistration->className = $className;
+          $ClassRegistration->classFullPath = $include_path;
+          $ClassRegistration->classFactoryMethod = $method;
+          //
+          // @todo: core class ids and lib id
+          //
+          // $ClassRegistration->classId;
+          // $ClassRegistration->classLibraryId;
+          $ClassRegistration->classScope = 'core';
+          $ClassRegistration->isRequired = TRUE;
+          $this->Classes[self::KEY_CLASS_NAME][$className] = $ClassRegistration;
+          // if (isset($ClassRegistration->classId)) {
+            // $this->Classes[self::KEY_ARTICLE_ID][$ClassRegistration->classId] = $ClassRegistration;
+          // }
         }
       }
     }
-    return $response;
+    return $ClassRegistration;
   }
   
   /**
@@ -207,18 +218,19 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * 
    * @param string $className The name of class to check for.
    *
-   * @return Array include file path and creation method, otherwise FALSE.
+   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR FALSE.
    */
   public function isLoadable($className) {
     
-    $response = FALSE;
+    $ClassRegistration = FALSE;
+    
     if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
-      $response = $this->Classes[self::KEY_CLASS_NAME][$className];
+      $ClassRegistration = $this->Classes[self::KEY_CLASS_NAME][$className];
     }
     else {
-      $response = $this->registerByConvention($className);
+      $ClassRegistration = $this->registerByConvention($className);
     }
-    return $response;
+    return $ClassRegistration;
   }
   
   /**
@@ -232,8 +244,8 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   public function loadClass($className, $param = NULL) {
     
     $Instance = NULL;
-    $info = $this->isLoadable($className);
-    if (isset($info[self::KEY_CLASS_FACTORY_METHOD])) {
+    $ClassRegistration = $this->isLoadable($className);
+    if (isset($ClassRegistration->classFactoryMethod)) {
       //
       // Get any parameters passed.
       //
@@ -243,9 +255,9 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
         array_shift($args);
         $parameters = $args;
       }
-      switch ($info[self::KEY_CLASS_FACTORY_METHOD]) {
+      switch ($ClassRegistration->classFactoryMethod) {
         default:
-          $Instance = call_user_func_array(array($className, $info[self::KEY_CLASS_FACTORY_METHOD]), $parameters);
+          $Instance = call_user_func_array(array($className, $ClassRegistration->classFactoryMethod), $parameters);
           break;
         case '__construct':
           $Instance = new $className;
@@ -298,10 +310,18 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       //
       // Registry
       //
-      $this->Classes[self::KEY_CLASS_NAME][$className] = array(
-        self::KEY_CLASS_FULL_PATH => $path,
-        self::KEY_CLASS_FACTORY_METHOD => $method,
-      );
+      $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+      $ClassRegistration->className = $className;
+      $ClassRegistration->classFullPath = $path;
+      $ClassRegistration->classFactoryMethod = $method;
+      //
+      // @todo: This methid needs to persist registration to db and deal with remaining field values
+      //
+      // $ClassRegistration->classId;
+      // $ClassRegistration->classLibraryId;
+      // $ClassRegistration->classScope = 'core';
+      // $ClassRegistration->isRequired = TRUE;
+      $this->Classes[self::KEY_CLASS_NAME][$className] = $ClassRegistration;
       
       //
       // Interfaces implemented by class.

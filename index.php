@@ -58,6 +58,7 @@ if (!defined('ABLE_POLECAT_CORE')) {
 /**
  * Route HTTP request.
  */
+
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Host.php')));
 
 AblePolecat_Host::routeRequest();

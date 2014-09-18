@@ -1,24 +1,23 @@
 <?php
 /**
- * @file      polecat/Message/Response/Xml.php
- * @brief     Base class for all response messages in Able Polecat.
+ * @file      polecat/Message/Response/Cached.php
+ * @brief     Encapsulates a response stored in [cache].
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.1
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Cache.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 
-class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstract {
-  
-  const BODY_DOCTYPE_XML        = "<?xml version='1.0' standalone='yes'?>";
+class AblePolecat_Message_Response_Cached extends AblePolecat_Message_ResponseAbstract {
   
   /**
-   * DOM element tag names.
+   * @var AblePolecat_Registry_Entry_Cache
    */
-  const DOM_ELEMENT_TAG_ROOT    = 'AblePolecat';
-    
+  private $CacheRegistration;
+  
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
    ********************************************************************************/
@@ -29,7 +28,7 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
    * @return AblePolecat_MessageInterface Concrete instance of message or NULL.
    */
   public static function create() {    
-    self::setConcreteInstance(new AblePolecat_Message_Response_Xml());
+    self::setConcreteInstance(new AblePolecat_Message_Response_Cached());
     self::unmarshallArgsList(__FUNCTION__, func_get_args());
     return self::getConcreteInstance();
   }
@@ -42,32 +41,42 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
    * @return string
    */
   public function getMimeType() {
-    return self::HEAD_CONTENT_TYPE_XML;
+    
+    $mimeType = NULL;
+    if (isset($this->CacheRegistration)) {
+      $mimeType = $this->CacheRegistration->getMimeType();
+    }
+    return $mimeType;
   }
   
   /**
    * @return string Entity body as text.
    */
   public function getEntityBody() {
-    return $this->getDocument()->saveXML();
+    
+    $EntityBody = NULL;
+    if (isset($this->CacheRegistration)) {
+      $EntityBody = $this->CacheRegistration->cacheData;
+    }
+    return $EntityBody;
   }
   
   /**
    * @param AblePolecat_ResourceInterface $Resource
    */
   public function setEntityBody(AblePolecat_ResourceInterface $Resource) {
-    
-    try {
-      $Document = $this->getDocument();
-      throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $this->getName()));
-    }
-    catch(AblePolecat_Message_Exception $Exception) {
-      $Document = AblePolecat_Dom::createXmlDocument(self::DOM_ELEMENT_TAG_ROOT);
-      $parentElement = $Document->firstChild;
-      $Element = $Resource->getDomNode($Document);
-      $Element = AblePolecat_Dom::appendChildToParent($Element, $Document, $parentElement);
-      $this->setDocument($Document);
-    }
+    AblePolecat_Command_Log::invoke(
+      AblePolecat_Host::getUserAgent(), 
+      sprintf("%s passed to %s, which is a non-functional stub. @see setCachedResponse().", AblePolecat_Data::getDataTypeName($Resource), __METHOD__), 
+      'info'
+    );
+  }
+  
+  /**
+   * @param AblePolecat_Registry_Entry_Cache $CacheRegistration
+   */
+  public function setCachedResponse(AblePolecat_Registry_Entry_Cache $CacheRegistration) {
+    $this->CacheRegistration = $CacheRegistration;
   }
   
   /********************************************************************************
@@ -78,7 +87,7 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
    * Send HTTP response headers.
    */
   protected function sendHead() {
-    header(self::HEAD_CONTENT_TYPE_XML);
+    header($this->getMimeType());
     parent::sendHead();
   }
 }
