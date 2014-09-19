@@ -190,14 +190,14 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       self::$Host = new AblePolecat_Host();
       
       //
-      // Preprocess HTTP request.
-      //
-      $Request = self::getRequest();
-      
-      //
       // wakeup session mode and get user agent.
       //
       self::$Host->Session = AblePolecat_Mode_Session::wakeup(self::$Host);
+      
+      //
+      // Preprocess HTTP request.
+      //
+      $Request = self::getRequest();
       
       //
       // Save raw HTTP request.

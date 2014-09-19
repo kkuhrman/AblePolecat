@@ -447,6 +447,8 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     
     //
     // Start Able Polecat session (data stored in core database, session id is passed by cookie).
+    // @todo: AblePolecat_Host::getRequest()->getHostName() will not be available at this point.
+    // @see AblePolecat_Host::routeRequest().
     //
     // AblePolecat_Dom::kill(AblePolecat_Host::getRequest()->getHostName());
     
