@@ -431,6 +431,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     $errorFile = str_replace("\\", "\\\\", $errfile);
     $errorLine = $errline;    
     $errorMessage = $msg;
+    if (isset(self::$Host->Session)) {
     $sql = __SQL()->          
       insert(
         'errorType',
@@ -449,13 +450,14 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         $errorMessage
     );
     $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
-    if (!$CommandResult->success()) {
-      //
-      // Apparently, no other log facility was available to handle the message
-      //
-      AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
+      if (!$CommandResult->success()) {
+        //
+        // Apparently, no other log facility was available to handle the message
+        //
+        AblePolecat_Log_Syslog::wakeup()->putMessage($type, $msg);
+      }
     }
-    if (!isset(self::$Host->Request) || !isset(self::$Host->Request->setRawRequestLogRecordId)) {
+    if (!isset(self::$Host->Request) || !isset(self::$Host->Request->setRawRequestLogRecordId) || !isset(self::$Host->Session)) {
       //
       // Error triggered before raw request logged.
       //
@@ -498,31 +500,33 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     $errorFile = str_replace("\\", "\\\\", $Exception->getFile());
     $errorLine = $Exception->getLine();    
     $errorMessage = $Exception->getMessage();
-    $sql = __SQL()->          
-      insert(
-        'errorType',
-        'errorFile', 
-        'errorLine', 
-        'errorClass', 
-        'errorFunction',
-        'errorMessage')->
-      into('error')->
-      values(
-        'exception',
-        $errorFile,
-        $errorLine,
-        __CLASS__,
-        __FUNCTION__,
-        $errorMessage
-    );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
-    if (!$CommandResult->success()) {
-      //
-      // Apparently, no other log facility was available to handle the message
-      //
-      AblePolecat_Log_Syslog::wakeup()->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
+    if (isset(self::$Host->Session)) {
+      $sql = __SQL()->          
+        insert(
+          'errorType',
+          'errorFile', 
+          'errorLine', 
+          'errorClass', 
+          'errorFunction',
+          'errorMessage')->
+        into('error')->
+        values(
+          'exception',
+          $errorFile,
+          $errorLine,
+          __CLASS__,
+          __FUNCTION__,
+          $errorMessage
+      );
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+      if (!$CommandResult->success()) {
+        //
+        // Apparently, no other log facility was available to handle the message
+        //
+        AblePolecat_Log_Syslog::wakeup()->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
+      }
     }
-    if (!isset(self::$Host->Request) || !isset(self::$Host->Request->setRawRequestLogRecordId)) {
+    if (!isset(self::$Host->Request) || !isset(self::$Host->Request->setRawRequestLogRecordId) || !isset(self::$Host->Session)) {
       //
       // Exception thrown before raw request logged.
       //
