@@ -190,14 +190,19 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       self::$Host = new AblePolecat_Host();
       
       //
+      // Preprocess HTTP request.
+      //
+      $Request = self::getRequest();
+      
+      //
       // wakeup session mode and get user agent.
       //
       self::$Host->Session = AblePolecat_Mode_Session::wakeup(self::$Host);
       
       //
-      // Preprocess HTTP request.
+      // Save raw HTTP request.
       //
-      $Request = self::getRequest();
+      self::$Host->saveRawRequest();
       
       if (is_a($Request, 'AblePolecat_Message_Request_Unsupported')) {
         //
@@ -258,39 +263,6 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             self::$Host->Request = AblePolecat_Message_Request_Delete::create();
             break;
         }
-    
-        //
-        // Check connection to core database.
-        //
-        $requestId = NULL;
-        if (self::$Host->Session->getDatabaseState(self::$Host, 'connected')) {
-          //
-          // Log raw request.
-          //
-          $sql = __SQL()->          
-            insert(
-              'requestTime', 
-              'remoteAddress', 
-              'remotePort', 
-              'userAgent', 
-              'requestMethod', 
-              'requestUri')->
-            into('request')->
-            values(
-              $_SERVER['REQUEST_TIME'], 
-              $_SERVER['REMOTE_ADDR'],
-              $_SERVER['REMOTE_PORT'],
-              $_SERVER['HTTP_USER_AGENT'],
-              $_SERVER['REQUEST_METHOD'],
-              $_SERVER['REQUEST_URI']
-            );
-          $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
-          if ($CommandResult->success() && count($CommandResult->value())) {
-            $Records = $CommandResult->value();
-            isset($Records['lastInsertId']) ? $requestId = $Records['lastInsertId'] : NULL;
-          }
-        }
-        self::$Host->Request->setRawRequestLogRecordId($requestId);
       }
     }
     else {
@@ -298,6 +270,50 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       trigger_error($message, E_USER_ERROR);
     }
     return self::$Host->Request;
+  }
+  
+  /**
+   * Helper function - saves some data about raw HTTP request.
+   */
+  protected function saveRawRequest() {
+    if (isset(self::$Host) && isset(self::$Host->Request)) {
+      //
+      // Check connection to core database.
+      //
+      $requestId = NULL;
+      if (self::$Host->Session->getDatabaseState(self::$Host, 'connected')) {
+        //
+        // Log raw request.
+        //
+        $sql = __SQL()->          
+          insert(
+            'requestTime', 
+            'remoteAddress', 
+            'remotePort', 
+            'userAgent', 
+            'requestMethod', 
+            'requestUri')->
+          into('request')->
+          values(
+            $_SERVER['REQUEST_TIME'], 
+            $_SERVER['REMOTE_ADDR'],
+            $_SERVER['REMOTE_PORT'],
+            $_SERVER['HTTP_USER_AGENT'],
+            $_SERVER['REQUEST_METHOD'],
+            $_SERVER['REQUEST_URI']
+          );
+        $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+        if ($CommandResult->success() && count($CommandResult->value())) {
+          $Records = $CommandResult->value();
+          isset($Records['lastInsertId']) ? $requestId = $Records['lastInsertId'] : NULL;
+        }
+      }
+      self::$Host->Request->setRawRequestLogRecordId($requestId);
+    }
+    else {
+      $message = 'Able Polecat cannot save raw HTTP request prior to initialization of session object.';
+      trigger_error($message, E_USER_ERROR);
+    }
   }
   
   /**
@@ -526,6 +542,95 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    ********************************************************************************/
   
   /**
+   * Configure error reporting/handling.
+   */
+  private function initializeErrorReporting() {
+    self::$report_errors = E_ALL;
+    self::$display_errors = 0;
+    if (isset($_REQUEST['display_errors'])) {
+      $display_errors = strval($_REQUEST['display_errors']);
+      switch ($display_errors) {
+        default:
+          self::$display_errors = E_ALL;
+          break;
+        case 'strict':
+          self::$report_errors = E_STRICT;
+          self::$display_errors = E_STRICT;
+          break;
+      }
+      
+      //
+      // Error settings for local development only
+      //
+      error_reporting(self::$report_errors);
+      ini_set('display_errors', self::$display_errors);
+    }
+    else {
+      //
+      // Error settings for production web server
+      //
+      error_reporting(self::$report_errors);
+      ini_set('display_errors', self::$display_errors);
+    }
+    //
+    // Default error/exception handling
+    //
+    set_error_handler(array('AblePolecat_Host', 'handleError'));
+    set_exception_handler(array('AblePolecat_Host', 'handleException'));
+  }
+  
+  /**
+   * Override PHP defaults for session handling.
+   */
+  private function initializeSessionSecurity() {
+    
+    //
+    // Session ID cookie is deleted immediately when browser is terminated.
+    //
+    ini_set('session.cookie_lifetime', 0);
+    
+    //
+    // Use only cookies for session ID management.
+    //
+    ini_set('session.use_cookies', 1);
+    ini_set('session.use_only_cookies', 1);
+    
+    //
+    // Reject user supplied session id.
+    //
+    ini_set('session.use_strict_mode', 1);
+    
+    //
+    // Disallow access to session cookie by JavaScript.
+    //
+    ini_set('session.cookie_httponly', 1);
+    
+    //
+    // Disabling transparent session ID management improves general 
+    // session ID security by removing possibility of session ID 
+    // injection and session ID leak. 
+    //
+    ini_set(' session.use_trans_sid', 0);
+    
+    //
+    // Stronger hash function will generates stronger session ID.
+    //
+    ini_set('session.hash_function', 'sha256');
+    
+    //
+    // Session handler callback functions.
+    //
+    session_set_save_handler(
+      array('AblePolecat_Mode_Session', 'openSession'),
+      array('AblePolecat_Mode_Session', 'closeSession'),
+      array('AblePolecat_Mode_Session', 'readSession'),
+      array('AblePolecat_Mode_Session', 'writeSession'),
+      array('AblePolecat_Mode_Session', 'destroySession'),
+      array('AblePolecat_Mode_Session', 'collectSessionGarbage')
+    );
+  }
+  
+  /**
    * Sets version information from core configuration file.
    */
   private function setVersion($version = NULL) {
@@ -598,46 +703,14 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   
   protected function __construct() {
     
-    self::$report_errors = E_ALL;
-    self::$display_errors = 0;
-    if (isset($_REQUEST['display_errors'])) {
-      $display_errors = strval($_REQUEST['display_errors']);
-      switch ($display_errors) {
-        default:
-          self::$display_errors = E_ALL;
-          break;
-        case 'strict':
-          self::$report_errors = E_STRICT;
-          self::$display_errors = E_STRICT;
-          break;
-      }
-      
-      //
-      // Error settings for local development only
-      //
-      error_reporting(self::$report_errors);
-      ini_set('display_errors', self::$display_errors);
-    }
-    else {
-      //
-      // Error settings for production web server
-      //
-      error_reporting(self::$report_errors);
-      ini_set('display_errors', self::$display_errors);
-    }
-    //
-    // Default error/exception handling
-    //
-    set_error_handler(array('AblePolecat_Host', 'handleError'));
-    set_exception_handler(array('AblePolecat_Host', 'handleException'));
+    $this->initializeErrorReporting();
 
     //
     // Start or resume session.
+    // Able Polecat does not use PHP session. But it does check the session global variable
+    // to ensure that it is not tampered with by extension classes.
     //
-    // $this->Session = AblePolecat_Session::wakeup($this);
-    //
-    // Start or resume session.
-    //
+    $this->initializeSessionSecurity();
     session_start();
     $this->sessionId = session_id();
   
@@ -669,7 +742,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     ob_end_flush();
     
     //
-    // Close and save session.
+    // Close and save PHP session.
     //
     session_write_close();
   }

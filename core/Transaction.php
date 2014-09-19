@@ -51,6 +51,13 @@ interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterf
   public function commit();
   
   /**
+   * Return name of transaction class, which can handle authentication if resource access is denied.
+   *
+   * @return string Name of class implementing AblePolecat_TransactionInterface or NULL.
+   */
+  public function getResourceAuthorityClassName();
+  
+  /**
    * @return string HTTP status code.
    */
   public function getStatusCode();
@@ -90,6 +97,11 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    * @var AblePolecat_Message_RequestInterface.
    */
   private $Request;
+  
+  /**
+   * @var string
+   */
+  private $resourceAuthorityClassName;
   
   /**
    * @var AblePolecat_Registry_Entry_ResourceInterface.
@@ -219,6 +231,15 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       // @todo:
       //
     }
+  }
+  
+  /**
+   * Return name of transaction class, which can handle authentication if resource access is denied.
+   *
+   * @return string Name of class implementing AblePolecat_TransactionInterface or NULL.
+   */
+  public function getResourceAuthorityClassName() {
+    return $this->resourceAuthorityClassName;
   }
   
   /**
@@ -410,6 +431,15 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    */
   protected function setStatus($status) {
     $this->status = $status;
+  }
+  
+  /**
+   * Set name of transaction class, which can handle authentication if resource access is denied.
+   *
+   * @param string $resourceAuthorityClassName Name of class implementing AblePolecat_TransactionInterface.
+   */
+  public function setResourceAuthorityClassName($resourceAuthorityClassName) {
+    $this->resourceAuthorityClassName = $resourceAuthorityClassName;
   }
   
   /**
@@ -668,6 +698,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     $this->Parent = NULL;
     $this->Request = NULL;
     $this->transactionId = NULL;
+    $this->resourceAuthorityClassName = NULL;
     $this->ResourceRegistration = NULL;
     $this->savepointId = NULL;
     $this->status = self::TX_STATE_PENDING;

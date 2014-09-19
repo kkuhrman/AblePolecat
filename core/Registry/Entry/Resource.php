@@ -11,6 +11,12 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
 
 interface AblePolecat_Registry_Entry_ResourceInterface extends AblePolecat_Registry_EntryInterface {
+  
+  /**
+   * @return string
+   */
+  public function getHostName();
+  
   /**
    * @return string.
    */
@@ -29,7 +35,7 @@ interface AblePolecat_Registry_Entry_ResourceInterface extends AblePolecat_Regis
   /**
    * @return string.
    */
-  public function getResourceAuthorityClassName();
+  public function getTransactionClassName();
   
   /**
    * @return int.
@@ -60,6 +66,13 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    ********************************************************************************/
   
   /**
+   * @return string
+   */
+  public function getHostName() {
+    return $this->getPropertyValue('hostName');
+  }
+  
+  /**
    * @return string.
    */
   public function getResourceName() {
@@ -83,8 +96,8 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
   /**
    * @return string.
    */
-  public function getResourceAuthorityClassName() {
-    return $this->getPropertyValue('resourceAuthorityClassName');
+  public function getTransactionClassName() {
+    return $this->getPropertyValue('transactionClassName');
   }
   
   /**

@@ -32,6 +32,11 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   const RESOURCE_NAME_UTIL      = 'util'; // Project utilities (install, update, more...)
   
   /**
+   * @return string
+   */
+  public function getHostName();
+  
+  /**
    * @return string Request method.
    */
   public function getMethod();
@@ -91,6 +96,11 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
 }
 
 abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAbstract implements AblePolecat_Message_RequestInterface {
+  
+  /**
+   * @var string Name of host/vhost (typically $_SERVER['HTTP_HOST']).
+   */
+  private $hostName;
   
   /**
    * @var string Request resource (URI/URL).
@@ -268,6 +278,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       }
     }
     return $resolvedResourceName;
+  }
+  
+  /**
+   * @return string
+   */
+  public function getHostName() {
+    return $this->hostName;
   }
   
   /**
@@ -462,17 +479,20 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     // base URL protocol://host[/alias]
     // 
+    $this->hostName = $host;
     $this->host_url = "$protocol://$host";
     
     //
     // Add any alias
     //
     if (isset($this->alias)) {
+      $this->hostName .=  $this->alias;
       $this->host_url .=  $this->alias;
     }
     else {
       $this->host_url .= self::URI_SLASH;
     }
+    $this->hostName = trim($this->hostName, self::URI_SLASH);
   }
   
   /**
@@ -541,6 +561,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       $url_parts = parse_url($resource);
       isset($url_parts['scheme']) ? $protocol = $url_parts['scheme'] . "://" : $protocol = '';
       isset($url_parts['host']) ? $host = $url_parts['host'] : $host = '';
+      $this->hostName = $host;
       $this->host_url = $protocol . $host;
       isset($url_parts['host']) ? $this->request_path = $url_parts['host'] : $this->request_path = '';
       
@@ -557,6 +578,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
+    $this->hostName = NULL;
     $this->resourceUri = NULL;
     $this->request_path_info = NULL;
     $this->rawRequestLogRecordId = NULL;

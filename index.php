@@ -55,6 +55,12 @@ if (!defined('ABLE_POLECAT_CORE')) {
   // define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
 // }
 
+//
+// Allows access to session ID cookie only when protocol is HTTPS. If your web site is 
+// HTTPS only web site, you must enable this setting.
+//
+ini_set('session.cookie_secure', 0); 
+ 
 /**
  * Route HTTP request.
  */

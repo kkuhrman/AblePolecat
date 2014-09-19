@@ -125,27 +125,31 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
         //
         switch ($this->getResourceRegistration()->getResourceDenyCode()) {
           default:
-            //
-            // Return access denied notification.
-            // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-            // 403 means server will refuses to fulfil request regardless of authentication.
-            //
-            $Resource = AblePolecat_Resource_Core::wakeup(
-              $this->getDefaultCommandInvoker(),
-              'AblePolecat_Resource_Error',
-              'Access Denied',
-              $Exception->getMessage()
-            );
-            $this->setStatusCode(403);
-            $this->setStatus(self::TX_STATE_COMPLETED);
             break;
           case 401:
             //
             // 401 means user requires authentication before request will be granted.
             //
-            $authorityClassName = $this->getResourceRegistration()->getResourceAuthorityClassName();
-            $ChildTransaction = $this->enlistTransaction($authorityClassName);
-            $Resource = $ChildTransaction->run();
+            $authorityClassName = $this->getResourceAuthorityClassName();
+            if (isset($authorityClassName)) {
+              $ChildTransaction = $this->enlistTransaction($authorityClassName);
+              $Resource = $ChildTransaction->run();
+            }
+        }
+        if (!isset($Resource)) {
+          //
+          // Return access denied notification.
+          // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+          // 403 means server will refuses to fulfil request regardless of authentication.
+          //
+          $Resource = AblePolecat_Resource_Core::wakeup(
+            $this->getDefaultCommandInvoker(),
+            'AblePolecat_Resource_Error',
+            'Access Denied',
+            $Exception->getMessage()
+          );
+          $this->setStatusCode(403);
+          $this->setStatus(self::TX_STATE_COMPLETED);
         }
       }
     }

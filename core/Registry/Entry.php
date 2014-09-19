@@ -40,5 +40,6 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
    * Sub-classes should override to initialize arguments.
    */
   protected function initialize() {
+    $this->lastModifiedTime = 0;
   }
 }

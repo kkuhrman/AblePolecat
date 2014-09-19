@@ -193,9 +193,78 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_ModeInterface.
+   * Callback functions used by session_set_save_handler().
    ********************************************************************************/
   
+  /**
+   * First callback function executed when PHP session is started.
+   *
+   * @param string $savePath
+   * @param string $sessionName
+   *
+   * @return bool
+   */
+  public static function openSession($savePath, $sessionName) {
+    return TRUE;
+  }
+  
+  /**
+   * Callback invoked when session_write_close() is called.
+   */
+  public static function closeSession() {
+    return TRUE;
+  }
+  
+  /**
+   * @param string $sessionId
+   *
+   * @return Session encoded (serialized) string, or an empty string no data to read. 
+   */
+  public static function readSession($sessionId) {
+    return '';
+  }
+  
+  /**
+   * Called when the session needs to be saved and closed. 
+   *
+   * @param string $sessionId
+   * @param string $data
+   */
+  public static function writeSession($sessionId, $data) {
+    return TRUE;
+  }
+  
+  /**
+   * Executed when a session is destroyed.
+   *
+   * @param string $sessionId
+   * 
+   * @return bool
+   */
+  public static function destroySession($sessionId) {
+    return TRUE;
+  }
+  
+  /**
+   * The garbage collector callback is invoked internally by PHP periodically 
+   * in order to purge old session data. 
+   *
+   * @param int $lifetime
+   *
+   * @return bool
+   */
+  public static function collectSessionGarbage($lifetime) {
+    return TRUE;
+  }
+  
+  /**
+   * Executed when a new session ID is required. 
+   *
+   * @return string Valid Able Polecat session id.
+   */
+  public static function createSessionId() {
+    return uniqid();
+  }
   
   
   /********************************************************************************
@@ -375,6 +444,11 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->db_state['dsn']);
       $this->db_state['connected'] = $this->CoreDatabase->open($this->AdministratorAgent, $DbUrl);
     }
+    
+    //
+    // Start Able Polecat session (data stored in core database, session id is passed by cookie).
+    //
+    // AblePolecat_Dom::kill(AblePolecat_Host::getRequest()->getHostName());
     
     //
     // Stop loading if there is no connection to the core database.

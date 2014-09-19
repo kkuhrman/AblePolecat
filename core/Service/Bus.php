@@ -217,11 +217,37 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           
           try {
             //
+            // Validate registered parent transaction class name.
+            //
+            $transactionClassName = $ResourceRegistration->getTransactionClassName();
+            if (!isset($transactionClassName)) {
+              switch ($Message->getMethod()) {
+                default:
+                  throw new AblePolecat_Service_Exception(sprintf("No transaction class registered for %s method on resource named %s",
+                    $Message->getMethod(),
+                    $ResourceRegistration->getResourceName()
+                  ));
+                  break;
+                case 'GET':
+                  $transactionClassName = 'AblePolecat_Transaction_Get_Resource';
+                  break;
+              }
+            }
+            else {
+              if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
+                throw new AblePolecat_Service_Exception(sprintf("Transaction class registered for %s method on resource named %s does not implement AblePolecat_TransactionInterface",
+                  $transactionClassName,
+                  $Message->getMethod(),
+                  $ResourceRegistration->getResourceName()
+                ));
+              }
+            }
+            
             // Start or resume the transaction
             // @todo: $parentTransactionId must be parent (object)
             //
             $Transaction = $this->getClassRegistry()->loadClass(
-              'AblePolecat_Transaction_Get_Resource',
+              $transactionClassName,
               $this->getDefaultCommandInvoker(),
               $Agent,
               $Message,
@@ -300,20 +326,21 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resourceName  = NULL;    
     if (isset($resourceName)) {
       $ResourceRegistration->resourceName = $resourceName;
+      $ResourceRegistration->hostName = $Request->getHostName();
       //
       // Look up (first part of) resource name in database
       //
       $sql = __SQL()->          
-          select('resourceClassName', 'resourceId', 'resourceAuthorityClassName', 'resourceDenyCode', 'lastModifiedTime')->
+          select('resourceClassName', 'resourceId', 'transactionClassName', 'resourceDenyCode', 'lastModifiedTime')->
           from('resource')->
-          where(sprintf("resourceName = '%s'", $resourceName));
+          where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
       $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $classInfo = $CommandResult->value();
         if (isset($classInfo[0])) {
           $ResourceRegistration->resourceId = $classInfo[0]['resourceId'];
           $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
-          $ResourceRegistration->resourceAuthorityClassName = $classInfo[0]['resourceAuthorityClassName'];
+          $ResourceRegistration->transactionClassName = $classInfo[0]['transactionClassName'];
           $ResourceRegistration->resourceDenyCode = $classInfo[0]['resourceDenyCode'];
           $ResourceRegistration->lastModifiedTime = $classInfo[0]['lastModifiedTime'];
         }
@@ -339,7 +366,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
           break;
       }      
-      $ResourceRegistration->resourceAuthorityClassName = NULL;
+      $ResourceRegistration->transactionClassName = NULL;
       $ResourceRegistration->resourceDenyCode = 200;
     }
     
@@ -494,13 +521,13 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $lastModifiedTime = $ResponseRegistration->lastModifiedTime;
     if (isset($ResponseRegistration->responseClassName)) {
       $responseClassRegistration = $this->getClassRegistry()->isLoadable($ResponseRegistration->responseClassName);
-    }
-    if ($responseClassRegistration && isset($responseClassRegistration->classLastModifiedTime)) {
-      if ($responseClassRegistration->classLastModifiedTime > $ResponseRegistration->lastModifiedTime) {
-        //
-        // Response class file has been modified since last response registry entry.
-        //
-        $lastModifiedTime = $responseClassRegistration->classLastModifiedTime;
+      if ($responseClassRegistration && isset($responseClassRegistration->classLastModifiedTime)) {
+        if ($responseClassRegistration->classLastModifiedTime > $ResponseRegistration->lastModifiedTime) {
+          //
+          // Response class file has been modified since last response registry entry.
+          //
+          $lastModifiedTime = $responseClassRegistration->classLastModifiedTime;
+        }
       }
     }
     if (isset($ResponseRegistration->templateFullPath)) {
