@@ -177,6 +177,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
           break;
       }
       $Agent = $this->getClassRegistry()->loadClass($agentClassName, $this, $Mode);
+      
       if (isset($Agent)) {
         //
         // cache agent
@@ -464,6 +465,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
    * @return AblePolecat_Registry_Class.
    */
   protected function getClassRegistry() {
+    
     if (!isset($this->ClassRegistry)) {
       $CommandResult = AblePolecat_Command_GetRegistry::invoke($this, 'AblePolecat_Registry_Class');
       if ($CommandResult->success()) {

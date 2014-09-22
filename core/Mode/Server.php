@@ -324,6 +324,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
    * @return AblePolecat_Registry_Class.
    */
   protected function getClassRegistry() {
+    
     if (!isset($this->ClassRegistry)) {
       //
       // Load class registry.

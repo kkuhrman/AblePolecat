@@ -74,6 +74,48 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    ********************************************************************************/
   
   /**
+   * Load the classes associated with given library into registry.
+   *
+   * @param string $classLibraryId
+   *
+   * @return Array Class registration entries OR FALSE.
+   */
+  public function loadLibrary($classLibraryId) {
+    
+    $ClassRegistrations = FALSE;
+    
+    //
+    // Populate class from application database
+    // Query application database for registered classes.
+    //
+    $sql = __SQL()->
+      select('className', 'classId', 'classScope', 'isRequired', 'classFullPath', 'classFactoryMethod')->
+      from('class')->
+      where("`classLibraryId` = '$classLibraryId'");
+    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    if($Result->success()) {
+      $Classes = $Result->value();
+      $error_info = '';
+      $ClassRegistrations = array();
+      foreach($Classes as $key => $Class) {
+        $className = $Class['className'];
+        $ClassRegistration = $this->registerLoadableClass($className, $Class['classFullPath'], $Class['classFactoryMethod'], $error_info);
+        if ($ClassRegistration) {
+          $ClassRegistrations[$className] = $ClassRegistration;
+        }
+        else {
+          $msg = sprintf("There is an invalid class definition in the database class registry for %s.",
+            $Class['className']
+          );
+          $msg .= ' ' . $error_info;
+          AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $msg, AblePolecat_LogInterface::WARNING);
+        }
+      }
+    }
+    return $ClassRegistrations;
+  }
+  
+  /**
    * Extends constructor.
    */
   protected function initialize() {
@@ -86,27 +128,6 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       self::KEY_CLASS_NAME => array(),
       self::KEY_INTERFACE => array(),
     );
-      
-    //
-    // Populate class from application database
-    // Query application database for registered classes.
-    //
-    $sql = __SQL()->
-      select('className', 'classId', 'classScope', 'isRequired', 'classFullPath', 'classFactoryMethod')->
-      from('class');
-    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    if($Result->success()) {
-      $Classes = $Result->value();
-      $error_info = '';
-      foreach($Classes as $key => $Class) {
-        if (FALSE === $this->registerLoadableClass($Class['className'], $Class['classFullPath'], $Class['classFactoryMethod'], $error_info)) {
-          $msg = sprintf("There is an invalid class definition in the database class registry for %s.",
-            $Class['className']
-          );
-          $msg .= ' ' . $error_info;
-        }
-      }
-    }
   }
   
   /**
@@ -275,11 +296,11 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * @param string $method Method used for creation (default is __construct()).
    * @param string &$error_info If passed any error info is stored here.
    *
-   * @return TRUE if class is registered, otherwise FALSE.
+   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR FALSE.
    */
   public function registerLoadableClass($className, $path = NULL, $method = NULL, &$error_info = NULL) {
     
-    $registered = FALSE;
+    $ClassRegistration = FALSE;
     
     if (!isset($path)) {
       //
@@ -342,13 +363,12 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
         if (isset($Id)) {
           $this->Classes[self::KEY_INTERFACE][$interfaceName][$className][self::KEY_ARTICLE_ID] = $Id;
         }
-        $registered = TRUE;
       }
     }
     else if (isset($error_info)) {      
       $error_info .= "Invalid include path ($path)";
     }
     
-    return $registered;
+    return $ClassRegistration;
   }
 }
