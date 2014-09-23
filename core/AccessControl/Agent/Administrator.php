@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role.php')));
@@ -116,6 +116,7 @@ class AblePolecat_AccessControl_Agent_Administrator extends AblePolecat_AccessCo
         // of system CoR hierarchy.
         //
         self::$Administrator = new AblePolecat_AccessControl_Agent_Administrator();
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Administrator agent initialized.');
       }
       else {
         $error_msg = sprintf("%s is not permitted to administer access control privileges.", AblePolecat_Data::getDataTypeName($Subject));

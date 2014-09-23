@@ -13,17 +13,17 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
 
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.1');
-define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_1_DEV');
+define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.2');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_2_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
 define('ABLE_POLECAT_VERSION_MINOR', '6');
-define('ABLE_POLECAT_VERSION_REVISION', '1');
+define('ABLE_POLECAT_VERSION_REVISION', '2');
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Target.php')));
@@ -48,6 +48,11 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    * @var Instance of concrete singleton class.
    */
   private static $Host = NULL;
+  
+  /**
+   * @var AblePolecat_Log_Boot
+   */
+  private $BootLog;
   
   /**
    * @var Instance of AblePolecat_Message_RequestInterface.
@@ -143,14 +148,14 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         // Command to shut down indicates abnormal termination
         //
         $Resource = AblePolecat_Resource_Core::wakeup(
-          $this->getDefaultCommandInvoker(),
+          $this,
           'AblePolecat_Resource_Error',
           $Command->getReason(),
           $Command->getMessage()
         );
-        self::$Host->Response = AblePolecat_Message_Response_Xml::create(500);
-        self::$Host->Response->setEntityBody($Resource);
-        self::shutdown($Command->getStatus());
+        $this->Response = AblePolecat_Message_Response_Xml::create(500);
+        $this->Response->setEntityBody($Resource);
+        $this->shutdown($Command->getStatus());
         break;
     }
     
@@ -193,6 +198,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       // wakeup session mode and get user agent.
       //
       self::$Host->Session = AblePolecat_Mode_Session::wakeup(self::$Host);
+      
+      //
+      // Boot procedure complete. Close boot log.
+      //
+      self::$Host->putBootMessage(AblePolecat_LogInterface::STATUS, 'Boot procedure completed successfully.');
+      self::$Host->BootLog = NULL;
       
       //
       // Preprocess HTTP request.
@@ -380,20 +391,18 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       }
     }
     else {
+      $version = array(
+        'name' => ABLE_POLECAT_VERSION_NAME,
+        'major' => ABLE_POLECAT_VERSION_MAJOR,
+        'minor' => ABLE_POLECAT_VERSION_MINOR,
+        'revision' => ABLE_POLECAT_VERSION_REVISION,
+      );
       if ($as_str) {
         $version = sprintf("Version %s.%s.%s (%s)",
-          ABLE_POLECAT_VERSION_MAJOR,
-          ABLE_POLECAT_VERSION_MINOR,
-          ABLE_POLECAT_VERSION_REVISION,
-          ABLE_POLECAT_VERSION_NAME
-        );
-      }
-      else {
-        $version = array(
-          'name' => ABLE_POLECAT_VERSION_NAME,
-          'major' => ABLE_POLECAT_VERSION_MAJOR,
-          'minor' => ABLE_POLECAT_VERSION_MINOR,
-          'revision' => ABLE_POLECAT_VERSION_REVISION,
+          $version['major'],
+          $version['minor'],
+          $version['revision'],
+          $version['name']
         );
       }
     }
@@ -461,7 +470,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       //
       // Error triggered before raw request logged.
       //
-      AblePolecat_Log_Boot::wakeup()->putMessage($type, $errorMessage);
+      self::logBootMessage(AblePolecat_LogInterface::ERROR, $errorMessage);
     }
     
     if ($shutdown && (self::$display_errors != 0)) {
@@ -530,7 +539,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       //
       // Exception thrown before raw request logged.
       //
-      AblePolecat_Log_Boot::wakeup()->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
+      self::logBootMessage(AblePolecat_LogInterface::ERROR, $errorMessage);
     }
     
     //
@@ -539,6 +548,24 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     $reason = 'Unhandled exception';
     $code = $Exception->getCode();
     AblePolecat_Command_Shutdown::invoke(self::$Host, $reason, $Exception->getMessage(), $code);
+  }
+  
+  /**
+   * Write information to the boot log if it is open.
+   *
+   * @param string $type STATUS | WARNING | ERROR.
+   * @param string $msg  Body of message.
+   * 
+   * @return mixed Message as sent, if written, otherwise FALSE.
+   */
+  public static function logBootMessage($type, $msg) {
+    
+    $writeResult = FALSE;
+    if (isset(self::$Host)) {
+      self::$Host->putBootMessage($type, $msg);
+      $writeResult = $msg;
+    }
+    return $writeResult;
   }
   
   /********************************************************************************
@@ -568,6 +595,11 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       //
       error_reporting(self::$report_errors);
       ini_set('display_errors', self::$display_errors);
+      
+      //
+      // Open the boot log.
+      //
+      $this->BootLog = AblePolecat_Log_Boot::wakeup();
     }
     else {
       //
@@ -575,6 +607,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       //
       error_reporting(self::$report_errors);
       ini_set('display_errors', self::$display_errors);
+      $this->BootLog = NULL;
     }
     //
     // Default error/exception handling
@@ -660,6 +693,20 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   }
   
   /**
+   * Write information to the boot log if it is open.
+   *
+   * @param string $type STATUS | WARNING | ERROR.
+   * @param string $msg  Body of message.
+   * 
+   * @return mixed Message as sent, if written, otherwise FALSE.
+   */
+  private function putBootMessage($type, $msg) {    
+    if (isset($this->BootLog)) {
+      $this->BootLog->putMessage($type, $msg);
+    }
+  }
+  
+  /**
    * Validates given command target as a forward or reverse COR link.
    *
    * @param AblePolecat_Command_TargetInterface $Target.
@@ -708,6 +755,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   protected function __construct() {
     
     $this->initializeErrorReporting();
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Error reporting initialized.');
 
     //
     // Start or resume session.
@@ -717,7 +765,8 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     $this->initializeSessionSecurity();
     session_start();
     $this->sessionId = session_id();
-  
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Session security initialized.');
+    
     //
     // Cache session global variable to ensure that it is not used/tampered with by
     // application/user mode.
@@ -728,12 +777,16 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     // Turn on output buffering.
     //
     ob_start();
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering started.');
     
     //
     // Initialize other members.
     //
     $this->Request = NULL;
     $this->setVersion(NULL);
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Set version %s", $this->getVersion(TRUE, 'text')));
+    
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Able Polecat HOST initialized.');
   }
   
   /**
@@ -744,10 +797,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     // Flush output buffer.
     //
     ob_end_flush();
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering flushed.');
     
     //
     // Close and save PHP session.
     //
     session_write_close();
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Session closed.');
   }
 }

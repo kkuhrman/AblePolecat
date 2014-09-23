@@ -7,7 +7,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -60,6 +60,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     if (!isset(self::$Registry)) {
       try {
         self::$Registry = new AblePolecat_Registry_Class($Subject);
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
       catch (Exception $Exception) {
         self::$Registry = NULL;
@@ -128,6 +129,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       self::KEY_CLASS_NAME => array(),
       self::KEY_INTERFACE => array(),
     );
+    
   }
   
   /**

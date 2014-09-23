@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
@@ -88,6 +88,8 @@ class AblePolecat_Mode_Session extends AblePolecat_Mode_UserAbstract {
         //
         //
         // self::$SessionMode->Environment = AblePolecat_Environment_User::wakeup(self::$SessionMode->Agent);
+        
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session mode is initialized.');
       }
       catch(Exception $Exception) {
         self::$SessionMode = NULL;

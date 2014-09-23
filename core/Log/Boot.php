@@ -5,13 +5,19 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
  
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Clock.php');
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Log.php');
 
 class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
+  
+  /**
+   * log file names.
+   */
+  const LOG_NAME_BOOTSEQ = 'bootseq.csv';
+  const LOG_NAME_REQUEST = 'request.txt';
   
   /**
    * @var object Instance of Singleton.
@@ -26,7 +32,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
   /**
    * @var Array Messages to log file (cached until sleep()).
    */
-  private $messages;
+  // private $messages;
   
   /**
    * @var bool TRUE if an error has been logged, otherwise FALSE.
@@ -37,6 +43,11 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    * @var resource File.
    */
   private $flog;
+  
+  /**
+   * @var int boot procedure step number.
+   */
+  private $step;
   
   /**
    * Helper function. Queue messages.
@@ -60,11 +71,21 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
       case AblePolecat_LogInterface::DEBUG:
         break;
     }
-    $this->messages[] = array(
+    // $this->messages[] = array(
+      // 'time' => $time,
+      // 'type' => $type,
+      // 'body' => $message,
+    // );
+    $messageLine = array(
+      'step' => $this->step,
       'time' => $time,
       'type' => $type,
       'body' => $message,
     );
+    if ($this->flog) {
+      fputcsv($this->flog, $messageLine);
+    }
+    $this->step += 1;
   }
   
   /**
@@ -78,6 +99,54 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     //
     // @todo:
     //
+  }
+  
+  /**
+   * Dump raw request data to a file.
+   */
+  public function dumpRawRequest() {
+    $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . self::LOG_NAME_REQUEST;
+    $this->flog = @fopen($file_name, 'a');
+    if ($this->flog) {
+      // 
+      // Banner separating this block from others
+      //
+      $now = date('Y-m-d H:i:s u e', time());
+      $pad = str_pad('', 80, '#');
+      fputs($this->flog, $pad . "\n");
+      fputs($this->flog, '# BEGIN: ' . $now . "\n");
+      fputs($this->flog, $pad . "\n");
+
+      //
+      // Write any available information about request which caused fail condition
+      //
+      isset($_SERVER['HTTP_HOST']) ? fputs($this->flog, 'HTTP_HOST = ' . $_SERVER['HTTP_HOST'] . "\n") : NULL;
+      isset($_SERVER['HTTP_USER_AGENT']) ? fputs($this->flog, 'HTTP_USER_AGENT = ' . $_SERVER['HTTP_USER_AGENT'] . "\n") : NULL;
+      isset($_SERVER['HTTP_ACCEPT']) ? fputs($this->flog, 'HTTP_ACCEPT = ' . $_SERVER['HTTP_ACCEPT'] . "\n") : NULL;
+      isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? fputs($this->flog, 'HTTP_ACCEPT_LANGUAGE = ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "\n") : NULL;
+      isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? fputs($this->flog, 'HTTP_ACCEPT_ENCODING = ' . $_SERVER['HTTP_ACCEPT_ENCODING'] . "\n") : NULL;
+      isset($_SERVER['HTTP_REFERER']) ? fputs($this->flog, 'HTTP_REFERER = ' . $_SERVER['HTTP_REFERER'] . "\n") : NULL;
+      isset($_SERVER['HTTP_CONNECTION']) ? fputs($this->flog, 'HTTP_CONNECTION = ' . $_SERVER['HTTP_CONNECTION'] . "\n") : NULL;
+      isset($_SERVER['HTTP_CACHE_CONTROL']) ? fputs($this->flog, 'HTTP_CACHE_CONTROL = ' . $_SERVER['HTTP_CACHE_CONTROL'] . "\n") : NULL;
+      isset($_SERVER['SERVER_PORT']) ? fputs($this->flog, 'SERVER_PORT = ' . $_SERVER['SERVER_PORT'] . "\n") : NULL;
+      isset($_SERVER['REMOTE_ADDR']) ? fputs($this->flog, 'REMOTE_ADDR = ' . $_SERVER['REMOTE_ADDR'] . "\n") : NULL;
+      isset($_SERVER['SCRIPT_FILENAME']) ? fputs($this->flog, 'SCRIPT_FILENAME = ' . $_SERVER['SCRIPT_FILENAME'] . "\n") : NULL;
+      isset($_SERVER['REMOTE_PORT']) ? fputs($this->flog, 'REMOTE_PORT = ' . $_SERVER['REMOTE_PORT'] . "\n") : NULL;
+      isset($_SERVER['GATEWAY_INTERFACE']) ? fputs($this->flog, 'GATEWAY_INTERFACE = ' . $_SERVER['GATEWAY_INTERFACE'] . "\n") : NULL;
+      isset($_SERVER['SERVER_PROTOCOL']) ? fputs($this->flog, 'SERVER_PROTOCOL = ' . $_SERVER['SERVER_PROTOCOL'] . "\n") : NULL;
+      isset($_SERVER['REQUEST_METHOD']) ? fputs($this->flog, 'REQUEST_METHOD = ' . $_SERVER['REQUEST_METHOD'] . "\n") : NULL;
+      isset($_SERVER['QUERY_STRING']) ? fputs($this->flog, 'QUERY_STRING = ' . $_SERVER['QUERY_STRING'] . "\n") : NULL;
+      isset($_SERVER['REQUEST_URI']) ? fputs($this->flog, 'REQUEST_URI = ' . $_SERVER['REQUEST_URI'] . "\n") : NULL;
+      isset($_SERVER['SCRIPT_NAME']) ? fputs($this->flog, 'SCRIPT_NAME = ' . $_SERVER['SCRIPT_NAME'] . "\n") : NULL;
+      fputs($this->flog, $pad . "\n");
+      
+      //
+      // Terminate
+      //
+      fputs($this->flog, $pad . "\n");
+      fputs($this->flog, '# END: ' . $now . "\n");
+      fputs($this->flog, $pad . "\n");
+    }
   }
   
   /**
@@ -97,67 +166,9 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
       $msg = sprintf("Close boot log file");
       $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
       
-      $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . 'boot.csv';
-      $this->flog = @fopen($file_name, 'a');
-      if ($this->flog) {
-        // 
-        // Banner separating this block from others
-        //
-        $now = date('Y-m-d H:i:s u e', time());
-        $pad = str_pad('', 80, '#');
-        fputs($this->flog, $pad . "\n");
-        fputs($this->flog, '# BEGIN: ' . $now . "\n");
-        fputs($this->flog, $pad . "\n");
-  
-        //
-        // Write any available information about request which caused fail condition
-        //
-        isset($_SERVER['HTTP_HOST']) ? fputs($this->flog, 'HTTP_HOST = ' . $_SERVER['HTTP_HOST'] . "\n") : NULL;
-        isset($_SERVER['HTTP_USER_AGENT']) ? fputs($this->flog, 'HTTP_USER_AGENT = ' . $_SERVER['HTTP_USER_AGENT'] . "\n") : NULL;
-        isset($_SERVER['HTTP_ACCEPT']) ? fputs($this->flog, 'HTTP_ACCEPT = ' . $_SERVER['HTTP_ACCEPT'] . "\n") : NULL;
-        isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? fputs($this->flog, 'HTTP_ACCEPT_LANGUAGE = ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "\n") : NULL;
-        isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? fputs($this->flog, 'HTTP_ACCEPT_ENCODING = ' . $_SERVER['HTTP_ACCEPT_ENCODING'] . "\n") : NULL;
-        isset($_SERVER['HTTP_REFERER']) ? fputs($this->flog, 'HTTP_REFERER = ' . $_SERVER['HTTP_REFERER'] . "\n") : NULL;
-        isset($_SERVER['HTTP_CONNECTION']) ? fputs($this->flog, 'HTTP_CONNECTION = ' . $_SERVER['HTTP_CONNECTION'] . "\n") : NULL;
-        isset($_SERVER['HTTP_CACHE_CONTROL']) ? fputs($this->flog, 'HTTP_CACHE_CONTROL = ' . $_SERVER['HTTP_CACHE_CONTROL'] . "\n") : NULL;
-        isset($_SERVER['SERVER_PORT']) ? fputs($this->flog, 'SERVER_PORT = ' . $_SERVER['SERVER_PORT'] . "\n") : NULL;
-        isset($_SERVER['REMOTE_ADDR']) ? fputs($this->flog, 'REMOTE_ADDR = ' . $_SERVER['REMOTE_ADDR'] . "\n") : NULL;
-        isset($_SERVER['SCRIPT_FILENAME']) ? fputs($this->flog, 'SCRIPT_FILENAME = ' . $_SERVER['SCRIPT_FILENAME'] . "\n") : NULL;
-        isset($_SERVER['REMOTE_PORT']) ? fputs($this->flog, 'REMOTE_PORT = ' . $_SERVER['REMOTE_PORT'] . "\n") : NULL;
-        isset($_SERVER['GATEWAY_INTERFACE']) ? fputs($this->flog, 'GATEWAY_INTERFACE = ' . $_SERVER['GATEWAY_INTERFACE'] . "\n") : NULL;
-        isset($_SERVER['SERVER_PROTOCOL']) ? fputs($this->flog, 'SERVER_PROTOCOL = ' . $_SERVER['SERVER_PROTOCOL'] . "\n") : NULL;
-        isset($_SERVER['REQUEST_METHOD']) ? fputs($this->flog, 'REQUEST_METHOD = ' . $_SERVER['REQUEST_METHOD'] . "\n") : NULL;
-        isset($_SERVER['QUERY_STRING']) ? fputs($this->flog, 'QUERY_STRING = ' . $_SERVER['QUERY_STRING'] . "\n") : NULL;
-        isset($_SERVER['REQUEST_URI']) ? fputs($this->flog, 'REQUEST_URI = ' . $_SERVER['REQUEST_URI'] . "\n") : NULL;
-        isset($_SERVER['SCRIPT_NAME']) ? fputs($this->flog, 'SCRIPT_NAME = ' . $_SERVER['SCRIPT_NAME'] . "\n") : NULL;
-        fputs($this->flog, $pad . "\n");
-        
-        //
-        // Write Able Polecat message stream
-        //
-        $message = array_shift($this->messages);
-        while (isset($message)) {
-          fputcsv($this->flog, $message);
-          $message = array_shift($this->messages);
-        }
-        
-        //
-        // Terminate
-        //
-        fputs($this->flog, $pad . "\n");
-        fputs($this->flog, '# END: ' . $now . "\n");
-        fputs($this->flog, $pad . "\n");
-      }
-      else {
-        $this->flog = NULL;
-        $msg = sprintf(
-          "Able Polecat attempted to open a CSV log file in the directory given at %s. No such directory exists or it is not writable by web agent.",
-          AblePolecat_Server_Paths::getFullPath('logs')
-        );
-        AblePolecat_Host::handleError(AblePolecat_Error::BOOTSTRAP_LOGGER, $msg);
-      }
-      
       if (isset($this->flog)) {
+        $terminate = array('########', '########', '########', '########');
+        fputcsv($this->flog, $terminate);
         fclose($this->flog);
         $this->flog = NULL;
       }
@@ -184,21 +195,34 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    */
   protected function initialize() {
     
+    $this->step = 1;
+    
     //
     // Start with no error condition.
     //
     $this->flog = NULL;
     $this->error = FALSE;
+    // $this->messages = array();
     
     //
     // Start stop watch
     //
     $this->Clock = new AblePolecat_Clock();
     $this->Clock->start();
-      
-    $this->messages = array();
     
-    $msg = sprintf("Open boot log file @ %s", date('H:i:s u e', time()));
-    $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
+    $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . self::LOG_NAME_BOOTSEQ;
+    $this->flog = @fopen($file_name, 'a');
+    if ($this->flog) {
+      $msg = sprintf("Open boot log file @ %s", date('H:i:s u e', time()));
+      $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
+    }
+    else {
+      $this->flog = NULL;
+      $msg = sprintf(
+        "Able Polecat attempted to open a log file in the directory given at %s. File does not exist or agent cannot write to it.",
+        $file_name
+      );
+      trigger_error($msg, E_USER_ERROR);
+    }
   }
 }

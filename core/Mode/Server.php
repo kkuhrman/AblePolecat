@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Administrator.php')));
@@ -128,7 +128,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
         //
         // Check if given agent has requested permission for given resource.
         //
-        if ($this->getAdministrator()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
+        if ($this->getAgent()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
           //
           // @todo: Access is permitted. Get security token.
           //
@@ -140,7 +140,10 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
         }
         break;
       case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
-        $Agent = $this->getAdministrator()->getAgent($Command->getInvoker());
+        //
+        // get agent
+        //
+        $Agent = $this->getAgent()->getAgent($Command->getInvoker());
         $Result = new AblePolecat_Command_Result($Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
       case 'ef797050-715c-11e3-981f-0800200c9a66':
@@ -274,7 +277,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
   /**
    * @return AblePolecat_AccessControl_Agent_Administrator
    */
-  private function getAdministrator() {
+  private function getAgent() {
     if (!isset($this->AdministratorAgent)) {
       throw new AblePolecat_Mode_Exception('Administrator agent is not available.');
     }
@@ -409,7 +412,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
    */
   public function getUserAgent() {
     if (!isset($this->UserAgent)) {
-      $this->UserAgent = $this->getAdministrator()->getAgent($this);
+      $this->UserAgent = $this->getAgent()->getAgent($this);
     }
     return $this->UserAgent;
   }
@@ -418,6 +421,11 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
    * Extends constructor.
    */
   protected function initialize() {
+    
+    //
+    // Load class registry.
+    //
+    $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this);
     
     //
     // Access control agent (super user).
@@ -445,14 +453,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->db_state['dsn']);
       $this->db_state['connected'] = $this->CoreDatabase->open($this->AdministratorAgent, $DbUrl);
     }
-    
-    //
-    // Start Able Polecat session (data stored in core database, session id is passed by cookie).
-    // @todo: AblePolecat_Host::getRequest()->getHostName() will not be available at this point.
-    // @see AblePolecat_Host::routeRequest().
-    //
-    // AblePolecat_Dom::kill(AblePolecat_Host::getRequest()->getHostName());
-    
+        
     //
     // Stop loading if there is no connection to the core database.
     //
@@ -466,13 +467,14 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
       // Start logging to database.
       //
       $this->Log = AblePolecat_Log_Pdo::wakeup($this);
-      
-      //
-      // Load interface registry.
-      //
-      // $this->InterfaceRegistry = AblePolecat_Registry_Interface::wakeup($this);
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Connection to core database established.');
+    }
+    else {
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Connection to core database is not established.');
     }
     
     $this->UserAgent = NULL;
+    
+    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode is initialized.');
   }
 }

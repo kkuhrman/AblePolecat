@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.1
+ * @version   0.6.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
@@ -19,9 +19,6 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   /**
    * System environment variable names
    */
-  // const SYSVAR_CORE_VERSION     = 'coreVersion';
-  // const SYSVAR_CORE_CLASSES     = 'coreClasses';
-  // const SYSVAR_CORE_INTERFACES  = 'coreInterfaces';
   const SYSVAR_CORE_DATABASE    = 'coreDatabase';
   
   /**
@@ -130,9 +127,11 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
           self::SYSVAR_CORE_DATABASE,
           $db_state
         );
+        
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server environment initialized.');
       }
       catch (Exception $Exception) {
-        throw new AblePolecat_Environment_Exception("Failure to access/set application configuration. " . $Exception->getMessage(), 
+        throw new AblePolecat_Environment_Exception("Failure to initialize server environment. " . $Exception->getMessage(), 
           AblePolecat_Error::BOOTSTRAP_CONFIG);
       }
     }
