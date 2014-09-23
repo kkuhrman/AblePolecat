@@ -29,14 +29,14 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
   const APP_INTERFACE_DATABASE            = 'AblePolecat_DatabaseInterface';
   
   /**
-   * @var AblePolecat_AccessControl_AgentInterface
+   * @var AblePolecat_AccessControl_Agent_Application
    */
-  private $Agent;
+  private $ApplicationAgent;
   
   /**
    * @var AblePolecat_EnvironmentInterface.
    */
-  private $Environment;
+  private $ApplicationEnvironment;
   
   /**
    * @var AblePolecat_Registry_ClassLibrary
@@ -160,6 +160,16 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
    ********************************************************************************/
   
   /**
+   * @return AblePolecat_AccessControl_Agent_Application
+   */
+  private function getAgent() {
+    if (!isset($this->ApplicationAgent)) {
+      throw new AblePolecat_Mode_Exception('Application agent is not available.');
+    }
+    return $this->ApplicationAgent;
+  }
+  
+  /**
    * Send command or forward or back the chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
@@ -192,16 +202,27 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
     //
     // Access control agent.
     //
-    // $CommandResult = AblePolecat_Command_GetAgent::invoke($this);
-    // if ($CommandResult->success()) {
-      // $this->Agent = $CommandResult->value();
-    // }
+    $Host = $this->getReverseCommandLink();
+    $this->ApplicationAgent = AblePolecat_AccessControl_Agent_Application::wakeup($Host, $this);
     
     //
     // Load environment/configuration
     //
     //
-    // $this->Environment = AblePolecat_Environment_Application::wakeup($this->Agent);
+    $this->ApplicationEnvironment = AblePolecat_Environment_Application::wakeup($this->ApplicationAgent);
+    $ClassRegistry = $this->getClassRegistry();
+    if (isset($ClassRegistry)) {
+      //
+      // Register classes in registered libraries.
+      //
+      $ClassLibraryRegistrations = $this->ApplicationEnvironment->
+        getVariable($this->ApplicationAgent, AblePolecat_Environment_Application::SYSVAR_CORE_CLASSLIBS);
+      if (isset($ClassLibraryRegistrations)) {
+        foreach($ClassLibraryRegistrations as $key => $ClassLibraryRegistration) {
+          $ClassRegistrations = $ClassRegistry->loadLibrary($ClassLibraryRegistration->getClassLibraryId());
+        }
+      }
+    }
             
     //
     // Load registry of class libraries.
@@ -223,5 +244,7 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
     //
     // @todo: Load application database(s).
     //
+    
+    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) mode is initialized.');
   }
 }

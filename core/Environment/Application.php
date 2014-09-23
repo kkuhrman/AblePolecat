@@ -8,12 +8,23 @@
  * @version   0.6.1
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
 
 class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstract {
   
   const UUID = 'df5e0c10-5f4d-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Application Environment';
+  
+  /**
+   * System environment variable names
+   */
+  const SYSVAR_CORE_CLASSLIBS    = 'classLibraries';
+  
+  /**
+   * Configuration file constants.
+   */
+  const CONF_FILENAME_LIBS        = 'libs.xml';
   
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
@@ -64,10 +75,61 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Environment)) {
-      //
-      // Initialize singleton instance.
-      //
-      self::$Environment = new AblePolecat_Environment_Application($Subject);
+      try {
+        //
+        // Initialize singleton instance.
+        //
+        self::$Environment = new AblePolecat_Environment_Application($Subject);
+        
+        //
+        // Get application settings from configuration file.
+        //
+        $confPath = implode(DIRECTORY_SEPARATOR, 
+          array(
+            AblePolecat_Server_Paths::getFullPath('conf'),
+            self::CONF_FILENAME_LIBS
+          )
+        );
+        $Conf = new DOMDocument();
+        $Conf->load($confPath);
+        
+        //
+        // Class library registrations.
+        //
+        $ClassLibraryRegistrations = array();
+        $LibsNodeList = AblePolecat_Dom::getElementsByTagName($Conf, 'classLibrary');
+        foreach($LibsNodeList as $key => $Node) {
+          //
+          // Register each class library flagged with use="1"
+          //
+          if ($Node->getAttribute('use')) {
+            $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+            $ClassLibraryRegistration->classLibraryName = $Node->getAttribute('name');
+            $ClassLibraryRegistration->classLibraryId = $Node->getAttribute('id');
+            $ClassLibraryRegistration->classLibraryType = $Node->getAttribute('type');
+            foreach($Node->childNodes as $key => $childNode) {
+              if($childNode->nodeName == 'fullPath') {
+                $ClassLibraryRegistration->classLibraryDirectory = $childNode->nodeValue;
+              }
+            }
+            $ClassLibraryRegistrations[] = $ClassLibraryRegistration;
+          }
+        }
+        
+        //
+        // Initialize system environment variables from conf file.
+        //
+        self::$Environment->setVariable(
+          $Subject,
+          self::SYSVAR_CORE_CLASSLIBS,
+          $ClassLibraryRegistrations
+        );
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) environment initialized.');
+      }
+      catch (Exception $Exception) {
+        throw new AblePolecat_Environment_Exception("Failure to initialize application(s) environment. " . $Exception->getMessage(), 
+          AblePolecat_Error::BOOTSTRAP_CONFIG);
+      }
     }
     return self::$Environment;
   }

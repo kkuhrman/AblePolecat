@@ -69,8 +69,9 @@ class AblePolecat_AccessControl_Agent_Application extends AblePolecat_AccessCont
       $Args = func_get_args();
       isset($Args[0]) ? $Subject = $Args[0] : $Subject = NULL;
       isset($Args[1]) ? $Mode = $Args[1] : $Mode = NULL;
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_Administrator')) {
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_Host')) {
         self::$Agent = new AblePolecat_AccessControl_Agent_Application($Mode);
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application agent initialized.');
       }
       else {
         $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_Data::getDataTypeName($Subject));
