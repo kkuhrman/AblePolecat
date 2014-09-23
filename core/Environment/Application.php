@@ -82,6 +82,11 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
         self::$Environment = new AblePolecat_Environment_Application($Subject);
         
         //
+        // Containers for variables form any conf files.
+        //
+        $ClassLibraryRegistrations = array();
+        
+        //
         // Get application settings from configuration file.
         //
         $confPath = implode(DIRECTORY_SEPARATOR, 
@@ -90,29 +95,30 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
             self::CONF_FILENAME_LIBS
           )
         );
-        $Conf = new DOMDocument();
-        $Conf->load($confPath);
-        
-        //
-        // Class library registrations.
-        //
-        $ClassLibraryRegistrations = array();
-        $LibsNodeList = AblePolecat_Dom::getElementsByTagName($Conf, 'classLibrary');
-        foreach($LibsNodeList as $key => $Node) {
+        if (file_exists($confPath)) {
+          $Conf = new DOMDocument();
+          $Conf->load($confPath);
+          
           //
-          // Register each class library flagged with use="1"
+          // Class library registrations.
           //
-          if ($Node->getAttribute('use')) {
-            $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-            $ClassLibraryRegistration->classLibraryName = $Node->getAttribute('name');
-            $ClassLibraryRegistration->classLibraryId = $Node->getAttribute('id');
-            $ClassLibraryRegistration->classLibraryType = $Node->getAttribute('type');
-            foreach($Node->childNodes as $key => $childNode) {
-              if($childNode->nodeName == 'fullPath') {
-                $ClassLibraryRegistration->classLibraryDirectory = $childNode->nodeValue;
+          $LibsNodeList = AblePolecat_Dom::getElementsByTagName($Conf, 'classLibrary');
+          foreach($LibsNodeList as $key => $Node) {
+            //
+            // Register each class library flagged with use="1"
+            //
+            if ($Node->getAttribute('use')) {
+              $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+              $ClassLibraryRegistration->classLibraryName = $Node->getAttribute('name');
+              $ClassLibraryRegistration->classLibraryId = $Node->getAttribute('id');
+              $ClassLibraryRegistration->classLibraryType = $Node->getAttribute('type');
+              foreach($Node->childNodes as $key => $childNode) {
+                if($childNode->nodeName == 'fullPath') {
+                  $ClassLibraryRegistration->classLibraryDirectory = $childNode->nodeValue;
+                }
               }
+              $ClassLibraryRegistrations[] = $ClassLibraryRegistration;
             }
-            $ClassLibraryRegistrations[] = $ClassLibraryRegistration;
           }
         }
         
