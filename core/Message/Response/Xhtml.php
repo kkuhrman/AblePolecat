@@ -107,7 +107,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     
     try {
       $Document = $this->getDocument();
-      throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $this->getName()));
+      throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $Resource->getName()));
     }
     catch(AblePolecat_Message_Exception $Exception) {
       $Document = AblePolecat_Dom::createDocument(

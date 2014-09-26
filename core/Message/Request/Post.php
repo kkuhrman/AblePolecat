@@ -32,19 +32,6 @@ class AblePolecat_Message_Request_Post extends AblePolecat_Message_RequestAbstra
     
     $Request->setResource($ArgsList->getArgumentValue(AblePolecat_Message_RequestInterface::URI));
     
-    $Request->setHead(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::HEAD, 
-        ''
-      )
-    );
-    $Request->setBody(
-      $ArgsList->getArgumentValue(
-        AblePolecat_Message_RequestInterface::ENTITY_BODY, 
-        ''
-      )
-    );
-    
     return $Request;
   }
   

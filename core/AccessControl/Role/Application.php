@@ -1,9 +1,12 @@
 <?php
 /**
- * @file: Application.php
- * Default access control role assigned to web applications.
- */
- 
+ * @file      polecat/core/AccessControl/Role/User.php
+ * @brief     Agent role for system at application layer (application administrator).
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.6.2
+ */ 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'AccessControl' . DIRECTORY_SEPARATOR . 'Role.php');
 
 class AblePolecat_AccessControl_Role_Application extends AblePolecat_AccessControl_RoleAbstract {

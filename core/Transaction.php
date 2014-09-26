@@ -51,16 +51,44 @@ interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterf
   public function commit();
   
   /**
-   * Return name of transaction class, which can handle authentication if resource access is denied.
-   *
-   * @return string Name of class implementing AblePolecat_TransactionInterface or NULL.
+   * @return AblePolecat_AccessControl_AgentInterface or NULL.
    */
-  public function getResourceAuthorityClassName();
+  public function getAgent();
+  
+  /**
+   * @return AblePolecat_TransactionInterface.
+   */
+  public function getParent();
+  
+  /**
+   * @return AblePolecat_Message_RequestInterface.
+   */
+  public function getRequest();
+  
+  /**
+   * @return AblePolecat_Registry_Entry_ResourceInterface.
+   */
+  public function getResourceRegistration();
+  
+  /**
+   * @return string ID of current transaction save point.
+   */
+  public function getSavepointId();
+  
+  /**
+   * @return string Status of transaction.
+   */
+  public function getStatus();
   
   /**
    * @return string HTTP status code.
    */
   public function getStatusCode();
+  
+  /**
+   * @return string ID of current transaction.
+   */
+  public function getTransactionId();
   
   /**
    * Rollback
@@ -97,12 +125,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    * @var AblePolecat_Message_RequestInterface.
    */
   private $Request;
-  
-  /**
-   * @var string
-   */
-  private $resourceAuthorityClassName;
-  
+    
   /**
    * @var AblePolecat_Registry_Entry_ResourceInterface.
    */
@@ -234,66 +257,6 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
-   * Return name of transaction class, which can handle authentication if resource access is denied.
-   *
-   * @return string Name of class implementing AblePolecat_TransactionInterface or NULL.
-   */
-  public function getResourceAuthorityClassName() {
-    return $this->resourceAuthorityClassName;
-  }
-  
-  /**
-   * @return string HTTP status code.
-   */
-  public function getStatusCode() {
-    return $this->statusCode;
-  }
-  
-  /**
-   * Begin or resume the transaction.
-   *
-   * @return AblePolecat_ResourceInterface The result of the work, partial or completed.
-   * @throw AblePolecat_Transaction_Exception If cannot be brought to a satisfactory state.
-   */
-  public function start() {
-    
-    $Resource = NULL;
-    
-    //
-    // Update raw request log entry with delegate transaction ID.
-    //
-    $sql = __SQL()-> 
-      update('request')->
-      set('transactionId')->
-      values($this->getTransactionId())->
-      where(sprintf("`requestId` = %d", $this->getRequest()->getRawRequestLogRecordId()));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    
-    //
-    // check save point
-    //
-    $savepointId = $this->getSavepointId();
-    
-    //
-    // If save point does not exist, create new save point at start and begin there.
-    //
-    if (!isset($savepointId)) {
-      $this->save(self::SAVEPOINT_NAME_START);
-    }
-    
-    //
-    // Otherwise begin at existing save point
-    //
-    $Resource = $this->run();
-    
-    return $Resource;
-  }
-  
-  /********************************************************************************
-   * Helper functions.
-   ********************************************************************************/
-  
-  /**
    * @return AblePolecat_AccessControl_AgentInterface or NULL.
    */
   public function getAgent() {
@@ -373,6 +336,57 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
+   * @return string HTTP status code.
+   */
+  public function getStatusCode() {
+    return $this->statusCode;
+  }
+  
+  /**
+   * Begin or resume the transaction.
+   *
+   * @return AblePolecat_ResourceInterface The result of the work, partial or completed.
+   * @throw AblePolecat_Transaction_Exception If cannot be brought to a satisfactory state.
+   */
+  public function start() {
+    
+    $Resource = NULL;
+    
+    //
+    // Update raw request log entry with delegate transaction ID.
+    //
+    $sql = __SQL()-> 
+      update('request')->
+      set('transactionId')->
+      values($this->getTransactionId())->
+      where(sprintf("`requestId` = %d", $this->getRequest()->getRawRequestLogRecordId()));
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    
+    //
+    // check save point
+    //
+    $savepointId = $this->getSavepointId();
+    
+    //
+    // If save point does not exist, create new save point at start and begin there.
+    //
+    if (!isset($savepointId)) {
+      $this->save(self::SAVEPOINT_NAME_START);
+    }
+    
+    //
+    // Otherwise begin at existing save point
+    //
+    $Resource = $this->run();
+    
+    return $Resource;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
    * @return AblePolecat_Registry_Class.
    */
   protected function getClassRegistry() {
@@ -432,16 +446,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   protected function setStatus($status) {
     $this->status = $status;
   }
-  
-  /**
-   * Set name of transaction class, which can handle authentication if resource access is denied.
-   *
-   * @param string $resourceAuthorityClassName Name of class implementing AblePolecat_TransactionInterface.
-   */
-  public function setResourceAuthorityClassName($resourceAuthorityClassName) {
-    $this->resourceAuthorityClassName = $resourceAuthorityClassName;
-  }
-  
+    
   /**
    * @param string HTTP status code.
    */
@@ -527,11 +532,11 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         //
         // Create record of transaction.
         //
-        $sessionId = AblePolecat_Host::getSessionId();
+        $sessionNumber = AblePolecat_Host::getSessionNumber();
         $sql = __SQL()->          
           insert(
             'transactionId',
-            'sessionId',
+            'sessionNumber',
             'requestMethod',
             'resourceId',
             'createTime', 
@@ -541,7 +546,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
           into('transaction')->
           values(
             $transactionId, 
-            $sessionId,
+            $sessionNumber,
             $this->getRequest()->getMethod(),
             $this->getResourceRegistration()->getResourceId(),
             $updateTime,
@@ -602,30 +607,42 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration = NULL
   ) {
     
+    $Transaction = NULL;
+    
     //
     // Verify requested class implements AblePolecat_TransactionInterface.
     //
-    if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
+    $ClassRegistration = $this->getClassRegistry()->isLoadable($transactionClassName);
+    if ($ClassRegistration) {
+      if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
+        throw new AblePolecat_Transaction_Exception(
+          sprintf("Transaction classes must implement AblePolecat_TransactionInterface. %s does not.",
+            $transactionClassName
+          )
+        );
+      }
+              
+      //
+      // Start or resume the transaction
+      //
+      $Transaction = $this->getClassRegistry()->loadClass(
+        $transactionClassName,
+        $this->getDefaultCommandInvoker(),
+        $this->getAgent(),
+        $Message,
+        $ResourceRegistration,
+        NULL,
+        NULL,
+        $this
+      );
+    }
+    else {
       throw new AblePolecat_Transaction_Exception(
-        sprintf("Transaction classes must implement AblePolecat_TransactionInterface. %s does not.",
+        sprintf("%s is not a loadable class. Cannot enlist as subordinate transaction.",
           $transactionClassName
         )
       );
     }
-            
-    //
-    // Start or resume the transaction
-    //
-    $Transaction = $this->getClassRegistry()->loadClass(
-      $transactionClassName,
-      $this->getDefaultCommandInvoker(),
-      $this->getAgent(),
-      $Message,
-      $ResourceRegistration,
-      NULL,
-      NULL,
-      $this
-    );
     
     return $Transaction;
   }
@@ -698,7 +715,6 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     $this->Parent = NULL;
     $this->Request = NULL;
     $this->transactionId = NULL;
-    $this->resourceAuthorityClassName = NULL;
     $this->ResourceRegistration = NULL;
     $this->savepointId = NULL;
     $this->status = self::TX_STATE_PENDING;

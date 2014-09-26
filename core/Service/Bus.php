@@ -198,9 +198,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             select(
               'transactionId', 'savepointId', 'parentTransactionId')->
             from('transaction')->
-            where(sprintf("`sessionId` = '%s' AND `requestMethod` = '%s' AND `resourceId` = '%s' AND `status` != '%s'", 
-              AblePolecat_Host::getSessionId(),
-              $Message->getMethod(),
+            where(sprintf("`sessionNumber` = %s AND `resourceId` = '%s' AND `status` != '%s'", 
+              AblePolecat_Host::getSessionNumber(),
               $ResourceRegistration->getPropertyValue('resourceId'), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );
@@ -234,15 +233,23 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               }
             }
             else {
-              if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
-                throw new AblePolecat_Service_Exception(sprintf("Transaction class registered for %s method on resource named %s does not implement AblePolecat_TransactionInterface",
-                  $transactionClassName,
-                  $Message->getMethod(),
-                  $ResourceRegistration->getResourceName()
+              if ($this->getClassRegistry()->isLoadable($transactionClassName)) {
+                if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
+                  throw new AblePolecat_Service_Exception(sprintf("Transaction class registered for %s method on resource named %s does not implement AblePolecat_TransactionInterface",
+                    $transactionClassName,
+                    $Message->getMethod(),
+                    $ResourceRegistration->getResourceName()
+                  ));
+                }
+              }
+              else {
+                throw new AblePolecat_Service_Exception(sprintf("Transaction class %s is not loadable.",
+                  $transactionClassName
                 ));
               }
             }
             
+            // 
             // Start or resume the transaction
             // @todo: $parentTransactionId must be parent (object)
             //
@@ -331,7 +338,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // Look up (first part of) resource name in database
       //
       $sql = __SQL()->          
-          select('resourceClassName', 'resourceId', 'transactionClassName', 'resourceDenyCode', 'lastModifiedTime')->
+          select('resourceClassName', 'resourceId', 'transactionClassName', 'authorityClassName', 'resourceDenyCode', 'lastModifiedTime')->
           from('resource')->
           where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
       $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
@@ -342,6 +349,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
           $ResourceRegistration->transactionClassName = $classInfo[0]['transactionClassName'];
           $ResourceRegistration->resourceDenyCode = $classInfo[0]['resourceDenyCode'];
+          $ResourceRegistration->authorityClassName = $classInfo[0]['authorityClassName'];
           $ResourceRegistration->lastModifiedTime = $classInfo[0]['lastModifiedTime'];
         }
       }
@@ -351,6 +359,9 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // Request did not resolve to a registered resource class.
       // Return one of the 'built-in' resources.
       //
+      $ResourceRegistration->transactionClassName = NULL;
+      $ResourceRegistration->authorityClassName = NULL;
+      $ResourceRegistration->resourceDenyCode = 200;
       switch ($resourceName) {
         default:
           $ResourceRegistration->resourceId = AblePolecat_Resource_Error::getId();
@@ -361,13 +372,28 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $ResourceRegistration->resourceId = AblePolecat_Resource_Ack::getId();
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
           break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::getId();
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
+          switch ($Request->getMethod()) {
+            default:
+              break;
+            case 'GET':
+              $ResourceRegistration->authorityClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+              $ResourceRegistration->resourceDenyCode = 401;
+              break;
+            case 'POST':
+              $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+              $ResourceRegistration->authorityClassName = NULL;
+              $ResourceRegistration->resourceDenyCode = 403;
+              break;
+          }
+          break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
           $ResourceRegistration->resourceId = AblePolecat_Resource_Install::getId();
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
           break;
-      }      
-      $ResourceRegistration->transactionClassName = NULL;
-      $ResourceRegistration->resourceDenyCode = 200;
+      }
     }
     
     //
@@ -468,6 +494,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
           $Response = AblePolecat_Message_Response_Xhtml::create($ResponseRegistration);
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_FORM:
+          $Response = AblePolecat_Message_Response_Xhtml::create($ResponseRegistration);
+          $Response->setEntityBody($Resource);
           break;
       }
       $Response->setEntityBody($Resource);

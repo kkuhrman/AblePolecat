@@ -370,6 +370,89 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    ********************************************************************************/
   
   /**
+   * Return information about user privileges on encapsulated database server.
+   *
+   * On success, will return something similar to:
+   * array['*' => 
+   *  array[
+   *    '*' => 
+   *      array[
+   *        'SELECT' => int 0
+   *        'INSERT' => int 1
+   *        'UPDATE' => int 2
+   *        'DELETE' => int 3
+   *        'CREATE' => int 4
+   *        'DROP' => int 5
+   *        'INDEX' => int 6
+   *        'ALTER' => int 7
+   *        'CREATE TEMPORARY TABLES' => int 8
+   *        'LOCK TABLES' => int 9],
+   * ],
+   * 'polecat' => 
+   *   array[
+   *     '*' => 
+   *       array[
+   *         'ALL PRIVILEGES' => int 0]
+   *   ],
+   * ]
+   *
+   * @param string $user
+   * @param string $password
+   * @param string $database
+   * @param string host
+   *
+   * @return Array User grants on database server or NULL if connection failed.
+   */
+  public function showGrants($user, $password, $database = NULL, $host = 'localhost') {
+    
+    $privileges = NULL;
+    
+    try {
+      //
+      // dsn = mysql://user:pass@localhost/database
+      //
+      $dsn = sprintf("mysql://%s:%s@%s", $user, $password, $host);
+      isset($database) ? $dsn .= "/$database" : NULL;
+      $DatabaseConnection = new PDO($dsn, $user, $password);
+      $PreparedStatement = $DatabaseConnection->prepare("SHOW GRANTS FOR CURRENT_USER()");
+      if($PreparedStatement->execute()) {
+        $grants = $PreparedStatement->fetchAll(PDO::FETCH_COLUMN);
+        if ($grants) {
+          $privileges = array();
+          foreach($grants as $recordNumber => $Record) {
+            $pos = strpos($Record, 'ON');
+            $rightSub = substr($Record, $pos, strlen($Record));
+            $leftSub = substr($Record, 0, $pos);
+            $pos = strpos($rightSub, 'TO');
+            $grantsOn = explode('.', trim(str_replace(array('ON', '`'), '', substr($rightSub, 0, $pos))));
+            isset($grantsOn[0]) ? $database = $grantsOn[0] : $database = NULL;
+            isset($grantsOn[1]) ? $dbObject = $grantsOn[1] : $dbObject = NULL;
+            if (!isset($privileges[$database])) {
+              $privileges[$database] = array();
+            }
+            if (!isset($privileges[$database][$dbObject])) {
+              $privileges[$database][$dbObject] = array();
+            }
+            
+            $leftSub = trim(str_replace('GRANT', '', $leftSub));
+            $leftSub = explode(', ', $leftSub);
+            foreach($leftSub as $key => $grant) {
+              $privileges[$database][$dbObject][$grant] = $key;
+            }
+          }
+        }
+      }
+      else {
+        $this->error_info[] = $PreparedStatement->errorInfo();
+      }
+    } 
+    catch (PDOException $Exception) {
+      $this->error_info[] = $Exception->getMessage();
+    }
+    return $privileges;
+  }
+  
+  /**
    * Helper function outputs PDO error information array as string.
    *
    * @param Array $error_info PDO error information.

@@ -59,7 +59,7 @@ class AblePolecat_Resource_Install extends AblePolecat_ResourceAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Install();
+      self::$Resource = new AblePolecat_Resource_Install($Subject);
       self::$Resource->activeCoreDatabase = AblePolecat_Host::getActiveCoreDatabaseName();
       
       $version = AblePolecat_Host::getVersion(TRUE, 'HTML');

@@ -38,6 +38,11 @@ interface AblePolecat_Registry_Entry_ResourceInterface extends AblePolecat_Regis
   public function getTransactionClassName();
   
   /**
+   * @return string.
+   */
+  public function getAuthorityClassName();
+  
+  /**
    * @return int.
    */
   public function getResourceDenyCode();
@@ -98,6 +103,13 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    */
   public function getTransactionClassName() {
     return $this->getPropertyValue('transactionClassName');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getAuthorityClassName() {
+    return $this->getPropertyValue('authorityClassName');
   }
   
   /**

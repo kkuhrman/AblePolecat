@@ -130,9 +130,13 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
             //
             // 401 means user requires authentication before request will be granted.
             //
-            $authorityClassName = $this->getResourceAuthorityClassName();
+            $authorityClassName = $this->getResourceRegistration()->getAuthorityClassName();
             if (isset($authorityClassName)) {
-              $ChildTransaction = $this->enlistTransaction($authorityClassName);
+              $ChildTransaction = $this->enlistTransaction(
+                $authorityClassName,
+                $this->getRequest(),
+                $this->getResourceRegistration()
+              );
               $Resource = $ChildTransaction->run();
             }
         }
@@ -167,6 +171,9 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
             sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceName())
           );
           $this->setStatus(self::TX_STATE_COMPLETED);
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+          
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:

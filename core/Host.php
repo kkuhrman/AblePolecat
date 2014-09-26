@@ -70,6 +70,11 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   private $sessionId;
   
   /**
+   * @var int Internal (Able Polecat) session ID.
+   */
+  private $sessionNumber;
+  
+  /**
    * @var Array Initial PHP session state.
    */
   private $sessionGlobal;
@@ -318,7 +323,38 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
           $Records = $CommandResult->value();
           isset($Records['lastInsertId']) ? $requestId = $Records['lastInsertId'] : NULL;
         }
+        
+        //
+        // Use internal session number.
+        //
+        $sql = __SQL()->
+          select(
+            'sessionNumber')->
+          from('session')->
+          where(sprintf("`phpSessionId` = '%s'", $this->sessionId));
+        $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+        if ($CommandResult->success() && count($CommandResult->value())) {
+          $Records = $CommandResult->value();
+          isset($Records[0]['sessionNumber']) ? $this->sessionNumber = $Records[0]['sessionNumber'] : NULL;
+        }
+        else {
+          $sql = __SQL()->
+            insert(
+              'phpSessionId', 
+              'hostName')->
+            into('session')->
+            values(
+              $this->sessionId, 
+              $this->getRequest()->getHostName()
+            );
+          $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+          if ($CommandResult->success() && count($CommandResult->value())) {
+            $Records = $CommandResult->value();
+            isset($Records['lastInsertId']) ? $this->sessionNumber = $Records['lastInsertId'] : NULL;
+          }
+        }
       }
+      
       self::$Host->Request->setRawRequestLogRecordId($requestId);
     }
     else {
@@ -350,6 +386,19 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       $sessionId = self::$Host->sessionId;
     }
     return $sessionId;
+  }
+  
+  /**
+   * @return int Internal (Able Polecat) session ID.
+   */
+  public static function getSessionNumber() {
+    
+    $sessionNumber = 0;
+    
+    if (isset(self::$Host)) {
+      $sessionNumber = self::$Host->sessionNumber;
+    }
+    return $sessionNumber;
   }
   
   /**
@@ -765,6 +814,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     $this->initializeSessionSecurity();
     session_start();
     $this->sessionId = session_id();
+    $this->sessionNumber = 0;
     $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Session security initialized.');
     
     //

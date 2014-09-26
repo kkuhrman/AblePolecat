@@ -25,6 +25,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')))
 /**
  * Core Commands
  */
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'AccessControl', 'Authenticate.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'DbQuery.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAccessToken.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAgent.php')));
@@ -124,26 +125,29 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     switch ($Command::getId()) {
       default:
         break;
+      case '80fe3992-44e7-11e4-b353-0050569e00a2':
+        //
+        // Authenticate user.
+        //
+        $Result = new AblePolecat_Command_Result("Core database is not available.", AblePolecat_Command_Result::RESULT_RETURN_FAIL);
+        if (isset($this->CoreDatabase)) {
+          $grants = $this->CoreDatabase->showGrants($Command->getUserName(), $Command->getPassword(), 'polecat');
+          if (isset($grants)) {
+            $Result = new AblePolecat_Command_Result($grants, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
+          }
+        }
+        break;
       case 'bed41310-2174-11e4-8c21-0800200c9a66':
         //
-        // Check if given agent has requested permission for given resource.
+        // @todo: get security token may be deprecated.
         //
-        if ($this->getAgent()->hasPermission($this, $Command->getAgentId(), $Command->getResourceId(), $Command->getConstraintId())) {
-          //
-          // @todo: Access is permitted. Get security token.
-          //
-          $SecurityToken = '@todo';
-          $Result = new AblePolecat_Command_Result($SecurityToken, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
-        }
-        else {
-          $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_FAIL);
-        }
+        $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_FAIL);
         break;
       case '54d2e7d0-77b9-11e3-981f-0800200c9a66':
         //
         // get agent
         //
-        $Agent = $this->getAgent()->getAgent($Command->getInvoker());
+        $Agent = $this->getAdministratorAgent()->getAgent($Command->getInvoker());
         $Result = new AblePolecat_Command_Result($Agent, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
       case 'ef797050-715c-11e3-981f-0800200c9a66':
@@ -277,7 +281,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
   /**
    * @return AblePolecat_AccessControl_Agent_Administrator
    */
-  private function getAgent() {
+  private function getAdministratorAgent() {
     if (!isset($this->AdministratorAgent)) {
       throw new AblePolecat_Mode_Exception('Administrator agent is not available.');
     }
@@ -412,7 +416,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
    */
   public function getUserAgent() {
     if (!isset($this->UserAgent)) {
-      $this->UserAgent = $this->getAgent()->getAgent($this);
+      $this->UserAgent = $this->getAdministratorAgent()->getAgent($this);
     }
     return $this->UserAgent;
   }

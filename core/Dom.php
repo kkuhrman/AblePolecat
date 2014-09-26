@@ -103,30 +103,6 @@ class AblePolecat_Dom {
   }
   
   /**
-   * Express an id attribute as an Array.
-   *
-   * @param string $attributeName The name of the ID attribute.
-   * @param string $attributeValue The value of the ID attribute.
-   *
-   * @return Array ['id' => Array[ID attribute name => ID value]]
-   */
-  public static function expressIdAttribute($attributeName, $attributeValue) {
-    return array('id' => array('attributeName' => $attributeName, 'attributeValue' => $attributeValue));
-  }
-  
-  /**
-   * Express an item in a DOMNodeList as an Array.
-   *
-   * @param string $tagName Node name or element tag name.
-   * @param int    $listIndex Index of item in list.
-   *
-   * @return Array ['tag' => Array[tag name => DOMNodeList index]]
-   */
-  public static function expressNodeListTag($tagName, $listIndex = 0) {
-    return array('tag' => array('tagName' => $tagName, 'listIndex' => $listIndex));
-  }
-  
-  /**
    * Create XML DOM Document.
    * 
    * @param string $rootElementName Name of top-level document element.
@@ -238,6 +214,70 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Helper function - express array as element attributes.
+   *
+   * @param Array $attributes
+   * @param int $pad  STR_PAD_RIGHT | STR_PAD_LEFT | STR_PAD_BOTH
+   *
+   * @return string.
+   */
+  public static function expressElementAttributes($attributes, $pad = STR_PAD_LEFT) {
+    
+    $attributesSyntax = '';
+    if (isset($attributes) && is_array($attributes)) {
+      $attributesSyntax = array();
+      foreach($attributes as $attributeName => $attributeValue) {
+        $attributesSyntax[] = sprintf("%s=\"%s\"", $attributeName, $attributeValue);
+      }
+      $attributesSyntax = implode(' ', $attributesSyntax);
+    }
+    if ($attributesSyntax != '') {
+      //
+      // pad to separate from other markup
+      //
+      $attributesSyntax = str_pad($attributesSyntax, 1 + strlen($attributesSyntax), ' ', $pad);
+    }
+    return $attributesSyntax;
+  }
+  
+  /**
+   * Express an id attribute as an Array.
+   *
+   * @param string $attributeName The name of the ID attribute.
+   * @param string $attributeValue The value of the ID attribute.
+   *
+   * @return Array ['id' => Array[ID attribute name => ID value]]
+   */
+  public static function expressIdAttribute($attributeName, $attributeValue) {
+    return array('id' => array('attributeName' => $attributeName, 'attributeValue' => $attributeValue));
+  }
+  
+  /**
+   * Express an item in a DOMNodeList as an Array.
+   *
+   * @param string $tagName Node name or element tag name.
+   * @param int    $listIndex Index of item in list.
+   *
+   * @return Array ['tag' => Array[tag name => DOMNodeList index]]
+   */
+  public static function expressNodeListTag($tagName, $listIndex = 0) {
+    return array('tag' => array('tagName' => $tagName, 'listIndex' => $listIndex));
+  }
+  
+  /**
+   * Helper function - removes potentially harmful or forbidden characters from response content.
+   *
+   * @param string $unfiltered.
+   *
+   * @return string Filtered output.
+   */
+  public static function filterText($unfiltered) {
+    // mb_convert_encoding($text,'ISO-8859-15','utf-8');
+    $filtered = htmlspecialchars($unfiltered);
+    return $filtered;
+  }
+  
+  /**
    * Load markup into DOM Document and detach document element.
    *
    * @param string $fileName Name of file containing markup.
@@ -275,7 +315,7 @@ class AblePolecat_Dom {
    */
   public static function getDocumentElementFromString($markup, $parent = 'body') {
     
-    $Document = self::createDocument();    
+    $Document = self::createDocument();
     @$Document->loadHTML($markup);
     $Elements = self::getElementsByTagName($Document, $parent);
     $Element = $Elements->item(0)->firstChild;

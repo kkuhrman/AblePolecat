@@ -27,6 +27,7 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   const RESOURCE_NAME_ACK       = 'ack'; // ping
   const RESOURCE_NAME_HOME      = 'home'; // Home page
   const RESOURCE_NAME_ERROR     = 'error'; // extended error information
+  const RESOURCE_NAME_FORM      = 'form'; // basic, built-in UI form
   const RESOURCE_NAME_INSTALL   = 'install'; // interactive install
   const RESOURCE_NAME_SEARCH    = 'search'; // list view of search results
   const RESOURCE_NAME_UTIL      = 'util'; // Project utilities (install, update, more...)
@@ -248,34 +249,32 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     // @todo: URI security
     //
-    $resolvedResourceName = AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME;
+    $resolvedResourceName = FALSE;
     $sanitizedResourceName = strtolower(preg_replace(array('/[^a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
-    $sql = __SQL()->
-      select('resourceName')->
-      from('resource');
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
-    if ($CommandResult->success() && count($CommandResult->value())) {
-      $ResourceNames = array_flip($CommandResult->value());
-      if (isset($ResourceNames[$sanitizedResourceName])) {
+
+    //
+    // Check sanitized resource names against registry.
+    //
+    switch ($sanitizedResourceName) {
+      default:
+        $sql = __SQL()->
+          select('resourceName')->
+          from('resource')->
+          where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $sanitizedResourceName, $this->getHostName()));
+        $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+        if ($CommandResult->success() && count($CommandResult->value())) {
+          $resourceName = $CommandResult->value();
+          $resolvedResourceName = $resourceName[0]['resourceName'];
+        }
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+      // case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
         $resolvedResourceName = $sanitizedResourceName;
-      }
-    }
-    if ($resolvedResourceName != $sanitizedResourceName) {
-      //
-      // Check core (built-in) resource names (e.g. 'reserved').
-      //
-      switch ($sanitizedResourceName) {
-        default:
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-        // case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-          $resolvedResourceName = $sanitizedResourceName;
-          break;
-      }
+        break;
     }
     return $resolvedResourceName;
   }
@@ -467,7 +466,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     // Alias after host name?
     //
     if(isset($_SERVER['SCRIPT_NAME'])) {
-      $this->alias = str_replace(array('index.php', 'search.php', 'util.php'), '', $_SERVER['SCRIPT_NAME']);
+      $this->alias = str_replace(array('index.php'), '', $_SERVER['SCRIPT_NAME']);
     }
     if (isset($this->alias) && ($this->alias == self::URI_SLASH)) {
       //

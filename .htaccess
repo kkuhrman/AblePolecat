@@ -14,8 +14,10 @@ Options -Indexes
 #
 DirectoryIndex index.php index.html index.htm
 
+# ErrorDocument 404 index.php
+
 <IfModule mod_rewrite.c>
-  RewriteEngine on
+  RewriteEngine On
   
   #
   # Block access to "hidden" directories whose names begin with a period.
@@ -39,6 +41,9 @@ DirectoryIndex index.php index.html index.htm
   #
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_URI} !=/favicon.ico
+  # RewriteCond $1 !^(css|js|plugins|img)/
+  RewriteCond %{REQUEST_URI} !=/.(js|ico|gif|jpg|png|css|html|swf|mp3|wav|txt)$
+  # RewriteRule ^ index.php [QSA,L]
   RewriteRule ^ index.php [L]
+
 </IfModule>

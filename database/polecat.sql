@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 19, 2014 at 04:06 PM
+-- Generation Time: Sep 26, 2014 at 01:17 AM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -18,6 +18,19 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Database: `polecat`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `article`
+--
+
+DROP TABLE IF EXISTS `article`;
+CREATE TABLE IF NOT EXISTS `article` (
+  `articleId` char(36) NOT NULL,
+  `articleName` varchar(255) NOT NULL,
+  PRIMARY KEY (`articleId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -109,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `error` (
   `errorFunction` varchar(255) NOT NULL,
   `errorMessage` text NOT NULL,
   PRIMARY KEY (`errorId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -155,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `eventMessage` text NOT NULL,
   PRIMARY KEY (`eventId`),
   KEY `user_id` (`userId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 
@@ -194,12 +207,13 @@ CREATE TABLE IF NOT EXISTS `outh2_token` (
 
 DROP TABLE IF EXISTS `permission`;
 CREATE TABLE IF NOT EXISTS `permission` (
+  `sessionNumber` int(11) NOT NULL,
   `resourceId` char(36) NOT NULL,
   `constraintId` char(36) NOT NULL,
   `subjectId` char(36) NOT NULL,
   `authorityId` char(36) NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY `permissionId` (`resourceId`,`constraintId`,`subjectId`)
+  UNIQUE KEY `permissionId` (`sessionNumber`,`resourceId`,`constraintId`,`subjectId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -220,7 +234,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `transactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=18 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=14 ;
 
 -- --------------------------------------------------------
 
@@ -235,6 +249,7 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `resourceName` varchar(255) NOT NULL,
   `resourceClassName` varchar(255) NOT NULL,
   `transactionClassName` varchar(255) DEFAULT NULL,
+  `authorityClassName` varchar(255) DEFAULT NULL COMMENT 'Immediate access control authority (first in CoR).',
   `resourceDenyCode` int(11) NOT NULL DEFAULT '403',
   `lastModifiedTime` int(11) NOT NULL,
   PRIMARY KEY (`resourceId`),
@@ -269,11 +284,10 @@ CREATE TABLE IF NOT EXISTS `response` (
 
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
-  `session_id` varchar(255) NOT NULL,
-  `interface` varchar(255) NOT NULL,
+  `sessionNumber` int(11) NOT NULL,
+  `roleId` char(36) NOT NULL,
   `userId` int(11) NOT NULL DEFAULT '1',
-  `session_data` longblob,
-  PRIMARY KEY (`session_id`,`interface`),
+  `roleData` blob,
   KEY `userId` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -300,14 +314,13 @@ CREATE TABLE IF NOT EXISTS `savepoint` (
 
 DROP TABLE IF EXISTS `session`;
 CREATE TABLE IF NOT EXISTS `session` (
-  `sessionId` char(36) NOT NULL,
-  `phpSessionId` char(32) NOT NULL,
+  `sessionNumber` int(11) NOT NULL AUTO_INCREMENT,
+  `phpSessionId` varchar(255) NOT NULL,
   `hostName` varchar(255) NOT NULL,
-  `startTime` int(11) NOT NULL,
-  `expireTime` int(11) NOT NULL,
-  `sessionStatus` char(8) NOT NULL,
-  PRIMARY KEY (`sessionId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `start` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`sessionNumber`),
+  UNIQUE KEY `phpSessionId` (`phpSessionId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -318,7 +331,7 @@ CREATE TABLE IF NOT EXISTS `session` (
 DROP TABLE IF EXISTS `transaction`;
 CREATE TABLE IF NOT EXISTS `transaction` (
   `transactionId` varchar(24) NOT NULL,
-  `sessionId` varchar(36) NOT NULL,
+  `sessionNumber` int(11) NOT NULL,
   `requestMethod` varchar(16) NOT NULL,
   `resourceId` varchar(36) NOT NULL,
   `createTime` int(11) NOT NULL,
@@ -327,9 +340,9 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `status` varchar(32) NOT NULL DEFAULT 'PENDING',
   `parentTransactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`transactionId`),
-  KEY `sessionId` (`sessionId`),
   KEY `requestMethod` (`requestMethod`),
-  KEY `resourceId` (`resourceId`)
+  KEY `resourceId` (`resourceId`),
+  KEY `sessionNumber` (`sessionNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

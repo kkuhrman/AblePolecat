@@ -13,12 +13,12 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Restricted.php')));
 
-class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract {
+class AblePolecat_Resource_Restricted_Util extends AblePolecat_Resource_RestrictedAbstract {
   
   /**
    * Constants.
    */
-  const UUID = '50919dc0-1e43-11e4-8c21-0800200c9a66';
+  const UUID = 'd1913419-4429-11e4-b353-0050569e00a2';
   const NAME = 'util';
   
   /********************************************************************************
@@ -52,12 +52,13 @@ class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract 
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Util
+   * @return Instance of AblePolecat_Resource_Restricted_Util
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Util($Subject);
+      self::$Resource = new AblePolecat_Resource_Restricted_Util($Subject);
+      self::$Resource->setWakeupAccessRequest(AblePolecat_AccessControl_Constraint_Execute::getId());
     }
     return parent::wakeup($Subject);
   }
@@ -82,8 +83,8 @@ class AblePolecat_Resource_Util extends AblePolecat_Resource_RestrictedAbstract 
       $request_path = AblePolecat_Host::getRequest()->getRequestPath();
       throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
     }
-    $util_directive = array_shift($request_path);
-    $this->Name = array_shift($request_path);
+    // $util_directive = array_shift($request_path);
+    // $this->Name = array_shift($request_path);
     // if (count($request_path)) {
       // $this->SubDir = $request_path;
     // }

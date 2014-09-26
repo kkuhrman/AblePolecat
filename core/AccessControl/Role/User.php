@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: User.php
- * Interface for all user access control roles.
+ * @file      polecat/core/AccessControl/Role/User.php
+ * @brief     Agent role for interactive user.
+ *
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.6.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role.php')));
