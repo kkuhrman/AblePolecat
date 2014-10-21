@@ -430,15 +430,24 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
 
     foreach($_REQUEST as $argName => $argValue) {
       //
-      // Sanitize
+      // Deal with array passed in query string.
       //
-      $argName = strtolower(addslashes($argName));
-      $argValue = strtolower(addslashes($argValue));
-      
-      //
-      // Store
-      //
-      $this->query_string[$argName] = explode('+', $argValue);
+      if (is_array($argValue)) {
+        $argName = strtolower(addslashes($argName));
+        $this->query_string[$argName] = $argValue;
+      }
+      else {
+        //
+        // Sanitize
+        //
+        $argName = strtolower(addslashes($argName));
+        $argValue = strtolower(addslashes($argValue));
+        
+        //
+        // Store
+        //
+        $this->query_string[$argName] = explode('+', $argValue);
+      }
     }
   }
   
