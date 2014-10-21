@@ -536,8 +536,6 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   protected function setResource($resource = NULL) {
     
-    AblePolecat_Command_Log::invoke(AblePolecat_Host::getUserAgent(), 'request ' . AblePolecat_Data::getDataTypeName($resource) , AblePolecat_LogInterface::STATUS);
-    
     if (!isset($resource)) {
       //
       // Resource URI is not specified. Use current HTTP request.
@@ -549,7 +547,6 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       //
       // aka 'base' URL.
       //
-      AblePolecat_Dom::kill($_SERVER);
       $this->initializeHostUrl();
       
       //
