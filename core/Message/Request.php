@@ -536,6 +536,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   protected function setResource($resource = NULL) {
     
+    AblePolecat_Command_Log::invoke(AblePolecat_Host::getUserAgent(), "Initializing request for $resource.", AblePolecat_LogInterface::STATUS);
+    
     if (!isset($resource)) {
       //
       // Resource URI is not specified. Use current HTTP request.
