@@ -301,6 +301,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         //
         // Log raw request.
         //
+        isset($_SERVER['REQUEST_TIME']) ? $requestTime = $_SERVER['REQUEST_TIME'] : $requestTime = time();
+        isset($_SERVER['REMOTE_ADDR']) ? $remoteAddress = $_SERVER['REMOTE_ADDR'] : $remoteAddress = 'UNKNOWN';
+        isset($_SERVER['REMOTE_PORT']) ? $remotePort = $_SERVER['REMOTE_PORT'] : $remotePort = 'UNKNOWN';
+        isset($_SERVER['HTTP_USER_AGENT']) ? $userAgent = $_SERVER['HTTP_USER_AGENT'] : $userAgent = 'UNKNOWN';
+        isset($_SERVER['REQUEST_METHOD']) ? $requestMethod = $_SERVER['REQUEST_METHOD'] : $requestMethod = 'UNKNOWN';
+        isset($_SERVER['REQUEST_URI']) ? $requestUri = $_SERVER['REQUEST_URI'] : $requestUri = 'UNKNOWN';
         $sql = __SQL()->          
           insert(
             'requestTime', 
@@ -311,12 +317,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             'requestUri')->
           into('request')->
           values(
-            $_SERVER['REQUEST_TIME'], 
-            $_SERVER['REMOTE_ADDR'],
-            $_SERVER['REMOTE_PORT'],
-            $_SERVER['HTTP_USER_AGENT'],
-            $_SERVER['REQUEST_METHOD'],
-            $_SERVER['REQUEST_URI']
+            $requestTime, 
+            $remoteAddress, 
+            $remotePort, 
+            $userAgent, 
+            $requestMethod, 
+            $requestUri
           );
         $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
