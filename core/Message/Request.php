@@ -266,6 +266,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
           $resourceName = $CommandResult->value();
           $resolvedResourceName = $resourceName[0]['resourceName'];
         }
+        else {
+          $message = sprintf("Request for unregistered resource %s/%s",
+            $this->getHostName(),
+            $sanitizedResourceName
+          );
+          AblePolecat_Command_Log::invoke(AblePolecat_Host::getUserAgent(), $message, AblePolecat_LogInterface::STATUS);
+        }
         break;
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
