@@ -357,8 +357,15 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     if (!isset($ResourceRegistration->resourceClassName)) {
       //
       // Request did not resolve to a registered resource class.
-      // Return one of the 'built-in' resources.
+      // Log status and return one of the 'built-in' resources.
       //
+      $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
+        $resourceName, 
+        $Request->getRequestPath(),
+        $Request->getHostName()
+      );
+      AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
+      
       $ResourceRegistration->transactionClassName = NULL;
       $ResourceRegistration->authorityClassName = NULL;
       $ResourceRegistration->resourceDenyCode = 200;
