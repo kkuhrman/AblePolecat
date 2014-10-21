@@ -469,6 +469,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     
     //
     // @todo: this order works on Win 7Pro and CENTOS - not tested otherwise
+    // @todo: requests from behind firewall or where hosts file resolves to private IP?
     //
     $host = '';
     if(isset($_SERVER['HTTP_HOST'])) {

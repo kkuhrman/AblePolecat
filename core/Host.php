@@ -347,11 +347,13 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
           $sql = __SQL()->
             insert(
               'phpSessionId', 
-              'hostName')->
+              'hostName',
+              'remoteAddress')->
             into('session')->
             values(
               $this->sessionId, 
-              $this->getRequest()->getHostName()
+              $this->getRequest()->getHostName(),
+              $remoteAddress
             );
           $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
           if ($CommandResult->success() && count($CommandResult->value())) {
