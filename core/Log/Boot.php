@@ -215,8 +215,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     if ($this->flog) {
       $DateTimeZone = new DateTimeZone('America/Chicago');
       $DateTime = new DateTime('now', $DateTimeZone);
-      $now = $DateTime->getTimestamp();
-      $msg = sprintf("Open boot log file @ %s", date('H:i:s u e', $now));
+      $msg = sprintf("Open boot log file @ %s", $DateTime->format('H:i:s u e'));
       $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
     }
     else {
