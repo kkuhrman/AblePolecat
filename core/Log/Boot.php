@@ -213,7 +213,10 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . self::LOG_NAME_BOOTSEQ;
     $this->flog = @fopen($file_name, 'a');
     if ($this->flog) {
-      $msg = sprintf("Open boot log file @ %s", date('H:i:s u e', time()));
+      $DateTimeZone = new DateTimeZone('America/Chicago');
+      $DateTime = new DateTime('now', $DateTimeZone);
+      $now = $DateTime->getTimestamp();
+      $msg = sprintf("Open boot log file @ %s", date('H:i:s u e', $now));
       $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
     }
     else {

@@ -208,7 +208,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       // Boot procedure complete. Close boot log.
       //
       self::$Host->putBootMessage(AblePolecat_LogInterface::STATUS, 'Boot procedure completed successfully.');
-      self::$Host->BootLog = NULL;
+      // self::$Host->BootLog = NULL;
       
       //
       // Preprocess HTTP request.
