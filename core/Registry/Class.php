@@ -281,36 +281,31 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     //
     $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($ClassRegistration));
     AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
-    if ($ClassRegistration) {
-      $message = sprintf("className=%s, classId=%s; classLibraryId=%s; classScope=%s; classFullPath=%s, classFactoryMethod=%s, classLastModifiedTime=%d",
-        $ClassRegistration->getClassName(),
-        $ClassRegistration->getClassId(),
-        $ClassRegistration->getClassLibraryId(),
-        $ClassRegistration->getClassScope(),
-        $ClassRegistration->getClassFullPath(),
-        $ClassRegistration->getClassFactoryMethod(),
-        $ClassRegistration->getClassLastModifiedTime()
-      );
-      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
-    }
     
-    if (isset($ClassRegistration->classFactoryMethod)) {
+    if ($ClassRegistration) {
       //
-      // Get any parameters passed.
+      // Dump class registration data to boot log.
       //
-      $parameters = array();
-      if (isset($param)) {
-        $args = func_get_args();
-        array_shift($args);
-        $parameters = $args;
-      }
-      switch ($ClassRegistration->classFactoryMethod) {
-        default:
-          $Instance = call_user_func_array(array($className, $ClassRegistration->classFactoryMethod), $parameters);
-          break;
-        case '__construct':
-          $Instance = new $className;
-          break;
+      $ClassRegistration->dumpState();
+      
+      if (isset($ClassRegistration->classFactoryMethod)) {
+        //
+        // Get any parameters passed.
+        //
+        $parameters = array();
+        if (isset($param)) {
+          $args = func_get_args();
+          array_shift($args);
+          $parameters = $args;
+        }
+        switch ($ClassRegistration->classFactoryMethod) {
+          default:
+            $Instance = call_user_func_array(array($className, $ClassRegistration->classFactoryMethod), $parameters);
+            break;
+          case '__construct':
+            $Instance = new $className;
+            break;
+        }
       }
     }
     return $Instance;
@@ -363,6 +358,12 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       $ClassRegistration->className = $className;
       $ClassRegistration->classFullPath = $path;
       $ClassRegistration->classFactoryMethod = $method;
+      
+      //
+      // Dump class registration data to boot log.
+      //
+      $ClassRegistration->dumpState();
+      
       //
       // @todo: This methid needs to persist registration to db and deal with remaining field values
       //

@@ -219,6 +219,18 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
         getVariable($this->ApplicationAgent, AblePolecat_Environment_Application::SYSVAR_CORE_CLASSLIBS);
       if (isset($ClassLibraryRegistrations)) {
         foreach($ClassLibraryRegistrations as $key => $ClassLibraryRegistration) {
+          //
+          // Boot log can help with troubleshooting third party library installs.
+          //
+          $message = sprintf("REGISTRY: %s class library (id=%s)",
+            $ClassLibraryRegistration->getClassLibraryName(),
+            $ClassLibraryRegistration->getClassLibraryId()
+          );
+          AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+          
+          //
+          // Register library classes.
+          //
           $ClassRegistrations = $ClassRegistry->loadLibrary($ClassLibraryRegistration->getClassLibraryId());
         }
       }

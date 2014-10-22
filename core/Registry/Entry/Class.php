@@ -163,6 +163,22 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    ********************************************************************************/
   
   /**
+   * Output class state to debug log.
+   */
+  public function dumpState() {
+    $message = sprintf("REGISTRY: className=%s, classId=%s; classLibraryId=%s; classScope=%s; classFullPath=%s, classFactoryMethod=%s, classLastModifiedTime=%d",
+      $this->getClassName(),
+      $this->getClassId(),
+      $this->getClassLibraryId(),
+      $this->getClassScope(),
+      $this->getClassFullPath(),
+      $this->getClassFactoryMethod(),
+      $this->getClassLastModifiedTime()
+    );
+    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+  }
+  
+  /**
    * Extends __construct().
    *
    * Sub-classes should override to initialize arguments.
