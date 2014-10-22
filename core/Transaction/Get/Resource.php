@@ -116,9 +116,7 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       // Attempt to load resource class
       //
       try {
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "Attempt to load resource class $resourceClassName.");
         $Resource = $this->getClassRegistry()->loadClass($resourceClassName, $this->getAgent());
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Result: %s", AblePolecat_Data::getDataTypeName($Resource)));
         $this->setStatus(self::TX_STATE_COMPLETED);
       }
       catch(AblePolecat_AccessControl_Exception $Exception) {

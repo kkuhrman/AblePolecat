@@ -275,11 +275,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             );
             $Resource = $Transaction->start();
             if (!isset($Resource) || !is_a($Resource, 'AblePolecat_ResourceInterface')) {
-              $message = sprintf("%s returned %s. Registration=()",
-                AblePolecat_Data::getDataTypeName($Transaction),
-                AblePolecat_Data::getDataTypeName($Resource)
-              );
-              AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
               throw new AblePolecat_Service_Exception(sprintf("%s failed to return object which implements AblePolecat_ResourceInterface",
                 AblePolecat_Data::getDataTypeName($Transaction)
               ));

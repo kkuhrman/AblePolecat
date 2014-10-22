@@ -247,10 +247,17 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     
     $ClassRegistration = FALSE;
     
+    //
+    // Boot log is used for troubleshooting.
+    //
+    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "Checking if $className is loadable.");
+    
     if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
       $ClassRegistration = $this->Classes[self::KEY_CLASS_NAME][$className];
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
     }
     else {
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is not registered. Attempt to register by convention.");
       $ClassRegistration = $this->registerByConvention($className);
     }
     return $ClassRegistration;
@@ -268,6 +275,25 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     
     $Instance = NULL;
     $ClassRegistration = $this->isLoadable($className);
+    
+    //
+    // Boot log is used for troubleshooting faulty extension code.
+    //
+    $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($ClassRegistration));
+    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+    if ($ClassRegistration) {
+      $message = sprintf("className=%s, classId=%s; classLibraryId=%s; classScope=%s; classFullPath=%s, classFactoryMethod=%s, classLastModifiedTime=%d",
+        $ClassRegistration->getClassName(),
+        $ClassRegistration->getClassId(),
+        $ClassRegistration->getClassLibraryId(),
+        $ClassRegistration->getClassScope(),
+        $ClassRegistration->getClassFullPath(),
+        $ClassRegistration->getClassFactoryMethod(),
+        $ClassRegistration->getClassLastModifiedTime()
+      );
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+    }
+    
     if (isset($ClassRegistration->classFactoryMethod)) {
       //
       // Get any parameters passed.
