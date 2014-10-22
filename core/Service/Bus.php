@@ -183,10 +183,14 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           if (($CacheRegistration->getLastModifiedTime() > $ResourceRegistration->getLastModifiedTime()) && 
               ($CacheRegistration->getLastModifiedTime() > $ResponseRegistration->getLastModifiedTime())) {
             //
-            // @todo: generate response from cache entry
+            // Generate response from cache entry
             //
             $Response = AblePolecat_Message_Response_Cached::create();
             $Response->setCachedResponse($CacheRegistration);
+            AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Using cached response.');
+          }
+          else {
+            AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Cached response not available or outdated.');
           }
         }
         
