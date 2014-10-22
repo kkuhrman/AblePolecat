@@ -208,7 +208,6 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       // Boot procedure complete. Close boot log.
       //
       self::$Host->putBootMessage(AblePolecat_LogInterface::STATUS, 'Boot procedure completed successfully.');
-      // self::$Host->BootLog = NULL;
       
       //
       // Preprocess HTTP request.
@@ -279,6 +278,12 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             self::$Host->Request = AblePolecat_Message_Request_Delete::create();
             break;
         }
+        $message = sprintf("Preprocessed %s request to '%s' for '%s'.",
+          self::$Host->Request->getMethod(),
+          self::$Host->Request->getHostName(),
+          self::$Host->Request->getRequestPath()
+        );
+        self::$Host->putBootMessage(AblePolecat_LogInterface::STATUS, $message);
       }
     }
     else {
@@ -361,6 +366,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             isset($Records['lastInsertId']) ? $this->sessionNumber = $Records['lastInsertId'] : NULL;
           }
         }
+        self::$Host->putBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Session number is %d.", $this->sessionNumber));
       }
       
       self::$Host->Request->setRawRequestLogRecordId($requestId);

@@ -156,6 +156,12 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     
     try {
       if (is_a($Message, 'AblePolecat_Message_RequestInterface')) {
+        $message = sprintf("%s request dispatched to service bus by %s agent.", 
+          $Message->getMethod(),
+          $Agent->getName()
+        );
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+    
         //
         // Get resource registration info.
         //

@@ -59,6 +59,11 @@ class AblePolecat_Command_DbQuery extends AblePolecat_Command_ReverseAbstract {
     $sql = self::checkArgument(self::getName(), func_get_args(), 1, 'object', 'AblePolecat_QueryLanguage_Statement_Sql_Interface');
     
     //
+    // Log SQL if capturing boot log.
+    //
+    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $sql->__toString());
+    
+    //
     // Create and dispatch command
     //
     $Command = new AblePolecat_Command_DbQuery($Invoker, $sql);
