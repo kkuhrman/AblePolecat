@@ -144,6 +144,8 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   /**
    * Post processing of entity body is final edit. Typically simple text substitutions.
    *
+   * This function is called after DOM document has been set and rendered as text.
+   *
    * @param $string entityBody
    *
    * @return string.
@@ -153,6 +155,19 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     $substitutionValue = $this->entityBodyStringSubstitutes;
     $entityBody = str_replace($substitutionMarkers, $substitutionValue, $entityBody);
     return $entityBody;
+  }
+  
+  /**
+   * Preprocessing DOM document allows sub-classes to insert/append additional elements.
+   * 
+   * This function is called after DOM document has been created but before it is set.
+   *
+   * @param DOMDocument $Document
+   *
+   * @return DOMDocument $Document
+   */
+  protected function preprocessEntityBody(DOMDocument $Document) {
+    return $Document;
   }
   
   /**

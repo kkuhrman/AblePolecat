@@ -14,6 +14,7 @@
  * @version   0.6.2
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Dom.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Data.php');
 
 class AblePolecat_Dom {
@@ -25,6 +26,15 @@ class AblePolecat_Dom {
   const XHTML_1_1_PUBLIC_ID       = "-//W3C//DTD XHTML 1.1//EN";
   const XHTML_1_1_SYSTEM_ID       = "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";
   const XHTML_1_1_NAMESPACE_URI   = "http://www.w3.org/1999/xhtml";
+  
+  const DOM_DIRECTIVE_KEY_OP              = 'op';
+  const DOM_DIRECTIVE_KEY_FRAGMENT_PARENT = 'fragmentParent';
+  const DOM_DIRECTIVE_KEY_DOCUMENT_PARENT = 'documentParent';
+  const DOM_DIRECTIVE_KEY_REPLACE_NODE    = 'replaceNode';
+  const DOM_DIRECTIVE_KEY_RECURSIVE       = 'recursive';
+  const DOM_FRAGMENT_OP_APPEND  = 'APPEND'; 
+  const DOM_FRAGMENT_OP_INSERT  = 'INSERT';
+  const DOM_FRAGMENT_OP_REPLACE = 'REPLACE';
   
   /**
    * Append child element to given parent or one identified by tag or id.
@@ -278,6 +288,35 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Find requested DOMNode in given document.
+   *
+   * @param DOMDocument $document DOM Document.
+   * @param mixed $node Parent node | Array['id' => Array[ID attribute name => ID value]] | ['tag' => Array[tag name => DOMNodeList index]]
+   *
+   * @return DOMNode The requested node if found otherwise NULL.
+   */
+  public static function findDomNode(DOMDocument $document, $node) {
+    
+    $Node = NULL;
+    
+    if (is_array($node)) {
+      //
+      // Find given node in document
+      //
+      if (isset($node['id'])) {
+        isset($node['id']['attributeValue']) ? $attributeValue = $node['id']['attributeValue'] : $attributeValue = NULL;
+        isset($attributeValue) ? $Node = self::getElementById($document, $attributeValue) : NULL;
+      }
+      else if (isset($node['tag'])) {
+        isset($node['id']['tagName']) ? $tagName = $node['id']['tagName'] : $tagName = NULL;
+        isset($node['id']['listIndex']) ? $listIndex = $node['id']['listIndex'] : $listIndex = 0;
+        isset($tagName) ? $Node = self::getElementsByTagName($document, $tagName, $listIndex) : NULL;
+      }
+    }
+    return $Node;
+  }
+  
+  /**
    * Load markup into DOM Document and detach document element.
    *
    * @param string $fileName Name of file containing markup.
@@ -318,7 +357,8 @@ class AblePolecat_Dom {
     $Document = self::createDocument();
     @$Document->loadHTML($markup);
     $Elements = self::getElementsByTagName($Document, $parent);
-    $Element = $Elements->item(0)->firstChild;
+    $parentElement = $Elements->item(0);
+    isset($parentElement) ? $Element = $parentElement->firstChild : $Element = NULL;
     return $Element;
   }
   
@@ -366,176 +406,309 @@ class AblePolecat_Dom {
   }
   
   /**
-   * Debug information helper.
-   */
-  public static function getFunctionCallBacktrace($stackPos = NULL) {
-    $backtrace = debug_backtrace();
-    if (isset($stackPos) && isset($backtrace[$stackPos])) {
-      //
-      // @todo: this is an uncertain hack to get line # to correspond/sync with function/method and file
-      //
-      isset($backtrace[$stackPos - 1]['line']) ? $line = $backtrace[$stackPos - 1]['line'] : $line = $backtrace[$stackPos]['line'];
-      $backtrace = $backtrace[$stackPos];
-      $backtrace['line'] = $line;
-    }
-    else if (isset($stackPos) && ($stackPos == 'xml')) {
-      $backtrace_xml = '<backtrace>';
-      foreach($backtrace as $key => $frame) {
-        $backtrace_xml .= sprintf("<frame id=\"%d\">", $key);
-        isset($frame['file']) ? $backtrace_xml .= sprintf("<file>%s</file>", $frame['file']) : NULL;
-        isset($frame['line']) ? $backtrace_xml .= sprintf("<line>%d</line>", $frame['line']) : NULL;
-        isset($frame['class']) ? $backtrace_xml .= sprintf("<class>%s</class>", $frame['class']) : NULL;
-        isset($frame['function']) ? $backtrace_xml .= sprintf("<function>%s</function>", $frame['function']) : NULL;
-        $backtrace_xml .= '</frame>';
-      }
-      $backtrace_xml .= '</backtrace>';
-      $backtrace = $backtrace_xml;
-    }
-    return $backtrace;
-  }
-  
-  /**
-   * die and vomit on screen.
+   * Insert XML or XHTML fragment into DOM Document.
    *
-   * @param mixed $object A DOM object to examine.
+   * Able Polecat best practice is to store theme files (templates, scripts, 
+   * style sheets, etc) in the ./[project root]/usr/theme/[THEME_NAME].
+   * Fragments, which will be shared by all resources should be stored in
+   * ./[project root dir]/usr/theme/[THEME_NAME]/template/default/[fragment file].
+   * Fragments, which are specific to a named resource should be stored in
+   * ./[project root dir]/usr/theme/[THEME_NAME]/template/[RESOURCE_NAME]/[fragment file].
+   *
+   * @param DOMDocument $Document Document into which fragment will be inserted.
+   * @param mixed $templateSearchPaths String or array (see note above about fragment paths).
+   * @param Array $domDirectives Associative array (see note above).
+   *
+   * @todo: probably pass class registration as parameter so we know what to update with
+   * file modified time
+   *
+   * @return DOMNode imported DOM node.
+   * @see appendChildToParent().
    */
-  public static function kill($object = NULL) {
+  public static function loadTemplateFragment(
+    DOMDocument $Document,
+    $templateSearchPaths,
+    $domDirectives = NULL
+    // $fragmentParent = self::ELEMENT_BODY,
+    // $parent = NULL,
+    // $recursive = TRUE
+  ) {
     
-    // global $Clock;
+    $fragmentNode = NULL;
+    $templateFullPath = NULL;
+    $templateBodyStr = NULL;
+    $fileModifiedTime = 0;
     
-    $backtrace = self::getFunctionCallBacktrace(2);
-    $message = '<p>' . __METHOD__ . ' called. context: ';
-    if (isset($backtrace['class'])) {
-      $message .= $backtrace['class'];
-      isset($backtrace['type']) ? $message .= $backtrace['type'] : $message .= '.';
-      // isset($backtrace['type']) ? $message .= $backtrace['type'] : $message .= '.';
-      isset($backtrace['function']) ? $message .= $backtrace['function'] : NULL;
-      $message .= '<br />';
-    }
-    $message .= '<br />';
-    isset($backtrace['line']) ? $message .= ' line ' . $backtrace['line'] : NULL;
-    isset($backtrace['file']) ? $message .= ' in file ' . $backtrace['file'] : NULL;
-    $message .= '</p>';
-    echo $message;
-    
-    $properties = array(
-      'DOMDocument' => array(
-        'actualEncoding',
-        'config',
-        'doctype',
-        'documentElement',
-        'documentURI',
-        'encoding',
-        'formatOutput',
-        'implementation',
-        'preserveWhiteSpace',
-        'recover',
-        'resolveExternals',
-        'standalone',
-        'strictErrorChecking',
-        'substituteEntities',
-        'validateOnParse',
-        'version',
-        'xmlEncoding',
-        'xmlStandalone',
-        'xmlVersion',
-        'nodeName',
-        'nodeValue',
-        'nodeType',
-        'parentNode',
-        'childNodes',
-        'firstChild',
-        'lastChild',
-        'previousSibling',
-        'nextSibling',
-        'attributes',
-        'ownerDocument',
-        'namespaceURI',
-        'prefix',
-        'localName',
-        'baseURI',
-        'textContent',
-      ),
-      'DOMNode' => array(
-        'nodeName',
-        'nodeValue',
-        'nodeType',
-        'parentNode',
-        'childNodes',
-        'firstChild',
-        'lastChild',
-        'previousSibling',
-        'nextSibling',
-        'attributes',
-        'ownerDocument',
-        'namespaceURI',
-        'prefix',
-        'localName',
-        'baseURI',
-        'textContent',
-      ),
-      'DOMElement' => array(
-        'schemaTypeInfo',
-        'tagName',
-        'nodeName',
-        'nodeValue',
-        'nodeType',
-        'parentNode',
-        'childNodes',
-        'firstChild',
-        'lastChild',
-        'previousSibling',
-        'nextSibling',
-        'attributes',
-        'ownerDocument',
-        'namespaceURI',
-        'prefix',
-        'localName',
-        'baseURI',
-        'textContent',
-      ),
-    );
-    
-    if (isset($object) && is_object($object)) {
-      $className = @get_class($object);
-      if (isset($properties[$className])) {
-        echo "<h2>$className</h2>";
-        foreach($properties[$className] as $key => $varName) {          
-          if (property_exists($object, $varName)) {
-            $varValue = $object->$varName;
-            $type = gettype($varValue);
-            $varExport = '';
-            if ($type == 'object') {
-              $type = get_class($varValue);
-              $varExport = 'Object';
-            }
-            else {
-              switch ($type) {
-                default:
-                  $varExport = strval($varValue);
-                  break;
-                case 'boolean':
-                  $varValue ? $varExport = 'true' : $varExport = 'false';
-                  break;
+    $domDirectives = self::validateDomDirectives($domDirectives);
+    if ($domDirectives) {
+      //
+      // First conditional is compromise between allowing mixed parameter vs.
+      // not wanting to repeat file_exists() conditional code below.
+      //
+      if (is_scalar($templateSearchPaths) && is_string($templateSearchPaths)) {
+        $templateSearchPaths = array($templateSearchPaths);
+      }    
+      if (is_array($templateSearchPaths)) {
+        foreach($templateSearchPaths as $key => $path) {
+          if (file_exists($path)) {
+            $templateFullPath = $path;
+            $templateBodyStr = file_get_contents($templateFullPath);
+            $fileModifiedTime = filemtime($templateFullPath);
+            break;
+          }
+        }
+        
+        //
+        // @todo: is fragment modified time more recent that parent document modified time?
+        // IOW - do we need to re-cache this page?
+        //
+        
+        //
+        // Insert template body into document.
+        //
+        if (isset($templateBodyStr)) {
+          $recursive = $domDirectives[self::DOM_DIRECTIVE_KEY_RECURSIVE];
+          
+          //
+          // Create temporary DOMDocument from fragment.
+          //
+          $fragmentParent = 'body';
+          if (isset($domDirectives[self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT])) {
+            $fragmentParent = $domDirectives[self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT];
+          }
+          $fragmentNode = AblePolecat_Dom::getDocumentElementFromString($templateBodyStr, $fragmentParent);
+          
+          //
+          // Locate fragment parent element and extract fragment.
+          //
+          $documentParent = NULL;
+          if (isset($domDirectives[self::DOM_DIRECTIVE_KEY_DOCUMENT_PARENT])) {
+            $documentParent = $domDirectives[self::DOM_DIRECTIVE_KEY_DOCUMENT_PARENT];
+          }
+          switch ($domDirectives[self::DOM_DIRECTIVE_KEY_OP]) {
+            default:
+            case self::DOM_FRAGMENT_OP_APPEND:
+              $fragmentNode = self::appendChildToParent($fragmentNode, $Document, $documentParent);
+              break;
+            case self::DOM_FRAGMENT_OP_INSERT:
+              break;
+            case self::DOM_FRAGMENT_OP_REPLACE:
+              if (isset($domDirectives[self::DOM_DIRECTIVE_KEY_REPLACE_NODE])) {
+                $oldNode = $domDirectives[self::DOM_DIRECTIVE_KEY_REPLACE_NODE];
+                self::replaceDomNode($Document, $fragmentNode, $oldNode, $recursive);
               }
-            }
-            $out = sprintf("<pre class='xdebug-var-dump' dir='ltr'> <em>%s</em> <small>%s</small> <font color='#cc0000'>%s</font></pre>",
-              $varName,
-              $type,
-              $varExport
-            );
-            echo $out;
+              break;
+          }
+        }
+        else {
+          foreach($templateSearchPaths as $key => $path) {
+            $message = sprintf("No valid template fragment file was found at %s.", $path);
+            AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
           }
         }
       }
       else {
-        var_dump($object);
+        $message = sprintf("%s requires string or array containing template path(s). %s passed.",
+          __METHOD__,
+          AblePolecat_Data::getDataTypeName($templateSearchPaths)
+        );
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
       }
     }
-    else {
-      var_dump($object);
+    
+    return $fragmentNode;
+  }
+  
+  /**
+   * Replace one DOM node with another.
+   *
+   * @param DOMDocument $Document DOM Document, which will be manipulated.
+   * @param mixed $oldNode See notes.
+   * @param DOMNode $newNode See notes.
+   * @param bool $recursive IF TRUE, recursively import the sub-tree under $newNode. 
+   * 
+   * @return mixed DOMNode ($oldNode) if successful, otherwise FALSE.
+   */
+  public static function replaceDomNode(
+    DOMDocument $Document,
+    DOMNode $newNode,
+    $oldNode,
+    $recursive = TRUE
+  ) {
+    
+    $returnVal = FALSE;
+    //
+    // Make sure oldNode is properly typecast.
+    //
+    if (is_array($oldNode)) {
+      $oldNode = self::findDomNode($Document, $oldNode);
     }
-    // print('<p><strong>stop: ' . $Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, TRUE) . '</strong></p>');
-    exit(1);
+    else if (!is_a($oldNode, 'DOMNode')) {
+      $message = sprintf("%s parameter 3 requires DOMNode or array. %s passed.",
+        __METHOD__,
+        AblePolecat_Data::getDataTypeName($oldNode)
+      );
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+    }
+    if (isset($oldNode)) {
+      $parentNode = $oldNode->parentNode;
+      if (isset($parentNode)) {
+        $newNode = $Document->importNode($newNode, $recursive);
+        $returnVal = $parentNode->replaceChild($newNode, $oldNode);
+      }
+    }
+    return $returnVal;
+  }
+  
+  /**
+   * Check parameters passed to certain DOM manipulation functions (e.g. loadTemplateFragment).
+   *
+   * Parameter $domDirectives is an optional associative array with directive(s)
+   * on how to place fragment in DOM. If no array is passed, or a value is not given for
+   * one of the keys below, defaults are used.
+   * op             - How to place fragment in target DOM document.
+   * fragmentParent - Where to find fragment in temporary DOM document loaded from file.
+   * documentParent - Where to place fragment in target DOM document.
+   * recursive      - TRUE = recursively import the fragment sub-tree; 
+   *                  FALSE = import only top-level element of fragment
+   * Valid DOM directive values
+   * op     
+   *  - String APPEND (default) | INSERT | REPLACE
+   *  - NULL (defaults to APPEND)
+   * fragmentParent 
+   *  - String html | head | body
+   *  - Array['tag' => Array[tag name => DOMNodeList index]] (points to DOMNode) 
+   *  - NULL (defaults to 'body')
+   * documentParent
+   *  - DOMNode |
+   *  - Array['id' => Array[ID attribute name => ID value]] (points to DOMNode) |
+   *  - Array['tag' => Array[tag name => DOMNodeList index]] (points to DOMNode) 
+   *  - NULL (defaults to top-level DOMNode (first child) in Document)
+   * recursive
+   *  - Boolean
+   *  - NULL (defaults to TRUE - recursively import entire fragment)
+   *
+   * @param Array $domDirectives Associative array (see note above).
+   *
+   * @return mixed Valid $domDirectives array or FALSE.
+   * @see loadTemplateFragment().
+   */
+  public static function validateDomDirectives(
+    $domDirectives = NULL
+  ) {
+    
+    $domDirectivesChecked = FALSE;
+    
+    //
+    // If parameter is NULL, pass
+    //
+    if (!isset($domDirectives)) {
+      $domDirectivesChecked = array(
+        self::DOM_DIRECTIVE_KEY_OP => self::DOM_FRAGMENT_OP_APPEND,
+        self::DOM_DIRECTIVE_KEY_RECURSIVE => TRUE,
+      );
+    }
+    else {
+      if (is_array($domDirectives)) {
+        $domDirectivesChecked = array();
+        //
+        // Check parameters.
+        //
+        foreach($domDirectives as $directiveName => $directiveValue) {
+          switch($directiveName) {
+            default:
+              $message = sprintf("Invalid DOM directive parameter %s", $directiveName);
+              AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+              break;
+            case self::DOM_DIRECTIVE_KEY_OP:
+              if (is_string($directiveValue)) {
+                switch ($directiveValue) {
+                  default:
+                    $message = sprintf("Invalid value for DOM directive parameter %s: %s", $directiveName, $directiveValue);
+                    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+                    break;
+                  case self::DOM_FRAGMENT_OP_APPEND:
+                  case self::DOM_FRAGMENT_OP_INSERT:
+                  case self::DOM_FRAGMENT_OP_REPLACE:
+                    $domDirectivesChecked[self::DOM_DIRECTIVE_KEY_OP] = $directiveValue;
+                    if (($directiveName == self::DOM_FRAGMENT_OP_REPLACE) && !isset($domDirectives[self::DOM_DIRECTIVE_KEY_REPLACE_NODE])) {
+                      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, 'DOM directive replace node requires that a target node be specified.');
+                    }
+                    break;
+                }
+              }
+              else {
+                $message = sprintf("Invalid type for DOM directive parameter %s: String expected, %s passed.", 
+                  $directiveName,
+                  AblePolecat_Data::getDataTypeName($directiveValue)
+                );
+                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+              }
+              break;
+            case self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT:
+              if (is_string($directiveValue)) {
+                $domDirectivesChecked[$directiveName] = $directiveValue;
+              }
+              else if (is_array($directiveValue)) {
+                isset($directiveValue['id']['tagName']) ? $domDirectivesChecked[$directiveName] = $directiveValue['id']['tagName'] : NULL;
+              }
+              else {
+                $message = sprintf("Invalid type for DOM directive parameter %s: Array or string expected, %s passed.", 
+                  $directiveName,
+                  AblePolecat_Data::getDataTypeName($directiveValue)
+                );
+                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+              }
+              break;
+            case self::DOM_DIRECTIVE_KEY_DOCUMENT_PARENT:
+            case self::DOM_DIRECTIVE_KEY_REPLACE_NODE:
+              if (is_array($directiveValue) || (is_object($directiveValue) && is_a($directiveValue, 'DOMNode'))) {
+                $domDirectivesChecked[$directiveName] = $directiveValue;
+              }
+              else {
+                $message = sprintf("Invalid type for DOM directive parameter %s: Array or DOMNode expected, %s passed.", 
+                  $directiveName,
+                  AblePolecat_Data::getDataTypeName($directiveValue)
+                );
+                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+              }
+              break;
+            case self::DOM_DIRECTIVE_KEY_RECURSIVE:
+              if (is_bool($directiveValue)) {
+                $domDirectivesChecked[$directiveName] = $directiveValue;
+              }
+              else {
+                $message = sprintf("Invalid type for DOM directive parameter %s: Array or DOMNode expected, %s passed.", 
+                  $directiveName,
+                  AblePolecat_Data::getDataTypeName($directiveValue)
+                );
+                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+              }
+              break;
+          }
+        }
+        //
+        // Set defaults for missing parameters.
+        // (fragmentParent and documentParent default to NULL)
+        //
+        if (!isset($domDirectivesChecked[self::DOM_DIRECTIVE_KEY_OP])) {
+          $domDirectivesChecked[self::DOM_DIRECTIVE_KEY_OP] = self::DOM_FRAGMENT_OP_APPEND;
+        }
+        if (!isset($domDirectivesChecked[self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT])) {
+          $domDirectivesChecked[self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT] = 'body';
+        }
+        if (!isset($domDirectivesChecked[self::DOM_DIRECTIVE_KEY_RECURSIVE])) {
+          $domDirectivesChecked[self::DOM_DIRECTIVE_KEY_RECURSIVE] = TRUE;
+        }
+      }
+      else {
+        $message = sprintf("Bad parameter passed to %s #3 (domDirectives). Expected Array or NULL, %s passed.",
+          __METHOD__,
+          AblePolecat_Data::getDataTypeName($domDirectives)
+        );
+        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+      }
+    }
+    return $domDirectivesChecked;
   }
 }

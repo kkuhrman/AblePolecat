@@ -85,9 +85,7 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
         );
       }
       if (isset($Document)) {
-        //
-        // @todo: handle resource insertion
-        //
+        $Document = $this->preprocessEntityBody($Document);
         $this->setDocument($Document);
       }
     }
@@ -112,4 +110,8 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
       $this->templateFullPath = $templateFullPath;
     }
   }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
 }
