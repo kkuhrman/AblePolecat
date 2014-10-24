@@ -110,9 +110,9 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
         implode(' ', $this->formElements)
       );
     }
-    else {
-      $value = parent::__set($name, $value);
-    }
+    // else {
+      // $value = parent::__get($name);
+    // }
     return $value;
   }
   

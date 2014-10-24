@@ -24,12 +24,14 @@
  */ 
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Structure.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Resource.php')));
 
 interface AblePolecat_ResourceInterface 
-  extends AblePolecat_Data_StructureInterface, 
+  extends AblePolecat_CacheObjectInterface, 
+          AblePolecat_Data_StructureInterface, 
           AblePolecat_AccessControl_ResourceInterface {
   
   /**
@@ -43,6 +45,11 @@ interface AblePolecat_ResourceInterface
 abstract class AblePolecat_ResourceAbstract 
   extends AblePolecat_Data_StructureAbstract 
   implements AblePolecat_ResourceInterface {
+  
+  /**
+   * @var AblePolecat_AccessControl_SubjectInterface Typically, the subject passed to wakeup().
+   */
+  private $CommandInvoker;
   
   /**
    * @var string URI.
@@ -86,16 +93,55 @@ abstract class AblePolecat_ResourceAbstract
    ********************************************************************************/
   
   /**
+   * Default command invoker.
+   *
+   * @return AblePolecat_AccessControl_SubjectInterface or NULL.
+   */
+  protected function getDefaultCommandInvoker() {
+    return $this->CommandInvoker;
+  }
+  
+  /**
    * Extends __construct().
    */
   protected function initialize() {
-    
-    parent::initialize();
     
     //
     // throw exception if request URI path is not valid for resource
     //
     $this->validateRequestPath();
     $this->uri = AblePolecat_Host::getRequest()->getBaseUrl() . AblePolecat_Host::getRequest()->getRequestPath(TRUE);
+  }
+  
+  /**
+   * Sets the default command handlers (invoker/target).
+   * 
+   * @param AblePolecat_AccessControl_SubjectInterface $Invoker
+   */
+  protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
+    $this->CommandInvoker = $Invoker;
+  }
+	
+  /**
+   * Cached objects must be created by wakeup().
+   * Initialization of sub-classes should take place in initialize().
+   * @see initialize(), wakeup().
+   */
+  final protected function __construct() {
+    $args = func_get_args();
+    if (isset($args[0]) && is_a($args[0], 'AblePolecat_AccessControl_SubjectInterface')) {
+      $this->CommandInvoker = $args[0];
+    }
+    else {
+      $this->CommandInvoker = NULL;
+    }
+    $this->initialize();
+  }
+  
+  /**
+   * Serialization prior to going out of scope in sleep().
+   */
+  final public function __destruct() {
+    $this->sleep();
   }
 }

@@ -8,17 +8,15 @@
  * @version   0.6.2
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'DynamicObject.php')));
 
 interface AblePolecat_Data_StructureInterface 
-  extends AblePolecat_CacheObjectInterface, 
-          AblePolecat_DataInterface,
+  extends AblePolecat_DataInterface,
           AblePolecat_StdObjectInterface {
 }
 
-abstract class AblePolecat_Data_StructureAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_Data_StructureInterface {
+abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_StructureInterface {
   
   /**
    *  @var public class data members.
@@ -211,13 +209,5 @@ abstract class AblePolecat_Data_StructureAbstract extends AblePolecat_CacheObjec
     $this->checkAlloc();
     $property = key($this->properties);
     return $property;
-  }
-  
-  /**
-   * Extends __construct().
-   *
-   * Sub-classes can override to initialize extended data members.
-   */
-  protected function initialize() {
   }
 }

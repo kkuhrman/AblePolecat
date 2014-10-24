@@ -8,6 +8,7 @@
 # Don't show directory listings for URLs which map to a directory.
 #
 Options -Indexes
+# Options +FollowSymLinks
 
 #
 # Set the default handler.
@@ -34,6 +35,7 @@ DirectoryIndex index.php index.html index.htm
   # server document root. e.g. RewriteBase /polecat
   #
   # RewriteBase /polecat
+  # RewriteBase /
   
   #
   # Pass all requests not referring directly to files in the file system to
@@ -41,9 +43,7 @@ DirectoryIndex index.php index.html index.htm
   #
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  # RewriteCond $1 !^(css|js|plugins|img)/
   RewriteCond %{REQUEST_URI} !=/.(js|ico|gif|jpg|png|css|html|swf|mp3|wav|txt)$
-  # RewriteRule ^ index.php [QSA,L]
   RewriteRule ^ index.php [L]
 
 </IfModule>

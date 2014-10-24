@@ -10,6 +10,17 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Data.php')));
 
+interface AblePolecat_DataInterface extends Serializable {
+  
+  /**
+   * @param DOMDocument $Document.
+   * @param string $tagName Name of element tag (default is data type).
+   *
+   * @return DOMElement Encapsulated data expressed as DOM node.
+   */
+  public function getDomNode(DOMDocument $Document, $tagName = NULL);
+}
+
 /**
  * Static data handling methods.
  */
@@ -34,15 +45,4 @@ class AblePolecat_Data {
     }
     return $typeName;
   }
-}
-
-interface AblePolecat_DataInterface extends Serializable {
-  
-  /**
-   * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
-   *
-   * @return DOMElement Encapsulated data expressed as DOM node.
-   */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL);
 }
