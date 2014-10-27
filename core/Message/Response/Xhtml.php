@@ -134,6 +134,11 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       $BodyContent = AblePolecat_Dom::getDocumentElementFromString($Resource->Body);
       $BodyContent = AblePolecat_Dom::appendChildToParent($BodyContent, $Document, $DocumentBody);
       $this->setDocument($Document);
+      
+      //
+      // Treat all scalar Resource properties as potential substitution strings.
+      //
+      $this->setDefaultSubstitutionMarkers($Resource);
     }
   }
   
@@ -256,6 +261,20 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
         sprintf("substitution marker %s (value = %s) is not valid. proper syntax is {![0-9a-zA-Z._]}.", $substitutionMarker, $substitutionValue), 
         'info'
       );
+    }
+  }
+  
+  /**
+   * Treats all scalar Resource properties as potential substitution strings.
+   */
+  protected function setDefaultSubstitutionMarkers(AblePolecat_ResourceInterface $Resource) {
+    $property = $Resource->getFirstProperty();
+    while($property) {
+      if (is_a($property, 'AblePolecat_Data_ScalarInterface')) {
+        $substitutionMarker = sprintf("{!%s}", $property->getPropertyKey());
+        $substitutionValue = sprintf("%s", $property);
+        $this->setSubstitutionMarker($substitutionMarker, $substitutionValue);
+      }
     }
   }
   

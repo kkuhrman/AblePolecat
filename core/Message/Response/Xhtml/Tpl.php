@@ -88,6 +88,11 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
         $Document = $this->preprocessEntityBody($Document);
         $this->setDocument($Document);
       }
+      
+      //
+      // Treat all scalar Resource properties as potential substitution strings.
+      //
+      $this->setDefaultSubstitutionMarkers($Resource);
     }
   }
   

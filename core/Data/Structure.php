@@ -14,6 +14,30 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'DynamicObjec
 interface AblePolecat_Data_StructureInterface 
   extends AblePolecat_DataInterface,
           AblePolecat_StdObjectInterface {
+  /**
+   * Returns assigned or default value and will not trigger an error.
+   * 
+   * @param string $name Name of property.
+   * @param mixed $default Default value to return if not assigned.
+   *
+   * @return mixed Assigned value of property given by $name if assigned, otherwise $default.
+   */
+  public function getPropertySafe($name, $default = NULL);
+  
+  /**
+   * @return AblePolecat_DataInterface Value of first property in structure or FALSE.
+   */
+  public function getFirstProperty();
+  
+  /**
+   * @return AblePolecat_DataInterface Value of next property in structure or FALSE.
+   */
+  public function getNextProperty();
+  
+  /**
+   * @return mixed Name of property currently being pointed to.
+   */
+  public function getPropertyKey();
 }
 
 abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_StructureInterface {
@@ -86,7 +110,15 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   public function __set($name, $value) {
     $this->checkAlloc();
     if (!is_a($value, 'AblePolecat_DataInterface')) {
-      $value = AblePolecat_Data_Scalar_String::typeCast($value);
+      try {
+        $value = AblePolecat_Data_Scalar_String::typeCast($value);
+      }
+      catch(AblePolecat_Data_Exception $Exception) {
+        throw new AblePolecat_Data_Exception(sprintf("Failed to set data structure property %s. %s", 
+          $name, 
+          $Exception->getMessage())
+        );
+      }
     }
     $this->properties[$name] = $value;
   }
