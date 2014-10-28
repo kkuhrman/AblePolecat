@@ -13,7 +13,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 
-interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ArticleInterface, AblePolecat_CacheObjectInterface {
+interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
   
   /**
    * Prepares a request to be dispatched to a service.
@@ -39,6 +39,39 @@ interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessContr
  * Base class for service initiators (respond to request, initiate service, return response).
  */
 abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_Service_InitiatorInterface {
+  /**
+   * @var AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource if any.
+   */
+  protected $Locater;
+  
+  /**
+   * Sets URL used to open resource.
+   *
+   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Locater.
+   */
+  protected function setLocater(AblePolecat_AccessControl_Resource_LocaterInterface $Locater) {
+    $this->Locater = $Locater;
+  }
+  
+  /**
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource or NULL.
+   */
+  public function getLocater() {
+    return $this->Locater;
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    $this->Locater = NULL;
+  }
+}
+
+/**
+ * This is a legacy class - probably made obsolete by transaction management.
+ */ 
+abstract class AblePolecat_Service_InitiatorExAbstract extends AblePolecat_Service_InitiatorAbstract {
   
   /**
    * @var Prepared requests, ready to dispatch. FIFO.

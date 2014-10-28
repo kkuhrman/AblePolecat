@@ -74,6 +74,26 @@ abstract class AblePolecat_ResourceAbstract
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
   }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ResourceInterface.
+   ********************************************************************************/
+   
+  /**
+   * Opens an existing resource or makes an empty one accessible depending on permissions.
+   * 
+   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking access.
+   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
+   * @param string $name Optional common name for new resources.
+   *
+   * @return bool TRUE if access to resource is granted, otherwise FALSE.
+   */
+  public function open(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_Resource_LocaterInterface $Url = NULL) {
+    //
+    // @todo: 
+    //
+    return TRUE;
+  }
    
   /********************************************************************************
    * Implementation of AblePolecat_ResourceInterface

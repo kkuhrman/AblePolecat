@@ -142,19 +142,19 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * Opens an existing resource or makes an empty one accessible depending on permissions.
    * 
    * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking access.
-   * @param AblePolecat_AccessControl_Resource_Locater_DsnInterface $Url Existing or new resource.
+   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
    * @param string $name Optional common name for new resources.
    *
    * @return bool TRUE if access to resource is granted, otherwise FALSE.
    */
-  public function open(AblePolecat_AccessControl_AgentInterface $Agent = NULL, AblePolecat_AccessControl_Resource_Locater_DsnInterface $Url = NULL) {
+  public function open(AblePolecat_AccessControl_AgentInterface $Agent = NULL, AblePolecat_AccessControl_Resource_LocaterInterface $Url = NULL) {
     
     $open = FALSE;
     
     //
     // @todo: access control
     //
-    if (isset($Url)) {
+    if (isset($Url) && is_a($Url, 'AblePolecat_AccessControl_Resource_Locater_DsnInterface')) {
       $dsn = $Url->getDsn();
       $dbUser = $Url->getUsername();
       $dbPass = $Url->getPassword();

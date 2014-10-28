@@ -16,17 +16,6 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
   
   /**
-   * Opens an existing resource or makes an empty one accessible depending on permissions.
-   * 
-   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking access.
-   * @param AblePolecat_AccessControl_Resource_Locater_DsnInterface $Url Existing or new resource.
-   * @param string $name Optional common name for new resources.
-   *
-   * @return bool TRUE if access to resource is granted, otherwise FALSE.
-   */
-  public function open(AblePolecat_AccessControl_AgentInterface $Agent = NULL, AblePolecat_AccessControl_Resource_Locater_DsnInterface $Url = NULL);
-  
-  /**
    * Execute SQL DML and return number of rows effected.
    * 
    * NOTE: USE execute() for INSERT, DELETE, UPDATE, REPLACE.
