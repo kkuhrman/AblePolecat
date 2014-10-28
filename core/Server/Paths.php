@@ -158,6 +158,8 @@ class AblePolecat_Server_Paths {
   }
   
   /**
+   * Given relative path, return full path based on current server/application environment.
+   *
    * @param string $subdir Name of system directory.
    *
    * @return string Full path of given system directory or NULL.
@@ -178,7 +180,13 @@ class AblePolecat_Server_Paths {
             $path = self::$data_paths[$subdir];
           }
           else {
-            throw new AblePolecat_Server_Paths_Exception("Attempt to access $subdir directory before configurable paths initialized.");
+            $paths = explode(PATH_SEPARATOR, get_include_path());
+            foreach($paths as $key => $searchPath) {
+              if (file_exists($searchPath . DIRECTORY_SEPARATOR . $subdir)) {
+                $path = $searchPath . DIRECTORY_SEPARATOR . $subdir;
+                self::$conf_paths[$subdir] = $path;
+              }
+            }
           }
           break;
         //

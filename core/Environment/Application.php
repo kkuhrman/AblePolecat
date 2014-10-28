@@ -115,6 +115,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
               foreach($Node->childNodes as $key => $childNode) {
                 if($childNode->nodeName == 'fullPath') {
                   $ClassLibraryRegistration->classLibraryDirectory = $childNode->nodeValue;
+                  set_include_path(get_include_path() . PATH_SEPARATOR . $ClassLibraryRegistration->classLibraryDirectory);
                 }
               }
               $ClassLibraryRegistrations[] = $ClassLibraryRegistration;
