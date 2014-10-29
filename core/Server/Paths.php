@@ -82,9 +82,23 @@ class AblePolecat_Server_Paths {
   private static $data_paths = array();
   
   /**
-   * @var Array Some paths are set in server conf file.
+   * @var Array Some paths are set in environment conf files.
    */
   private static $conf_paths = array();
+  
+  /**
+   * @return Array Paths used for data storage.
+   */
+  public static function getDataPaths() {
+    return self::$data_paths;
+  }
+  
+  /**
+   * @return Array Paths set in environment conf files.
+   */
+  public static function getConfPaths() {
+    return self::$conf_paths;
+  }
   
   /**
    * Includes file if found, gives application a chance to fail gracefully if not.
@@ -340,4 +354,6 @@ class AblePolecat_Server_Paths {
       }
     }
   }
+  
+  final protected function __construct() {}
 }
