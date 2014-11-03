@@ -121,6 +121,7 @@ class AblePolecat_Transaction_AccessControl_Authority
           $this->getAgent(),
           'AblePolecat_Resource_Form'
         );
+        $Resource->addText('Enter user name and password for database administrator.');
         $Resource->addControl('label', array('for' => 'userName'), 'Username: ');
         $Resource->addControl('input', array('id' => 'userName', 'type' => 'text', 'name' => self::ARG_USER));
         $Resource->addControl('label', array('for' => 'passWord'), 'Password: ');

@@ -28,6 +28,11 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
   private $formElements;
   
   /**
+   * @var Array
+   */
+  private $textElements;
+  
+  /**
    * Constants.
    */
   const UUID = '7641ec47-44c4-11e4-b353-0050569e00a2';
@@ -105,6 +110,7 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
     
     if ($name == 'Body') {
       $value = sprintf($this->BodyFormat, 
+        implode('',$this->textElements),
         $this->getId(),
         '', // all forms should be processed through index.php; @see addControl('input', array('type'=>'hidden'))
         implode(' ', $this->formElements)
@@ -155,6 +161,17 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
   }
   
   /**
+   * Add text to the top of the form.
+   *
+   * @param string $text Text to appear at the top of the form.
+   */
+  public function addText($text) {
+    if (is_string($text)) {
+      $this->textElements[] = sprintf("<p>%s</p>", $text);
+    }
+  }
+  
+  /**
    * Validates request URI path to ensure resource request can be fulfilled.
    *
    * @throw AblePolecat_Exception If request URI path is not validated.
@@ -172,7 +189,8 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
     
     parent::initialize();
     
-    $this->BodyFormat = "<div><form id=\"%s\" action=\"%s\" method=\"post\">%s<input type=\"submit\" value=\"Submit\" /></form></div>";
+    $this->BodyFormat = "<div><div>%s</div><div><form id=\"%s\" action=\"%s\" method=\"post\">%s<input type=\"submit\" value=\"Submit\" /></form></div></div>";
     $this->formElements = array();
+    $this->textElements = array();
   }
 }

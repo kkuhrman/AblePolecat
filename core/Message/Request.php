@@ -83,6 +83,11 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   public function getRawRequestLogRecordId();
   
   /**
+   * @return mixed Redirect URL or FALSE.
+   */
+  public function getRedirectUrl();
+  
+  /**
    * Check resource name against list of allowable characters etc.
    *
    * @param string $requestedResourceName Name of requested resource.
@@ -142,6 +147,11 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * @var mixed ID of raw request log entry in database.
    */
   private $rawRequestLogRecordId;
+  
+  /**
+   * @var mixed Redirect URL or FALSE.
+   */
+  private $redirectUrl;
   
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
@@ -239,6 +249,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
   }
   
   /**
+   * @return mixed Redirect URL or FALSE.
+   */
+  public function getRedirectUrl() {
+    return $this->redirectUrl;
+  }
+  
+  /**
    * Check resource name against list of allowable characters etc.
    *
    * @param string $requestedResourceName Name of requested resource.
@@ -321,78 +338,78 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = 'GET';
     
     //
-    // @todo: if method is POST and not the result of search form action, we bypass default POST
-    // processing by spoofing a GET request here; not elegant but functional.
+    // Remove trailing slash, alias and query string, if any, from request URI
     //
-    if (isset($_POST) && count($_POST) && !isset($this->entity_body[self::URI_SEARCH_PARAM])) {
-      $method = 'GET';
-    }
+    isset($this->alias) ? $alias = $this->alias : $alias = '';
+    isset($_SERVER['REQUEST_URI']) ? $request_uri = $_SERVER['REQUEST_URI'] : $request_uri = '';
+    isset($_SERVER['QUERY_STRING']) ? $query_string = $_SERVER['QUERY_STRING'] : $query_string = '';
+    $this->request_path_info[self::URI_PATH] = trim(str_replace($alias, '', str_replace($query_string, '', $request_uri)), self::URI_SLASH.'?');
+    $this->request_path = explode(self::URI_SLASH, $this->request_path_info[self::URI_PATH]);
     
-    switch ($method) {
-      default:        
+    //
+    // Is there anything left of the path?
+    //
+    if (isset($this->request_path[0]) && ($this->request_path[0] != '')) {
+      //
+      // Is it a request for a recognized resource on the system?
+      //
+      $resourceName = $this->validateResourceName($this->request_path[0]);
+      if (strcasecmp($this->request_path[0], $resourceName) == 0) {
         //
-        // Remove trailing slash, alias and query string, if any, from request URI
+        // Yes, a valid resource name was given.
         //
-        isset($this->alias) ? $alias = $this->alias : $alias = '';
-        isset($_SERVER['REQUEST_URI']) ? $request_uri = $_SERVER['REQUEST_URI'] : $request_uri = '';
-        isset($_SERVER['QUERY_STRING']) ? $query_string = $_SERVER['QUERY_STRING'] : $query_string = '';
-        $this->request_path_info[self::URI_PATH] = trim(str_replace($alias, '', str_replace($query_string, '', $request_uri)), self::URI_SLASH.'?');
-        $this->request_path = explode(self::URI_SLASH, $this->request_path_info[self::URI_PATH]);
+        $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
+        $this->request_path_info[self::URI_REDIRECT] = FALSE;
+      }
+      else {
+        //
+        // @todo: log error in event request is for script, CSS etc that does not exist at given path.
+        //
         
         //
-        // Is there anything left of the path?
+        // No, an invalid resource name was given; redirect to search.
         //
-        if (isset($this->request_path[0]) && ($this->request_path[0] != '')) {
-          //
-          // Is it a request for a recognized resource on the system?
-          //
-          $resourceName = $this->validateResourceName($this->request_path[0]);
-          if (strcasecmp($this->request_path[0], $resourceName) == 0) {
-            //
-            // Yes, a valid resource name was given.
-            //
-            $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
-            $this->request_path_info[self::URI_REDIRECT] = FALSE;
-          }
-          else {
-            //
-            // @todo: log error in event request is for script, CSS etc that does not exist at given path.
-            //
-            
-            //
-            // No, an invalid resource name was given; redirect to search.
-            //
-            $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_SEARCH;
-            $this->request_path_info[self::URI_REDIRECT] = TRUE;
-          }
-        }
-        else {
-          //
-          // Otherwise, this is a request for the home page.
-          //
-          $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_HOME;
-          $this->request_path_info[self::URI_REDIRECT] = FALSE;
-        }
-        break;
-      case 'POST':
-        //
-        // Process search form action
-        // Build a query string from the POST data
-        //
-        $query_string = $this->makeRequestQueryString($this->entity_body);
+        $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_SEARCH;
+        $this->request_path_info[self::URI_REDIRECT] = TRUE;
         
         //
-        // @todo: No! This is the job of the host/server.
-        // Redirect to search feature
+        // Build search query string from invalid resource path.
         //
-        $redirect_uri = sprintf("%s%s%s?%s",
+        $query_string = $this->makeRequestQueryString(array(self::URI_SEARCH_PARAM => $this->request_path));
+        $this->redirectUrl = sprintf("%s%s%s?%s",
           $this->host_url,
           self::RESOURCE_NAME_SEARCH,
           self::URI_SLASH,
           $query_string
         );
-        header("Location: $redirect_uri");
-        exit(0);
+      }
+    }
+    else {
+      //
+      // Otherwise, this is a request for the home page.
+      //
+      $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_HOME;
+      $this->request_path_info[self::URI_REDIRECT] = FALSE;
+    }
+        
+    switch ($method) {
+      default:
+        break;
+      case 'POST':
+        if (isset($this->entity_body[self::URI_SEARCH_PARAM])) {
+          //
+          // POST process search form results, redirect to search page.
+          //
+          $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_SEARCH;
+          $this->request_path_info[self::URI_REDIRECT] = TRUE;
+          $query_string = $this->makeRequestQueryString(array(self::URI_SEARCH_PARAM => $this->entity_body[self::URI_SEARCH_PARAM]));
+          $this->redirectUrl = sprintf("%s%s%s?%s",
+            $this->host_url,
+            self::RESOURCE_NAME_SEARCH,
+            self::URI_SLASH,
+            $query_string
+          );
+        }        
     }
   }
   
@@ -400,31 +417,36 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * Filter (sanitize) entity body if sent (e.g. POST data).
    */
   protected function filterEntityBody() {
-    //
-    // Is the search parameter present in the POST data or query string?
-    //
-    if (isset($_POST[self::URI_SEARCH_PARAM])) {
+    if (isset($_POST) && count($_POST)) {
       //
-      // Sanitize raw form data
+      // Is the search parameter present in the POST data or query string?
       //
-      $body = strtolower(addslashes($_POST[self::URI_SEARCH_PARAM]));
-      
-      //
-      // Remove unwanted characters
-      //
-      $body = preg_replace("[^ 0-9a-zA-Z]", " ", $body);
-      
-      //
-      // Remove multiple adjacent spaces
-      //
-      while (strstr($body, "  ")) {
-        $body = str_replace("  ", " ", $body);
+      if (isset($_POST[self::URI_SEARCH_PARAM])) {
+        //
+        // Sanitize raw form data
+        //
+        $body = strtolower(addslashes($_POST[self::URI_SEARCH_PARAM]));
+        
+        //
+        // Remove unwanted characters
+        //
+        $body = preg_replace("[^ 0-9a-zA-Z]", " ", $body);
+        
+        //
+        // Remove multiple adjacent spaces
+        //
+        while (strstr($body, "  ")) {
+          $body = str_replace("  ", " ", $body);
+        }
+        
+        //
+        // Break up search parameter string into array of search terms
+        //
+        $this->entity_body[self::URI_SEARCH_PARAM] = explode(' ', $body);
       }
-      
-      //
-      // Break up search parameter string into array of search terms
-      //
-      $this->entity_body[self::URI_SEARCH_PARAM] = explode(' ', $body);
+      else {
+        $this->entity_body = $_POST;
+      }
     }
   }
   
@@ -525,7 +547,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     
     if (isset($parameters) && is_array($parameters)) {
       foreach($parameters as $parameter => $args) {
-        $query_string_parts[] = sprintf("%s=%s", $parameter, rawurlencode(implode('+', $args)));
+        is_scalar($args) ? $args = array($args) : NULL;
+        $query_string_parts[] = sprintf("%s=%s", strval($parameter), rawurlencode(implode('+', $args)));
       }
       $query_string = implode('&', $query_string_parts);
     }
@@ -598,5 +621,6 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     $this->resourceUri = NULL;
     $this->request_path_info = NULL;
     $this->rawRequestLogRecordId = NULL;
+    $this->redirectUrl = FALSE;
   }
 }

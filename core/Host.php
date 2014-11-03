@@ -44,6 +44,15 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   const UUID                    = 'd63da8f0-39b0-11e4-916c-0800200c9a66';
   const NAME                    = 'Able Polecat Host';
   
+  //
+  // Permitted session variables (not stored in database).
+  //
+  const POLECAT_INSTALL_TRX     = 'transaction';
+  const POLECAT_INSTALL_SAVEPT  = 'save_point';
+  const POLECAT_INSTALL_DBNAME  = 'database';
+  const POLECAT_INSTALL_DBUSER  = 'user';
+  const POLECAT_INSTALL_DBPASS  = 'pass';
+  
   /**
    * @var Instance of concrete singleton class.
    */
@@ -278,6 +287,16 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             self::$Host->Request = AblePolecat_Message_Request_Delete::create();
             break;
         }
+        
+        //
+        // @todo: handle redirect to search page?
+        //
+        // $redirect_uri = self::$Host->Request->getRedirectUrl();
+        // if ($redirect_uri) {
+          // header("Location: $redirect_uri");
+          // exit(0);
+        // }
+        
         $message = sprintf("Preprocessed %s request to '%s' for '%s'.",
           self::$Host->Request->getMethod(),
           self::$Host->Request->getHostName(),
@@ -413,6 +432,34 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       $sessionNumber = self::$Host->sessionNumber;
     }
     return $sessionNumber;
+  }
+  
+  /**
+   * Retrieve variable from $_SESSION global variable.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject Class attempting to retrieve variable.
+   * @param string $variableName Name of session variable.
+   *
+   * @return mixed $variableValue Value of session variable or NULL.
+   */
+  public static function getSessionVariable(AblePolecat_AccessControl_SubjectInterface $Subject, $variableName) {
+    
+    $value = NULL;
+    
+    if (isset(self::$Host) &&
+        isset(self::$Host->sessionGlobal) && 
+        is_array(self::$Host->sessionGlobal) && 
+        isset(self::$Host->sessionGlobal[$variableName])) {
+      $className = get_class($Subject);
+      switch ($className) {
+        default:
+          break;
+        case 'AblePolecat_Transaction_Install':
+          $value = self::$Host->sessionGlobal[$className][$variableName];
+          break;
+      }
+    }
+    return $value;
   }
   
   /**
@@ -631,6 +678,40 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     return $writeResult;
   }
   
+  /**
+   * Save variable to $_SESSION global variable.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject Class attempting to set variable.
+   * @param string $variableName Name of session variable.
+   * @param mixed $variableValue Value of session variable.
+   */
+  public static function setSessionVariable(AblePolecat_AccessControl_SubjectInterface $Subject, $variableName, $variableValue) {
+    if (isset(self::$Host) &&
+        isset(self::$Host->sessionGlobal) && 
+        is_array(self::$Host->sessionGlobal) && 
+        is_scalar($variableName)) {
+      $className = get_class($Subject);
+      switch ($className) {
+        default:
+          break;
+        case 'AblePolecat_Transaction_Install':
+          !isset(self::$Host->sessionGlobal[$className]) ? self::$Host->sessionGlobal[$className] = array() : NULL;
+          switch ($variableName) {
+            default:
+              break;
+            case self::POLECAT_INSTALL_TRX:
+            case self::POLECAT_INSTALL_SAVEPT:
+            case self::POLECAT_INSTALL_DBNAME:
+            case self::POLECAT_INSTALL_DBUSER:
+            case self::POLECAT_INSTALL_DBPASS:
+              self::$Host->sessionGlobal[$className][$variableName] = $variableValue;
+              break;
+          }
+          break;
+      }
+    }
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -836,6 +917,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     // application/user mode.
     //
     $this->sessionGlobal = $_SESSION;
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Session state: ' . serialize($_SESSION));
     
     //
     // Turn on output buffering.
@@ -862,6 +944,17 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     //
     ob_end_flush();
     $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering flushed.');
+    
+    //
+    // Remove any unauthorized session settings.
+    //
+    foreach($_SESSION as $varName => $varValue) {
+      unset($_SESSION[$varName]);
+    }
+    foreach($this->sessionGlobal as $varName => $varValue) {
+      $_SESSION[$varName] = $varValue;
+    }
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Session state: ' . serialize($_SESSION));
     
     //
     // Close and save PHP session.

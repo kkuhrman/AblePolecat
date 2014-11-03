@@ -139,8 +139,11 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
         break;
       case 'bed41310-2174-11e4-8c21-0800200c9a66':
         //
-        // @todo: get security token may be deprecated.
+        // Request for access to restricted resource.
+        // In server mode, the only restricted resource is server database.
+        // Typically only passed to server mode prior to install or utility execution.
         //
+        AblePolecat_Debug::kill($Command);
         $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_FAIL);
         break;
       case '54d2e7d0-77b9-11e3-981f-0800200c9a66':

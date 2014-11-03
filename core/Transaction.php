@@ -18,7 +18,10 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Transaction.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
 
-interface AblePolecat_TransactionInterface extends AblePolecat_CacheObjectInterface, AblePolecat_OverloadableInterface {
+interface AblePolecat_TransactionInterface 
+  extends AblePolecat_AccessControl_SubjectInterface,
+          AblePolecat_CacheObjectInterface, 
+          AblePolecat_OverloadableInterface {
   
   /**
    * Transaction states.
@@ -579,6 +582,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     $savepointCreated = $CommandResult->success();
     
     if (($transactionStarted == FALSE) || ($transactionUpdated == FALSE) || ($savepointCreated == FALSE)) {
+      // AblePolecat_Debug::kill(debug_backtrace());
       throw new AblePolecat_Transaction_Exception(sprintf("Failed to create save point given by $savepointName on transaction %s [ID:%s]",
           $savepointName, $this->getTransactionId()), AblePolecat_Transaction_Exception::CODE_DATABASE_ERROR
       );

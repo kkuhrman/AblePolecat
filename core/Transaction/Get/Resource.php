@@ -64,7 +64,6 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
       self::$Transaction = new AblePolecat_Transaction_Get_Resource($ArgsList->getArgumentValue(self::TX_ARG_SUBJECT));
       self::prepare(self::$Transaction, $ArgsList, __FUNCTION__);
-      
     }
     return self::$Transaction;
   }
@@ -173,20 +172,15 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
           $this->setStatus(self::TX_STATE_COMPLETED);
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-          
+          //
+          // @todo:
+          //
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
           $Resource = AblePolecat_Resource_Core::wakeup(
             $this->getDefaultCommandInvoker(),
             'AblePolecat_Resource_Ack'
-          );
-          $this->setStatus(self::TX_STATE_COMPLETED);
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $Resource = AblePolecat_Resource_Core::wakeup(
-            $this->getDefaultCommandInvoker(),
-            'AblePolecat_Resource_Install'
           );
           $this->setStatus(self::TX_STATE_COMPLETED);
           break;

@@ -8,14 +8,14 @@
  * @version   0.6.2
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Restricted.php')));
 
-class AblePolecat_Resource_Install extends AblePolecat_ResourceAbstract {
+class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstract {
   
   /**
    * @var resource Instance of singleton.
    */
-  private static $Resource;
+  // private static $Resource;
   
   /**
    * Constants.
@@ -60,14 +60,36 @@ class AblePolecat_Resource_Install extends AblePolecat_ResourceAbstract {
     
     if (!isset(self::$Resource)) {
       self::$Resource = new AblePolecat_Resource_Install($Subject);
-      self::$Resource->activeCoreDatabase = AblePolecat_Host::getActiveCoreDatabaseName();
+      self::$Resource->setWakeupAccessRequest(AblePolecat_AccessControl_Constraint_Execute::getId());
+    }
+    return parent::wakeup($Subject);
+    /*
+    if (!isset(self::$Resource)) {
+      //
+      // Create resource.
+      //
+      self::$Resource = new AblePolecat_Resource_Install($Subject);
+      self::$Resource->Head = 'Able Polecat | Install';
       
-      $version = AblePolecat_Host::getVersion(TRUE, 'HTML');
-      self::$Resource->Head = sprintf("<title>%s | Install</title>", $version);
-      self::$Resource->Body = "<p>Detailed installation instructions are at <a href=\"https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started\" target=\"new\">
-        https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started</a></p>";
+      //
+      // Check if Able Polecat database exists.
+      //
+      $activeCoreDatabase = AblePolecat_Host::getActiveCoreDatabaseName();
+      if ($activeCoreDatabase) {
+        $version = AblePolecat_Host::getVersion(TRUE, 'HTML');
+        self::$Resource->Body = sprintf("<p>Able Polecat %s is installed. Active database is [%s].</p>",
+          $version,
+          $activeCoreDatabase
+        );
+      }
+      else {
+        throw new AblePolecat_AccessControl_Exception('Able Polecat is not installed. Server database is not active.');
+        // self::$Resource->Body = "<p>Detailed installation instructions are at <a href=\"https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started\" target=\"new\">
+          // https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started</a></p>";
+      }
     }
     return self::$Resource;
+    */
   }
   
   /********************************************************************************

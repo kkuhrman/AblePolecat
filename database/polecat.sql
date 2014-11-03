@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Oct 21, 2014 at 10:40 PM
+-- Generation Time: Nov 03, 2014 at 03:42 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `eventMessage` text NOT NULL,
   PRIMARY KEY (`eventId`),
   KEY `user_id` (`userId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `transactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=30 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS `response` (
   `docType` text,
   `defaultHeaders` text,
   `responseClassName` varchar(255) NOT NULL,
-  `templateFullPath` varchar(255) DEFAULT NULL,
+  `templateFullPath` varchar(255) DEFAULT 'C:\\wamp\\www\\tabby\\htdocs\\theme\\default\\template\\default\\page.tpl',
   `lastModifiedTime` int(11) NOT NULL,
   UNIQUE KEY `responseKey` (`resourceId`,`statusCode`),
   KEY `responseClassName` (`responseClassName`)
@@ -321,7 +321,7 @@ CREATE TABLE IF NOT EXISTS `session` (
   `start` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`sessionNumber`),
   UNIQUE KEY `phpSessionId` (`phpSessionId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 

@@ -138,7 +138,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       //
       // Treat all scalar Resource properties as potential substitution strings.
       //
-      $this->setDefaultSubstitutionMarkers($Resource);
+      // $this->setDefaultSubstitutionMarkers($Resource);
     }
   }
   

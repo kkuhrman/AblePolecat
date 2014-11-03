@@ -366,21 +366,21 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     }
     if (!isset($ResourceRegistration->resourceClassName)) {
       //
-      // Request did not resolve to a registered resource class.
-      // Log status and return one of the 'built-in' resources.
+      // Resource is not registered. Use a system resource.      
+      // Assign resource id and class name.
       //
-      $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
-        $resourceName, 
-        $Request->getRequestPath(),
-        $Request->getHostName()
-      );
-      AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
-      
-      $ResourceRegistration->transactionClassName = NULL;
-      $ResourceRegistration->authorityClassName = NULL;
-      $ResourceRegistration->resourceDenyCode = 200;
       switch ($resourceName) {
         default:
+          //
+          // Request did not resolve to a registered or system resource class.
+          // Log status and return error resource.
+          //
+          $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
+            $resourceName, 
+            $Request->getRequestPath(),
+            $Request->getHostName()
+          );
+          AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
           $ResourceRegistration->resourceId = AblePolecat_Resource_Error::getId();
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Error';
           break;
@@ -392,6 +392,29 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
           $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::getId();
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
+          $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Install::getId();
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
+          $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
+          break;
+      }
+      
+      //
+      // Assign transaction, authority and access denied code.
+      //
+      switch ($resourceName) {
+        default:
+          //
+          // Unrestricted resource.
+          //
+          $ResourceRegistration->transactionClassName = NULL;
+          $ResourceRegistration->authorityClassName = NULL;
+          $ResourceRegistration->resourceDenyCode = 200;
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
           switch ($Request->getMethod()) {
             default:
               break;
@@ -400,15 +423,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               $ResourceRegistration->resourceDenyCode = 401;
               break;
             case 'POST':
-              $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
               $ResourceRegistration->authorityClassName = NULL;
               $ResourceRegistration->resourceDenyCode = 403;
               break;
           }
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Install::getId();
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
           break;
       }
     }
@@ -630,7 +648,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         );
         break;
       case 'AblePolecat_Resource_Ack':
-      case 'AblePolecat_Resource_Install':
         //
         // If requested resource is ACK, ignore.
         //
