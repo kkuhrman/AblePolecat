@@ -16,6 +16,11 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
   
   /**
+   * @return AblePolecat_AccessControl_Resource_Locater_DsnInterface URL used to open resource or NULL.
+   */
+  public function getLocater();
+  
+  /**
    * Execute SQL DML and return number of rows effected.
    * 
    * NOTE: USE execute() for INSERT, DELETE, UPDATE, REPLACE.
@@ -49,6 +54,52 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
    */
   protected $Locater;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   ********************************************************************************/
+  
+  /**
+   * Common name, need not be unique.
+   *
+   * @return string Common name.
+   */
+  public function getName() {
+    
+    $name = NULL;
+    if (isset($this->Locater)) {
+      $name = $this->Locater->getPathname();
+    }
+    return $name;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_DatabaseInterface.
+   ********************************************************************************/
+  
+  /**
+   * @return AblePolecat_AccessControl_Resource_Locater_DsnInterface URL used to open resource or NULL.
+   */
+  public function getLocater() {
+    return $this->Locater;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
   /**
    * Sets URL used to open resource.
    *
@@ -56,13 +107,6 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
    */
   protected function setLocater(AblePolecat_AccessControl_Resource_Locater_DsnInterface $Locater) {
     $this->Locater = $Locater;
-  }
-  
-  /**
-   * @return AblePolecat_AccessControl_Resource_Locater_DsnInterface URL used to open resource or NULL.
-   */
-  public function getLocater() {
-    return $this->Locater;
   }
   
   /**

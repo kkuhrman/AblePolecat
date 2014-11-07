@@ -8,12 +8,12 @@
  * @version   0.6.2
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Environment.php')));
 
-interface AblePolecat_EnvironmentInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
+interface AblePolecat_EnvironmentInterface extends AblePolecat_AccessControl_Article_StaticInterface, AblePolecat_CacheObjectInterface {
   
   /**
    * Returns assigned value of given environment variable.
@@ -45,23 +45,16 @@ abstract class AblePolecat_EnvironmentAbstract extends AblePolecat_CacheObjectAb
   private $Variables;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ResourceInterface.
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
-   
+  
   /**
-   * Opens an existing resource or makes an empty one accessible depending on permissions.
-   * 
-   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking access.
-   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
-   * @param string $name Optional common name for new resources.
+   * General purpose of object implementing this interface.
    *
-   * @return bool TRUE if access to resource is granted, otherwise FALSE.
+   * @return string.
    */
-  public function open(AblePolecat_AccessControl_AgentInterface $Agent, AblePolecat_AccessControl_Resource_LocaterInterface $Url = NULL) {
-    //
-    // @todo: 
-    //
-    return TRUE;
+  public static function getScope() {
+    return 'SYSTEM';
   }
   
   /********************************************************************************

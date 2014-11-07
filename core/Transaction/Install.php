@@ -32,7 +32,7 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
   private static $Transaction;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

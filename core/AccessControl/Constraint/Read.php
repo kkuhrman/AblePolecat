@@ -11,11 +11,24 @@ class AblePolecat_AccessControl_Constraint_Read implements AblePolecat_AccessCon
   /**
    * Constants.
    */
-  const UUID = '6b71c7f0-63dc-11e2-bcfd-0800200c9a66';
+  const UUID = 'read';
   const NAME = 'read';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'RESOURCE';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

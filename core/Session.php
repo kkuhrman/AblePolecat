@@ -73,7 +73,7 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    * @return string PHP session ID.
    * @throw AblePolecat_Session if session appears to have been tampered with.
    */
-  public static function getId() {
+  public function getId() {
     
     $sessionId = NULL;
     
@@ -95,8 +95,8 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    *
    * @return string Common name.
    */
-  public static function getName() {
-    return 'Able Polecat Session';
+  public function getName() {
+    return 'session';
   }
   
   /********************************************************************************
@@ -121,10 +121,13 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Session)) {
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_HostInterface')) {
-        self::$Session = new AblePolecat_Session($Subject);
+      $args = func_get_args();
+      $DefaultCommandInvoker = NULL;
+      if(isset($args[1]) && is_a($args[1], 'AblePolecat_HostInterface')) {
+        $DefaultCommandInvoker = $args[1];
+        self::$Session = new AblePolecat_Session($DefaultCommandInvoker);
       }
-      else {
+      if (!isset(self::$Session)) {
         $error_msg = sprintf("%s is not permitted to manage sessions.", AblePolecat_Data::getDataTypeName($Subject));
         throw new AblePolecat_Session($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }

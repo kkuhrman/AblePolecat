@@ -22,28 +22,6 @@ class AblePolecat_Resource_Restricted_Util extends AblePolecat_Resource_Restrict
   const NAME = 'util';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Agent identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Agent name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/
   
@@ -96,5 +74,7 @@ class AblePolecat_Resource_Restricted_Util extends AblePolecat_Resource_Restrict
    */
   protected function initialize() {
     parent::initialize();
+    $this->setId(self::UUID);
+    $this->setId(self::NAME);
   }
 }

@@ -54,9 +54,6 @@ interface AblePolecat_Database_PdoInterface extends AblePolecat_DatabaseInterfac
 
 class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements AblePolecat_Database_PdoInterface {
   
-  const UUID              = '503bd610-6431-11e2-bcfd-0800200c9a66';
-  const NAME              = 'Able Polecat PDO database';
-  
   /**
    * @var AblePolecat_Database_Pdo Instance of singleton.
    */
@@ -73,25 +70,16 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   private $error_info;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
    ********************************************************************************/
   
   /**
-   * Return unique, system-wide identifier for security resource.
+   * System unique ID.
    *
-   * @return string Resource identifier.
+   * @return scalar Subject unique identifier.
    */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for security resource.
-   *
-   * @return string Resource name.
-   */
-  public static function getName() {
-    return self::NAME;
+  public function getId() {
+    return $this->DatabaseConnection;
   }
   
   /********************************************************************************
@@ -122,15 +110,11 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * @return AblePolecat_Database_Pdo or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    
-    $Database = NULL;
-    
-    if (isset($Subject) && is_a($Subject, 'AblePolecat_Mode_Session')) {
-      if (!isset(self::$Database)) {
-        self::$Database = new AblePolecat_Database_Pdo();
-      }
-      $Database = self::$Database;
+    $Database = NULL;    
+    if (!isset(self::$Database)) {
+      self::$Database = new AblePolecat_Database_Pdo();
     }
+    $Database = self::$Database;
     return $Database;
   }
   
@@ -171,7 +155,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         );
         $this->DatabaseConnection = NULL;
       }
-      else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_Administrator')) {
+      else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_System')) {
         try {
           $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass);
           $this->setLocater($Url);

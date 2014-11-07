@@ -6,40 +6,28 @@
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role', 'User.php')));
 
-class AblePolecat_AccessControl_Role_User_Anonymous extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_Role_UserInterface {
-  
-  /**
-   * Constants.
-   */
-  const UUID = '5c14a350-6976-11e2-bcfd-0800200c9a66';
-  const NAME = 'Anonymous';
-  
-  /**
-   * Extends __construct().
-   */
-  protected function initialize() {
-  }
+class AblePolecat_AccessControl_Role_User_Anonymous extends AblePolecat_AccessControl_RoleAbstract implements AblePolecat_AccessControl_Role_UserInterface {
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
    ********************************************************************************/
   
   /**
-   * Return unique, system-wide identifier for agent.
+   * System unique ID.
    *
-   * @return string Role identifier.
+   * @return scalar Subject unique identifier.
    */
-  public static function getId() {
-    return self::UUID;
+  public function getId() {
+    return 0;
   }
   
   /**
-   * Return common name for role.
+   * Common name, need not be unique.
    *
-   * @return string Role name.
+   * @return string Common name.
    */
-  public static function getName() {
-    return self::NAME;
+  public function getName() {
+    return 'anonymous';
   }
   
   /********************************************************************************

@@ -20,10 +20,10 @@
  * @version   0.6.2
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command.php')));
 
-interface AblePolecat_Command_TargetInterface extends AblePolecat_AccessControl_SubjectInterface {
+interface AblePolecat_Command_TargetInterface extends AblePolecat_AccessControl_Article_StaticInterface {
   
   const CMD_LINK_FWD    = 'forward';
   const CMD_LINK_REV    = 'reverse';
@@ -67,6 +67,19 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
    * @var Next forward target in command chain of responsibility.
    */
   private $Subordinate;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_Command_TargetInterface.

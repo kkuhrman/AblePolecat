@@ -43,7 +43,7 @@ abstract class AblePolecat_Mode_UserAbstract extends AblePolecat_Mode_Applicatio
         // Not handled
         //
         break;
-      case '85fc7590-724d-11e3-981f-0800200c9a66':
+      case AblePolecat_Command_Log::UUID:
         //
         // Log
         //
@@ -84,7 +84,7 @@ abstract class AblePolecat_Mode_UserAbstract extends AblePolecat_Mode_Applicatio
     // Load environment/configuration
     //
     //
-    // $this->UserEnvironment = AblePolecat_Environment_User::wakeup($this->UserAgent);
+    // $this->UserEnvironment = AblePolecat_Environment_User::wakeup($this->getAgent($this));
     
     AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'User mode is initialized.');
   }

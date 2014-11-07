@@ -24,7 +24,7 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
   private static $Transaction;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

@@ -21,34 +21,6 @@ class AblePolecat_Resource_Core extends AblePolecat_ResourceAbstract {
    */
   private static $Resource;
   
-  /**
-   * Constants.
-   */
-  const UUID = '80d53f20-3a93-11e4-916c-0800200c9a66';
-  const NAME = 'Able Polecat Core Resource';
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Agent identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Agent name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/

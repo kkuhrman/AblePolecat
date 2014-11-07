@@ -13,36 +13,53 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessContro
 class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_AgentAbstract {
   
   /**
-   * Constants.
-   */
-  const UUID = 'f5aa51b1-3d12-45e3-abfd-276588032652';
-  const NAME = 'User';
-  
-  /**
    * @var AblePolecat_AccessControl_Agent_User Instance of singleton.
    */
-  private static $Agent;
+  private static $User;
+  
+  /**
+   * @var int User id on localhost.
+   */
+  private $userId;
+  
+  /**
+   * @var string User name on localhost.
+   */
+  private $userName;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
   
   /**
-   * Return unique, system-wide identifier for agent.
+   * General purpose of object implementing this interface.
    *
-   * @return string Agent identifier.
+   * @return string.
    */
-  public static function getId() {
-    return self::UUID;
+  public static function getScope() {
+    return 'USER';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   ********************************************************************************/
+  
+  /**
+   * System unique ID.
+   *
+   * @return scalar Subject unique identifier.
+   */
+  public function getId() {
+    return $this->userId;
   }
   
   /**
-   * Return common name for agent.
+   * Common name, need not be unique.
    *
-   * @return string Agent name.
+   * @return string Common name.
    */
-  public static function getName() {
-    return self::NAME;
+  public function getName() {
+    return $this->userName;
   }
   
   /********************************************************************************
@@ -65,19 +82,19 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (!isset(self::$Agent)) {
+    if (!isset(self::$User)) {
       $Args = func_get_args();
       isset($Args[0]) ? $Subject = $Args[0] : $Subject = NULL;
       isset($Args[1]) ? $Mode = $Args[1] : $Mode = NULL;
-      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_Administrator')) {
-        self::$Agent = new AblePolecat_AccessControl_Agent_User($Mode);
+      if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_System')) {
+        self::$User = new AblePolecat_AccessControl_Agent_User($Mode);
       }
       else {
         $error_msg = sprintf("%s is not permitted to wakeup user access control agent.", AblePolecat_Data::getDataTypeName($Subject));
         throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
       }
     }
-    return self::$Agent;
+    return self::$User;
   }
   
   /********************************************************************************
@@ -89,5 +106,7 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    */
   protected function initialize() {
     parent::initialize();
+    $this->userId = 0; // default = anonymous
+    $this->userName = 'anonymous';
   }
 }

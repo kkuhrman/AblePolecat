@@ -11,11 +11,24 @@ class AblePolecat_AccessControl_Constraint_Execute implements AblePolecat_Access
   /**
    * Constants.
    */
-  const UUID = '4455ad00-2332-11e4-8c21-0800200c9a66';
+  const UUID = 'execute';
   const NAME = 'execute';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'RESOURCE';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

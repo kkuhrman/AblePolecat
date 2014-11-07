@@ -14,12 +14,13 @@
  * @version   0.6.2
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Transaction.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
 
 interface AblePolecat_TransactionInterface 
-  extends AblePolecat_AccessControl_SubjectInterface,
+  extends AblePolecat_AccessControl_Article_StaticInterface,
           AblePolecat_CacheObjectInterface, 
           AblePolecat_OverloadableInterface {
   
@@ -153,6 +154,19 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    * @var string ID of current transaction.
    */
   private $transactionId;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SESSION';
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.

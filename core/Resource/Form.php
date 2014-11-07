@@ -39,28 +39,6 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
   const NAME = AblePolecat_Message_RequestInterface::RESOURCE_NAME_FORM;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Agent identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Agent name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/
   
@@ -188,7 +166,8 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
   protected function initialize() {
     
     parent::initialize();
-    
+    $this->setId(self::UUID);
+    $this->setId(self::NAME);
     $this->BodyFormat = "<div><div>%s</div><div><form id=\"%s\" action=\"%s\" method=\"post\">%s<input type=\"submit\" value=\"Submit\" /></form></div></div>";
     $this->formElements = array();
     $this->textElements = array();

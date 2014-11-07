@@ -119,7 +119,7 @@ abstract class AblePolecat_Resource_RestrictedAbstract
     // default deny
     //
     $hasPermission = FALSE;    
-    $subjectId = $Subject::getId();
+    $subjectId = $Subject->getId();
     
     //
     // Before making a trip to db, see if constraint data is already cached.
@@ -258,7 +258,7 @@ abstract class AblePolecat_Resource_RestrictedAbstract
    * Helper function with dual role - check if constraint exists on resource AND if subject is exempt from constraint.
    *
    * @param string $constraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
-   * @param string $subjectId AblePolecat_AccessControl_SubjectInterface::getId() or Array of ids.
+   * @param string $subjectId AblePolecat_AccessControl_SubjectInterface->getId() or Array of ids.
    * 
    * @return Array[self::CONSTRAINT_CACHED => bool, self::CONSTRAINT_EXISTS => bool, self::PERMISSION_EXISTS => bool]
    */
@@ -336,7 +336,7 @@ abstract class AblePolecat_Resource_RestrictedAbstract
    * Exempts subject from given constraint, if it exists, on requested resource.
    *
    * @param mixed $constraintId i.e. AblePolecat_AccessControl_ConstraintInterface::getId() or Array of ids.
-   * @param mixed $subjectId AblePolecat_AccessControl_SubjectInterface::getId() or Array of ids.
+   * @param mixed $subjectId AblePolecat_AccessControl_SubjectInterface->getId() or Array of ids.
    * @param string $authorityId Access control subject making the request.
    */
   protected function setPermission(

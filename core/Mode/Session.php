@@ -73,21 +73,23 @@ class AblePolecat_Mode_Session extends AblePolecat_Mode_UserAbstract {
     if (!isset(self::$SessionMode)) {
       try {
         //
-        // Create instance of user mode
+        // Unmarshall (from numeric keyed index to named properties) variable args list.
         //
-        self::$SessionMode = new AblePolecat_Mode_Session($Subject);
-
+        $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
+    
         //
-        // Set chain of responsibility relationship
+        // Create instance of session mode
         //
-        $Subject->setForwardCommandLink(self::$SessionMode);
-        self::$SessionMode->setReverseCommandLink($Subject);
+        self::$SessionMode = new AblePolecat_Mode_Session(
+          $ArgsList->getArgumentValue(AblePolecat_ModeInterface::ARG_SUBJECT),
+          $ArgsList->getArgumentValue(AblePolecat_ModeInterface::ARG_INVOKER)
+        );
         
         //
         // Load environment/configuration
         //
         //
-        // self::$SessionMode->Environment = AblePolecat_Environment_User::wakeup(self::$SessionMode->Agent);
+        // self::$SessionMode->Environment = AblePolecat_Environment_User::wakeup($this->getAgent($this));
         
         AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session mode is initialized.');
       }
@@ -158,6 +160,13 @@ class AblePolecat_Mode_Session extends AblePolecat_Mode_UserAbstract {
       $Result = self::$SessionMode->execute($Command);
     }
     return $Result;
+  }
+  
+  /**
+   * @return AblePolecat_AccessControl_AgentInterface.
+   */
+  public function getUserAgent() {
+    return $this->getAgent($this);
   }
   
   /**

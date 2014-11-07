@@ -157,12 +157,13 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         //
         $Result = new AblePolecat_Command_Result();
         break;
-      case '7ca0f570-1f22-11e4-8c21-0800200c9a66':
+      case AblePolecat_Command_Shutdown::UUID:
         //
         // Command to shut down indicates abnormal termination
         //
+        $Agent = $this->Session->getUserAgent();
         $Resource = AblePolecat_Resource_Core::wakeup(
-          $this,
+          $Agent,
           'AblePolecat_Resource_Error',
           $Command->getReason(),
           $Command->getMessage()
@@ -211,7 +212,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       //
       // wakeup session mode and get user agent.
       //
-      self::$Host->Session = AblePolecat_Mode_Session::wakeup(self::$Host);
+      self::$Host->Session = AblePolecat_Mode_Session::wakeup(NULL, self::$Host);
       
       //
       // Boot procedure complete. Close boot log.
@@ -240,7 +241,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         // Get user agent and dispatch request to service bus.
         //
         $Agent = self::$Host->Session->getUserAgent();
-        self::$Host->Response = AblePolecat_Service_Bus::wakeup(self::$Host->Session)->dispatch($Agent, $Request);
+        self::$Host->Response = AblePolecat_Service_Bus::wakeup($Agent)->dispatch($Agent, $Request);
       }
     }
     else {
@@ -348,7 +349,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             $requestMethod, 
             $requestUri
           );
-        $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+        $CommandResult = AblePolecat_Command_DbQuery::invoke(self::getUserAgent(), $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
           $Records = $CommandResult->value();
           isset($Records['lastInsertId']) ? $requestId = $Records['lastInsertId'] : NULL;
@@ -362,7 +363,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             'sessionNumber')->
           from('session')->
           where(sprintf("`phpSessionId` = '%s'", $this->sessionId));
-        $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+        $CommandResult = AblePolecat_Command_DbQuery::invoke(self::getUserAgent(), $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
           $Records = $CommandResult->value();
           isset($Records[0]['sessionNumber']) ? $this->sessionNumber = $Records[0]['sessionNumber'] : NULL;
@@ -568,7 +569,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         __FUNCTION__,
         $errorMessage
     );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(self::getUserAgent(), $sql);
       if (!$CommandResult->success()) {
         //
         // Apparently, no other log facility was available to handle the message
@@ -883,8 +884,9 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       self::$Host->Response->send();
     }
     else {
+      isset(self::$Host->Session) ? $Agent = self::$Host->getUserAgent() : $Agent = NULL;
       $Resource = AblePolecat_Resource_Core::wakeup(
-        self::$Host,
+        $Agent,
         'AblePolecat_Resource_Error',
         'Forced shut down',
         'Able Polecat server was directed to shut down before generating response to request URI.'

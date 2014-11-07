@@ -8,7 +8,6 @@
  * @version   0.6.2
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Application.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
@@ -27,12 +26,7 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
    */
   const APP_INTERFACE_COMMAND_TARGET      = 'AblePolecat_Command_TargetInterface';
   const APP_INTERFACE_DATABASE            = 'AblePolecat_DatabaseInterface';
-  
-  /**
-   * @var AblePolecat_AccessControl_Agent_Application
-   */
-  private $ApplicationAgent;
-  
+    
   /**
    * @var AblePolecat_EnvironmentInterface.
    */
@@ -108,7 +102,7 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
     switch ($Command::getId()) {
       default:
         break;
-      case 'ef797050-715c-11e3-981f-0800200c9a66':
+      case AblePolecat_Command_DbQuery::UUID:
         //
         // DbQuery
         //
@@ -117,7 +111,7 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
         // $QueryResult = $this->executeDbQuery($Command->getArguments());
         // $Result = new AblePolecat_Command_Result($QueryResult, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
-      case '85fc7590-724d-11e3-981f-0800200c9a66':
+      case AblePolecat_Command_Log::UUID:
         //
         // Log
         //
@@ -160,16 +154,6 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
    ********************************************************************************/
   
   /**
-   * @return AblePolecat_AccessControl_Agent_Application
-   */
-  private function getAgent() {
-    if (!isset($this->ApplicationAgent)) {
-      throw new AblePolecat_Mode_Exception('Application agent is not available.');
-    }
-    return $this->ApplicationAgent;
-  }
-  
-  /**
    * Send command or forward or back the chain of responsibility.
    *
    * @param AblePolecat_CommandInterface $Command
@@ -200,23 +184,17 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
     );
     
     //
-    // Access control agent.
-    //
-    $Host = $this->getReverseCommandLink();
-    $this->ApplicationAgent = AblePolecat_AccessControl_Agent_Application::wakeup($Host, $this);
-    
-    //
     // Load environment/configuration
     //
     //
-    $this->ApplicationEnvironment = AblePolecat_Environment_Application::wakeup($this->ApplicationAgent);
+    $this->ApplicationEnvironment = AblePolecat_Environment_Application::wakeup($this->getAgent($this));
     $ClassRegistry = $this->getClassRegistry();
     if (isset($ClassRegistry)) {
       //
       // Register classes in registered libraries.
       //
       $ClassLibraryRegistrations = $this->ApplicationEnvironment->
-        getVariable($this->ApplicationAgent, AblePolecat_Environment_Application::SYSVAR_CORE_CLASSLIBS);
+        getVariable($this->getAgent($this), AblePolecat_Environment_Application::SYSVAR_CORE_CLASSLIBS);
       if (isset($ClassLibraryRegistrations)) {
         foreach($ClassLibraryRegistrations as $key => $ClassLibraryRegistration) {
           //
@@ -239,7 +217,7 @@ abstract class AblePolecat_Mode_ApplicationAbstract extends AblePolecat_Mode_Ser
     //
     // Load registry of class libraries.
     //
-    // $this->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup($this);
+    // $this->ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup($this->getAgent($this));
     
     //
     // Load application command targets.

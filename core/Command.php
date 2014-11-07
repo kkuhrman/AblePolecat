@@ -8,11 +8,12 @@
  * @version   0.6.2
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Result.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Command.php')));
 
-interface AblePolecat_CommandInterface extends AblePolecat_AccessControl_ArticleInterface {
+interface AblePolecat_CommandInterface extends AblePolecat_AccessControl_Article_StaticInterface {
   
   /**
    * Indicates which direction to pass command along CoR.
@@ -60,6 +61,19 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
    * @var AblePolecat_ArgsListInterface
    */
   private $Arguments;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CommandInterface.

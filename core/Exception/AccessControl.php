@@ -41,15 +41,15 @@ class AblePolecat_AccessControl_Exception extends AblePolecat_Exception {
     AblePolecat_AccessControl_SubjectInterface $Authority = NULL) {
     
     $message = sprintf("[%s] identified by '%s' is denied access to [%s] identified by '%s'.",
-      isset($Subject) ? $Subject::getName() : 'null',
-      isset($Subject) ? $Subject::getId() : 'null',
-      isset($Object) ? $Object::getName() : 'null',
-      isset($Object) ? $Object::getId() : 'null'
+      isset($Subject) ? $Subject->getName() : 'null',
+      isset($Subject) ? $Subject->getId() : 'null',
+      isset($Object) ? $Object->getName() : 'null',
+      isset($Object) ? $Object->getId() : 'null'
     );
     if (isset($Authority)) {
       $message .= ' ' . sprintf("[%s] identified by '%s' is not authorized to grant this request.",
-        $Authority::getName(),
-        $Authority::getId()
+        $Authority->getName(),
+        $Authority->getId()
       );
     }
     return $message;

@@ -20,7 +20,7 @@ class AblePolecat_Command_Log extends AblePolecat_Command_ReverseAbstract {
   const ARG_LOG_NAME  = 'logName';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
      
   /**

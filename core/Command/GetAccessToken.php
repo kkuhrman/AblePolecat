@@ -21,7 +21,7 @@ class AblePolecat_Command_GetAccessToken extends AblePolecat_Command_ReverseAbst
   const ARG_RESOURCE_ID   = 'resourceId';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
      
   /**

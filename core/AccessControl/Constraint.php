@@ -8,7 +8,7 @@
  * @version   0.6.2
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 
-interface AblePolecat_AccessControl_ConstraintInterface extends AblePolecat_AccessControl_ArticleInterface {
+interface AblePolecat_AccessControl_ConstraintInterface extends AblePolecat_AccessControl_Article_StaticInterface {
 }

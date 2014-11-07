@@ -16,7 +16,7 @@ class AblePolecat_Command_DbQuery extends AblePolecat_Command_ReverseAbstract {
   const NAME = 'DbQuery';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
      
   /**

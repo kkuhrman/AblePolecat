@@ -274,6 +274,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   public function loadClass($className, $param = NULL) {
     
     $Instance = NULL;
+    $parameters = array();
     $ClassRegistration = $this->isLoadable($className);
     
     //
@@ -292,7 +293,6 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
         //
         // Get any parameters passed.
         //
-        $parameters = array();
         if (isset($param)) {
           $args = func_get_args();
           array_shift($args);
@@ -307,6 +307,11 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
             break;
         }
       }
+    }
+    
+    if (!isset($Instance)) {
+      $message = sprintf("Could not load class %s with parameter set %s.", $className, serialize($parameters));
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     }
     return $Instance;
   }
@@ -377,7 +382,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       // Interfaces implemented by class.
       //
       $interfaces = class_implements($className, FALSE);
-      array_key_exists('AblePolecat_AccessControl_ArticleInterface', $interfaces) ? $Id = $className::getId() : $Id = NULL;;
+      array_key_exists('AblePolecat_AccessControl_Article_StaticInterface', $interfaces) ? $Id = $className::getId() : $Id = NULL;;
       foreach($interfaces as $interfaceName) {
         //
         // Map by interface name.

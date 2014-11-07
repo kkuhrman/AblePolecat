@@ -8,7 +8,7 @@
  * @version   0.6.2
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Subject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Host.php')));
  
 interface AblePolecat_CacheObjectInterface {
   
@@ -83,7 +83,7 @@ abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjec
       $this->CommandInvoker = $args[0];
     }
     else {
-      $this->CommandInvoker = NULL;
+      $this->CommandInvoker = AblePolecat_Host::getUserAgent();
     }
     $this->initialize();
   }

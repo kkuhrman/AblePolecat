@@ -57,11 +57,56 @@ abstract class AblePolecat_ResourceAbstract
   private $uri;
   
   /**
+   * @var string Resource ID unique to localhost.
+   */
+  private $resourceId;
+  
+  /**
+   * @var string Resource name unique to localhost.
+   */
+  private $resourceName;
+  
+  /**
    * Validates request URI path to ensure resource request can be fulfilled.
    *
    * @throw AblePolecat_Resource_Exception If request URI path is not validated.
    */
   abstract protected function validateRequestPath();
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'RESOURCE';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   ********************************************************************************/
+  
+  /**
+   * System unique ID.
+   *
+   * @return scalar Subject unique identifier.
+   */
+  public function getId() {
+    return $this->resourceId;
+  }
+  
+  /**
+   * Common name, need not be unique.
+   *
+   * @return string Common name.
+   */
+  public function getName() {
+    return $this->resourceName;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface
@@ -122,6 +167,33 @@ abstract class AblePolecat_ResourceAbstract
   }
   
   /**
+   * Sets the default command handlers (invoker/target).
+   * 
+   * @param AblePolecat_AccessControl_SubjectInterface $Invoker
+   */
+  protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
+    $this->CommandInvoker = $Invoker;
+  }
+  
+  /**
+   * Set unique resource ID.
+   *
+   * @param string $resourceId.
+   */
+  protected function setId($resourceId) {
+    $this->resourceId = $resourceId;
+  }
+  
+  /**
+   * Set resource name.
+   *
+   * @param string $resourceName.
+   */
+  protected function setName($resourceName) {
+    $this->resourceName = $resourceName;
+  }
+  
+  /**
    * Extends __construct().
    */
   protected function initialize() {
@@ -131,15 +203,8 @@ abstract class AblePolecat_ResourceAbstract
     //
     $this->validateRequestPath();
     $this->uri = AblePolecat_Host::getRequest()->getBaseUrl() . AblePolecat_Host::getRequest()->getRequestPath(TRUE);
-  }
-  
-  /**
-   * Sets the default command handlers (invoker/target).
-   * 
-   * @param AblePolecat_AccessControl_SubjectInterface $Invoker
-   */
-  protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
-    $this->CommandInvoker = $Invoker;
+    $this->resourceId = $this->uri;
+    $this->resourceName = AblePolecat_Host::getRequest()->getRequestPath(TRUE);
   }
 	
   /**
@@ -155,6 +220,8 @@ abstract class AblePolecat_ResourceAbstract
     else {
       $this->CommandInvoker = NULL;
     }
+    $this->resourceId = NULL;
+    $this->resourceName = NULL;
     $this->initialize();
   }
   

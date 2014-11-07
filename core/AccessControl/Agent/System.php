@@ -1,34 +1,34 @@
 <?php
 /**
- * @file: Authenticated.php
- * Role reserved for anonymous agent (user).
+ * @file      polecat/core/AccessControl/Agent/System.php
+ * @brief     Built-in system agent.
+ * 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.6.2
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Role', 'User.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
 
-interface AblePolecat_AccessControl_Role_User_AuthenticatedInterface extends AblePolecat_AccessControl_Role_UserInterface {
-  /**
-   * @return string ID of authenticating authority.
-   */
-  public function getAuthority();
-}
-
-class AblePolecat_AccessControl_Role_User_Authenticated extends AblePolecat_AccessControl_RoleAbstract implements AblePolecat_AccessControl_Role_User_AuthenticatedInterface {
+class AblePolecat_AccessControl_Agent_System extends AblePolecat_AccessControl_AgentAbstract {
   
   /**
-   * @var int Role id on localhost.
+   * @var AblePolecat_AccessControl_Agent_System Instance of singleton.
    */
-  private $roleId;
+  private static $System;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
   
   /**
-   * @var string Role name on localhost.
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
    */
-  private $roleName;
-  
-  /**
-   * @var string ID of authenticating authority.
-   */
-  private $authorityId;
+  public static function getScope() {
+    return 'SYSTEM';
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
@@ -40,7 +40,7 @@ class AblePolecat_AccessControl_Role_User_Authenticated extends AblePolecat_Acce
    * @return scalar Subject unique identifier.
    */
   public function getId() {
-    return $this->roleId;
+    return 1;
   }
   
   /**
@@ -49,7 +49,7 @@ class AblePolecat_AccessControl_Role_User_Authenticated extends AblePolecat_Acce
    * @return string Common name.
    */
   public function getName() {
-    return $this->roleName;
+    return 'system';
   }
   
   /********************************************************************************
@@ -69,37 +69,30 @@ class AblePolecat_AccessControl_Role_User_Authenticated extends AblePolecat_Acce
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_CacheObjectInterface or NULL.
+   * @return AblePolecat_AccessControl_Agent_System Initialized access control service or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    $Role = new AblePolecat_AccessControl_Role_User_Authenticated($Subject);
-    $args = func_get_args();
-    isset($args[1]) ? $Role->authorityId = $args[1] : NULL;
-    return $Role;
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Role_User_AuthenticatedInterface.
-   ********************************************************************************/
-  
-  /**
-   * @var string ID of authenticating authority.
-   */
-  public function getAuthority() {
-    return $this->authorityId;
+    if (!isset(self::$System)) {
+      //
+      // Intentionally do not pass AblePolecat_Host to constructor as this would save
+      // it as default command invoker. By default, commands will be dispatched to top
+      // of system CoR hierarchy.
+      //
+      self::$System = new AblePolecat_AccessControl_Agent_System();
+      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'System agent initialized.');
+    }
+    return self::$System;
   }
   
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-   
+  
   /**
    * Extends __construct().
+   * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
-    $this->authorityId = NULL;
-    $this->roleId = 0;
-    $this->roleName = 'not authenticated';
   }
 }

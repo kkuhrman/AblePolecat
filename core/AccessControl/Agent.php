@@ -30,7 +30,7 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
    * @var AblePolecat_Registry_Class Class Registry.
    */
   private $ClassRegistry;
-    
+     
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_AgentInterface.
    ********************************************************************************/

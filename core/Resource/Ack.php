@@ -27,28 +27,6 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
   const NAME = AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Agent identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Agent name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/
   
@@ -84,5 +62,14 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
     //
     // Request path is irrelevant in this case.
     //
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    parent::initialize();
+    $this->setId(self::UUID);
+    $this->setId(self::NAME);
   }
 }

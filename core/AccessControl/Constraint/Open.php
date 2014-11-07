@@ -11,11 +11,24 @@ class AblePolecat_AccessControl_Constraint_Open implements AblePolecat_AccessCon
   /**
    * Constants.
    */
-  const UUID = '8ac53be0-6117-11e2-bcfd-0800200c9a66';
+  const UUID = 'open';
   const NAME = 'open';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'RESOURCE';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

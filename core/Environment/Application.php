@@ -32,7 +32,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   private static $Environment = NULL;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

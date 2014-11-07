@@ -24,28 +24,6 @@ class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstra
   const NAME = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Agent identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Agent name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
-  /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface
    ********************************************************************************/
   
@@ -134,5 +112,14 @@ class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstra
       $request_path = AblePolecat_Host::getRequest()->getRequestPath();
       throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
     }
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    parent::initialize();
+    $this->setId(self::UUID);
+    $this->setId(self::NAME);
   }
 }

@@ -23,17 +23,56 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Target.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Mode.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Overloadable.php')));
 
 interface AblePolecat_ModeInterface extends 
   AblePolecat_CacheObjectInterface, 
-  AblePolecat_AccessControl_SubjectInterface, 
-  AblePolecat_Command_TargetInterface {
+  AblePolecat_Command_TargetInterface,
+  AblePolecat_OverloadableInterface {
+  
+  const ARG_SUBJECT     = 'subject';
+  const ARG_INVOKER     = 'commandInvoker';
 }
 
 abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstract implements AblePolecat_ModeInterface {
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_OverloadableInterface.
+   ********************************************************************************/
+  
+  /**
+   * Marshall numeric-indexed array of variable method arguments.
+   *
+   * @param string $method_name __METHOD__ is good enough.
+   * @param Array $args Variable list of arguments passed to method (i.e. get_func_args()).
+   * @param mixed $options Reserved for future use.
+   *
+   * @return Array Associative array representing [argument name] => [argument value]
+   */
+  public static function unmarshallArgsList($method_name, $args, $options = NULL) {
     
+    $ArgsList = AblePolecat_ArgsList::create();
+    
+    foreach($args as $key => $value) {
+      switch ($method_name) {
+        default:
+          break;
+        case 'wakeup':
+          switch($key) {
+            case 0:
+              $ArgsList->{AblePolecat_ModeInterface::ARG_SUBJECT} = $value;
+              break;
+            case 1:
+              $ArgsList->{AblePolecat_ModeInterface::ARG_INVOKER} = $value;
+              break;
+          }
+          break;
+      }
+    }
+    return $ArgsList;
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -55,8 +94,13 @@ abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstra
     // Process constructor arguments
     //
     $args = func_get_args();
-    if (isset($args[0]) && is_a($args[0], 'AblePolecat_Host')) {
-      $this->setReverseCommandLink($args[0]);
+    if (isset($args[1]) && is_a($args[1], 'AblePolecat_Host')) {
+      $Host = $args[1];
+      //
+        // Set chain of responsibility relationship
+        //
+        $Host->setForwardCommandLink($this);
+        $this->setReverseCommandLink($Host);
     }
     
     //

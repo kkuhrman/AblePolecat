@@ -14,6 +14,7 @@
  * @version   0.6.2
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
@@ -27,7 +28,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.
  * between these and the application in scope.
  */
 
-class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_SubjectInterface {
+class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_Article_StaticInterface {
   
   const UUID              = '3d50dbb0-715e-11e2-bcfd-0800200c9a66';
   const NAME              = 'Able Polecat Service Bus';
@@ -72,6 +73,19 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**
@@ -381,21 +395,21 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             $Request->getHostName()
           );
           AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Error::getId();
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Error::UUID;
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Error';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Ack::getId();
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Ack::UUID;
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::getId();
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::UUID;
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
           $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Install::getId();
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Install::UUID;
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
           $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
           break;
@@ -504,7 +518,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     //
     // Check cache first.
     //
-    $CacheRegistration = $this->getCacheRegistration($Resource::getId(), $Transaction->getStatusCode());
+    $CacheRegistration = $this->getCacheRegistration($Resource->getId(), $Transaction->getStatusCode());
     
     //
     // Search core database for corresponding response registration.
@@ -523,7 +537,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // No response registration record; use one of the core response classes.
       //
       $headerFields = array();
-      switch ($Resource::getName()) {
+      switch ($Resource->getName()) {
         default:
           $Response = AblePolecat_Message_Response_Xml::create($ResponseRegistration);
           break;

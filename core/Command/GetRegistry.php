@@ -16,7 +16,7 @@ class AblePolecat_Command_GetRegistry extends AblePolecat_Command_ReverseAbstrac
   const NAME = 'GetRegistry';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
      
   /**

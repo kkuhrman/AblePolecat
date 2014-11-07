@@ -20,7 +20,7 @@ class AblePolecat_Command_AccessControl_Authenticate extends AblePolecat_Command
   const ARG_AUTHORITY  = 'authority';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
      
   /**

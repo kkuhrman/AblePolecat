@@ -15,4 +15,17 @@ interface AblePolecat_AccessControl_RoleInterface extends AblePolecat_AccessCont
 }
 
 abstract class AblePolecat_AccessControl_RoleAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_RoleInterface {
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'USER';
+  }
 }

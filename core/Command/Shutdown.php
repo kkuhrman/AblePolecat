@@ -20,7 +20,7 @@ class AblePolecat_Command_Shutdown extends AblePolecat_Command_ReverseAbstract {
   const ARG_STATUS    = 'status';
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
      
   /**

@@ -21,7 +21,7 @@ class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
   private static $Environment = NULL;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**

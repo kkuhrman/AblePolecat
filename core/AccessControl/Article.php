@@ -16,16 +16,9 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 interface AblePolecat_AccessControl_ArticleInterface {
   
   /**
-   * Ideally unique id will be UUID.
+   * Scope of operation.
    *
-   * @return string Subject unique identifier.
+   * @return string SYSTEM | APPLICATION | USER | SESSION | RESOURCE.
    */
-  public static function getId();
-  
-  /**
-   * Common name, need not be unique.
-   *
-   * @return string Common name.
-   */
-  public static function getName();
+  public static function getScope();
 }

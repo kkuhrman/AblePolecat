@@ -41,7 +41,7 @@ class AblePolecat_Transaction_AccessControl_Authority
   private $grants;
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**
@@ -220,7 +220,7 @@ class AblePolecat_Transaction_AccessControl_Authority
     $sql = __SQL()->
       insert('sessionNumber', 'roleId', 'userId', 'roleData')->
       into('role')->
-      values(AblePolecat_Host::getSessionNumber(), $Role::getId(), 0, '');
+      values(AblePolecat_Host::getSessionNumber(), $Role->getId(), 0, '');
     $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
     if ($CommandResult->success()) {
       $result = TRUE;
@@ -264,7 +264,7 @@ class AblePolecat_Transaction_AccessControl_Authority
     $sql = __SQL()->
       insert('sessionNumber', 'resourceId', 'constraintId', 'subjectId', 'authorityId')->
       into('permission')->
-      values(AblePolecat_Host::getSessionNumber(), $this->getResourceRegistration()->getResourceId(), $Constraint::getId(), $Subject::getId(), $this->getId());
+      values(AblePolecat_Host::getSessionNumber(), $this->getResourceRegistration()->getResourceId(), $Constraint::getId(), $Subject->getId(), $this->getId());
     $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
     if ($CommandResult->success()) {
       $result = TRUE;

@@ -11,11 +11,24 @@ class AblePolecat_AccessControl_Constraint_Write implements AblePolecat_AccessCo
   /**
    * Constants.
    */
-  const UUID = '9ca96bc0-63dc-11e2-bcfd-0800200c9a66';
+  const UUID = 'write';
   const NAME = 'write';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'RESOURCE';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
   
   /**
