@@ -298,7 +298,7 @@ abstract class AblePolecat_Mode_ServerAbstract extends AblePolecat_ModeAbstract 
     else {
       if (!isset($this->UserAgent)) {
         $agentClassName = 'AblePolecat_AccessControl_Agent_User';
-        $this->UserAgent = $this->getClassRegistry()->loadClass($agentClassName, $this, $Mode);
+        $this->UserAgent = $this->getClassRegistry()->loadClass($agentClassName, $this->SystemAgent, $Mode);
       }
       $Agent = $this->UserAgent;
     }

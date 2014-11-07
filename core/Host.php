@@ -170,7 +170,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         );
         $this->Response = AblePolecat_Message_Response_Xml::create(500);
         $this->Response->setEntityBody($Resource);
-        $this->shutdown($Command->getStatus());
+        self::shutdown($Command->getStatus());
         break;
     }
     
@@ -380,7 +380,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
               $this->getRequest()->getHostName(),
               $remoteAddress
             );
-          $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+          $CommandResult = AblePolecat_Command_DbQuery::invoke(self::getUserAgent(), $sql);
           if ($CommandResult->success() && count($CommandResult->value())) {
             $Records = $CommandResult->value();
             isset($Records['lastInsertId']) ? $this->sessionNumber = $Records['lastInsertId'] : NULL;
@@ -587,7 +587,8 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     if ($shutdown && (self::$display_errors != 0)) {
       $reason = 'Critical Error';
       $code = $errno;
-      AblePolecat_Command_Shutdown::invoke(self::$Host, $reason, $msg, $code);
+      // AblePolecat_Command_Shutdown::invoke(self::getUserAgent(), $reason, $msg, $code);
+      self::shutdown($code);
     }
     else if (self::$display_errors != 0) {
       //
@@ -638,7 +639,7 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
           __FUNCTION__,
           $errorMessage
       );
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(self::$Host->Session, $sql);
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(self::getUserAgent(), $sql);
       if (!$CommandResult->success()) {
         //
         // Apparently, no other log facility was available to handle the message
@@ -658,7 +659,8 @@ final class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     //
     $reason = 'Unhandled exception';
     $code = $Exception->getCode();
-    AblePolecat_Command_Shutdown::invoke(self::$Host, $reason, $Exception->getMessage(), $code);
+    // AblePolecat_Command_Shutdown::invoke(self::getUserAgent(), $reason, $Exception->getMessage(), $code);
+    self::shutdown($code);
   }
   
   /**

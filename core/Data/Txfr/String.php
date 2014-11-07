@@ -17,7 +17,7 @@ class AblePolecat_Data_Txfr_String extends AblePolecat_Data_TxfrAbstract {
     // @todo: verify all core classes loadable by convention.
     //
     // $ClassRegistry = NULL;
-    // $CommandResult = AblePolecat_Command_GetRegistry::invoke($this, 'AblePolecat_Registry_Class');
+    // $CommandResult = AblePolecat_Command_GetRegistry::invoke(AblePolecat_Host::getUserAgent(), 'AblePolecat_Registry_Class');
     // if ($CommandResult->success()) {
       // $ClassRegistry = $CommandResult->value();
     // }

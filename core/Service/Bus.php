@@ -279,7 +279,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             //
             $Transaction = $this->getClassRegistry()->loadClass(
               $transactionClassName,
-              $this->getDefaultCommandInvoker(),
+              //$this->getDefaultCommandInvoker(),
+              $Agent,
               $Agent,
               $Message,
               $ResourceRegistration,
@@ -486,7 +487,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       select('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
       into('cache')->
       where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
     if ($CommandResult->success() && is_array($CommandResult->value())) {
       $registrationInfo = $CommandResult->value();
       if (isset($registrationInfo[0])) {
@@ -822,7 +823,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           replace('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
           into('cache')->
           values($Message->getResourceId(), $Message->getStatusCode(), $Message->getMimeType(), $now, $Message->getEntityBody());
-        $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
     }
     return $Message;
   }

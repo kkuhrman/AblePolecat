@@ -209,7 +209,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
           break;
         case 'wakeup':
           isset($args[0]) ? $Subject = $args[0] : $Subject = NULL;
-          if (isset($Subject) && is_a($Subject, 'AblePolecat_Command_TargetInterface')) {
+          if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_System')) {
             $ArgsList->{self::TX_ARG_SUBJECT} = $Subject;
             switch($key) {
               default:
@@ -265,7 +265,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         $updateTime,
         self::TX_STATE_COMMITTED)->
       where(sprintf("`transactionId` = '%s'", $this->getTransactionId()));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
     if ($CommandResult->success() == FALSE) {
       //
       // @todo:
@@ -377,7 +377,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       set('transactionId')->
       values($this->getTransactionId())->
       where(sprintf("`requestId` = %d", $this->getRequest()->getRawRequestLogRecordId()));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
     
     //
     // check save point
@@ -408,7 +408,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    */
   protected function getClassRegistry() {
     if (!isset($this->ClassRegistry)) {
-      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getDefaultCommandInvoker(), 'AblePolecat_Registry_Class');
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke($this->getAgent(), 'AblePolecat_Registry_Class');
       if ($CommandResult->success()) {
         //
         // Save reference to class registry.
@@ -541,7 +541,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
             $updateTime,
             $savepointId)->
           where(sprintf("transactionId = '%s'", $this->getTransactionId()));
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
         $transactionUpdated = $CommandResult->success();
         $transactionStarted = $transactionUpdated;
         break;
@@ -571,7 +571,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
             $savepointId,
             $parentTransactionId
         );
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
         $transactionStarted = $CommandResult->success();
         $transactionUpdated = $transactionStarted;
         break;
@@ -592,7 +592,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         $transactionId, 
         $savepointName
     );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
     $savepointCreated = $CommandResult->success();
     
     if (($transactionStarted == FALSE) || ($transactionUpdated == FALSE) || ($savepointCreated == FALSE)) {
@@ -645,7 +645,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       //
       $Transaction = $this->getClassRegistry()->loadClass(
         $transactionClassName,
-        $this->getDefaultCommandInvoker(),
+        $this->getAgent(),
         $this->getAgent(),
         $Message,
         $ResourceRegistration,
