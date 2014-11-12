@@ -279,8 +279,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             //
             $Transaction = $this->getClassRegistry()->loadClass(
               $transactionClassName,
-              //$this->getDefaultCommandInvoker(),
-              $Agent,
+              $this->getDefaultCommandInvoker(),
               $Agent,
               $Message,
               $ResourceRegistration,

@@ -300,7 +300,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
         }
         switch ($ClassRegistration->classFactoryMethod) {
           default:
-            $Instance = call_user_func_array(array($className, $ClassRegistration->classFactoryMethod), $parameters);
+            $Instance = @call_user_func_array(array($className, $ClassRegistration->classFactoryMethod), $parameters);
             break;
           case '__construct':
             $Instance = new $className;

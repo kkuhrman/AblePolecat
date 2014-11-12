@@ -89,18 +89,6 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (!isset($this->Response)) {
-      $Resource = AblePolecat_Resource_Core::wakeup(
-        $this->getDefaultCommandInvoker(),
-        'AblePolecat_Resource_Error',
-        'Forced shut down',
-        'Able Polecat server was directed to shut down before generating response to request URI.'
-      );
-      $this->Response = AblePolecat_Message_Response_Xml::create(500);
-      $this->Response->setEntityBody($Resource);
-    }
-    $this->Response->send();
-        
     //
     // Flush output buffer.
     //
@@ -158,6 +146,13 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     
     switch ($Command::getId()) {
       default:
+        break;
+      case AblePolecat_Command_Shutdown::UUID:
+        //
+        // Host shut down command overrides server mode shut down command
+        // because it needs to send HTTP response before terminating.
+        //
+        self::shutdown($Command->getStatus());
         break;
     }
     //
@@ -331,6 +326,28 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param int $status Return code.
+   */
+  protected static function shutdown($status = 0) {
+    if (isset(self::$Host)) {
+      if (!isset(self::$Host->Response)) {
+        $Resource = AblePolecat_Resource_Core::wakeup(
+          self::$Host->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Error',
+          'Forced shut down',
+          'Able Polecat server was directed to shut down before generating response to request URI.'
+        );
+        self::$Host->Response = AblePolecat_Message_Response_Xml::create(500);
+        self::$Host->Response->setEntityBody($Resource);
+      }
+      self::$Host->Response->send();
+    }
+    exit($status);
+  }
   
   /**
    * Validates given command target as a forward or reverse COR link.

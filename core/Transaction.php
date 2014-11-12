@@ -202,7 +202,6 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   public static function unmarshallArgsList($method_name, $args, $options = NULL) {
     
     $ArgsList = AblePolecat_ArgsList::create();
-    
     foreach($args as $key => $value) {
       switch ($method_name) {
         default:
@@ -549,7 +548,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         //
         // Create record of transaction.
         //
-        $sessionNumber = AblePolecat_Host::getSessionNumber();
+        $sessionNumber = AblePolecat_Mode_Session::getSessionNumber();
         $sql = __SQL()->          
           insert(
             'transactionId',
