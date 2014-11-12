@@ -170,7 +170,7 @@ abstract class AblePolecat_Data_ExchangeMapAbstract implements AblePolecat_Data_
   protected function mapInputField($field_name, $txfr_class_name) {
     if (!isset($this->fieldMap[$field_name]) && is_string($field_name)) {
       $ClassRegistry = NULL;
-      $CommandResult = AblePolecat_Command_GetRegistry::invoke(AblePolecat_Host::getUserAgent(), 'AblePolecat_Registry_Class');
+      $CommandResult = AblePolecat_Command_GetRegistry::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), 'AblePolecat_Registry_Class');
       if ($CommandResult->success()) {
         //
         // Save reference to class registry.

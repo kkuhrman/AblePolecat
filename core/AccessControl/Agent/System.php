@@ -5,7 +5,7 @@
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
@@ -75,12 +75,12 @@ class AblePolecat_AccessControl_Agent_System extends AblePolecat_AccessControl_A
     
     if (!isset(self::$System)) {
       //
-      // Intentionally do not pass AblePolecat_Host to constructor as this would save
-      // it as default command invoker. By default, commands will be dispatched to top
-      // of system CoR hierarchy.
+      // Intentionally do not pass $Subject to constructor as this would save
+      // it as default command invoker. Agents invoke their own commands.
+      // @see AblePolecat_AccessControl_AgentAbstract::initialize()
       //
       self::$System = new AblePolecat_AccessControl_Agent_System();
-      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'System agent initialized.');
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'System agent initialized.');
     }
     return self::$System;
   }
@@ -94,5 +94,6 @@ class AblePolecat_AccessControl_Agent_System extends AblePolecat_AccessControl_A
    * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
+    parent::initialize();
   }
 }

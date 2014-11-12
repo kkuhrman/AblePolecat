@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
@@ -245,7 +245,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       }
       if (isset($this->entityBodyStringSubstitutes[$substitutionMarker]) && ($this->entityBodyStringSubstitutes[$substitutionMarker] != strval($substitutionValue))) {
         AblePolecat_Command_Log::invoke(
-          AblePolecat_Host::getUserAgent(), 
+          AblePolecat_AccessControl_Agent_User::wakeup(), 
           sprintf("substitution marker %s value = %s replaced with %s.", $substitutionMarker, $substitutionValue), 
           'info'
         );
@@ -257,7 +257,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     }
     else {
       AblePolecat_Command_Log::invoke(
-        AblePolecat_Host::getUserAgent(), 
+        AblePolecat_AccessControl_Agent_User::wakeup(), 
         sprintf("substitution marker %s (value = %s) is not valid. proper syntax is {![0-9a-zA-Z._]}.", $substitutionMarker, $substitutionValue), 
         'info'
       );

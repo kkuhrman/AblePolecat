@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
@@ -596,7 +596,6 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     $savepointCreated = $CommandResult->success();
     
     if (($transactionStarted == FALSE) || ($transactionUpdated == FALSE) || ($savepointCreated == FALSE)) {
-      // AblePolecat_Debug::kill(debug_backtrace());
       throw new AblePolecat_Transaction_Exception(sprintf("Failed to create save point given by $savepointName on transaction %s [ID:%s]",
           $savepointName, $this->getTransactionId()), AblePolecat_Transaction_Exception::CODE_DATABASE_ERROR
       );

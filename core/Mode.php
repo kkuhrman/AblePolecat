@@ -19,23 +19,24 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Chain.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Mode.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Overloadable.php')));
 
 interface AblePolecat_ModeInterface extends 
-  AblePolecat_CacheObjectInterface, 
   AblePolecat_Command_TargetInterface,
   AblePolecat_OverloadableInterface {
   
-  const ARG_SUBJECT     = 'subject';
-  const ARG_INVOKER     = 'commandInvoker';
+  const ARG_SUBJECT         = 'subject';
+  const ARG_REVERSE_TARGET  = 'reverseTarget';
 }
 
-abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstract implements AblePolecat_ModeInterface {
+abstract class AblePolecat_ModeAbstract 
+  extends AblePolecat_Command_TargetAbstract 
+  implements AblePolecat_ModeInterface {
   
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
@@ -64,7 +65,15 @@ abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstra
               $ArgsList->{AblePolecat_ModeInterface::ARG_SUBJECT} = $value;
               break;
             case 1:
-              $ArgsList->{AblePolecat_ModeInterface::ARG_INVOKER} = $value;
+              if (is_object($value) && is_a($value, 'AblePolecat_Command_TargetInterface')) {
+                $ArgsList->{AblePolecat_ModeInterface::ARG_REVERSE_TARGET} = $value;
+              }
+              else {
+                $message = sprintf('AblePolecat_ModeInterface::wakeup() argument #s must be type AblePolecat_Command_TargetInterface, %s passed.',
+                  AblePolecat_Data::getDataTypeName($value)
+                );
+                throw new AblePolecat_Mode_Exception($message);
+              }
               break;
           }
           break;
@@ -78,41 +87,21 @@ abstract class AblePolecat_ModeAbstract extends AblePolecat_Command_TargetAbstra
    ********************************************************************************/
    
   /**
-   * Extends constructor.
-   * Sub-classes should override to initialize members.
+   * Alias for AblePolecat_CacheObjectAbstract::getDefaultCommandInvoker().
+   *
+   * @return AblePolecat_AccessControl_AgentInterface.
    */
-  abstract protected function initialize();
-  
-  /**
-   * Cached objects must be created by wakeup().
-   * Initialization of sub-classes should take place in initialize().
-   * @see initialize(), wakeup().
-   */
-  final protected function __construct() {
-    
-    //
-    // Process constructor arguments
-    //
-    $args = func_get_args();
-    if (isset($args[1]) && is_a($args[1], 'AblePolecat_Host')) {
-      $Host = $args[1];
-      //
-        // Set chain of responsibility relationship
-        //
-        $Host->setForwardCommandLink($this);
-        $this->setReverseCommandLink($Host);
-    }
-    
-    //
-    // Initialize sub-class members.
-    //
-    $this->initialize();
+  protected function getAgent() {
+    return $this->getDefaultCommandInvoker();
   }
   
   /**
-   * Serialization prior to going out of scope in sleep().
+   * Extends constructor.
    */
-  final public function __destruct() {
-    $this->sleep();
+  protected function initialize() {
+    //
+    // Access control agent (system agent).
+    //
+    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_System::wakeup());
   }
 }

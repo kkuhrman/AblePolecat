@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Restricted.php')));
@@ -52,9 +52,9 @@ class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstra
       //
       // Check if Able Polecat database exists.
       //
-      $activeCoreDatabase = AblePolecat_Host::getActiveCoreDatabaseName();
+      $activeCoreDatabase = AblePolecat_Mode_Server::getActiveCoreDatabaseName();
       if ($activeCoreDatabase) {
-        $version = AblePolecat_Host::getVersion(TRUE, 'HTML');
+        $version = AblePolecat_Version::getVersion(TRUE, 'HTML');
         self::$Resource->Body = sprintf("<p>Able Polecat %s is installed. Active database is [%s].</p>",
           $version,
           $activeCoreDatabase

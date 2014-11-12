@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
  
 require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');
@@ -112,7 +112,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     $Database = NULL;    
     if (!isset(self::$Database)) {
-      self::$Database = new AblePolecat_Database_Pdo();
+      self::$Database = new AblePolecat_Database_Pdo($Subject);
     }
     $Database = self::$Database;
     return $Database;

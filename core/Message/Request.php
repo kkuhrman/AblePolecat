@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  *
  */
 
@@ -278,7 +278,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
           select('resourceName')->
           from('resource')->
           where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $sanitizedResourceName, $this->getHostName()));
-        $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+        $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
           $resourceName = $CommandResult->value();
           $resolvedResourceName = $resourceName[0]['resourceName'];
@@ -288,7 +288,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
             $this->getHostName(),
             $sanitizedResourceName
           );
-          AblePolecat_Command_Log::invoke(AblePolecat_Host::getUserAgent(), $message, AblePolecat_LogInterface::STATUS);
+          AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $message, AblePolecat_LogInterface::STATUS);
         }
         break;
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:

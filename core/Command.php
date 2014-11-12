@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
@@ -163,23 +163,9 @@ abstract class AblePolecat_CommandAbstract implements AblePolecat_CommandInterfa
    * @return AblePolecat_Command_Result.
    */
   protected function dispatch() {
-    
-    $Result = NULL;
-    
-    if (is_a($this->getInvoker(), 'AblePolecat_Command_TargetInterface')) {
-      //
-      // $Invoker can execute this command or send it back chain of responsibility.
-      //
-      $Result = $this->getInvoker()->execute($this);
-    }
-    else {
-      //
-      // $Invoker cannot handle command, send it to server for further handling.
-      //
-      $Result = AblePolecat_Mode_Session::dispatchCommand($this);
-    }
+    $Result = AblePolecat_Command_Chain::dispatch($this);
     if (!isset($Result) || !is_a($Result, 'AblePolecat_Command_Result')) {
-      $msg = __CLASS__ . '::invoke() failed to return a valid result object. Check log for details.';
+      $msg = AblePolecat_Data::getDataTypeName($this) . '::invoke() failed to return a valid result object. Check log for details.';
       throw new AblePolecat_Command_Exception($msg);
     }
     return $Result;

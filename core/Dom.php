@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Dom.php')));
@@ -503,7 +503,7 @@ class AblePolecat_Dom {
         else {
           foreach($templateSearchPaths as $key => $path) {
             $message = sprintf("No valid template fragment file was found at %s.", $path);
-            AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
           }
         }
       }
@@ -512,7 +512,7 @@ class AblePolecat_Dom {
           __METHOD__,
           AblePolecat_Data::getDataTypeName($templateSearchPaths)
         );
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
       }
     }
     
@@ -548,7 +548,7 @@ class AblePolecat_Dom {
         __METHOD__,
         AblePolecat_Data::getDataTypeName($oldNode)
       );
-      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
     }
     if (isset($oldNode)) {
       $parentNode = $oldNode->parentNode;
@@ -618,21 +618,21 @@ class AblePolecat_Dom {
           switch($directiveName) {
             default:
               $message = sprintf("Invalid DOM directive parameter %s", $directiveName);
-              AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+              AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
               break;
             case self::DOM_DIRECTIVE_KEY_OP:
               if (is_string($directiveValue)) {
                 switch ($directiveValue) {
                   default:
                     $message = sprintf("Invalid value for DOM directive parameter %s: %s", $directiveName, $directiveValue);
-                    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+                    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
                     break;
                   case self::DOM_FRAGMENT_OP_APPEND:
                   case self::DOM_FRAGMENT_OP_INSERT:
                   case self::DOM_FRAGMENT_OP_REPLACE:
                     $domDirectivesChecked[self::DOM_DIRECTIVE_KEY_OP] = $directiveValue;
                     if (($directiveName == self::DOM_FRAGMENT_OP_REPLACE) && !isset($domDirectives[self::DOM_DIRECTIVE_KEY_REPLACE_NODE])) {
-                      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, 'DOM directive replace node requires that a target node be specified.');
+                      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, 'DOM directive replace node requires that a target node be specified.');
                     }
                     break;
                 }
@@ -642,7 +642,7 @@ class AblePolecat_Dom {
                   $directiveName,
                   AblePolecat_Data::getDataTypeName($directiveValue)
                 );
-                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+                AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
               }
               break;
             case self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT:
@@ -657,7 +657,7 @@ class AblePolecat_Dom {
                   $directiveName,
                   AblePolecat_Data::getDataTypeName($directiveValue)
                 );
-                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+                AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
               }
               break;
             case self::DOM_DIRECTIVE_KEY_DOCUMENT_PARENT:
@@ -670,7 +670,7 @@ class AblePolecat_Dom {
                   $directiveName,
                   AblePolecat_Data::getDataTypeName($directiveValue)
                 );
-                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+                AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
               }
               break;
             case self::DOM_DIRECTIVE_KEY_RECURSIVE:
@@ -682,7 +682,7 @@ class AblePolecat_Dom {
                   $directiveName,
                   AblePolecat_Data::getDataTypeName($directiveValue)
                 );
-                AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+                AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
               }
               break;
           }
@@ -706,7 +706,7 @@ class AblePolecat_Dom {
           __METHOD__,
           AblePolecat_Data::getDataTypeName($domDirectives)
         );
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, $message);
       }
     }
     return $domDirectivesChecked;

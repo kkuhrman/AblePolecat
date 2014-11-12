@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Cache.php')));
@@ -66,7 +66,7 @@ class AblePolecat_Message_Response_Cached extends AblePolecat_Message_ResponseAb
    */
   public function setEntityBody(AblePolecat_ResourceInterface $Resource) {
     AblePolecat_Command_Log::invoke(
-      AblePolecat_Host::getUserAgent(), 
+      AblePolecat_AccessControl_Agent_User::wakeup(), 
       sprintf("%s passed to %s, which is a non-functional stub. @see setCachedResponse().", AblePolecat_Data::getDataTypeName($Resource), __METHOD__), 
       'info'
     );

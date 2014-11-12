@@ -7,7 +7,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -60,7 +60,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     if (!isset(self::$Registry)) {
       try {
         self::$Registry = new AblePolecat_Registry_Class($Subject);
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
       catch (Exception $Exception) {
         self::$Registry = NULL;
@@ -250,14 +250,14 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     //
     // Boot log is used for troubleshooting.
     //
-    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "Checking if $className is loadable.");
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "Checking if $className is loadable.");
     
     if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
       $ClassRegistration = $this->Classes[self::KEY_CLASS_NAME][$className];
-      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
     }
     else {
-      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is not registered. Attempt to register by convention.");
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is not registered. Attempt to register by convention.");
       $ClassRegistration = $this->registerByConvention($className);
     }
     return $ClassRegistration;
@@ -281,7 +281,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     // Boot log is used for troubleshooting faulty extension code.
     //
     $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($ClassRegistration));
-    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     
     if ($ClassRegistration) {
       //
@@ -311,7 +311,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     
     if (!isset($Instance)) {
       $message = sprintf("Could not load class %s with parameter set %s.", $className, serialize($parameters));
-      AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     }
     return $Instance;
   }

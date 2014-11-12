@@ -9,7 +9,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Transaction.php');
@@ -137,7 +137,6 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
       case 'POST':
         $transactionId = AblePolecat_Host::getSessionVariable($this, AblePolecat_Host::POLECAT_INSTALL_TRX);
         $savePointId = AblePolecat_Host::getSessionVariable($this, AblePolecat_Host::POLECAT_INSTALL_SAVEPT);
-        AblePolecat_Debug::kill(array($transactionId, $savePointId));
         break;
     }
     
@@ -165,7 +164,7 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
           // Attempt to load resource class
           //
           try {
-            // $Resource = AblePolecat_Resource_Install::wakeup(AblePolecat_Host::getUserAgent());
+            // $Resource = AblePolecat_Resource_Install::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
             $Resource = AblePolecat_Resource_Core::wakeup(
               $this->getDefaultCommandInvoker(),
               'AblePolecat_Resource_Install'
@@ -217,7 +216,6 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
           }
           break;
         case 'POST':
-          AblePolecat_Debug::kill($_SESSION);
           break;
       }
     }

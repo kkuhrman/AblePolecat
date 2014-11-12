@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
@@ -159,7 +159,7 @@ abstract class AblePolecat_Resource_RestrictedAbstract
         select('constraintId', 'authorityId')->
         from('constraint')->
         where(sprintf("resourceId = '%s'", $this->getId()));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
       if ($CommandResult->success()) {
         $results = $CommandResult->value();
         foreach($results as $key => $Record) {
@@ -176,7 +176,7 @@ abstract class AblePolecat_Resource_RestrictedAbstract
         select('constraintId', 'subjectId', 'authorityId')->
         from('permission')->
         where(sprintf("resourceId = '%s'", $this->getId()));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_Host::getUserAgent(), $sql);
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
       if ($CommandResult->success()) {
         $results = $CommandResult->value();
         foreach($results as $key => $Record) {

@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression.php')));
@@ -81,7 +81,7 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
           $strvalue = AblePolecat_Data_Scalar_String::typeCast($value);
           switch($key) {
             default:
-              AblePolecat_Command_Log::invoke(AblePolecat_Host::getUserAgent(), sprintf("Excess data passed to %s constructor. %s.", get_class($this), $strvalue), AblePolecat_LogInterface::WARNING);
+              AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), sprintf("Excess data passed to %s constructor. %s.", get_class($this), $strvalue), AblePolecat_LogInterface::WARNING);
               break;
             case 0:
               $this->expression[self::LVALUE] = $strvalue;
@@ -113,7 +113,7 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
     // @todo: verify all core classes loadable by convention.
     //
     // $ClassRegistry = NULL;
-    // $CommandResult = AblePolecat_Command_GetRegistry::invoke(AblePolecat_Host::getUserAgent(), 'AblePolecat_Registry_Class');
+    // $CommandResult = AblePolecat_Command_GetRegistry::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), 'AblePolecat_Registry_Class');
     // if ($CommandResult->success()) {
       // $ClassRegistry = $CommandResult->value();
     // }

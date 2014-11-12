@@ -17,13 +17,16 @@
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command.php')));
 
-interface AblePolecat_Command_TargetInterface extends AblePolecat_AccessControl_Article_StaticInterface {
+interface AblePolecat_Command_TargetInterface 
+  extends AblePolecat_AccessControl_Article_StaticInterface,
+          AblePolecat_CacheObjectInterface {
   
   const CMD_LINK_FWD    = 'forward';
   const CMD_LINK_REV    = 'reverse';
@@ -56,7 +59,9 @@ interface AblePolecat_Command_TargetInterface extends AblePolecat_AccessControl_
   public function setReverseCommandLink(AblePolecat_Command_TargetInterface $Target);
 }
 
-abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command_TargetInterface {
+abstract class AblePolecat_Command_TargetAbstract 
+  extends AblePolecat_CacheObjectAbstract
+  implements AblePolecat_Command_TargetInterface {
   
   /**
    * @var Next reverse target in command chain of responsibility.
@@ -150,7 +155,9 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
    *
    * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
    */
-  abstract protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction);
+  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
+    return TRUE;
+  }
   
   /**
    * Send command or forward or back the chain of responsibility.
@@ -164,17 +171,9 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
     
     if (!isset($Result)) {
       $Target = NULL;
-      
-      $direction = NULL;
-      if (is_a($Command, 'AblePolecat_Command_ForwardInterface')) {
-        $direction = AblePolecat_Command_TargetInterface::CMD_LINK_FWD;
-      }
-      if (is_a($Command, 'AblePolecat_Command_ReverseInterface')) {
-        $direction = AblePolecat_Command_TargetInterface::CMD_LINK_REV;
-      }
-      
+            
       try {
-        switch ($direction) {
+        switch ($Command::direction()) {
           default:
             break;
           case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
@@ -207,7 +206,9 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
     
     $Subordinate = $this->Subordinate;
     if (!isset($Subordinate)) {
-      throw new AblePolecat_Command_Exception('Attempt to access ' . __METHOD__ . ' when no forward command link has been defined.');
+      $message = 'Attempt to access ' . __METHOD__ . ' when no forward command link has been defined.';
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+      throw new AblePolecat_Command_Exception($message);
     }
     return $Subordinate;
   }
@@ -220,8 +221,9 @@ abstract class AblePolecat_Command_TargetAbstract implements AblePolecat_Command
   protected function getReverseCommandLink() {
     $Superior = $this->Superior;
     if (!isset($Superior)) {
-      $msg = 'Attempt to access ' . __METHOD__ . ' when no forward command link has been defined.';
-      throw new AblePolecat_Command_Exception($msg);
+      $message = 'Attempt to access ' . __METHOD__ . ' when no reverse command link has been defined.';
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+      throw new AblePolecat_Command_Exception($message);
     }
     return $Superior;
   }

@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
@@ -175,7 +175,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
       $this->getClassFactoryMethod(),
       $this->getClassLastModifiedTime()
     );
-    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
   }
   
   /**

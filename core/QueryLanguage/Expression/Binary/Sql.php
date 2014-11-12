@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'QueryLanguage', 'Expression', 'Binary.php')));
@@ -34,7 +34,7 @@ class AblePolecat_QueryLanguage_Expression_Binary_Sql extends AblePolecat_QueryL
       );
     }
     catch (AblePolecat_Exception $Exception) {
-      AblePolecat_Command_Log::invoke(AblePolecat_Host::getUserAgent(), $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
+      AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $Exception->getMessage(), AblePolecat_LogInterface::WARNING);
     }
     return $str;
   }

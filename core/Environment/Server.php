@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
@@ -128,7 +128,7 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
           $db_state
         );
         
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server environment initialized.');
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server environment initialized.');
       }
       catch (Exception $Exception) {
         throw new AblePolecat_Environment_Exception("Failure to initialize server environment. " . $Exception->getMessage(), 

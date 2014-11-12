@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Clock.php');
@@ -33,7 +33,7 @@ class AblePolecat_Log_Syslog extends AblePolecat_LogAbstract {
    * @return AblePolecat_Log_Syslog or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    return new AblePolecat_Log_Syslog();
+    return new AblePolecat_Log_Syslog($Subject);
   }
   
   /********************************************************************************

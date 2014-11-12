@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Ack.php')));
@@ -50,19 +50,19 @@ class AblePolecat_Resource_Core extends AblePolecat_ResourceAbstract {
           isset($args[3]) ? self::$Resource->Message = $args[3] : self::$Resource->Message = 'Able Polecat directed to issue error response but no reason or message was given.';
           break;
         case 'AblePolecat_Resource_Form':
-          self::$Resource = AblePolecat_Resource_Form::wakeup(AblePolecat_Host::getUserAgent());
+          self::$Resource = AblePolecat_Resource_Form::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
           break;
         case 'AblePolecat_Resource_Ack':
           self::$Resource = AblePolecat_Resource_Ack::wakeup();
           break;
         case 'AblePolecat_Resource_Install':
-          self::$Resource = AblePolecat_Resource_Install::wakeup(AblePolecat_Host::getUserAgent());
+          self::$Resource = AblePolecat_Resource_Install::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
           break;
         case 'AblePolecat_Resource_Restricted_Util':
           //
           // @todo: authenticate
           //
-          self::$Resource = AblePolecat_Resource_Restricted_Util::wakeup(AblePolecat_Host::getUserAgent());
+          self::$Resource = AblePolecat_Resource_Restricted_Util::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
           break;
       }
     }

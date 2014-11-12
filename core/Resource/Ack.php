@@ -8,7 +8,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
@@ -41,7 +41,7 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
     
     if (!isset(self::$Resource)) {
       self::$Resource = new AblePolecat_Resource_Ack();
-      $version = AblePolecat_Host::getVersion(FALSE);
+      $version = AblePolecat_Version::getVersion(FALSE);
       foreach($version as $propertyName => $propertyValue) {
         self::$Resource->{$propertyName} = $propertyValue;
       }

@@ -11,7 +11,7 @@
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
@@ -174,7 +174,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $Message->getMethod(),
           $Agent->getName()
         );
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     
         //
         // Get resource registration info.
@@ -201,10 +201,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             //
             $Response = AblePolecat_Message_Response_Cached::create();
             $Response->setCachedResponse($CacheRegistration);
-            AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Using cached response.');
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Using cached response.');
           }
           else {
-            AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Cached response not available or outdated.');
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Cached response not available or outdated.');
           }
         }
         
@@ -223,7 +223,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               'transactionId', 'savepointId', 'parentTransactionId')->
             from('transaction')->
             where(sprintf("`sessionNumber` = %s AND `resourceId` = '%s' AND `status` != '%s'", 
-              AblePolecat_Host::getSessionNumber(),
+              AblePolecat_Mode_Session::getSessionNumber(),
               $ResourceRegistration->getPropertyValue('resourceId'), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );

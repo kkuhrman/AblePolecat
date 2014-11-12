@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'ClassLibrary.php')));
@@ -139,7 +139,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
           self::SYSVAR_CORE_CLASSLIBS,
           $ClassLibraryRegistrations
         );
-        AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) environment initialized.');
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) environment initialized.');
       }
       catch (Exception $Exception) {
         throw new AblePolecat_Environment_Exception("Failure to initialize application(s) environment. " . $Exception->getMessage(), 

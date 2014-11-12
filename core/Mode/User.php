@@ -5,19 +5,82 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.2
+ * @version   0.6.3
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php'))); 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'User.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
 
-abstract class AblePolecat_Mode_UserAbstract extends AblePolecat_Mode_ApplicationAbstract {
+class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
+  
+  /**
+   * Constants.
+   */
+  const UUID = 'deb2b1ec-69fc-11e4-b5a7-0050569e00a2';
+  const NAME = 'AblePolecat_Mode_User';
+  
+  /**
+   * @var Instance of Singleton.
+   */
+  private static $UserMode;
   
   /**
    * @var AblePolecat_EnvironmentInterface.
    */
   private $UserEnvironment;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_SubjectInterface.
+   ********************************************************************************/  
+  /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+  
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+  }
+  
+  /**
+   * Create a new instance of object or restore cached object to previous state.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface session status helps determine if connection is new or established.
+   *
+   * @return AblePolecat_Mode_User or NULL.
+   */
+  public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
+    if (!isset(self::$UserMode)) {
+      //
+      // Create instance of session mode
+      //
+      self::$UserMode = new AblePolecat_Mode_User();
+    }
+      
+    return self::$UserMode;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_Command_TargetInterface.
@@ -43,23 +106,6 @@ abstract class AblePolecat_Mode_UserAbstract extends AblePolecat_Mode_Applicatio
         // Not handled
         //
         break;
-      case AblePolecat_Command_Log::UUID:
-        //
-        // Log
-        //
-        switch($Command->getEventSeverity()) {
-          default:
-            break;
-          case AblePolecat_LogInterface::USER_INFO:
-          case AblePolecat_LogInterface::USER_STATUS:
-          case AblePolecat_LogInterface::USER_WARNING:
-            //
-            // Do not pass these to next link in CoR.
-            //
-            $Result = new AblePolecat_Command_Result(NULL, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
-            break;
-        }
-        break;
     }
     //
     // Pass command to next link in chain of responsibility
@@ -73,19 +119,53 @@ abstract class AblePolecat_Mode_UserAbstract extends AblePolecat_Mode_Applicatio
    ********************************************************************************/
   
   /**
+   * Validates given command target as a forward or reverse COR link.
+   *
+   * @param AblePolecat_Command_TargetInterface $Target.
+   * @param string $direction 'forward' | 'reverse'
+   *
+   * @return bool TRUE if proposed COR link is acceptable, otherwise FALSE.
+   */
+  protected function validateCommandLink(AblePolecat_Command_TargetInterface $Target, $direction) {
+    
+    $ValidLink = FALSE;
+    
+    switch ($direction) {
+      default:
+        break;
+      case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
+        break;
+      case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Session');
+        break;
+    }
+    return $ValidLink;
+  }
+  
+  /**
    * Extends constructor.
-   * Sub-classes should override to initialize members.
    */
   protected function initialize() {
     
-    parent::initialize();
+    //
+    // Access control agent (system agent).
+    //
+    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User::wakeup());
+    
+    //
+    // Wakeup session mode and establish as reverse command target.
+    //
+    $CommandChain = AblePolecat_Command_Chain::wakeup();
+    $SessionMode = AblePolecat_Mode_Session::wakeup();
+    $CommandChain->setCommandLink($SessionMode, $this);
     
     //
     // Load environment/configuration
     //
     //
-    // $this->UserEnvironment = AblePolecat_Environment_User::wakeup($this->getAgent($this));
+    $this->UserEnvironment = AblePolecat_Environment_User::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
     
-    AblePolecat_Host::logBootMessage(AblePolecat_LogInterface::STATUS, 'User mode is initialized.');
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'User mode is initialized.');
   }
 }
