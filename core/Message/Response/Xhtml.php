@@ -138,7 +138,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       //
       // Treat all scalar Resource properties as potential substitution strings.
       //
-      // $this->setDefaultSubstitutionMarkers($Resource);
+      $this->setDefaultSubstitutionMarkers($Resource);
     }
   }
   
@@ -156,9 +156,30 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    * @return string.
    */
   protected function postProcessEntityBody($entityBody) {
+    //
+    // Resolve problems caused by encoding of brackets ('{', '}')
+    // @todo: although this works, encoding problem should be resolved in DOM class.
+    // We wish to replace merge field markers (e.g. {!myMergeFieldName}) but not 
+    // Javascript script encapsulation (e.g. function(){...})
+    //
+    $entityBody = str_replace(array('{', '}'), array('%7B', '%7D'), $entityBody);
+    
+    //
+    // Substitute markers with resource property values.
+    //
     $substitutionMarkers = array_keys($this->entityBodyStringSubstitutes);
     $substitutionValue = $this->entityBodyStringSubstitutes;
     $entityBody = str_replace($substitutionMarkers, $substitutionValue, $entityBody);
+    
+    //
+    // @see encoding issue comment at top of function
+    //
+    $entityBody = str_replace(array('%7B', '%7D'), array('{', '}'), $entityBody);
+    
+    //
+    // @todo: components...
+    //
+    
     return $entityBody;
   }
   
@@ -271,10 +292,11 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     $property = $Resource->getFirstProperty();
     while($property) {
       if (is_a($property, 'AblePolecat_Data_ScalarInterface')) {
-        $substitutionMarker = sprintf("{!%s}", $property->getPropertyKey());
+        $substitutionMarker = sprintf("{!%s}", $Resource->getPropertyKey());
         $substitutionValue = sprintf("%s", $property);
         $this->setSubstitutionMarker($substitutionMarker, $substitutionValue);
       }
+      $property = $Resource->getNextProperty();
     }
   }
   

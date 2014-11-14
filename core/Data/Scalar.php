@@ -38,7 +38,7 @@ interface AblePolecat_Data_ScalarInterface extends AblePolecat_DataInterface {
   public function __toString();
 }
 
-abstract class AblePolecat_Data_ScalarAbstract implements AblePolecat_DataInterface {
+abstract class AblePolecat_Data_ScalarAbstract implements AblePolecat_Data_ScalarInterface {
   
   /**
    * @var mixed The value of the encapsulated data.

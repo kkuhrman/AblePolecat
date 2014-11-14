@@ -208,6 +208,15 @@ abstract class AblePolecat_ResourceAbstract
   }
   
   /**
+   * Set resource URI.
+   *
+   * @param string $uri URI or NULL.
+   */
+  protected function setUri($uri) {
+    $this->uri = $uri;
+  }
+  
+  /**
    * Extends __construct().
    */
   protected function initialize() {
