@@ -311,7 +311,12 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       if (is_array($Tables)) {
         switch ($DmlOp) {
           default:
-            parent::__set($Element, sprintf("`%s`", implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER, $Tables)));
+            if ($this->encloseObjectNames()) {
+              parent::__set($Element, sprintf("`%s`", implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER, $Tables)));
+            }
+            else {
+              parent::__set($Element, sprintf("%s", implode(AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER, $Tables)));
+            }
             break;
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT:
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::REPLACE:
@@ -321,7 +326,12 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
             // Otherwise, complain...
             //
             if (count($Tables) == 1) {
-              parent::__set($Element, sprintf("`%s`", strval($Tables[0])));
+              if ($this->encloseObjectNames()) {
+                parent::__set($Element, sprintf("`%s`", strval($Tables[0])));
+              }
+              else {
+                parent::__set($Element, sprintf("%s", strval($Tables[0])));
+              }
             }
             else {
               throw new AblePolecat_QueryLanguage_Exception("Invalid SQL syntax [$DmlOp]. Only one table can be referenced. " . count($Tables) . " given.",
@@ -331,7 +341,12 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         }
       }
       else {
-        parent::__set($Element, sprintf("`%s`", strval($Tables)));
+        if ($this->encloseObjectNames()) {
+          parent::__set($Element, sprintf("`%s`", strval($Tables)));
+        }
+        else {
+          parent::__set($Element, sprintf("%s", strval($Tables)));
+        }
       }
     }
     else {
@@ -356,7 +371,12 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         $delimiter = AblePolecat_QueryLanguage_Statement_Sql_Interface::NAME_LIST_DELIMITER;
         switch($DmlOp) {
           default:
-            parent::__set($Element, sprintf("`%s`", implode($delimiter, $Columns)));
+            if ($this->encloseObjectNames()) {
+              parent::__set($Element, sprintf("`%s`", implode($delimiter, $Columns)));
+            }
+            else {
+              parent::__set($Element, sprintf("%s", implode($delimiter, $Columns)));
+            }
             break;
           case self::UPDATE:
             $delimiter = AblePolecat_QueryLanguage_Statement_Sql_Interface::LIST_DELIMITER;
@@ -365,7 +385,12 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
         }
       }
       else {
-        parent::__set($Element, sprintf("`%s`", strval($Columns)));
+        if ($this->encloseObjectNames()) {
+          parent::__set($Element, sprintf("`%s`", strval($Columns)));
+        }
+        else {
+          parent::__set($Element, sprintf("%s", strval($Columns)));
+        }
       }
     }
     else {
@@ -430,10 +455,18 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
               //
               // @todo: handle quoting
               //
-              $setExpr[] = sprintf("`%s` = %s",
-                $name,
-                $this->getLiteralExpression($Values[$key])
-              );
+              if ($this->encloseObjectNames()) {
+                $setExpr[] = sprintf("`%s` = %s",
+                  $name,
+                  $this->getLiteralExpression($Values[$key])
+                );
+              }
+              else {
+                $setExpr[] = sprintf("%s = %s",
+                  $name,
+                  $this->getLiteralExpression($Values[$key])
+                );
+              }
             }
             //
             // Overwrite column names
@@ -656,5 +689,6 @@ class AblePolecat_Sql extends AblePolecat_QueryLanguage_Statement_SqlAbstract {
    */
   protected function initialize() {
     parent::initialize();
+    $this->setEncloseObjectNames(TRUE);
   }
 }

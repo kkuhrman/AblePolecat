@@ -100,6 +100,11 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
    */
   private $DmlOp;
   
+  /**
+   * @var bool TRUE if objects (table, field names etc.) should be enclosed by tick (`).
+   */
+  private $encloseObjectNames;
+  
   /********************************************************************************
    * Implementation of AblePolecat_StdObjectInterface.
    ********************************************************************************/
@@ -335,6 +340,13 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
    ********************************************************************************/
   
   /**
+   * @return bool TRUE if objects (table, field names etc.) should be enclosed by tick (`).
+   */
+  public function encloseObjectNames() {
+    return $this->encloseObjectNames;
+  }
+  
+  /**
    * @return string QueryObject field list.
    */
   public function getFields() {
@@ -425,11 +437,22 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
     $Element = AblePolecat_QueryLanguage_StatementInterface::FIELDS;
     if (self::supportsSyntax($DmlOp, $Element)) {
       if (is_array($Fields)) {
-        $delimiter = AblePolecat_QueryLanguage_StatementInterface::NAME_LIST_DELIMITER;
-        parent::__set($Element, sprintf("`%s`", implode($delimiter, $Fields)));
+        if ($this->encloseObjectNames()) {
+          $delimiter = AblePolecat_QueryLanguage_StatementInterface::NAME_LIST_DELIMITER;
+          parent::__set($Element, sprintf("`%s`", implode($delimiter, $Fields)));
+        }
+        else {
+          $delimiter = AblePolecat_QueryLanguage_StatementInterface::LIST_DELIMITER;
+          parent::__set($Element, sprintf("%s", implode($delimiter, $Fields)));
+        }
       }
       else {
-        parent::__set($Element, sprintf("`%s`", strval($Fields)));
+        if ($this->encloseObjectNames()) {
+          parent::__set($Element, sprintf("`%s`", strval($Fields)));
+        }
+        else {
+          parent::__set($Element, sprintf("%s", strval($Fields)));
+        }
       }
     }
     else {
@@ -557,7 +580,12 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
               AblePolecat_Error::INVALID_SYNTAX);
             break;
           case AblePolecat_QueryLanguage_StatementInterface::SELECT:
-            parent::__set($Element, sprintf("`%s`", strval($QueryObject)));
+            if ($this->encloseObjectNames()) {
+              parent::__set($Element, sprintf("`%s`", strval($QueryObject)));
+            }
+            else {
+              parent::__set($Element, sprintf("%s", strval($QueryObject)));
+            }
             break;
         }
       }
@@ -614,6 +642,13 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
   }
   
   /**
+   * @param bool $encloseObjectNames TRUE if objects (table, field names etc.) should be enclosed by tick (`).
+   */
+  protected function setEncloseObjectNames($encloseObjectNames) {
+    $this->encloseObjectNames = $encloseObjectNames;
+  }
+  
+  /**
    * Initialize SQL syntax support or override a specific feature.
    *
    * @param string $dml DML operation (e.g. SELECT, INSERT, etc.)
@@ -651,5 +686,7 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
         self::OFFSET => TRUE,
       ),
     );
+    
+    $this->encloseObjectNames = FALSE;
   }
 }

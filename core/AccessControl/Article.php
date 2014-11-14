@@ -18,7 +18,7 @@ interface AblePolecat_AccessControl_ArticleInterface {
   /**
    * Scope of operation.
    *
-   * @return string SYSTEM | APPLICATION | USER | SESSION | RESOURCE.
+   * @return string SYSTEM | APPLICATION | USER | SESSION | SERVICE | RESOURCE.
    */
   public static function getScope();
 }

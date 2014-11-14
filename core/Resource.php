@@ -197,7 +197,6 @@ abstract class AblePolecat_ResourceAbstract
    * Extends __construct().
    */
   protected function initialize() {
-    
     //
     // throw exception if request URI path is not valid for resource
     //

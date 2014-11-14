@@ -19,18 +19,65 @@ interface AblePolecat_Service_ClientInterface extends AblePolecat_Service_Initia
 abstract class AblePolecat_Service_ClientAbstract extends AblePolecat_Service_InitiatorAbstract implements AblePolecat_Service_ClientInterface {
   
   /**
-   * @var object Instance of PHP client.
+   * @var string Resource ID unique to localhost.
    */
-  protected $Client;
+  private $clientId;
   
+  /**
+   * @var string Resource name unique to localhost.
+   */
+  private $clientName;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   ********************************************************************************/
+  
+  /**
+   * System unique ID.
+   *
+   * @return scalar Subject unique identifier.
+   */
+  public function getId() {
+    return $this->clientId;
+  }
+  
+  /**
+   * Common name, need not be unique.
+   *
+   * @return string Common name.
+   */
+  public function getName() {
+    return $this->clientName;
+  }
+    
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-   
+  
+  /**
+   * Set unique client ID.
+   *
+   * @param string $clientId.
+   */
+  protected function setId($clientId) {
+    $this->clientId = $clientId;
+  }
+  
+  /**
+   * Set client name.
+   *
+   * @param string $clientName.
+   */
+  protected function setName($clientName) {
+    $this->clientName = $clientName;
+  }
+  
   /**
    * Extends __construct().
    */
   protected function initialize() {
     parent::initialize();
+    $this->clientId = NULL;
+    $this->clientName = NULL;
   }
 }

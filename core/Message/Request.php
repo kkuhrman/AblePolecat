@@ -17,7 +17,7 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   const URI                 = 'uri';
   const URI_SLASH           = URI_SLASH;
   const URI_PATH            = 'path';
-  const URI_RESOURCE_NAME   = 'resource_name'; // Name of object type (e.g. product, location, etc).
+  const URI_RESOURCE_NAME   = 'resource_name'; // In most cases, relative path.
   const URI_REDIRECT        = 'uri_redirect'; // TRUE if resolved path is not the original request, otherwise FALSE.
   const URI_SEARCH_PARAM    = 'q'; // Parameter in query string identifying string to send to search feature.
   
@@ -358,7 +358,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         //
         // Yes, a valid resource name was given.
         //
-        $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
+        // $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
+        $this->request_path_info[self::URI_RESOURCE_NAME] = $this->request_path_info[self::URI_PATH];
         $this->request_path_info[self::URI_REDIRECT] = FALSE;
       }
       else {
@@ -596,6 +597,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     else {
       //
       // Resource URI is specified.
+      // @todo: ensure $this->request_path_info[self::URI_RESOURCE_NAME] excludes host name.
       //
       $url_parts = parse_url($resource);
       isset($url_parts['scheme']) ? $protocol = $url_parts['scheme'] . "://" : $protocol = '';

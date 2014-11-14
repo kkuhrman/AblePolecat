@@ -354,7 +354,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     // Extract the part of the URI, which defines the resource.
     //
     $requestPathInfo = $Request->getRequestPathInfo();
-    isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resourceName  = NULL;    
+    isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resourceName  = NULL;
     if (isset($resourceName)) {
       $ResourceRegistration->resourceName = $resourceName;
       $ResourceRegistration->hostName = $Request->getHostName();
@@ -570,9 +570,9 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   protected function getResponseRegistration($resourceId, $resourceName, $statusCode) {
     
     $ResponseRegistration = AblePolecat_Registry_Entry_Response::create();
-    $ResponseRegistration->resourceId = $resourceId;
-    $ResponseRegistration->resourceName = $resourceName;
-    $ResponseRegistration->statusCode = $statusCode;
+    isset($resourceId) ? $ResponseRegistration->resourceId = $resourceId : $ResponseRegistration->resourceId = '';
+    isset($resourceName) ? $ResponseRegistration->resourceName = $resourceName : $ResponseRegistration->resourceName = '';
+    isset($statusCode) ? $ResponseRegistration->statusCode = $statusCode : $ResponseRegistration->statusCode = 0;
     
     //
     // Search database table [response] for a corresponding registration record.

@@ -10,29 +10,13 @@
 
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Service.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 
 interface AblePolecat_Service_InitiatorInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
   
   /**
-   * Prepares a request to be dispatched to a service.
-   *
-   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent with access to requested service.
-   * @param AblePolecat_Message_RequestAbstract $request The unprepared request.
-   *
-   * @return AblePolecat_Service_InitiatorInterface Client prepared to dispatch request.
-   * @throw AblePolecat_Service_Exception if request could not be prepared.
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource or NULL.
    */
-  public function prepare(AblePolecat_AccessControl_AgentInterface $Agent, 
-    AblePolecat_Message_RequestInterface $request);
-  
-  /**
-   * Dispatch a prepared request to a service.
-   *
-   * @return bool TRUE if the request was dispatched, otherwise FALSE.
-   */
-  public function dispatch();
+  public function getLocater();
 }
 
 /**
@@ -42,7 +26,34 @@ abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheOb
   /**
    * @var AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource if any.
    */
-  protected $Locater;
+  private $Locater;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SERVICE';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_Service_InitiatorInterface.
+   ********************************************************************************/
+   
+  /**
+   * @return AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource or NULL.
+   */
+  public function getLocater() {
+    return $this->Locater;
+  }
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Sets URL used to open resource.
@@ -54,122 +65,9 @@ abstract class AblePolecat_Service_InitiatorAbstract extends AblePolecat_CacheOb
   }
   
   /**
-   * @return AblePolecat_AccessControl_Resource_LocaterInterface URL used to open resource or NULL.
-   */
-  public function getLocater() {
-    return $this->Locater;
-  }
-  
-  /**
    * Extends __construct().
    */
   protected function initialize() {
     $this->Locater = NULL;
-  }
-}
-
-/**
- * This is a legacy class - probably made obsolete by transaction management.
- */ 
-abstract class AblePolecat_Service_InitiatorExAbstract extends AblePolecat_Service_InitiatorAbstract {
-  
-  /**
-   * @var Prepared requests, ready to dispatch. FIFO.
-   */
-  private $PreparedRequests;
-  
-  /**
-   * @var bool Internal lock. Prevents concurrent dispatching of requests.
-   */
-  private $lock;
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_Service_InitiatorInterface.
-   ********************************************************************************/
-  
-  /**
-   * Dispatch a prepared request to a service.
-   *
-   * @return bool TRUE if the request was dispatched, otherwise FALSE.
-   */
-  public function dispatch() {
-    
-    //
-    // Set lock.
-    //
-    $this->setLock();
-    
-    //
-    // Prepare response.
-    //
-    $Response = AblePolecat_Message_Response_Xml::create(200, 'OK');    
-    
-    //
-    // Handle next prepared request.
-    //
-    $PreparedRequest = $this->getNextPreparedRequest();
-    $this->handlePreparedRequest($PreparedRequest, $Response);
-    
-    //
-    // Release lock and return response.
-    //
-    $this->setLock(FALSE);
-    return $Response;
-  }
-  
-  /********************************************************************************
-   * Helper functions.
-   ********************************************************************************/
-  
-  /**
-   * Handle a prepared request.
-   *
-   * @param AblePolecat_Message_RequestInterface $Request.
-   * @param AblePolecat_Message_ResponseInterface &$Response.
-   *
-   * @throw AblePolecat_Service_Exception If processing request fails.
-   */
-  abstract protected function handlePreparedRequest($Request, &$Response);
-  
-  /**
-   * Return next request prepared for dispatch.
-   *
-   * @return mixed Next request or NULL.
-   */
-  protected function getNextPreparedRequest() {
-    return array_shift($this->PreparedRequests);
-  }
-  
-  /**
-   * Pushes a prepared request to the end of the list.
-   *
-   * @param mixed $Request.
-   */
-  protected function pushPreparedRequest($Request) {
-    return array_push($this->PreparedRequests, $Request);
-  }
-  
-  /**
-   * @return bool TRUE if lock on client is set, otherwise FALSE.
-   */
-  protected function isLocked() {
-    return $this->lock;
-  }
-  
-  /**
-   * @param bool $lock Prevents concurrent dispatching of requests.
-   */
-  protected function setLock($lock = TRUE) {
-    $this->lock = $lock;
-  }
-  
-  /**
-   * Extends __construct().
-   *
-   * Sub-classes should override to initialize properties.
-   */
-  protected function initialize() {
-    $this->PreparedRequests = array();
-    $this->lock = FALSE;
   }
 }
