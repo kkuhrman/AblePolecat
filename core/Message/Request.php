@@ -267,8 +267,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     // @todo: URI security
     //
     $resolvedResourceName = FALSE;
-    $sanitizedResourceName = strtolower(preg_replace(array('/[^a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
-
+    $sanitizedResourceName = strtolower(preg_replace(array('/[^\/\a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
+    
     //
     // Check sanitized resource names against registry.
     //
@@ -353,13 +353,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       //
       // Is it a request for a recognized resource on the system?
       //
-      $resourceName = $this->validateResourceName($this->request_path[0]);
-      if (strcasecmp($this->request_path[0], $resourceName) == 0) {
+      $resourceName = $this->validateResourceName($this->request_path_info[self::URI_PATH]);
+      if (strcasecmp($this->request_path_info[self::URI_PATH], $resourceName) == 0) {
         //
         // Yes, a valid resource name was given.
         //
         // $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
-        $this->request_path_info[self::URI_RESOURCE_NAME] = $this->request_path_info[self::URI_PATH];
+        $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
         $this->request_path_info[self::URI_REDIRECT] = FALSE;
       }
       else {
