@@ -40,6 +40,20 @@ interface AblePolecat_ResourceInterface
    * @return string URI or NULL.
    */
   public function getUri();
+  
+  /**
+   * Set unique resource ID.
+   *
+   * @param string $resourceId.
+   */
+  public function setId($resourceId);
+  
+  /**
+   * Set resource name.
+   *
+   * @param string $resourceName.
+   */
+  public function setName($resourceName);
 }
 
 abstract class AblePolecat_ResourceAbstract 
@@ -152,6 +166,24 @@ abstract class AblePolecat_ResourceAbstract
   public function getUri() {
     return $this->uri;
   }
+  
+  /**
+   * Set unique resource ID.
+   *
+   * @param string $resourceId.
+   */
+  public function setId($resourceId) {
+    $this->resourceId = $resourceId;
+  }
+  
+  /**
+   * Set resource name.
+   *
+   * @param string $resourceName.
+   */
+  public function setName($resourceName) {
+    $this->resourceName = $resourceName;
+  }
     
   /********************************************************************************
    * Helper functions.
@@ -173,24 +205,6 @@ abstract class AblePolecat_ResourceAbstract
    */
   protected function setDefaultCommandInvoker(AblePolecat_AccessControl_SubjectInterface $Invoker) {
     $this->CommandInvoker = $Invoker;
-  }
-  
-  /**
-   * Set unique resource ID.
-   *
-   * @param string $resourceId.
-   */
-  protected function setId($resourceId) {
-    $this->resourceId = $resourceId;
-  }
-  
-  /**
-   * Set resource name.
-   *
-   * @param string $resourceName.
-   */
-  protected function setName($resourceName) {
-    $this->resourceName = $resourceName;
   }
   
   /**

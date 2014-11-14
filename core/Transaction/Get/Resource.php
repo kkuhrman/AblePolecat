@@ -116,6 +116,8 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       //
       try {
         $Resource = $this->getClassRegistry()->loadClass($resourceClassName, $this->getAgent());
+        $Resource->setId($this->getResourceRegistration()->getResourceId());
+        $Resource->setName($this->getResourceRegistration()->getResourceName());
         $this->setStatus(self::TX_STATE_COMPLETED);
       }
       catch(AblePolecat_AccessControl_Exception $Exception) {
