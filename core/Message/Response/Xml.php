@@ -67,6 +67,11 @@ class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstr
       $Element = $Resource->getDomNode($Document);
       $Element = AblePolecat_Dom::appendChildToParent($Element, $Document, $parentElement);
       $this->setDocument($Document);
+      
+      //
+      // Stash raw resource.
+      //
+      $this->setResource($Resource);
     }
   }
   

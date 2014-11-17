@@ -38,6 +38,11 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
   public function getMimeType();
   
   /**
+   * @return AblePolecat_ResourceInterface.
+   */
+  public function getResource();
+  
+  /**
    * @return string.
    */
   public function getResourceName();
@@ -75,6 +80,11 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    * @see getConcreteInstance(), setConcreteInstance().
    */
   private static $Response;
+  
+  /**
+   * @var AblePolecat_ResourceInterface 
+   */
+  private $dataResource;
   
   /**
    * @var AblePolecat_Registry_Entry_ResponseInterface
@@ -163,6 +173,13 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   /********************************************************************************
    * Implementation of AblePolecat_Message_ResponseInterface.
    ********************************************************************************/
+  
+  /**
+   * @return AblePolecat_ResourceInterface.
+   */
+  public function getResource() {
+    return $this->dataResource;
+  }
   
   /**
    * @return string.
@@ -257,6 +274,13 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     // output buffer is not flushed until server goes out of scope).
     //
     echo $this->getEntityBody();
+  }
+  
+  /**
+   * @return AblePolecat_ResourceInterface.
+   */
+  protected function setResource(AblePolecat_ResourceInterface $Resource) {
+    $this->dataResource = $Resource;
   }
   
   /**
@@ -428,6 +452,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    */
   protected function initialize() {
     $this->Document = NULL;
+    $this->dataResource = NULL;
     $this->ResponseRegistration = NULL;
     $this->statusCode = 200;
     $this->reasonPhrase = '';

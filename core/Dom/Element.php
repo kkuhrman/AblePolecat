@@ -8,7 +8,7 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Node.php')));
 
 interface AblePolecat_Dom_ElementInterface extends AblePolecat_Dom_NodeInterface {
 }

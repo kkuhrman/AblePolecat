@@ -8,6 +8,7 @@
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Component.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response.php')));
 
 class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbstract {
@@ -35,6 +36,11 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    * @var string.
    */
   private $systemId;
+  
+  /**
+   * @var Array[id of parent element => AblePolecat_ComponentInterface].
+   */
+  private $entityBodyComponents;
   
   /**
    * @var Array String substitutions.
@@ -139,6 +145,11 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       // Treat all scalar Resource properties as potential substitution strings.
       //
       $this->setDefaultSubstitutionMarkers($Resource);
+      
+      //
+      // Stash raw resource.
+      //
+      $this->setResource($Resource);
     }
   }
   
@@ -176,10 +187,6 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     //
     $entityBody = str_replace(array('%7B', '%7D'), array('{', '}'), $entityBody);
     
-    //
-    // @todo: components...
-    //
-    
     return $entityBody;
   }
   
@@ -193,6 +200,19 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    * @return DOMDocument $Document
    */
   protected function preprocessEntityBody(DOMDocument $Document) {
+    //
+    // Insert component markup into parent element.
+    //
+    foreach($this->entityBodyComponents as $parentId => $Components) {
+      foreach($Components as $key => $Component) {
+        $Element = $Component->getDomNode($Document);
+        AblePolecat_Dom::appendChildToParent(
+          $Element, 
+          $Document,
+          AblePolecat_Dom::expressIdAttribute('id', $parentId)
+        );
+      }
+    }
     return $Document;
   }
   
@@ -230,6 +250,29 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    */
   public function getSystemId() {
     return $this->systemId;
+  }
+  
+  /**
+   * Append component to given element.
+   *
+   * @param String $parentId ID of element component will be appended to.
+   * @param AblePolecat_ComponentInterface $Component.
+   *
+   */
+  public function setComponent($parentId, AblePolecat_ComponentInterface $Component) {
+    if ($result && is_scalar($parentId)) {
+      if (!isset($this->entityBodyComponents[$parentId])) {
+        $this->entityBodyComponents[$parentId] = array();
+      }
+      $this->entityBodyComponents[$parentId][] = $Component;
+    }
+    else {
+      AblePolecat_Command_Log::invoke(
+        AblePolecat_AccessControl_Agent_User::wakeup(), 
+        sprintf("%s first parameter must be scalar (element id attribute value). %s given.", __METHOD__, AblePolecat_Data::getDataTypeName($parentId)), 
+        'info'
+      );
+    }
   }
   
   /**
@@ -305,6 +348,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    */
   protected function initialize() {
     parent::initialize();
+    $this->entityBodyComponents = array();
     $this->entityBodyStringSubstitutes = array();
   }
 }

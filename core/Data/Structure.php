@@ -165,41 +165,6 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   /**
    * Returns assigned or default value and will not trigger an error.
    * 
-   * @param string $name Name of given property.
-   * @param mixed $default Default value to return if not assigned.
-   *
-   * @return mixed Assigned value of property given by $name if set, otherwise $default.
-   */
-  public function getPropertyValue($name, $default = NULL) {
-    
-    $property = $default;
-    
-    if (isset($this->properties[$name])) {
-      $property = $this->properties[$name];
-    }
-    return $property;
-  }
-  
-  /********************************************************************************
-   * Helper functions.
-   ********************************************************************************/
-  
-  /**
-   * Allocates array if not already allocated.
-   *
-   * It seems intuitively inefficient to step into this function every time.
-   * It is a protection against failure to call parent method in subclasses.
-   * (for example, subclass overrides initialize()).
-   */
-  private function checkAlloc() {
-    if (!isset($this->properties)) {
-      $this->properties = array();
-    }
-  }
-  
-  /**
-   * Returns assigned or default value and will not trigger an error.
-   * 
    * @param string $name Name of property.
    * @param mixed $default Default value to return if not assigned.
    *
@@ -241,5 +206,40 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
     $this->checkAlloc();
     $property = key($this->properties);
     return $property;
+  }
+  
+  /**
+   * Returns assigned or default value and will not trigger an error.
+   * 
+   * @param string $name Name of given property.
+   * @param mixed $default Default value to return if not assigned.
+   *
+   * @return mixed Assigned value of property given by $name if set, otherwise $default.
+   */
+  public function getPropertyValue($name, $default = NULL) {
+    
+    $property = $default;
+    
+    if (isset($this->properties[$name])) {
+      $property = $this->properties[$name];
+    }
+    return $property;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Allocates array if not already allocated.
+   *
+   * It seems intuitively inefficient to step into this function every time.
+   * It is a protection against failure to call parent method in subclasses.
+   * (for example, subclass overrides initialize()).
+   */
+  private function checkAlloc() {
+    if (!isset($this->properties)) {
+      $this->properties = array();
+    }
   }
 }

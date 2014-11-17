@@ -70,8 +70,20 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
     }
     catch(AblePolecat_Message_Exception $Exception) {
       
-      $Document = NULL;
+      //
+      // Treat all scalar Resource properties as potential substitution strings.
+      //
+      $this->setDefaultSubstitutionMarkers($Resource);
       
+      //
+      // Stash raw resource.
+      //
+      $this->setResource($Resource);
+      
+      //
+      // Create DOM document.
+      //
+      $Document = NULL;
       $templateFullPath = $this->getTemplateFullPath();
       if (isset($templateFullPath) && file_exists($templateFullPath)) {
         $Document = AblePolecat_Dom::createDocumentFromTemplate($templateFullPath);
@@ -88,11 +100,6 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
         $Document = $this->preprocessEntityBody($Document);
         $this->setDocument($Document);
       }
-      
-      //
-      // Treat all scalar Resource properties as potential substitution strings.
-      //
-      $this->setDefaultSubstitutionMarkers($Resource);
     }
   }
   
