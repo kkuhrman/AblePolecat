@@ -16,7 +16,7 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Response.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
@@ -569,7 +569,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    */
   protected function getResponseRegistration($resourceId, $resourceName, $statusCode) {
     
-    $ResponseRegistration = AblePolecat_Registry_Entry_Response::create();
+    $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
     isset($resourceId) ? $ResponseRegistration->resourceId = $resourceId : $ResponseRegistration->resourceId = '';
     isset($resourceName) ? $ResponseRegistration->resourceName = $resourceName : $ResponseRegistration->resourceName = '';
     isset($statusCode) ? $ResponseRegistration->statusCode = $statusCode : $ResponseRegistration->statusCode = 0;
@@ -803,7 +803,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    *
    * @param AblePolecat_Registry_Entry_Cache $CacheRegistration
    * @param AblePolecat_Registry_Entry_Resource $ResourceRegistration
-   * @param AblePolecat_Registry_Entry_Response $ResponseRegistration
+   * @param AblePolecat_Registry_Entry_DomNode_Response $ResponseRegistration
    * @param AblePolecat_MessageInterface $Message
    *
    * @return AblePolecat_MessageInterface
@@ -811,7 +811,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   protected function updateCache(
     AblePolecat_Registry_Entry_Cache $CacheRegistration,
     AblePolecat_Registry_Entry_Resource $ResourceRegistration,
-    AblePolecat_Registry_Entry_Response $ResponseRegistration,
+    AblePolecat_Registry_Entry_DomNode_Response $ResponseRegistration,
     AblePolecat_MessageInterface $Message
   ) {
     
