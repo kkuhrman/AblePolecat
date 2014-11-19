@@ -8,6 +8,7 @@
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Component.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
 
 class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Response_Xhtml {

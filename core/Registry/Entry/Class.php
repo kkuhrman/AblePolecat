@@ -99,6 +99,46 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_Registry_EntryInterface.
+   ********************************************************************************/
+  
+  /**
+   * Fetch registration record given by id.
+   *
+   * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
+   *
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function fetch($primaryKey) {
+    //
+    // @todo: complete fetch from [class]
+    //
+  }
+  
+  /**
+   * Returns name(s) of field(s) uniquely identifying records for encapsulated table.
+   *
+   * @return Array[string].
+   */
+  public static function getPrimaryKeyFieldNames() {
+    return array(0 => 'className');
+  }
+  
+  /**
+   * Update or insert registration record.
+   *
+   * If the encapsulated registration exists, based on id property, it will be updated
+   * to reflect object state. Otherwise, a new registration record will be created.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function save() {
+    //
+    // @todo complete REPLACE [class]
+    //
+  }
+  
+  /********************************************************************************
    * Implementation of AblePolecat_Registry_Entry_ClassInterface.
    ********************************************************************************/
     

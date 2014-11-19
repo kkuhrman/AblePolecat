@@ -3,6 +3,22 @@
  * @file      polecat/core/Resource.php
  * @brief     The 'Model' part of the MVC triad aka a resource on the web.
  *
+ * Able Polecat expects the part of the URI, which follows the host or virtual host
+ * name to define a 'resource' on the system. This function returns the data (model)
+ * corresponding to request. If no corresponding resource is located on the system, 
+ * or if an application error is encountered along the way, Able Polecat has a few 
+ * built-in resources to deal with these situations.
+ *
+ * NOTE: Although a 'resource' may comprise more than one path component (e.g. 
+ * ./books/[ISBN] or ./products/[SKU] etc), an Able Polecat resource is identified by
+ * the first part only (e.g. 'books' or 'products') combined with a UUID. Additional
+ * path parts are passed to the top-level resource for further resolution. This is 
+ * why resource classes validate the URI, to ensure it follows expectations for syntax
+ * and that request for resource can be fulfilled. In short, the Able Polecat server
+ * really only fulfils the first part of the resource request and delegates the rest to
+ * the 'resource' itself.
+ *
+ * @see AblePolecat_ResourceAbstract::validateRequestPath()
  *
  * According to Richardson/Ruby (@see ISBN 978-0-596-52926-0), a Resource Oriented
  * Architecture involves four concepts:

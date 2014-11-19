@@ -15,15 +15,31 @@
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
  */
- 
+
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Component.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Element.php')));
 
-interface AblePolecat_ComponentInterface extends AblePolecat_Dom_ElementInterface {
+interface AblePolecat_ComponentInterface 
+  extends AblePolecat_Dom_ElementInterface,
+          AblePolecat_AccessControl_Article_StaticInterface {
 }
 
 abstract class AblePolecat_ComponentAbstract 
   extends AblePolecat_Dom_ElementAbstract 
   implements AblePolecat_ComponentInterface {
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_DataInterface.
+   ********************************************************************************/
+  
+  /**
+   * Scope of operation.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'APPLICATION';
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_DataInterface.

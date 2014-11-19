@@ -15,6 +15,7 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'Integer.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
@@ -193,25 +194,36 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             $ResourceRegistration->getResourceName(), 
             200
           );
-          $CacheRegistration = $this->getCacheRegistration($ResourceRegistration->getResourceId(), 200);
-          if (($CacheRegistration->getLastModifiedTime() > $ResourceRegistration->getLastModifiedTime()) && 
-              ($CacheRegistration->getLastModifiedTime() > $ResponseRegistration->getLastModifiedTime())) {
+          
+          $primaryKey = array($ResourceRegistration->getResourceId(), 200);
+          $CacheRegistration = AblePolecat_Registry_Entry_Cache::fetch($primaryKey);
+          if (isset($CacheRegistration)) {
             //
-            // Generate response from cache entry
+            // Check if resource and/or response have been modified since last cache entry.
             //
-            $Response = AblePolecat_Message_Response_Cached::create();
-            $Response->setCachedResponse($CacheRegistration);
-            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Using cached response.');
-          }
-          else {
-            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Cached response not available or outdated.');
+            $lastModifiedTimes = array(
+              $CacheRegistration->getLastModifiedTime(),
+              $ResourceRegistration->getLastModifiedTime(),
+              $ResponseRegistration->getLastModifiedTime()
+            );
+            $mostRecentModifiedTime = AblePolecat_Data_Scalar_Integer::max($lastModifiedTimes);
+            
+            if ($mostRecentModifiedTime == $CacheRegistration->getLastModifiedTime()) {
+              //
+              // Generate response from cache entry
+              //
+              $Response = AblePolecat_Message_Response_Cached::create();
+              $Response->setCachedResponse($CacheRegistration);
+              AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Using cached response.');
+            }
           }
         }
         
-        //
-        // If no cached response was available, generate a new response.
-        //
         if (!isset($Response)) {
+          //
+          // No cached response was available, generate a new response.
+          //
+          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Cached response not available or outdated.');
           //
           // Check for open transactions matching request for given method/resource by same agent.
           //
@@ -359,7 +371,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       $ResourceRegistration->resourceName = $resourceName;
       $ResourceRegistration->hostName = $Request->getHostName();
       //
-      // Look up (first part of) resource name in database
+      // Look up resource registration in [resource]
       //
       $sql = __SQL()->          
           select('resourceClassName', 'resourceId', 'transactionClassName', 'authorityClassName', 'resourceDenyCode', 'lastModifiedTime')->
@@ -469,37 +481,17 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   }
   
   /**
-   * Check [cache] for a timely and relevant response to request for resource.
-   *
-   * @param string $resourceId
-   * @param int $statusCode
-   *
-   * @return AblePolecat_Registry_Entry_Cache
-   */
-  protected function getCacheRegistration($resourceId, $statusCode) {
-    
-    $CacheRegistration = AblePolecat_Registry_Entry_Cache::create();
-    $CacheRegistration->resourceId = $resourceId;
-    $CacheRegistration->statusCode = $statusCode;
-    
-    $sql = __SQL()->          
-      select('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
-      into('cache')->
-      where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    if ($CommandResult->success() && is_array($CommandResult->value())) {
-      $registrationInfo = $CommandResult->value();
-      if (isset($registrationInfo[0])) {
-        isset($registrationInfo[0]['mimeType']) ? $CacheRegistration->mimeType = $registrationInfo[0]['mimeType'] : NULL;
-        isset($registrationInfo[0]['lastModifiedTime']) ? $CacheRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
-        isset($registrationInfo[0]['cacheData']) ? $CacheRegistration->cacheData = $registrationInfo[0]['cacheData'] : NULL;
-      }
-    }
-    return $CacheRegistration;
-  }
-  
-  /**
    * Prepare an HTTP response corresponding to the given resource and status code.
+   *
+   *
+   * UPDATE cache with response entity body if corresponding entry:
+   * 1. Does not exist.
+   * 2. Modified time is older than:
+   *    2.1 Resource registration entry modified time
+   *    2.2 Response registration entry modified time
+   * @todo: auto update modified times in resource/response registration records if:
+   * - PHP class file modified time is newer than registry entry modified time
+   * - .tpl file modified time is newer than registry entry modified time
    *
    * @param AblePolecat_Registry_Entry_Resource $ResourceRegistration
    * @param AblePolecat_TransactionInterface $Transaction
@@ -514,11 +506,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   ) {
     
     $Response = NULL;
-    
-    //
-    // Check cache first.
-    //
-    $CacheRegistration = $this->getCacheRegistration($Resource->getId(), $Transaction->getStatusCode());
     
     //
     // Search core database for corresponding response registration.
@@ -550,13 +537,20 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           break;
       }
       $Response->setEntityBody($Resource);
-    }    
-    return $this->updateCache(
-      $CacheRegistration,
-      $ResourceRegistration,
-      $ResponseRegistration,
-      $Response
-    );
+    }
+    
+    //
+    // Update cache with current response.
+    //
+    $CacheRegistration = AblePolecat_Registry_Entry_Cache::create();
+    $CacheRegistration->resourceId = $Response->getResourceId();
+    $CacheRegistration->statusCode = $Response->getStatusCode();
+    $CacheRegistration->mimeType = $Response->getMimeType();
+    $CacheRegistration->lastModifiedTime = time();
+    $CacheRegistration->cacheData = $Response->getEntityBody();
+    $CacheRegistration->save();
+    
+    return $Response;
   }
   
   /**
@@ -787,44 +781,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       throw new AblePolecat_Service_Exception("Failed to load service or service client identified by '$id'");
     }
     return $ServiceInitiator;
-  }
-  
-  /**
-   * Update [cache] with response corresponding to requested resource and status code.
-   *
-   * UPDATE cache with response entity body if corresponding entry:
-   * 1. Does not exist.
-   * 2. Modified time is older than:
-   *    2.1 Resource registration entry modified time
-   *    2.2 Response registration entry modified time
-   * @todo: auto update modified times in resource/response registration records if:
-   * - PHP class file modified time is newer than registry entry modified time
-   * - .tpl file modified time is newer than registry entry modified time
-   *
-   * @param AblePolecat_Registry_Entry_Cache $CacheRegistration
-   * @param AblePolecat_Registry_Entry_Resource $ResourceRegistration
-   * @param AblePolecat_Registry_Entry_DomNode_Response $ResponseRegistration
-   * @param AblePolecat_MessageInterface $Message
-   *
-   * @return AblePolecat_MessageInterface
-   */
-  protected function updateCache(
-    AblePolecat_Registry_Entry_Cache $CacheRegistration,
-    AblePolecat_Registry_Entry_Resource $ResourceRegistration,
-    AblePolecat_Registry_Entry_DomNode_Response $ResponseRegistration,
-    AblePolecat_MessageInterface $Message
-  ) {
-    
-    if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
-        
-        $now = time();
-        $sql = __SQL()->          
-          replace('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
-          into('cache')->
-          values($Message->getResourceId(), $Message->getStatusCode(), $Message->getMimeType(), $now, $Message->getEntityBody());
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    }
-    return $Message;
   }
   
   /**

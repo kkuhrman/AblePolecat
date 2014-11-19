@@ -51,6 +51,86 @@ class AblePolecat_Registry_Entry_Cache extends AblePolecat_Registry_EntryAbstrac
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_Registry_EntryInterface.
+   ********************************************************************************/
+   
+  /**
+   * Fetch registration record given by id.
+   *
+   * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
+   *
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function fetch($primaryKey) {
+    
+    $CacheRegistration = NULL;
+    
+    if (is_array($primaryKey) && (2 == count($primaryKey))) {
+      //
+      // Create registry object and initialize primary key.
+      //
+      $CacheRegistration = new AblePolecat_Registry_Entry_Cache();
+      isset($primaryKey['resourceId']) ? $CacheRegistration->resourceId = $primaryKey['resourceId'] : $CacheRegistration->resourceId = $primaryKey[0];
+      isset($primaryKey['statusCode']) ? $CacheRegistration->statusCode = $primaryKey['statusCode'] : $CacheRegistration->statusCode = $primaryKey[1];
+      
+      //
+      // Generate and execute SELECT statement.
+      //
+      $sql = __SQL()->          
+        select('resourceId', 'statusCode', 'mimeType', 'lastModifiedTime', 'cacheData')->
+        from('cache')->
+        where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $CacheRegistration->resourceId, $CacheRegistration->statusCode));
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        if (isset($registrationInfo[0])) {
+          isset($registrationInfo[0]['mimeType']) ? $CacheRegistration->mimeType = $registrationInfo[0]['mimeType'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $CacheRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          isset($registrationInfo[0]['cacheData']) ? $CacheRegistration->cacheData = $registrationInfo[0]['cacheData'] : NULL;
+        }
+      }
+    }
+    return $CacheRegistration;
+  }
+  
+  /**
+   * Returns name(s) of field(s) uniquely identifying records for encapsulated table.
+   *
+   * @return Array[string].
+   */
+  public static function getPrimaryKeyFieldNames() {
+    return array(0 => 'resourceId', 1 => 'statusCode');
+  }
+  
+  /**
+   * Update or insert registration record.
+   *
+   * If the encapsulated registration exists, based on id property, it will be updated
+   * to reflect object state. Otherwise, a new registration record will be created.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function save() {
+    $sql = __SQL()->          
+      replace(
+        'resourceId', 
+        'statusCode', 
+        'mimeType', 
+        'lastModifiedTime', 
+        'cacheData')->
+      into('cache')->
+      values(
+        $this->getResourceId(), 
+        $this->getStatusCode(), 
+        $this->getMimeType(), 
+        $this->getLastModifiedTime(), 
+        $this->getCacheData()
+      );
+    $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    return $CommandResult->success();
+  }
+  
+  /********************************************************************************
    * Implementation of AblePolecat_Registry_Entry_CacheInterface.
    ********************************************************************************/
     
