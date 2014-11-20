@@ -98,7 +98,7 @@ class AblePolecat_Dom {
   /**
    * Append child element to given parent or one identified by tag or id.
    *
-   * @param AblePolecat_DataInterface $data Child node data.
+   * @param AblePolecat_Data_PrimitiveInterface $data Child node data.
    * @param DOMDocument $document DOM Document.
    * @param mixed $parent Parent node | Array['id' => Array[ID attribute name => ID value]] | ['tag' => Array[tag name => DOMNodeList index]]
    * @param bool $recursive IF TRUE, recursively import the subtree under $child. 
@@ -107,7 +107,7 @@ class AblePolecat_Dom {
    * @see expressIdAttribute()
    * @see expressNodeListTag()
    */
-  public static function appendData(AblePolecat_DataInterface $data, DOMDocument $document, $parent = NULL, $recursive = TRUE) {
+  public static function appendData(AblePolecat_Data_PrimitiveInterface $data, DOMDocument $document, $parent = NULL, $recursive = TRUE) {
     // DOMNode $child;
     return self::appendChildToParent($child, $document, $parent, $recursive);
   }

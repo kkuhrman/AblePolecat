@@ -12,7 +12,7 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'DynamicObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'QueryLanguage.php')));
 
@@ -317,7 +317,7 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
     
     foreach(func_get_args() as $key => $arg) {
       try{
-        $strvalue = AblePolecat_Data_Scalar_String::typeCast($arg);
+        $strvalue = AblePolecat_Data_Primitive_Scalar_String::typeCast($arg);
         !isset($WhereCondition) ? $WhereCondition = array() : NULL;
         $WhereCondition[] = $strvalue;
       }

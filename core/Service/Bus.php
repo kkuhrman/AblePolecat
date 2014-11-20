@@ -15,7 +15,7 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'Integer.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
@@ -206,7 +206,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               $ResourceRegistration->getLastModifiedTime(),
               $ResponseRegistration->getLastModifiedTime()
             );
-            $mostRecentModifiedTime = AblePolecat_Data_Scalar_Integer::max($lastModifiedTimes);
+            $mostRecentModifiedTime = AblePolecat_Data_Primitive_Scalar_Integer::max($lastModifiedTimes);
             
             if ($mostRecentModifiedTime == $CacheRegistration->getLastModifiedTime()) {
               //

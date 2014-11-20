@@ -285,7 +285,7 @@ abstract class AblePolecat_Dom_DocumentAbstract
   protected $Document;
   
   /********************************************************************************
-   * Implementation of AblePolecat_DataInterface.
+   * Implementation of AblePolecat_Data_PrimitiveInterface.
    ********************************************************************************/
   
   /**

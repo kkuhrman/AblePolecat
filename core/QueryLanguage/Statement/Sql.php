@@ -548,7 +548,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
     foreach(func_get_args() as $key => $arg) {
       try{
         !isset($JoinStatement) ? $JoinStatement = array() : NULL;
-        $JoinStatement[] = AblePolecat_Data_Scalar_String::typeCast($arg);
+        $JoinStatement[] = AblePolecat_Data_Primitive_Scalar_String::typeCast($arg);
         ($key === 0) ? $JoinStatement[] = "ON" : NULL;
       }
       catch (AblePolecat_Data_Exception $Exception) {

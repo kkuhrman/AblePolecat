@@ -78,7 +78,7 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
     if (isset($args) && is_array($args)) {
       try {
         foreach($args as $key => $value) {
-          $strvalue = AblePolecat_Data_Scalar_String::typeCast($value);
+          $strvalue = AblePolecat_Data_Primitive_Scalar_String::typeCast($value);
           switch($key) {
             default:
               AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), sprintf("Excess data passed to %s constructor. %s.", get_class($this), $strvalue), AblePolecat_LogInterface::WARNING);
@@ -117,9 +117,9 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
     // if ($CommandResult->success()) {
       // $ClassRegistry = $CommandResult->value();
     // }
-    // if (isset($ClassRegistry) && !$ClassRegistry->isLoadable('AblePolecat_Data_Scalar_String')) {
+    // if (isset($ClassRegistry) && !$ClassRegistry->isLoadable('AblePolecat_Data_Primitive_Scalar_String')) {
       // $ClassRegistry->registerLoadableClass(
-        // 'AblePolecat_Data_Scalar_String', 
+        // 'AblePolecat_Data_Primitive_Scalar_String', 
         // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
         // 'typeCast'
       // );

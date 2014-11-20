@@ -12,8 +12,8 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')))
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'DynamicObject.php')));
 
 interface AblePolecat_Data_StructureInterface 
-  extends AblePolecat_DataInterface,
-          AblePolecat_StdObjectInterface {
+  extends AblePolecat_StdObjectInterface,
+          Serializable {
   /**
    * Returns assigned or default value and will not trigger an error.
    * 
@@ -25,12 +25,12 @@ interface AblePolecat_Data_StructureInterface
   public function getPropertySafe($name, $default = NULL);
   
   /**
-   * @return AblePolecat_DataInterface Value of first property in structure or FALSE.
+   * @return AblePolecat_Data_PrimitiveInterface Value of first property in structure or FALSE.
    */
   public function getFirstProperty();
   
   /**
-   * @return AblePolecat_DataInterface Value of next property in structure or FALSE.
+   * @return AblePolecat_Data_PrimitiveInterface Value of next property in structure or FALSE.
    */
   public function getNextProperty();
   
@@ -52,49 +52,17 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
    ********************************************************************************/
    
   /**
-   * @return string serialized representation of AblePolecat_Data_ScalarAbstract.
+   * @return string serialized representation of AblePolecat_Data_Primitive_ScalarAbstract.
    */
   public function serialize() {
     return serialize($this->properties);
   }
   
   /**
-   * @return concrete instance of AblePolecat_Data_ScalarAbstract.
+   * @return concrete instance of AblePolecat_Data_Primitive_ScalarAbstract.
    */
   public function unserialize($data) {
     $this->properties = unserialize($data);
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_DataInterface.
-   ********************************************************************************/
-  
-  /**
-   * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
-   *
-   * @return DOMElement Encapsulated data expressed as DOM node.
-   */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL) {
-    
-    //
-    // Create parent element.
-    //
-    !isset($tagName) ? $tagName = AblePolecat_Data::getDataTypeName($this) : NULL;
-    $Element = $Document->createElement($tagName);
-    
-    //
-    // Iterate through properties and create child elements.
-    //
-    $Property = $this->getFirstProperty();
-    while ($Property) {
-      $propertyName = $this->getPropertyKey();
-      $Child = $Property->getDomNode($Document, $propertyName);
-      $Element->appendChild($Child);
-      $Property = $this->getNextProperty();
-    }
-    return $Element;
-    
   }
   
   /********************************************************************************
@@ -109,13 +77,15 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
    */
   public function __set($name, $value) {
     $this->checkAlloc();
-    if (!is_a($value, 'AblePolecat_DataInterface')) {
+    if (!is_a($value, 'AblePolecat_Data_PrimitiveInterface')) {
       try {
-        $value = AblePolecat_Data_Scalar_String::typeCast($value);
+        $value = AblePolecat_Data::castPrimitiveType($value);
       }
       catch(AblePolecat_Data_Exception $Exception) {
-        throw new AblePolecat_Data_Exception(sprintf("Failed to set data structure property %s. %s", 
+        AblePolecat_Debug::kill(get_object_vars($value->records[0]));
+        throw new AblePolecat_Data_Exception(sprintf("Failed to set data structure property %s (%s). %s", 
           $name, 
+          AblePolecat_Data::getDataTypeName($value),
           $Exception->getMessage())
         );
       }
@@ -182,7 +152,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   }
   
   /**
-   * @return AblePolecat_DataInterface Value of first property in structure or FALSE.
+   * @return AblePolecat_Data_PrimitiveInterface Value of first property in structure or FALSE.
    */
   public function getFirstProperty() {
     $this->checkAlloc();
@@ -191,7 +161,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   }
   
   /**
-   * @return AblePolecat_DataInterface Value of next property in structure or FALSE.
+   * @return AblePolecat_Data_PrimitiveInterface Value of next property in structure or FALSE.
    */
   public function getNextProperty() {
     $this->checkAlloc();

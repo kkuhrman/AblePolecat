@@ -334,7 +334,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   protected function setDefaultSubstitutionMarkers(AblePolecat_ResourceInterface $Resource) {
     $property = $Resource->getFirstProperty();
     while($property) {
-      if (is_a($property, 'AblePolecat_Data_ScalarInterface')) {
+      if (is_a($property, 'AblePolecat_Data_Primitive_ScalarInterface')) {
         $substitutionMarker = sprintf("{!%s}", $Resource->getPropertyKey());
         $substitutionValue = sprintf("%s", $property);
         $this->setSubstitutionMarker($substitutionMarker, $substitutionValue);

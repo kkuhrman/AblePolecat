@@ -29,7 +29,7 @@ abstract class AblePolecat_ComponentAbstract
   implements AblePolecat_ComponentInterface {
   
   /********************************************************************************
-   * Implementation of AblePolecat_DataInterface.
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
   
   /**
@@ -42,7 +42,7 @@ abstract class AblePolecat_ComponentAbstract
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_DataInterface.
+   * Implementation of AblePolecat_Data_PrimitiveInterface.
    ********************************************************************************/
   
   /**

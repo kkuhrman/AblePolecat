@@ -1,25 +1,17 @@
 <?php
 /**
  * @file      polecat/core/Data.php
- * @brief     Encapsulates both scalar and not scalar data types.
+ * @brief     Encapsulates routines for type-checking and casting.
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Array.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Scalar', 'Integer.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Scalar', 'String.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Data.php')));
-
-interface AblePolecat_DataInterface extends Serializable {
-  
-  /**
-   * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
-   *
-   * @return DOMElement Encapsulated data expressed as DOM node.
-   */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL);
-}
 
 /**
  * Static data handling methods.
@@ -44,5 +36,41 @@ class AblePolecat_Data {
       }
     }
     return $typeName;
+  }
+  
+  /**
+   * Cast PHP primitive data type as Able Polecat primitive data type.
+   *
+   * @param mixed $data PHP primitive data type.
+   *
+   * @return AblePolecat_Data_PrimitiveInterface Able Polecat primitive data type.
+   * @throw AblePolecat_Data_Exception If cast cannot be made.
+   */
+  public static function castPrimitiveType($data) {
+    
+    $primitive = NULL;
+    switch (gettype($data)) {
+      default:
+      // 'object'
+      // 'resource'
+      // 'NULL'
+      throw new AblePolecat_Data_Exception(
+        sprintf("Cannot cast %s as string.", self::getDataTypeName($data)), 
+        AblePolecat_Error::INVALID_TYPE_CAST
+      );
+      break;
+      case 'boolean':
+      case 'integer':
+        AblePolecat_Data_Primitive_Scalar_Integer::typeCast($data);
+        break;
+      case 'double':
+      case 'string':
+        $primitive = AblePolecat_Data_Primitive_Scalar_String::typeCast($data);
+        break;
+      case 'array':
+        AblePolecat_Data_Primitive_Array::typeCast($data);
+        break;
+    }
+    return $primitive;
   }
 }

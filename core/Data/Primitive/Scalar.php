@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Data/Scalar.php
+ * @file      polecat/core/Data/Primitive/Scalar.php
  * @brief     Encapsulates scalar data types.
  * 
  * @author    Karl Kuhrman
@@ -8,10 +8,9 @@
  * @version   0.6.3
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Data.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive.php')));
 
-interface AblePolecat_Data_ScalarInterface extends AblePolecat_DataInterface {
-  
+interface AblePolecat_Data_Primitive_ScalarInterface extends AblePolecat_Data_PrimitiveInterface {  
   /**
    * @return mixed Encapsulated (scalar or not scalar) data.
    */
@@ -21,24 +20,9 @@ interface AblePolecat_Data_ScalarInterface extends AblePolecat_DataInterface {
    * @return bool TRUE if data has NULL value, otherwise FALSE.
    */
   public function isNull();
-  
-  /**
-   * Casts the given parameter into an instance of data class.
-   *
-   * @param mixed $data
-   *
-   * @return Concrete instance of AblePolecat_Data_ScalarInterface
-   * @throw AblePolecat_Data_Exception if type cast is invalid.
-   */
-  public static function typeCast($data);
-  
-  /**
-   * @return Data expressed as a string.
-   */
-  public function __toString();
 }
 
-abstract class AblePolecat_Data_ScalarAbstract implements AblePolecat_Data_ScalarInterface {
+abstract class AblePolecat_Data_Primitive_ScalarAbstract implements AblePolecat_Data_Primitive_ScalarInterface {
   
   /**
    * @var mixed The value of the encapsulated data.
@@ -50,21 +34,21 @@ abstract class AblePolecat_Data_ScalarAbstract implements AblePolecat_Data_Scala
    ********************************************************************************/
    
   /**
-   * @return string serialized representation of AblePolecat_Data_ScalarAbstract.
+   * @return string serialized representation of AblePolecat_Data_Primitive_ScalarAbstract.
    */
   public function serialize() {
     return serialize($this->getData());
   }
   
   /**
-   * @return concrete instance of AblePolecat_Data_ScalarAbstract.
+   * @return concrete instance of AblePolecat_Data_Primitive_ScalarAbstract.
    */
   public function unserialize($data) {
     $this->setData(unserialize($data));
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_DataInterface
+   * Implementation of AblePolecat_Data_PrimitiveInterface
    ********************************************************************************/
   
   /**
