@@ -224,6 +224,52 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Create DOM element by inserting data from object into template string.
+   *
+   * @param DOMDocument $Document Parent DOM Document .
+   * @param DOMElement $parentElement Parent DOM Element (container for repeatable elements).
+   * @param AblePolecat_Data_Primitive_StdObject $Data Data to insert into template.
+   * @param string $elementTemplateStr Text template of repeatable element.
+   *
+   * @return DOMElement The newly created element.
+   * @see AblePolecat_Dom::removeRepeatableElementTemplate
+   */
+  public static function createRepeatableElementFromTemplate(
+    DOMDocument $Document,
+    DOMElement $parentElement,
+    AblePolecat_Data_Primitive_StdObject $Data,
+    $elementTemplateStr
+  ) {
+    //
+    // Iterate through list, creating element text for each item by string substitution.
+    // Notation is {!property_name} where the entire string will be replaced with the
+    // value corresponding to the property given by property_name.
+    //
+    // $Resource = $this->getResource();
+    // $elementTemplateStr = $AbleTabby_List_Business_Hours;
+    // $SObjectList = $Resource->Business_Hours__r;
+    // $parentElement = $AbleTabby_List_Business_Hours_Element;
+          
+    $substituteMarkers = array();
+    $substituteValues = array();
+    $Property = $Data->getFirstProperty();
+    while($Property) {
+      $substituteMarkers[] = sprintf("{!%s}", $Data->getPropertyKey());
+      $substituteValues[] = $Property->__toString();
+      $Property = $Data->getNextProperty();
+    }
+    $listItemElementStr = str_replace($substituteMarkers, $substituteValues, $elementTemplateStr);
+    
+    $Element = @AblePolecat_Dom::getDocumentElementFromString($listItemElementStr);
+    $Element = AblePolecat_Dom::appendChildToParent(
+      $Element, 
+      $Document,
+      $parentElement
+    );
+    return $Element;
+  }
+  
+  /**
    * Helper function - express array as element attributes.
    *
    * @param Array $attributes
@@ -561,6 +607,21 @@ class AblePolecat_Dom {
   }
   
   /**
+   * Helper function - find element given by id and remove from document if found.
+   *
+   * @param DOMDocument $Document DOM Document, which will be manipulated.
+   * @param string $elementId Value of parent element id attribute.
+   *
+   * @return DOMNode Old element if found otherwise NULL.
+   */
+  public static function removeElement(DOMDocument $Document, $elementId) {
+    $Element = AblePolecat_Dom::getElementById($Document, $elementId);
+    $parentElement = $Element->parentNode;
+    $Element = $parentElement->removeChild($Element);
+    return $Element;
+  }
+  
+  /**
    * Helper function - remove the first child of the node with given id.
    *
    * This function is used to allow designer to create a template for repeatable
@@ -581,65 +642,7 @@ class AblePolecat_Dom {
     //
     // Create a temporary DOM document and append element.
     //
-    // $tempDocument = AblePolecat_Dom::createXmlDocument();
-    // AblePolecat_Dom::appendChildToParent($templateElement, $Document);    
     $parentElement = AblePolecat_Dom::getElementById($Document, $parentElementId);
-    if (isset($parentElement)) {
-      //
-      // Convert parent element to text.
-      //
-      $templateElementStr = $parentElement->C14N();
-      
-      //
-      // Remove the repeatable element(s) from the parent.
-      //
-      $childElement = $parentElement->removeChild($parentElement->firstChild);
-      if (!isset($childElement)) {
-        throw new AbleTabby_Exception("Could not locate DOM element with id=$parentElementId");
-      }
-      
-      //
-      // Convert parent (without repeatable child element) to text.
-      //
-      $parentElementStr = $parentElement->C14N();
-      
-      //
-      // Strip parent element tags from HTML text to produce repeatable element 'template'
-      //
-      $pos = strpos($parentElementStr, '>');
-      $startTag = substr($parentElementStr, 0, 1 + $pos);
-      $pos = strpos($parentElementStr, '<', 1 + $pos);
-      $endTag = substr($parentElementStr, $pos, strlen($parentElementStr) - $pos);
-      $templateElementStr = trim(str_replace(array($startTag, $endTag, '&#xD;'), '', $templateElementStr));
-    }
-    
-    return $templateElementStr;
-  }
-  
-  /**
-   * Helper function - remove the first child of the node with given id.
-   *
-   * This function is used to allow designer to create a template for repeatable
-   * elements such as list items, table rows, etc. The mark up for the element is
-   * included in the template at design time. At runtime, this function is called
-   * in the response object to strip the design element and use it to create the 
-   * data elements in its place.
-   *
-   * @param DOMDocument $Document DOM Document, which will be manipulated.
-   * @param string $parentElementId Value of parent element id attribute.
-   * 
-   * @return string The removed node as text.
-   */
-  public static function removeRepeatableElementTemplateX(DOMElement $templateElement, $parentElementId) {
-    
-    $templateElementStr = NULL;
-    
-    //
-    // Create a temporary DOM document and append element.
-    //
-    $tempDocument = AblePolecat_Dom::createXmlDocument();
-    AblePolecat_Dom::appendChildToParent($templateElement, $tempDocument);    
-    $parentElement = AblePolecat_Dom::getElementById($tempDocument, $parentElementId);
     if (isset($parentElement)) {
       //
       // Convert parent element to text.

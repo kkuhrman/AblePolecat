@@ -209,6 +209,14 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
    ********************************************************************************/
   
   /**
+   * @return int Number of properties.
+   */
+  public function size() {
+    $this->checkAlloc();
+    return count($this->properties);
+  }
+  
+  /**
    * @return mixed Value of internal iterator.
    */
   protected function getIteratorPtr() {

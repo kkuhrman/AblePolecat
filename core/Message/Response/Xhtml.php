@@ -116,6 +116,19 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $Resource->getName()));
     }
     catch(AblePolecat_Message_Exception $Exception) {
+      //
+      // Treat all scalar Resource properties as potential substitution strings.
+      //
+      $this->setDefaultSubstitutionMarkers($Resource);
+      
+      //
+      // Stash raw resource.
+      //
+      $this->setResource($Resource);
+      
+      //
+      // Create DOM document.
+      //
       $Document = AblePolecat_Dom::createDocument(
         AblePolecat_Dom::XHTML_1_1_NAMESPACE_URI,
         AblePolecat_Dom::XHTML_1_1_QUALIFIED_NAME,
@@ -140,16 +153,6 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
       $BodyContent = AblePolecat_Dom::getDocumentElementFromString($Resource->Body);
       $BodyContent = AblePolecat_Dom::appendChildToParent($BodyContent, $Document, $DocumentBody);
       $this->setDocument($Document);
-      
-      //
-      // Treat all scalar Resource properties as potential substitution strings.
-      //
-      $this->setDefaultSubstitutionMarkers($Resource);
-      
-      //
-      // Stash raw resource.
-      //
-      $this->setResource($Resource);
     }
   }
   
@@ -205,12 +208,9 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     //
     foreach($this->entityBodyComponents as $parentId => $Components) {
       foreach($Components as $key => $Component) {
-        $Element = $Component->getDomNode($Document);
-        // AblePolecat_Dom::appendChildToParent(
-          // $Element, 
-          // $Document,
-          // AblePolecat_Dom::expressIdAttribute('id', $parentId)
-        // );
+        $newElement = $Component->getDomNode($Document);
+        $oldElement = AblePolecat_Dom::getElementById($Document, $parentId);
+        AblePolecat_Dom::replaceDomNode($Document, $newElement, $oldElement);
       }
     }
     return $Document;
