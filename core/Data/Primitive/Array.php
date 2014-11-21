@@ -12,7 +12,8 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Prim
 
 interface AblePolecat_Data_Primitive_ArrayInterface 
   extends AblePolecat_Data_Primitive_StdObjectInterface,
-          ArrayAccess {
+          ArrayAccess,
+          Iterator {
 }
 
 class AblePolecat_Data_Primitive_Array 
@@ -64,6 +65,56 @@ class AblePolecat_Data_Primitive_Array
     $this->__unset($offset);
   }
   
+  /********************************************************************************
+   * Implementation of Iterator.
+   ********************************************************************************/
+  
+  /**
+   * Returns the current element.
+   *
+   * * @return AblePolecat_Data_PrimitiveInterface or NULL.
+   */
+  public function current() {
+    return $this->getIteratorPtr();
+  }
+  
+  /**
+   * Returns the key of the current element.
+   *
+   * @return mixed.
+   */
+  public function key() {
+    $key = NULL;
+    if ($this->getIteratorPtr()) {
+      $key = $this->getPropertyKey();
+    }
+    return $key;
+  }
+  
+  /**
+   * Move forward to next element.
+   */
+  public function next() {
+    $this->getNextProperty();
+  }
+  
+  /**
+   * Rewinds back to the first element of the Iterator. 
+   *
+   */
+  public function rewind() {
+    $this->getFirstProperty();
+  }
+  
+  /**
+   * Checks if current position is valid.
+   *
+   * @return bool Returns TRUE on success or FALSE on failure. 
+   */
+  public function valid() {
+    return (bool)$this->getIteratorPtr();
+  }
+
   /********************************************************************************
    * Implementation of AblePolecat_Data_PrimitiveInterface.
    ********************************************************************************/

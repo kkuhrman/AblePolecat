@@ -8,20 +8,16 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Structure.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom.php')));
-
-interface AblePolecat_Dom_NodeInterface extends AblePolecat_Data_StructureInterface {
+interface AblePolecat_Dom_NodeInterface {
   /**
-   * @return AblePolecat_Dom_NodeInterface
+   * @return Data expressed as a string.
    */
-  public static function create();
-}
-
-abstract class AblePolecat_Dom_NodeAbstract 
-  extends AblePolecat_Data_StructureAbstract 
-  implements AblePolecat_Dom_NodeInterface {
+  public function __toString();
   
-  final protected function __construct() {
-  }
+  /**
+   * @param DOMDocument $Document.
+   *
+   * @return DOMNode Encapsulated data expressed as DOM node.
+   */
+  public function getDomNode(DOMDocument $Document = NULL);
 }

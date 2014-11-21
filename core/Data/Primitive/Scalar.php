@@ -67,14 +67,12 @@ abstract class AblePolecat_Data_Primitive_ScalarAbstract implements AblePolecat_
   
   /**
    * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
    *
    * @return DOMElement Encapsulated data expressed as DOM node.
    */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL) {
-    
-    !isset($tagName) ? $tagName = AblePolecat_Data::getDataTypeName($this) : NULL;
-    $Element = $Document->createElement($tagName);
+  public function getDomNode(DOMDocument $Document = NULL) {
+    !isset($Document) ? $Document = new DOMDocument() : NULL;
+    $Element = $Document->createElement(AblePolecat_Data::getDataTypeName($this));
     $cData = $Document->createCDATASection($this->__toString());
     $Element->appendChild($cData);
     return $Element;

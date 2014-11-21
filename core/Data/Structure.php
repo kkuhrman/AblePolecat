@@ -47,6 +47,11 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
    */
   private $properties;
   
+  /**
+   * @var Iterator pointer provides support for implementation of Traversable.
+   */
+  private $ptrIterator;
+  
   /********************************************************************************
    * Implementation of Serializable
    ********************************************************************************/
@@ -82,7 +87,6 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
         $value = AblePolecat_Data::castPrimitiveType($value);
       }
       catch(AblePolecat_Data_Exception $Exception) {
-        AblePolecat_Debug::kill(get_object_vars($value->records[0]));
         throw new AblePolecat_Data_Exception(sprintf("Failed to set data structure property %s (%s). %s", 
           $name, 
           AblePolecat_Data::getDataTypeName($value),
@@ -117,7 +121,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
    *
    * @param string $name  Name of given property.
    *
-   * @return bool TRUE if property given by $name is set,otherwise FALSE.
+   * @return bool TRUE if property given by $name is set, otherwise FALSE.
    */
   public function __isset($name) {
     $this->checkAlloc();
@@ -147,6 +151,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
     
     if (isset($this->properties[$name])) {
       $property = $this->properties[$name];
+      $this->ptrIterator = $property;
     }
     return $property;
   }
@@ -157,6 +162,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   public function getFirstProperty() {
     $this->checkAlloc();
     $property = reset($this->properties);
+    $this->ptrIterator = $property;
     return $property;
   }
   
@@ -166,6 +172,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   public function getNextProperty() {
     $this->checkAlloc();
     $property = next($this->properties);
+    $this->ptrIterator = $property;
     return $property;
   }
   
@@ -192,6 +199,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
     
     if (isset($this->properties[$name])) {
       $property = $this->properties[$name];
+      $this->ptrIterator = $property;
     }
     return $property;
   }
@@ -199,6 +207,13 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * @return mixed Value of internal iterator.
+   */
+  protected function getIteratorPtr() {
+    return $this->ptrIterator;
+  }
   
   /**
    * Allocates array if not already allocated.
@@ -210,6 +225,7 @@ abstract class AblePolecat_Data_StructureAbstract implements AblePolecat_Data_St
   private function checkAlloc() {
     if (!isset($this->properties)) {
       $this->properties = array();
+      $this->ptrIterator = reset($this->properties);
     }
   }
 }

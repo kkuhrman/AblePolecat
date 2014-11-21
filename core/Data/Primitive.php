@@ -9,8 +9,9 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Node.php')));
 
-interface AblePolecat_Data_PrimitiveInterface extends Serializable {
+interface AblePolecat_Data_PrimitiveInterface extends AblePolecat_Dom_NodeInterface, Serializable {
   /**
    * Casts the given parameter into an instance of data class.
    *
@@ -20,17 +21,4 @@ interface AblePolecat_Data_PrimitiveInterface extends Serializable {
    * @throw AblePolecat_Data_Exception if type cast is invalid.
    */
   public static function typeCast($data);
-  
-  /**
-   * @return Data expressed as a string.
-   */
-  public function __toString();
-  
-  /**
-   * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
-   *
-   * @return DOMElement Encapsulated data expressed as DOM node.
-   */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL);
 }

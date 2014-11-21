@@ -32,6 +32,12 @@ class  AblePolecat_Data_Primitive_Scalar_Integer extends AblePolecat_Data_Primit
     if (isset($cast)) {
       $Data = new AblePolecat_Data_Primitive_Scalar_Integer($cast);
     }
+    else if (!isset($data)) {
+      //
+      // NULL
+      //
+      $Data = new AblePolecat_Data_Primitive_Scalar_Integer();
+    }
     else {
       throw new AblePolecat_Data_Exception(
         sprintf("Cannot cast %s as %s.", AblePolecat_Data::getDataTypeName($data), __CLASS__), 

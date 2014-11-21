@@ -11,9 +11,13 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Node.php')));
 
 interface AblePolecat_Dom_ElementInterface extends AblePolecat_Dom_NodeInterface {
-}
-
-abstract class AblePolecat_Dom_ElementAbstract 
-  extends AblePolecat_Dom_NodeAbstract 
-  implements AblePolecat_Dom_ElementInterface {
+  /**
+   * @return string Tag name of element.
+   */
+  public function getTagName();
+  
+  /**
+   * @param string $tagName.
+   */
+  public function setTagName($tagName);
 }

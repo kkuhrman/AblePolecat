@@ -16,17 +16,40 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Component.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Element.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Component.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource.php')));
 
 interface AblePolecat_ComponentInterface 
   extends AblePolecat_Dom_ElementInterface,
           AblePolecat_AccessControl_Article_StaticInterface {
+  /**
+   * Create an instance of component initialized with given resource data.
+   *
+   * @param AblePolecat_ResourceInterface $Resource.
+   *
+   * @return AblePolecat_ComponentInterface.
+   */
+  public static function create(AblePolecat_ResourceInterface $Resource);
 }
 
 abstract class AblePolecat_ComponentAbstract 
-  extends AblePolecat_Dom_ElementAbstract 
   implements AblePolecat_ComponentInterface {
+  
+  /**
+   * AblePolecat_ResourceInterface $Resource.
+   */
+  private $dataResource;
+  
+  /**
+   * @var string.
+   */
+  private $tagName;
+  
+  /**
+   * @var DOMElement Component template from file as DOM element.
+   */
+  private $DomElement;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -42,23 +65,66 @@ abstract class AblePolecat_ComponentAbstract
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Data_PrimitiveInterface.
+   * Implementation of AblePolecat_Dom_ElementInterface.
    ********************************************************************************/
   
   /**
-   * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
-   *
-   * @return DOMElement Encapsulated data expressed as DOM node.
+   * @return string Tag name of element.
    */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL) {
-    //
-    // @todo:
-    //
-    return parent::getDomNode($Document, $tagName);
+  public function getTagName() {
+    return $this->tagName;
+  }
+  
+  /**
+   * @param string $tagName.
+   */
+  public function setTagName($tagName) {
+    $this->tagName = $tagName;
   }
   
   /********************************************************************************
-   * Helper functions.
+   * Constructor and initialization functions.
    ********************************************************************************/
+  
+  /**
+   * @return DOMElement Component template from file as DOM element.
+   */
+  protected function getTemplateElement() {
+    if (!isset($this->DomElement)) {
+      //
+      // @todo: Create DOMNode of component template stored in file.
+      //
+      $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::fetch(array($this->getId()));
+      $this->DomElement = AblePolecat_Dom::getDocumentElementFromFile($ComponentRegistration->getTemplateFullPath());
+    }
+    return $this->DomElement;
+  }
+  /**
+   * @return AblePolecat_ResourceInterface $Resource.
+   */
+  protected function getResource() {
+    return $this->dataResource;
+  }
+  
+  /**
+   * @param AblePolecat_ResourceInterface $Resource.
+   */
+  protected function setResource(AblePolecat_ResourceInterface $Resource) {
+    $this->dataResource = $Resource;
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  abstract protected function initialize();
+  
+  /**
+   * @see: initialize().
+   */
+  final protected function __construct() {
+    $this->dataResource = NULL;
+    $this->DomElement = NULL;
+    $this->tagName = NULL;
+    $this->initialize();
+  }
 }

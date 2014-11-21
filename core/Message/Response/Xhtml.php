@@ -206,11 +206,11 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
     foreach($this->entityBodyComponents as $parentId => $Components) {
       foreach($Components as $key => $Component) {
         $Element = $Component->getDomNode($Document);
-        AblePolecat_Dom::appendChildToParent(
-          $Element, 
-          $Document,
-          AblePolecat_Dom::expressIdAttribute('id', $parentId)
-        );
+        // AblePolecat_Dom::appendChildToParent(
+          // $Element, 
+          // $Document,
+          // AblePolecat_Dom::expressIdAttribute('id', $parentId)
+        // );
       }
     }
     return $Document;
@@ -260,7 +260,7 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    *
    */
   public function setComponent($parentId, AblePolecat_ComponentInterface $Component) {
-    if ($result && is_scalar($parentId)) {
+    if (is_scalar($parentId)) {
       if (!isset($this->entityBodyComponents[$parentId])) {
         $this->entityBodyComponents[$parentId] = array();
       }

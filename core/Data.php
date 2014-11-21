@@ -51,24 +51,27 @@ class AblePolecat_Data {
     $primitive = NULL;
     switch (gettype($data)) {
       default:
-      // 'object'
-      // 'resource'
-      // 'NULL'
-      throw new AblePolecat_Data_Exception(
-        sprintf("Cannot cast %s as string.", self::getDataTypeName($data)), 
-        AblePolecat_Error::INVALID_TYPE_CAST
-      );
-      break;
+        // 'resource'
+        // 'NULL'
+        throw new AblePolecat_Data_Exception(
+          sprintf("Cannot cast %s as string.", self::getDataTypeName($data)), 
+          AblePolecat_Error::INVALID_TYPE_CAST
+        );
+        break;
+      case 'NULL':
       case 'boolean':
       case 'integer':
-        AblePolecat_Data_Primitive_Scalar_Integer::typeCast($data);
+        $primitive = AblePolecat_Data_Primitive_Scalar_Integer::typeCast($data);
         break;
       case 'double':
       case 'string':
         $primitive = AblePolecat_Data_Primitive_Scalar_String::typeCast($data);
         break;
+      case 'object':
+        $primitive = AblePolecat_Data_Primitive_StdObject::typeCast($data);
+        break;
       case 'array':
-        AblePolecat_Data_Primitive_Array::typeCast($data);
+        $primitive = AblePolecat_Data_Primitive_Array::typeCast($data);
         break;
     }
     return $primitive;

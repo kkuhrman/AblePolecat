@@ -26,17 +26,16 @@ class AblePolecat_Data_Primitive_StdObject
   
   /**
    * @param DOMDocument $Document.
-   * @param string $tagName Name of element tag (default is data type).
    *
    * @return DOMElement Encapsulated data expressed as DOM node.
    */
-  public function getDomNode(DOMDocument $Document, $tagName = NULL) {
+  public function getDomNode(DOMDocument $Document = NULL) {
     
     //
     // Create parent element.
     //
-    !isset($tagName) ? $tagName = AblePolecat_Data::getDataTypeName($this) : NULL;
-    $Element = $Document->createElement($tagName);
+    !isset($Document) ? $Document = new DOMDocument() : NULL;
+    $Element = $Document->createElement(AblePolecat_Data::getDataTypeName($this));
     
     //
     // Iterate through properties and create child elements.
@@ -44,7 +43,7 @@ class AblePolecat_Data_Primitive_StdObject
     $Property = $this->getFirstProperty();
     while ($Property) {
       $propertyName = $this->getPropertyKey();
-      $Child = $Property->getDomNode($Document, $propertyName);
+      $Child = $Property->getDomNode($Document);
       $Element->appendChild($Child);
       $Property = $this->getNextProperty();
     }
