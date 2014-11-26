@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Resource/Error.php
+ * @file      polecat/core/Resource/Core/Error.php
  * @brief     The default resource in the event of application error.
  *
  * @author    Karl Kuhrman
@@ -8,9 +8,9 @@
  * @version   0.6.3
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
 
-class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
+class AblePolecat_Resource_Core_Error extends AblePolecat_Resource_CoreAbstract {
   
   /**
    * @var resource Instance of singleton.
@@ -32,12 +32,12 @@ class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Error
+   * @return Instance of AblePolecat_Resource_Core_Error
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Error();
+      self::$Resource = new AblePolecat_Resource_Core_Error();
     }
     return self::$Resource;
   }
@@ -63,6 +63,6 @@ class AblePolecat_Resource_Error extends AblePolecat_ResourceAbstract {
   protected function initialize() {
     parent::initialize();
     $this->setId(self::UUID);
-    $this->setId(self::NAME);
+    $this->setName(self::NAME);
   }
 }

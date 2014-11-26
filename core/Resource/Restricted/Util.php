@@ -75,6 +75,6 @@ class AblePolecat_Resource_Restricted_Util extends AblePolecat_Resource_Restrict
   protected function initialize() {
     parent::initialize();
     $this->setId(self::UUID);
-    $this->setId(self::NAME);
+    $this->setName(self::NAME);
   }
 }

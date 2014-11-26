@@ -117,9 +117,9 @@ class AblePolecat_Transaction_AccessControl_Authority
         //
         break;
       case 'GET':
-        $Resource = AblePolecat_Resource_Core::wakeup(
+        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
           $this->getAgent(),
-          'AblePolecat_Resource_Form'
+          'AblePolecat_Resource_Core_Form'
         );
         $Resource->addText('Enter user name and password for database administrator.');
         $Resource->addControl('label', array('for' => 'userName'), 'Username: ');

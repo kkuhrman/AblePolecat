@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Resource/Ack.php
+ * @file      polecat/core/Resource/Core/Ack.php
  * @brief     The default resource for normal operation if none other is defined.
  *
  * A throwback to the good, old days of programming... sometimes all you want to hear from
@@ -11,9 +11,9 @@
  * @version   0.6.3
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
 
-class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
+class AblePolecat_Resource_Core_Ack extends AblePolecat_Resource_CoreAbstract {
   
   /**
    * @var resource Instance of singleton.
@@ -35,12 +35,12 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Ack
+   * @return Instance of AblePolecat_Resource_Core_Ack
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Ack();
+      self::$Resource = new AblePolecat_Resource_Core_Ack();
       $version = AblePolecat_Version::getVersion(FALSE);
       foreach($version as $propertyName => $propertyValue) {
         self::$Resource->{$propertyName} = $propertyValue;
@@ -70,6 +70,6 @@ class AblePolecat_Resource_Ack extends AblePolecat_ResourceAbstract {
   protected function initialize() {
     parent::initialize();
     $this->setId(self::UUID);
-    $this->setId(self::NAME);
+    $this->setName(self::NAME);
   }
 }

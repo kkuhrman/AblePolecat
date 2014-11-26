@@ -147,9 +147,9 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
           // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
           // 403 means server will refuses to fulfil request regardless of authentication.
           //
-          $Resource = AblePolecat_Resource_Core::wakeup(
+          $Resource = AblePolecat_Resource_Core_Factory::wakeup(
             $this->getDefaultCommandInvoker(),
-            'AblePolecat_Resource_Error',
+            'AblePolecat_Resource_Core_Error',
             'Access Denied',
             $Exception->getMessage()
           );
@@ -165,9 +165,9 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       //
       switch ($this->getResourceName()) {
         default:
-          $Resource = AblePolecat_Resource_Core::wakeup(
+          $Resource = AblePolecat_Resource_Core_Factory::wakeup(
             $this->getDefaultCommandInvoker(),
-            'AblePolecat_Resource_Error',
+            'AblePolecat_Resource_Core_Error',
             'Resource not found',
             sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceName())
           );
@@ -180,9 +180,9 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-          $Resource = AblePolecat_Resource_Core::wakeup(
+          $Resource = AblePolecat_Resource_Core_Factory::wakeup(
             $this->getDefaultCommandInvoker(),
-            'AblePolecat_Resource_Ack'
+            'AblePolecat_Resource_Core_Ack'
           );
           $this->setStatus(self::TX_STATE_COMPLETED);
           break;

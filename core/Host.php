@@ -21,7 +21,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Host.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Factory.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Version.php')));
 
@@ -335,9 +335,9 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   protected static function shutdown($status = 0) {
     if (isset(self::$Host)) {
       if (!isset(self::$Host->Response)) {
-        $Resource = AblePolecat_Resource_Core::wakeup(
+        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
           self::$Host->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Error',
+          'AblePolecat_Resource_Core_Error',
           'Forced shut down',
           'Able Polecat server was directed to shut down before generating response to request URI.'
         );

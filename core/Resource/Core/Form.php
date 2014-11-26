@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Resource/Form.php
+ * @file      polecat/core/Resource/Core/Form.php
  * @brief     The very simplest of interactive (HTML) forms.
  *
  * @author    Karl Kuhrman
@@ -8,9 +8,9 @@
  * @version   0.6.3
  */
 
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
 
-class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
+class AblePolecat_Resource_Core_Form extends AblePolecat_Resource_CoreAbstract {
   
   /**
    * @var resource Instance of singleton.
@@ -47,12 +47,12 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Form
+   * @return Instance of AblePolecat_Resource_Core_Form
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Form($Subject);
+      self::$Resource = new AblePolecat_Resource_Core_Form($Subject);
     }
     return self::$Resource;
   }
@@ -70,7 +70,7 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
   public function __set($name, $value) {
     
     if ($name == 'Body') {
-      throw new AblePolecat_Resource_Exception("Cannot define form property Body directly. @see AblePolecat_Resource_Form::addControl().");
+      throw new AblePolecat_Resource_Exception("Cannot define form property Body directly. @see AblePolecat_Resource_Core_Form::addControl().");
     }
     parent::__set($name, $value);
   }
@@ -167,7 +167,7 @@ class AblePolecat_Resource_Form extends AblePolecat_ResourceAbstract {
     
     parent::initialize();
     $this->setId(self::UUID);
-    $this->setId(self::NAME);
+    $this->setName(self::NAME);
     $this->BodyFormat = "<div><div>%s</div><div><form id=\"%s\" action=\"%s\" method=\"post\">%s<input type=\"submit\" value=\"Submit\" /></form></div></div>";
     $this->formElements = array();
     $this->textElements = array();

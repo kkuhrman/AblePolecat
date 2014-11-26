@@ -8,6 +8,10 @@
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Execute.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Open.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Read.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Write.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Resource.php');
 
 interface AblePolecat_Resource_RestrictedInterface extends AblePolecat_ResourceInterface {

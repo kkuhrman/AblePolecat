@@ -56,7 +56,7 @@ class AblePolecat_Message_Response_Cached extends AblePolecat_Message_ResponseAb
     
     $EntityBody = NULL;
     if (isset($this->CacheRegistration)) {
-      $EntityBody = $this->CacheRegistration->cacheData;
+      $EntityBody = $this->CacheRegistration->getCacheData();
     }
     return $EntityBody;
   }

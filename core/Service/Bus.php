@@ -197,7 +197,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           
           $primaryKey = array($ResourceRegistration->getResourceId(), 200);
           $CacheRegistration = AblePolecat_Registry_Entry_Cache::fetch($primaryKey);
-          if (isset($CacheRegistration)) {
+          if ($CacheRegistration->getLastModifiedTime()) {
             //
             // Check if resource and/or response have been modified since last cache entry.
             //
@@ -407,13 +407,13 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             $Request->getHostName()
           );
           AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Error::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Error';
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Error::UUID;
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Error';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Ack::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Ack::UUID;
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Ack';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
           $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::UUID;
@@ -421,8 +421,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Install::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Install';
+          $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
+          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
           $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
           break;
       }
@@ -541,14 +541,25 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     
     //
     // Update cache with current response.
+    // (Do not cache built-in resource responses e.g. error).
     //
-    $CacheRegistration = AblePolecat_Registry_Entry_Cache::create();
-    $CacheRegistration->resourceId = $Response->getResourceId();
-    $CacheRegistration->statusCode = $Response->getStatusCode();
-    $CacheRegistration->mimeType = $Response->getMimeType();
-    $CacheRegistration->lastModifiedTime = time();
-    $CacheRegistration->cacheData = $Response->getEntityBody();
-    $CacheRegistration->save();
+    switch($Response->getResourceId()) {
+      default:
+        $CacheRegistration = AblePolecat_Registry_Entry_Cache::create();
+        $CacheRegistration->resourceId = $Response->getResourceId();
+        $CacheRegistration->statusCode = $Response->getStatusCode();
+        $CacheRegistration->mimeType = $Response->getMimeType();
+        $CacheRegistration->lastModifiedTime = time();
+        $CacheRegistration->cacheData = $Response->getEntityBody();
+        $CacheRegistration->save();
+        break;
+      case AblePolecat_Resource_Core_Ack::UUID:
+      case AblePolecat_Resource_Core_Error::UUID:
+      case AblePolecat_Resource_Core_Form::UUID:
+      case AblePolecat_Resource_Restricted_Install::UUID:
+      case AblePolecat_Resource_Restricted_Util::UUID:
+        break;
+    }
     
     return $Response;
   }
@@ -648,18 +659,18 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     $resourceClassName = $ResourceRegistration->getPropertyValue('resourceClassName');
     switch($resourceClassName) {
       default:
-        $Resource = AblePolecat_Resource_Core::wakeup(
+        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
           $this->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Error',
+          'AblePolecat_Resource_Core_Error',
           'Transaction failed',
           $Exception->getMessage()
         );
         break;
-      case 'AblePolecat_Resource_Ack':
+      case 'AblePolecat_Resource_Core_Ack':
         //
         // If requested resource is ACK, ignore.
         //
-        $Resource = AblePolecat_Resource_Core::wakeup(
+        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
           $this->getDefaultCommandInvoker(),
           $resourceClassName
         );

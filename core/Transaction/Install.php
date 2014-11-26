@@ -118,7 +118,7 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
         //
         // Check if Able Polecat database exists.
         //
-        $activeCoreDatabase = AblePolecat_Host::getActiveCoreDatabaseName();
+        $activeCoreDatabase = AblePolecat_Mode_Server::getActiveCoreDatabaseName();
         if ($activeCoreDatabase) {
           //
           // Database is active. Allow parent to handle from here.
@@ -135,8 +135,8 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
         }
         break;
       case 'POST':
-        $transactionId = AblePolecat_Host::getSessionVariable($this, AblePolecat_Host::POLECAT_INSTALL_TRX);
-        $savePointId = AblePolecat_Host::getSessionVariable($this, AblePolecat_Host::POLECAT_INSTALL_SAVEPT);
+        $transactionId = AblePolecat_Mode_Session::getSessionVariable($this->getAgent(), AblePolecat_Host::POLECAT_INSTALL_TRX);
+        $savePointId = AblePolecat_Mode_Session::getSessionVariable($this->getAgent(), AblePolecat_Host::POLECAT_INSTALL_SAVEPT);
         break;
     }
     
@@ -154,7 +154,7 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
     $Resource = NULL;
     
     $resourceClassName = $this->getResourceRegistration()->getResourceClassName();
-    if (isset($resourceClassName) && ($resourceClassName === 'AblePolecat_Resource_Install')) {
+    if (isset($resourceClassName) && ($resourceClassName === 'AblePolecat_Resource_Restricted_Install')) {
       switch ($this->getRequest()->getMethod()) {
         default:
           break;
@@ -164,10 +164,10 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
           // Attempt to load resource class
           //
           try {
-            // $Resource = AblePolecat_Resource_Install::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
-            $Resource = AblePolecat_Resource_Core::wakeup(
+            // $Resource = AblePolecat_Resource_Restricted_Install::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
+            $Resource = AblePolecat_Resource_Core_Factory::wakeup(
               $this->getDefaultCommandInvoker(),
-              'AblePolecat_Resource_Install'
+              'AblePolecat_Resource_Restricted_Install'
             );
             $this->setStatus(self::TX_STATE_COMPLETED);
           }
@@ -188,9 +188,9 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
                   // );
                   // $Resource = $ChildTransaction->run();
                 // }
-                $Resource = AblePolecat_Resource_Core::wakeup(
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
                   $this->getAgent(),
-                  'AblePolecat_Resource_Form'
+                  'AblePolecat_Resource_Core_Form'
                 );
                 $Resource->addText('Enter name and password for user authorized to create database.');
                 $Resource->addControl('label', array('for' => 'userName'), 'Username: ');
@@ -204,9 +204,9 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
               // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
               // 403 means server will refuses to fulfil request regardless of authentication.
               //
-              $Resource = AblePolecat_Resource_Core::wakeup(
+              $Resource = AblePolecat_Resource_Core_Factory::wakeup(
                 $this->getDefaultCommandInvoker(),
-                'AblePolecat_Resource_Error',
+                'AblePolecat_Resource_Core_Error',
                 'Access Denied',
                 $Exception->getMessage()
               );

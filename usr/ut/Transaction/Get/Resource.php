@@ -11,7 +11,7 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Factory.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Get', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'UnitTest.php')));
 
@@ -40,8 +40,8 @@ class AblePolecat_Transaction_Get_Resource_TestClass implements AblePolecat_Unit
       $Request = AblePolecat_Message_Request_Get::create();
       
       $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
-      $ResourceRegistration->resourceId = AblePolecat_Resource_Ack::UUID;
-      $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Ack';
+      $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Ack::UUID;
+      $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Ack';
       $ResourceRegistration->transactionClassName = NULL;
       $ResourceRegistration->authorityClassName = NULL;
       $ResourceRegistration->resourceDenyCode = 200;
@@ -54,8 +54,6 @@ class AblePolecat_Transaction_Get_Resource_TestClass implements AblePolecat_Unit
       );
       
       $Instance = call_user_func_array(array($className, $classFactoryMethod), $parameters);
-      // AblePolecat_Debug::kill($Instance);
-      // $Transaction = AblePolecat_Transaction_Get_Resource::wakeup();
     }
     catch(AblePolecat_Command_Exception $Exception) {
       $pass = FALSE;

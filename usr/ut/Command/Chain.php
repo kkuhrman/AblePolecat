@@ -41,7 +41,6 @@ class AblePolecat_Command_Chain_TestClass implements AblePolecat_UnitTestInterfa
       throw new AblePolecat_UnitTest_Exception(self::TEST_SUBJECT . ' unit tests failed on ' . __METHOD__);
     }
     catch(AblePolecat_Command_Exception $Exception) {
-      // AblePolecat_Debug::kill($Exception);
       $pass = TRUE;
     }
     return $pass;
@@ -84,7 +83,6 @@ class AblePolecat_Command_Chain_TestClass implements AblePolecat_UnitTestInterfa
     $SuperiorTarget = $CommandChain->getBottomCommandTarget();
     $SubordinateTarget = $CommandChain->getTopCommandTarget();
     if (($ServerMode::getId() != $SuperiorTarget::getId()) || ($UserMode::getId() != $SubordinateTarget::getId())) {
-      AblePolecat_Debug::kill($CommandChain);
       throw new AblePolecat_UnitTest_Exception('command link not properly established');
     }
     return TRUE;

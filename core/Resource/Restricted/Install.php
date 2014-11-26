@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Resource/Install.php
+ * @file      polecat/core/Resource/Core/Install.php
  * @brief     Starting point for interactive install procedure.
  *
  * @author    Karl Kuhrman
@@ -8,9 +8,9 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Restricted.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted.php')));
 
-class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstract {
+class AblePolecat_Resource_Restricted_Install extends AblePolecat_Resource_RestrictedAbstract {
   
   /**
    * @var resource Instance of singleton.
@@ -32,12 +32,12 @@ class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstra
    *
    * @param AblePolecat_AccessControl_SubjectInterface $Subject
    *
-   * @return Instance of AblePolecat_Resource_Install
+   * @return Instance of AblePolecat_Resource_Restricted_Install
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Resource)) {
-      self::$Resource = new AblePolecat_Resource_Install($Subject);
+      self::$Resource = new AblePolecat_Resource_Restricted_Install($Subject);
       self::$Resource->setWakeupAccessRequest(AblePolecat_AccessControl_Constraint_Execute::getId());
     }
     return parent::wakeup($Subject);
@@ -46,7 +46,7 @@ class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstra
       //
       // Create resource.
       //
-      self::$Resource = new AblePolecat_Resource_Install($Subject);
+      self::$Resource = new AblePolecat_Resource_Restricted_Install($Subject);
       self::$Resource->Head = 'Able Polecat | Install';
       
       //
@@ -120,6 +120,6 @@ class AblePolecat_Resource_Install extends AblePolecat_Resource_RestrictedAbstra
   protected function initialize() {
     parent::initialize();
     $this->setId(self::UUID);
-    $this->setId(self::NAME);
+    $this->setName(self::NAME);
   }
 }
