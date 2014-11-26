@@ -1,5 +1,5 @@
 All Able Polecat Project software is released under the BSD 2 License.
-Copyright (c) 2008-2013 by Karl Kuhrman. All rights reserved.
+Copyright (c) 2008-2014 by Karl Kuhrman. All rights reserved.
 
 @see: LICENSE.md
 
@@ -12,15 +12,10 @@ businesses information systems.
 The goal of Able Polecat is to give developers the ability to quickly implement 
 integration solutions as web services written in PHP.
 
-The core Able Polecat class library comprises:
-1. Enterprise Service Bus (ESB)
-2. Role-based Access Control
-3. Message Queue
-4. Transaction Management
-5. Data Transformation and Exchange (DTX) Tools
-6. A PHP class registry and lazy loader.
-7. Tools for logging, exception and error handling
-6. Framework for extending functionality
+At the heart of the Able Polecat project is the Enterprise Service Bus (ESB), 
+which manages a message queue and a transaction queue. Transactions are classes 
+in Able Polecat, whose work it is to return a Resource class, which in turn can 
+be used to enlist other Transactions in the work-flow or generate an HTTP response.
 
 Extending Able Polecat
 --------------------------------------------------------------------------------
@@ -32,9 +27,6 @@ An Able Polecat 'module' is an implementation of one or more core interfaces.
 Able Polecat modules are the primary means of extending core functionality.
 Best practices encourage contributing added functionality to Able Polecat by 
 releasing modules as open-source code for review and reuse by other developers. 
-A few examples of contributed third-party Able Polecat modules include a logger 
-for FireBug, which encapsulates the FirePHP class library; and a service client, 
-which encapsulates the Google API class library for PHP.
 
 A web service may also implement Able Polecat interfaces but, true to the name,
 delivers a service over the web.
@@ -46,24 +38,15 @@ or web service.
  
 Core System Requirements
 --------------------------------------------------------------------------------
-Apache HTTP Server (2.2.17+ recommended)
-PHP 5.3.5+
-PHP pdo_mysql
-MySql 5.5.8+
+
+System requirements are given at: 
+https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started
 
 Basic Installation Instructions
 --------------------------------------------------------------------------------
 
 More detailed instrcutions can be found at:
 https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started
-
-But the basic steps for getting started with Able Polecat are:
-1. Clone Able Polecat core from Git (https://github.com/kkuhrman/AblePolecat)
-   in target directory (DOCUMENT_ROOT == POLECAT_ROOT)
-2. Make [POLECAT_ROOT]/files directory writeable (e.g. chmod a+w files)
-3. Create application database and database user (see POLECAT_ROOT/database)
-4. Enter database configuration to POLECAT_ROOT/etc/conf/server.xml
-5. HTTP request to POLECAT_ROOT should show state of install.
 
 Background and Acknowledgements
 --------------------------------------------------------------------------------
@@ -95,10 +78,3 @@ New BSD License.
 
 The Drupal Comtent Management Framework (https://drupal.org/) is released under
 the GNU GPL v2 License.
-
-
-Coding Standards
---------------------------------------------------------------------------------
-Able Polecat uses the Zend naming convention:
-http://framework.zend.com/manual/1.12/en/coding-standard.naming-conventions.html
-
