@@ -1,0 +1,44 @@
+##
+# @file      polecat\usr\share\examples\basic\.htaccess
+# @brief     Example Apache host access settings.
+# @author    Karl Kuhrman
+# @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+#
+
+#
+# Set the default handler.
+#
+DirectoryIndex index.php
+ 
+#
+# Override default Apache handlers.
+#
+Options -Indexes
+Options +FollowSymLinks
+Options +MultiViews
+
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+  
+  #
+  # Block access to "hidden" directories whose names begin with a period.
+  # (This rule exists mainly to prevent access to Git files).
+  #
+  RewriteRule "(^|/)\." - [F]
+  
+  #
+  # If using an alias to access the site (e.g. http://localhost/polecat), 
+  # define the base below relative to the server document root. 
+  # (e.g. RewriteBase /polecat)
+  #
+  # RewriteBase /polecat
+  
+  #
+  # Pass all requests not referring directly to files in the file system to
+  # index.php.
+  #
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !=/favicon.ico
+  RewriteRule ^ index.php [L]
+</IfModule>
