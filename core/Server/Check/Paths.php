@@ -19,27 +19,20 @@ class AblePolecat_Server_Check_Paths extends AblePolecat_Server_CheckAbstract {
     
     $go = TRUE;
     
-    $dirs = array(
-      AblePolecat_Server_Paths::root,
-      AblePolecat_Server_Paths::conf,
-      AblePolecat_Server_Paths::core,
-      AblePolecat_Server_Paths::dev,
-      AblePolecat_Server_Paths::qa,
-      AblePolecat_Server_Paths::user,
-      AblePolecat_Server_Paths::sites,
-      AblePolecat_Server_Paths::services,
-      
-      //
-      // @todo: these paths are configurable
-      //
-      // AblePolecat_Server_Paths::libs,
-      // AblePolecat_Server_Paths::logs,
-      // AblePolecat_Server_Paths::mods,
-    );
+    if (!defined('ABLE_POLECAT_ROOT')) {
+      self::$error_code = AblePolecat_Error::SYS_PATH_ERROR;
+      self::$error_message = "Global variable is not defined: ABLE_POLECAT_ROOT";
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, self::$error_message);
+    }
+    else if (!self::directoryExists(ABLE_POLECAT_ROOT)) {
+      self::$error_code = AblePolecat_Error::SYS_PATH_ERROR;
+      self::$error_message = sprintf("Invalid system path encountered: $dir", ABLE_POLECAT_ROOT);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, self::$error_message);
+    }
     foreach ($dirs as $key => $dir) {
-      if (!self::directoryExists($dir)) {
+      if () {
         self::$error_code = AblePolecat_Error::SYS_PATH_ERROR;
-        self::$error_message = "Invalid system path encountered: $dir";
+        
         $go = FALSE;
         goto ABLE_POLECAT_CHECK_FAIL;
       }
