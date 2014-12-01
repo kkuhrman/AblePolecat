@@ -1,0 +1,22 @@
+<?xml version='1.0' standalone='yes'?>
+<classLibraries>
+  <!--
+    Able Polecat application mode will register any class library in this file 
+    flagged use=1 provided the given fullPath is valid. All valid class library
+    paths will be added to the PHP include path. Any classes in [class] under
+    the given class library id will be preloaded (meaning they can be lazy loaded
+    by a call to AblePolecat_Registry_Class::loadClass().
+  -->
+  <classLibrary id="UUID" name="myProject" type="PROJECT" use="1">
+    <fullPath>/full/path/to/myProject</fullPath>
+  </classLibrary>
+  <classLibrary id="UUID" name="My Able Polecat Mod" type="MOD" use="1">
+    <fullPath>/full/path/to/myProject/usr/mods/myMod</fullPath>
+  </classLibrary>
+  <classLibrary id="UUID" name="Some Third Party Class Library" type="LIB" use="1">
+    <fullPath>/full/path/to/myProject/libs/thirdPartyLibrary</fullPath>
+  </classLibrary>
+  <classLibrary id="UUID" name="Unstable Development Version of Some Third Party Class Library" type="LIB" use="0">
+    <fullPath>/full/path/to/myProject/libs/thirdPartyLibrary-Dev</fullPath>
+  </classLibrary>
+</classLibraries>

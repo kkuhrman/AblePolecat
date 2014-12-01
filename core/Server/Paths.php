@@ -12,30 +12,24 @@
  * Root directory of the entire Able Polecat core project.
  */
 if (!defined('ABLE_POLECAT_ROOT')) {
-  $ABLE_POLECAT_ROOT = dirname(dirname(__DIR__));
-  define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
+  $message = sprintf("Global variable %s should be defined in index.php.", 'ABLE_POLECAT_ROOT');
+  trigger_error($message, E_USER_ERROR);
 }
 
 /**
  * Host-specific system-wide configuration files directory.
- * This constant IS used to locate the server configuration file and must define 
- * the full path of the parent of the conf directory if other than ABLE_POLECAT_ROOT/etc/conf.
  */
 if (!defined('ABLE_POLECAT_ETC')) {
-  $ABLE_POLECAT_ETC = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'etc';
-  define('ABLE_POLECAT_ETC', $ABLE_POLECAT_ETC);
+  $message = sprintf("Global variable %s should be defined in index.php.", 'ABLE_POLECAT_ETC');
+  trigger_error($message, E_USER_ERROR);
 }
 
 /**
  * Variable files directory.
- * This constant is used to locate files with content expected to continually change 
- * during normal operation of the system, such as logs. It must define the full path 
- * to a directory, for which the web agent has write privilege if other than 
- * ABLE_POLECAT_ROOT/files.
  */
 if (!defined('ABLE_POLECAT_FILES')) {
-  $ABLE_POLECAT_FILES = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'files';
-  define('ABLE_POLECAT_FILES', $ABLE_POLECAT_FILES);
+  $message = sprintf("Global variable %s should be defined in path.config.", 'ABLE_POLECAT_FILES');
+  trigger_error($message, E_USER_ERROR);
 }
 
 /**
@@ -43,8 +37,7 @@ if (!defined('ABLE_POLECAT_FILES')) {
  * utilities, etc.
  */
 if (!defined('ABLE_POLECAT_USR')) {
-  $ABLE_POLECAT_USR = ABLE_POLECAT_ROOT  . DIRECTORY_SEPARATOR . 'usr';;
-  define('ABLE_POLECAT_USR', $ABLE_POLECAT_USR);
+  $message = sprintf("Global variable %s should be defined in path.config.", 'ABLE_POLECAT_USR');
 }
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Server', 'Paths.php')));
@@ -215,17 +208,17 @@ class AblePolecat_Server_Paths {
         case 'core':
           $path = self::core;
           break;
-        // case 'dev':
-          // $path = self::dev;
-          // break;
         case 'libs':
-          $path = self::usr . DIRECTORY_SEPARATOR . 'libs';
+          // $path = self::usr . DIRECTORY_SEPARATOR . 'libs';
+          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'libs'));
           break;
         case 'conf':
-          $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
+          // $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
+          $path = implode(DIRECTORY_SEPARATOR, array(self::etc, 'polecat', 'conf'));
           break;
         case 'logs':
-          $path = self::files . DIRECTORY_SEPARATOR . 'logs';
+          // $path = self::files . DIRECTORY_SEPARATOR . 'logs';
+          $path = implode(DIRECTORY_SEPARATOR, array(self::files, 'logs'));
           break;
         case 'files':
           $path = self::files;
@@ -234,20 +227,9 @@ class AblePolecat_Server_Paths {
           $path = self::usr;
           break;
         case 'mods':
-          $path = self::usr . DIRECTORY_SEPARATOR . 'mods';
+          // $path = self::usr . DIRECTORY_SEPARATOR . 'mods';
+          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'mods'));
           break;
-        // case 'qa':
-          // $path = self::qa;
-          // break;
-        // case 'user':
-          // $path = self::user;
-          // break;
-        // case 'sites':
-          // $path = self::sites;
-          // break;
-        // case 'services':
-          // $path = self::services;
-          // break;
       }
     }
     return $path;
@@ -275,15 +257,10 @@ class AblePolecat_Server_Paths {
       case 'core':
       case 'conf';
       case 'logs':
-      // case 'dev':
       case 'libs':
       case 'usr':
       case 'files':
       case 'mods':
-      // case 'qa':
-      // case 'user':
-      // case 'sites':
-      // case 'services':
         break;
     }
     return $reserved;
