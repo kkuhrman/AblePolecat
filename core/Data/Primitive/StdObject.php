@@ -30,7 +30,6 @@ class AblePolecat_Data_Primitive_StdObject
    * @return DOMElement Encapsulated data expressed as DOM node.
    */
   public function getDomNode(DOMDocument $Document = NULL) {
-    
     //
     // Create parent element.
     //
@@ -48,7 +47,6 @@ class AblePolecat_Data_Primitive_StdObject
       $Property = $this->getNextProperty();
     }
     return $Element;
-    
   }
   
   /********************************************************************************

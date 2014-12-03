@@ -1,24 +1,23 @@
 <?php
 /**
- * @file      polecat/core/Data/Primitive/Array.php
- * @brief     Encapsulates Array data type.
+ * @file      polecat/core/Resource/List.php
+ * @brief     Base class for resource encapsulating a list with iterator.
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'StdObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Array.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource.php')));
 
-interface AblePolecat_Data_Primitive_ArrayInterface 
-  extends AblePolecat_Data_Primitive_StdObjectInterface,
-          ArrayAccess,
-          Iterator {
+interface AblePolecat_Resource_ListInterface
+  extends AblePolecat_ResourceInterface,
+          AblePolecat_Data_Primitive_ArrayInterface {
 }
 
-class AblePolecat_Data_Primitive_Array 
-  extends AblePolecat_Data_Primitive_StdObject 
-  implements AblePolecat_Data_Primitive_ArrayInterface {
+abstract class AblePolecat_Resource_ListAbstract 
+  extends AblePolecat_ResourceAbstract {
   
   /********************************************************************************
    * Implementation of ArrayAccess.
@@ -114,11 +113,46 @@ class AblePolecat_Data_Primitive_Array
   public function valid() {
     return (bool)$this->getIteratorPtr();
   }
-
+  
   /********************************************************************************
    * Implementation of AblePolecat_Data_PrimitiveInterface.
    ********************************************************************************/
-   
+  
+  /**
+   * @param DOMDocument $Document.
+   *
+   * @return DOMElement Encapsulated data expressed as DOM node.
+   */
+  public function getDomNode(DOMDocument $Document = NULL) {
+    //
+    // Create root element.
+    //
+    !isset($Document) ? $Document = new DOMDocument() : NULL;
+    $rootElement = $Document->createElement(AblePolecat_Data::getDataTypeName($this));
+    $rootElement->setAttribute('id', $this->getId());
+    $rootElement->setIdAttribute('id', true);
+    $rootElement->setAttribute('name', $this->getName());
+    $rootElement->setAttribute('uri', $this->getUri());
+    
+    //
+    // Create list container.
+    //
+    $listElement = $Document->createElement('Items');
+    
+    //
+    // Iterate through properties and create child elements.
+    //
+    $Property = $this->getFirstProperty();
+    while ($Property) {
+      $propertyName = $this->getPropertyKey();
+      $Child = $Property->getDomNode($Document);
+      $listElement->appendChild($Child);
+      $Property = $this->getNextProperty();
+    }
+    $rootElement->appendChild($listElement);
+    return $rootElement;
+  }
+  
   /**
    * Casts the given parameter into an instance of data class.
    *

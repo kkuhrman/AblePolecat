@@ -228,7 +228,7 @@ class AblePolecat_Dom {
    *
    * @param DOMDocument $Document Parent DOM Document .
    * @param DOMElement $parentElement Parent DOM Element (container for repeatable elements).
-   * @param AblePolecat_Data_Primitive_StdObject $Data Data to insert into template.
+   * @param AblePolecat_Data_StructureInterface $Data Data to insert into template.
    * @param string $elementTemplateStr Text template of repeatable element.
    *
    * @return DOMElement The newly created element.
@@ -237,9 +237,17 @@ class AblePolecat_Dom {
   public static function createRepeatableElementFromTemplate(
     DOMDocument $Document,
     DOMElement $parentElement,
-    AblePolecat_Data_Primitive_StdObject $Data,
+    AblePolecat_Data_StructureInterface $Data,
     $elementTemplateStr
   ) {
+    
+    //
+    // @todo: this cannot remain as a long-term solution to the problem of warnings and errors
+    // triggered by loadHTML() (@see getDocumentElementFromString()).
+    // All it does is log errors vs. handle them.
+    //
+    libxml_use_internal_errors(TRUE);
+    
     //
     // Iterate through list, creating element text for each item by string substitution.
     // Notation is {!property_name} where the entire string will be replaced with the
@@ -259,13 +267,27 @@ class AblePolecat_Dom {
       $Property = $Data->getNextProperty();
     }
     $listItemElementStr = str_replace($substituteMarkers, $substituteValues, $elementTemplateStr);
-    
     $Element = @AblePolecat_Dom::getDocumentElementFromString($listItemElementStr);
     $Element = AblePolecat_Dom::appendChildToParent(
       $Element, 
       $Document,
       $parentElement
     );
+    
+    // 
+    // @see call to at begin of function
+    //
+    foreach (libxml_get_errors() as $error) {
+      // 
+      // @todo: handle errors here
+      //
+      $errorMsg = sprintf("libxml error in AblePolecat_Dom: %s", $error->message);
+      isset($error->column) ? $errorMsg .= sprintf(" (column %d)", $error->column) : NULL;
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $errorMsg);
+    }
+
+    libxml_clear_errors();
+    
     return $Element;
   }
   
@@ -522,7 +544,7 @@ class AblePolecat_Dom {
           if (isset($domDirectives[self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT])) {
             $fragmentParent = $domDirectives[self::DOM_DIRECTIVE_KEY_FRAGMENT_PARENT];
           }
-          $fragmentNode = AblePolecat_Dom::getDocumentElementFromString($templateBodyStr, $fragmentParent);
+          $fragmentNode = @AblePolecat_Dom::getDocumentElementFromString($templateBodyStr, $fragmentParent);
           
           //
           // Locate fragment parent element and extract fragment.
