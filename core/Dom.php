@@ -671,13 +671,30 @@ class AblePolecat_Dom {
       //
       $templateElementStr = $parentElement->C14N();
       
+      
       //
-      // Remove the repeatable element(s) from the parent.
+      // Get first child of type DOMElement
       //
-      $childElement = $parentElement->removeChild($parentElement->firstChild);
+      $childElement = NULL;
+      if ($parentElement->hasChildNodes()) {
+        //
+        // Pass over DOMText and other white space nodes...
+        //
+        foreach($parentElement->childNodes as $key => $Node) {
+          if (is_a($Node, 'DOMElement')) {
+            $childElement = $Node;
+          }
+        }
+      }
+      
       if (!isset($childElement)) {
         throw new AbleTabby_Exception("Could not locate DOM element with id=$parentElementId");
       }
+      
+      //
+      // Remove the repeatable element(s) from the parent.
+      //
+      $childElement = $parentElement->removeChild($childElement);
       
       //
       // Convert parent (without repeatable child element) to text.
