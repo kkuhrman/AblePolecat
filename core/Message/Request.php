@@ -486,9 +486,12 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   protected function initializeHostUrl() {
     //
-    // @todo: HTTPS
+    // HTTP | HTTPS
     //
     $protocol = 'http';
+    if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on')) {
+      $protocol .= 's';
+    }
     
     //
     // @todo: this order works on Win 7Pro and CENTOS - not tested otherwise
