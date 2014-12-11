@@ -356,6 +356,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     // Is there anything left of the path?
     //
+    AblePolecat_Debug::kill($this);
     if (isset($this->request_path[0]) && ($this->request_path[0] != '')) {
       //
       // Is it a request for a recognized resource on the system?
