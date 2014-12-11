@@ -508,8 +508,17 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     // Alias after host name?
     //
-    if(isset($_SERVER['SCRIPT_NAME'])) {
-      $this->alias = str_replace(array('index.php'), '', $_SERVER['SCRIPT_NAME']);
+    $this->alias = NULL;
+    if (isset($_SERVER['SCRIPT_NAME']) && isset($_SERVER['SCRIPT_FILENAME'])) {
+      //
+      // Eliminate OS-dependent path separators.
+      //
+      // $document_root = preg_replace('!' . self::URI_SLASH . '$!', '&#47;', ABLE_POLECAT_ROOT);
+      $document_root = str_replace(DIRECTORY_SEPARATOR, '&#47;', ABLE_POLECAT_ROOT);
+      $script_filename = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_FILENAME']);
+      $request_path = str_replace($document_root, '', $script_filename);
+      $script_name = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_NAME']);
+      $this->alias = str_replace('&#47;', self::URI_SLASH, str_replace($request_path, '', $script_name));
     }
     if (isset($this->alias) && ($this->alias == self::URI_SLASH)) {
       //
