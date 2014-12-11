@@ -300,9 +300,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         $resolvedResourceName = $sanitizedResourceName;
         break;
     }
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### raw resource name = %s", $requestedResourceName));
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### sanitized resource name = %s", $sanitizedResourceName));
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### resolved resource name = %s", $resolvedResourceName));
+    var_dump($requestedResourceName);
+    echo '<br />';
+    var_dump($sanitizedResourceName);
+    AblePolecat_Debug::kill($resolvedResourceName);
+    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### raw resource name = %s", $requestedResourceName));
+    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### sanitized resource name = %s", $sanitizedResourceName));
+    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### resolved resource name = %s", $resolvedResourceName));
     return $resolvedResourceName;
   }
   
