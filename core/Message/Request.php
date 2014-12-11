@@ -300,6 +300,9 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         $resolvedResourceName = $sanitizedResourceName;
         break;
     }
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### raw resource name = %s", $requestedResourceName));
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### sanitized resource name = %s", $sanitizedResourceName));
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### resolved resource name = %s", $resolvedResourceName));
     return $resolvedResourceName;
   }
   
@@ -343,7 +346,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     isset($this->alias) ? $alias = $this->alias : $alias = '';
     isset($_SERVER['REQUEST_URI']) ? $request_uri = $_SERVER['REQUEST_URI'] : $request_uri = '';
     isset($_SERVER['QUERY_STRING']) ? $query_string = $_SERVER['QUERY_STRING'] : $query_string = '';
-    $this->request_path_info[self::URI_PATH] = trim(str_replace($alias, '', str_replace($query_string, '', $request_uri)), self::URI_SLASH.'?');
+    $this->request_path_info[self::URI_PATH] = trim(str_replace($alias, '', str_replace($query_string, '', $request_uri)), self::URI_SLASH . '?');
     $this->request_path = explode(self::URI_SLASH, $this->request_path_info[self::URI_PATH]);
     
     //
