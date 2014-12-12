@@ -300,13 +300,6 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         $resolvedResourceName = $sanitizedResourceName;
         break;
     }
-    var_dump($requestedResourceName);
-    echo '<br />';
-    var_dump($sanitizedResourceName);
-    AblePolecat_Debug::kill($resolvedResourceName);
-    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### raw resource name = %s", $requestedResourceName));
-    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### sanitized resource name = %s", $sanitizedResourceName));
-    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("#### resolved resource name = %s", $resolvedResourceName));
     return $resolvedResourceName;
   }
   
@@ -356,7 +349,6 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     // Is there anything left of the path?
     //
-    AblePolecat_Debug::kill($this);
     if (isset($this->request_path[0]) && ($this->request_path[0] != '')) {
       //
       // Is it a request for a recognized resource on the system?
@@ -515,25 +507,50 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     
     //
     // Alias after host name?
+    // Defined in ./etc/polecat/conf/path.config. Typically for local development environments.
     //
-    $this->alias = NULL;
-    if (isset($_SERVER['SCRIPT_NAME']) && isset($_SERVER['SCRIPT_FILENAME'])) {
-      //
-      // Eliminate OS-dependent path separators.
-      //
-      // $document_root = preg_replace('!' . self::URI_SLASH . '$!', '&#47;', ABLE_POLECAT_ROOT);
-      $document_root = str_replace(DIRECTORY_SEPARATOR, '&#47;', ABLE_POLECAT_ROOT);
-      $script_filename = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_FILENAME']);
-      $request_path = str_replace($document_root, '', $script_filename);
-      $script_name = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_NAME']);
-      $this->alias = str_replace('&#47;', self::URI_SLASH, str_replace($request_path, '', $script_name));
+    if (defined('ABLE_POLECAT_ALIAS')) {
+      if (ABLE_POLECAT_ALIAS == self::URI_SLASH) {
+        //
+        // This can cause problems with string manipulation. Unset alias if it is only '/'
+        //
+        $this->alias = NULL;
+      }
+      else {
+        //
+        // Make sure first character of given alias is a leading slash.
+        //
+        $given_alias = ABLE_POLECAT_ALIAS;
+        $pos = strpos(self::URI_SLASH, ABLE_POLECAT_ALIAS);
+        if ($pos !== 0) {
+          $given_alias = self::URI_SLASH . ABLE_POLECAT_ALIAS;
+        }
+          
+        //
+        // Validate given alias name against PHP globals
+        // Eliminate OS-dependent path separators.
+        //
+        $document_root = str_replace(DIRECTORY_SEPARATOR, '&#47;', ABLE_POLECAT_ROOT);
+        $script_filename = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_FILENAME']);
+        $request_path = str_replace($document_root, '', $script_filename);
+        $script_name = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_NAME']);
+        $alias = str_replace('&#47;', self::URI_SLASH, str_replace($request_path, '', $script_name));
+        if ($alias === $given_alias) {
+          $this->alias = $given_alias;
+        }
+        else {
+          trigger_error(sprintf("Check defined alias in ./etc/polecat/conf/path.config. Given: %s; Derived: %s.",
+              ABLE_POLECAT_ALIAS,
+              $alias
+            ), 
+            E_USER_ERROR
+          );
+        }
+      }
     }
-    if (isset($this->alias) && ($this->alias == self::URI_SLASH)) {
-      //
-      // This can cause problems with string manipulation. Unset alias if it is only '/'
-      //
+    else {
       $this->alias = NULL;
-    }
+    }    
     
     //
     // base URL protocol://host[/alias]
