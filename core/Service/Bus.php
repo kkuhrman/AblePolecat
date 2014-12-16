@@ -185,7 +185,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         //
         // If method is GET and resource is not restricted, check cache first.
         //
-        if (($Message->getMethod() == 'GET') && (200 == $ResourceRegistration->getResourceDenyCode())) {
+        $recache = $Message->getQueryStringFieldValue('recache');
+        if (($Message->getMethod() == 'GET') && 
+            (200 == $ResourceRegistration->getResourceDenyCode()) &&
+            !isset($recache)) {
           //
           // Check current cache entry against modified dates for both resource and response objects.
           //

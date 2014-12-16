@@ -322,6 +322,22 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    ********************************************************************************/
   
   /**
+   * Return value of query string field if it exists.
+   *
+   * @param string $fieldName Name of query string field (parameter).
+   *
+   * @return mixed Value of given query string field or NULL.
+   */
+  public function getQueryStringFieldValue($fieldName) {
+    
+    $fieldValue = NULL;
+    if (isset($this->query_string[$fieldName])) {
+      $fieldValue = $this->query_string[$fieldName];
+    }
+    return $fieldValue;
+  }
+  
+  /**
    * @param mixed $rawRequestLogRecordId
    */
   public function setRawRequestLogRecordId($rawRequestLogRecordId) {
