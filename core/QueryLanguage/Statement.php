@@ -325,7 +325,7 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
         throw new AblePolecat_QueryLanguage_Exception(
           sprintf("%s WHERE parameter must be scalar or implement __toString(). %s passed.", 
             get_class($this), 
-            gettype($arg)
+            AblePolecat_Data::getDataTypeName($arg)
           ), 
           AblePolecat_Error::INVALID_TYPE_CAST
         );

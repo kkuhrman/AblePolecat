@@ -122,16 +122,16 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       }
       catch(AblePolecat_AccessControl_Exception $Exception) {
         //
-        // @todo: handle different resourceDenyCode
+        // @todo: handle different accessDeniedCode
         //
-        switch ($this->getResourceRegistration()->getResourceDenyCode()) {
+        switch ($this->getConnectorRegistration()->getAccessDeniedCode()) {
           default:
             break;
           case 401:
             //
             // 401 means user requires authentication before request will be granted.
             //
-            $authorityClassName = $this->getResourceRegistration()->getAuthorityClassName();
+            $authorityClassName = $this->getConnectorRegistration()->getAuthorityClassName();
             if (isset($authorityClassName)) {
               $ChildTransaction = $this->enlistTransaction(
                 $authorityClassName,

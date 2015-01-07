@@ -2,12 +2,6 @@
 /**
  * @file      polecat/core/Service/Bus.php
  * @brief     Provides a channel for Able Polecat services to communicate with one another.
- *
- * 1. Route messages between services implemented in Able Polecat.
- * 2. Resolve contention between services.
- * 3. Control data transformation and exchange (DTX) between services.
- * 4. Marshal redundant resources (e.g. web service client connections).
- * 5. Handle messaging, exceptions, logging etc.
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -16,7 +10,6 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Response.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
@@ -151,9 +144,9 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    *        2.1.2 If no cached response found GOTO 3
    *    2.2 If restricted check if agent/role has permission to access
    *        2.2.1 If access is permitted GOTO 2.1
-   *        2.2.2 If access denied and resourceDenyCode == 403 generate access denied 
+   *        2.2.2 If access denied and accessDeniedCode == 403 generate access denied 
    *              response and GOTO 7
-   *        2.2.3 If access denied and resourceDenyCode == 401 generate authentication 
+   *        2.2.3 If access denied and accessDeniedCode == 401 generate authentication 
    *              form response and GOTO 7
    * 3. Start transaction corresponding to request method/resource
    * 4. Get response registration entry corresponding to transaction status code and 
@@ -171,23 +164,25 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     
     try {
       if (is_a($Message, 'AblePolecat_Message_RequestInterface')) {
+        $requestMethod = $Message->getMethod();
         $message = sprintf("%s request dispatched to service bus by %s agent.", 
-          $Message->getMethod(),
+          $requestMethod,
           $Agent->getName()
         );
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     
         //
-        // Get resource registration info.
+        // Get resource/representation registration info.
         //
         $ResourceRegistration = $this->getResourceRegistration($Message);
+        $ConnectorRegistration = $this->getConnectorRegistration($ResourceRegistration, $requestMethod);
         
         //
         // If method is GET and resource is not restricted, check cache first.
         //
         $recache = $Message->getQueryStringFieldValue('recache');
-        if (($Message->getMethod() == 'GET') && 
-            (200 == $ResourceRegistration->getResourceDenyCode()) &&
+        if (($requestMethod == 'GET') && 
+            (200 == $ConnectorRegistration->getAccessDeniedCode()) &&
             !isset($recache)) {
           //
           // Check current cache entry against modified dates for both resource and response objects.
@@ -257,12 +252,12 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             //
             // Validate registered parent transaction class name.
             //
-            $transactionClassName = $ResourceRegistration->getTransactionClassName();
+            $transactionClassName = $ConnectorRegistration->getTransactionClassName();
             if (!isset($transactionClassName)) {
-              switch ($Message->getMethod()) {
+              switch ($requestMethod) {
                 default:
                   throw new AblePolecat_Service_Exception(sprintf("No transaction class registered for %s method on resource named %s",
-                    $Message->getMethod(),
+                    $requestMethod,
                     $ResourceRegistration->getResourceName()
                   ));
                   break;
@@ -276,7 +271,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
                 if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
                   throw new AblePolecat_Service_Exception(sprintf("Transaction class registered for %s method on resource named %s does not implement AblePolecat_TransactionInterface",
                     $transactionClassName,
-                    $Message->getMethod(),
+                    $requestMethod,
                     $ResourceRegistration->getResourceName()
                   ));
                 }
@@ -298,6 +293,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               $Agent,
               $Message,
               $ResourceRegistration,
+              $ConnectorRegistration,
               $transactionId,
               $savepointId,
               NULL
@@ -335,6 +331,71 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // throw new AblePolecat_Service_Exception($Exception->getMessage());
     }
     return $Response;
+  }
+  
+  /**
+   * Return registration data on connector corresponding to request path and method.
+   *
+   * @param AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration
+   * @param string $requestMethod
+   * 
+   * @return AblePolecat_Registry_Entry_Connector
+   */
+  protected function getConnectorRegistration(AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration, $requestMethod) {
+    
+    $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::fetch(array($ResourceRegistration->resourceId, $requestMethod));
+    if (!isset($ConnectorRegistration)) {
+      $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
+      $ConnectorRegistration->resourceId = $ResourceRegistration->resourceId;
+      $ConnectorRegistration->requestMethod = $requestMethod;
+      
+      //
+      // Assign transaction class name.
+      //
+      switch ($ResourceRegistration->resourceName) {
+        default:
+          //
+          // Unrestricted resource.
+          //
+          $ConnectorRegistration->transactionClassName = NULL;
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+          $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+          $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
+          break;
+      }
+      
+      //
+      // Assign authority and access denied code.
+      //
+      switch ($ResourceRegistration->resourceName) {
+        default:
+          //
+          // Unrestricted resource.
+          //
+          $ConnectorRegistration->authorityClassName = NULL;
+          $ConnectorRegistration->accessDeniedCode = 200;
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+          switch ($Request->getMethod()) {
+            default:
+              break;
+            case 'GET':
+              $ConnectorRegistration->authorityClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+              $ConnectorRegistration->accessDeniedCode = 401;
+              break;
+            case 'POST':
+              $ConnectorRegistration->authorityClassName = NULL;
+              $ConnectorRegistration->accessDeniedCode = 403;
+              break;
+          }
+          break;
+      }
+    }
+    return $ConnectorRegistration;
   }
   
   /**
@@ -377,7 +438,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // Look up resource registration in [resource]
       //
       $sql = __SQL()->          
-          select('resourceClassName', 'resourceId', 'transactionClassName', 'authorityClassName', 'resourceDenyCode', 'lastModifiedTime')->
+          select('resourceClassName', 'resourceId', 'lastModifiedTime')->
           from('resource')->
           where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
       $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
@@ -386,9 +447,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         if (isset($classInfo[0])) {
           $ResourceRegistration->resourceId = $classInfo[0]['resourceId'];
           $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
-          $ResourceRegistration->transactionClassName = $classInfo[0]['transactionClassName'];
-          $ResourceRegistration->resourceDenyCode = $classInfo[0]['resourceDenyCode'];
-          $ResourceRegistration->authorityClassName = $classInfo[0]['authorityClassName'];
           $ResourceRegistration->lastModifiedTime = $classInfo[0]['lastModifiedTime'];
         }
       }
@@ -421,41 +479,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
           $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::UUID;
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
-          $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
           $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
           $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
-          $ResourceRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
-          break;
-      }
-      
-      //
-      // Assign transaction, authority and access denied code.
-      //
-      switch ($resourceName) {
-        default:
-          //
-          // Unrestricted resource.
-          //
-          $ResourceRegistration->transactionClassName = NULL;
-          $ResourceRegistration->authorityClassName = NULL;
-          $ResourceRegistration->resourceDenyCode = 200;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          switch ($Request->getMethod()) {
-            default:
-              break;
-            case 'GET':
-              $ResourceRegistration->authorityClassName = 'AblePolecat_Transaction_AccessControl_Authority';
-              $ResourceRegistration->resourceDenyCode = 401;
-              break;
-            case 'POST':
-              $ResourceRegistration->authorityClassName = NULL;
-              $ResourceRegistration->resourceDenyCode = 403;
-              break;
-          }
           break;
       }
     }

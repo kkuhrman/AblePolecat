@@ -393,10 +393,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         // Build search query string from invalid resource path.
         //
         $query_string = $this->makeRequestQueryString(array(self::URI_SEARCH_PARAM => $this->request_path));
-        $this->redirectUrl = sprintf("%s%s%s?%s",
-          $this->host_url,
-          self::RESOURCE_NAME_SEARCH,
-          self::URI_SLASH,
+        $this->redirectUrl = sprintf("%s?%s",
+          implode(self::URI_SLASH, array($this->host_url, self::RESOURCE_NAME_SEARCH)),
           $query_string
         );
       }
@@ -420,10 +418,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
           $this->request_path_info[self::URI_RESOURCE_NAME] = self::RESOURCE_NAME_SEARCH;
           $this->request_path_info[self::URI_REDIRECT] = TRUE;
           $query_string = $this->makeRequestQueryString(array(self::URI_SEARCH_PARAM => $this->entity_body[self::URI_SEARCH_PARAM]));
-          $this->redirectUrl = sprintf("%s%s%s?%s",
-            $this->host_url,
-            self::RESOURCE_NAME_SEARCH,
-            self::URI_SLASH,
+          $this->redirectUrl = sprintf("%s?%s",
+            implode(self::URI_SLASH, array($this->host_url, self::RESOURCE_NAME_SEARCH)),
             $query_string
           );
         }        

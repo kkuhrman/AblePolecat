@@ -2,12 +2,7 @@
 /**
  * @file      polecat/core/Host.php
  * @brief     Manages most direct interaction between Able Polecat and PHP global variables.
- *
- * Host has the following duties:
- * 1. Marshall web server REQUEST
- * 2. Initiate upstream chain of responsibility (COR - session, user, application, etc).
- * 3. Dispatch marshalled request object
- * 4. Unmarshall RESPONSE, send HTTP response head/body
+ * 
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)

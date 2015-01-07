@@ -17,7 +17,9 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Transaction.php')));
-require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Overloadable.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Overloadable.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Connector.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 
 interface AblePolecat_TransactionInterface 
   extends AblePolecat_AccessControl_Article_StaticInterface,
@@ -42,6 +44,7 @@ interface AblePolecat_TransactionInterface
   const TX_ARG_SAVEPOINT_ID     = 'savepointId';
   const TX_ARG_REQUEST          = 'Request';
   const TX_ARG_RESOURCE_REG     = 'ResourceRegistration';
+  const TX_ARG_CONNECTOR_REG    = 'ConnectorRegistration';
   const TX_ARG_PARENT           = 'Parent';
   
   /**
@@ -58,6 +61,11 @@ interface AblePolecat_TransactionInterface
    * @return AblePolecat_AccessControl_AgentInterface or NULL.
    */
   public function getAgent();
+  
+  /**
+   * @return AblePolecat_Registry_Entry_ConnectorInterface.
+   */
+  public function getConnectorRegistration();
   
   /**
    * @return AblePolecat_TransactionInterface.
@@ -223,12 +231,15 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
                 $ArgsList->{self::TX_ARG_RESOURCE_REG} = $value;
                 break;
               case 4:
-                $ArgsList->{self::TX_ARG_TRANSACTION_ID} = $value;
+                $ArgsList->{self::TX_ARG_CONNECTOR_REG} = $value;
                 break;
               case 5:
-                $ArgsList->{self::TX_ARG_SAVEPOINT_ID} = $value;
+                $ArgsList->{self::TX_ARG_TRANSACTION_ID} = $value;
                 break;
               case 6:
+                $ArgsList->{self::TX_ARG_SAVEPOINT_ID} = $value;
+                break;
+              case 7:
                 $ArgsList->{self::TX_ARG_PARENT} = $value;
                 break;
             }
@@ -285,6 +296,20 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       throw new AblePolecat_Transaction_Exception(sprintf("Transaction [ID:%s] Agent is null.", $this->getTransactionId()));
     }
     return $Agent;
+  }
+  
+  /**
+   * @return AblePolecat_Registry_Entry_ConnectorInterface.
+   */
+  public function getConnectorRegistration() {
+    $ConnectorRegistration = NULL;
+    if (isset($this->ConnectorRegistration)) {
+      $ConnectorRegistration = $this->ConnectorRegistration;
+    }
+    else {
+      throw new AblePolecat_Transaction_Exception(sprintf("Transaction [ID:%s] connector registration is null.", $this->getTransactionId()));
+    }
+    return $ConnectorRegistration;
   }
   
   /**
@@ -426,6 +451,13 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    */
   protected function setAgent(AblePolecat_AccessControl_AgentInterface $Agent) {
     $this->Agent = $Agent;
+  }
+  
+  /**
+   * @param AblePolecat_Registry_Entry_ConnectorInterface $ConnectorRegistration.
+   */
+  public function setConnectorRegistration(AblePolecat_Registry_Entry_ConnectorInterface $ConnectorRegistration) {
+    $this->ConnectorRegistration = $ConnectorRegistration;
   }
   
   /**
@@ -686,6 +718,8 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         isset($Request) ? $Transaction->setRequest($Request) : NULL;
         $ResourceRegistration = $ArgsList->getArgumentValue(self::TX_ARG_RESOURCE_REG);
         isset($ResourceRegistration) ? $Transaction->setResourceRegistration($ResourceRegistration) : NULL;
+        $ConnectorRegistration = $ArgsList->getArgumentValue(self::TX_ARG_CONNECTOR_REG);
+        isset($ConnectorRegistration) ? $Transaction->setConnectorRegistration($ConnectorRegistration) : NULL;
         $Transaction->setTransactionId($ArgsList->getArgumentValue(self::TX_ARG_TRANSACTION_ID));
         $Transaction->setSavepointId($ArgsList->getArgumentValue(self::TX_ARG_SAVEPOINT_ID));
         $parent = $ArgsList->getArgumentValue(self::TX_ARG_PARENT);
@@ -732,6 +766,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     $this->Request = NULL;
     $this->transactionId = NULL;
     $this->ResourceRegistration = NULL;
+    $this->ConnectorRegistration = NULL;
     $this->savepointId = NULL;
     $this->status = self::TX_STATE_PENDING;
     $this->statusCode = 200;

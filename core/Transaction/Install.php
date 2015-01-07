@@ -172,14 +172,14 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
             $this->setStatus(self::TX_STATE_COMPLETED);
           }
           catch(AblePolecat_AccessControl_Exception $Exception) {
-            switch ($this->getResourceRegistration()->getResourceDenyCode()) {
+            switch ($this->getConnectorRegistration()->getAccessDeniedCode()) {
               default:
                 break;
               case 401:
                 //
                 // 401 means user requires authentication before request will be granted.
                 //
-                // $authorityClassName = $this->getResourceRegistration()->getAuthorityClassName();
+                // $authorityClassName = $this-getConnectorRegistration()->getAuthorityClassName();
                 // if (isset($authorityClassName)) {
                   // $ChildTransaction = $this->enlistTransaction(
                     // $authorityClassName,

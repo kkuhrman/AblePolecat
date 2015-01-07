@@ -3,6 +3,13 @@
  * @file      polecat/core/Registry/Entry/Resource.php
  * @brief     Encapsulates record of a resource registered in [resource].
  *
+ * Addressability of resources is achieved by enforcing uniqueness of each
+ * host name + path combination. In Able Polecat, path, as used in previous 
+ * sentence, is the same as resource name (not necessarily unique except in
+ * combination with host name to comprise URL).
+ *
+ * @see Richardson/Ruby, RESTful Web Services (ISBN 978-0-596-52926-0)
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
@@ -31,21 +38,6 @@ interface AblePolecat_Registry_Entry_ResourceInterface extends AblePolecat_Regis
    * @return string.
    */
   public function getResourceClassName();
-  
-  /**
-   * @return string.
-   */
-  public function getTransactionClassName();
-  
-  /**
-   * @return string.
-   */
-  public function getAuthorityClassName();
-  
-  /**
-   * @return int.
-   */
-  public function getResourceDenyCode();
 }
 
 /**
@@ -91,9 +83,6 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
             'hostName', 
             'resourceName', 
             'resourceClassName', 
-            'transactionClassName', 
-            'authorityClassName', 
-            'resourceDenyCode', 
             'lastModifiedTime')->
           from('resource')->
           where(sprintf("`resourceId` = '%s'", $ResourceRegistration->resourceId));
@@ -104,9 +93,6 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
           $ResourceRegistration->hostName = $classInfo[0]['hostName'];
           $ResourceRegistration->resourceName = $classInfo[0]['resourceName'];
           $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
-          $ResourceRegistration->transactionClassName = $classInfo[0]['transactionClassName'];
-          $ResourceRegistration->resourceDenyCode = $classInfo[0]['resourceDenyCode'];
-          $ResourceRegistration->authorityClassName = $classInfo[0]['authorityClassName'];
           $ResourceRegistration->lastModifiedTime = $classInfo[0]['lastModifiedTime'];
         }
       }
@@ -167,27 +153,6 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    */
   public function getResourceClassName() {
     return $this->getPropertyValue('resourceClassName');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getTransactionClassName() {
-    return $this->getPropertyValue('transactionClassName');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getAuthorityClassName() {
-    return $this->getPropertyValue('authorityClassName');
-  }
-  
-  /**
-   * @return int.
-   */
-  public function getResourceDenyCode() {
-    return $this->getPropertyValue('resourceDenyCode');
   }
     
   /********************************************************************************
