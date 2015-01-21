@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 03, 2014 at 03:42 PM
+-- Generation Time: Jan 21, 2015 at 05:37 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -18,19 +18,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Database: `polecat`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `article`
---
-
-DROP TABLE IF EXISTS `article`;
-CREATE TABLE IF NOT EXISTS `article` (
-  `articleId` char(36) NOT NULL,
-  `articleName` varchar(255) NOT NULL,
-  PRIMARY KEY (`articleId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -73,22 +60,34 @@ CREATE TABLE IF NOT EXISTS `class` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `classlib`
+-- Table structure for table `component`
 --
 
-DROP TABLE IF EXISTS `classlib`;
-CREATE TABLE IF NOT EXISTS `classlib` (
-  `classLibraryName` varchar(255) NOT NULL,
-  `classLibraryId` varchar(80) NOT NULL,
-  `classLibraryType` char(4) NOT NULL,
-  `major` int(11) NOT NULL,
-  `minor` int(11) NOT NULL,
-  `revision` int(11) NOT NULL,
-  `classLibraryDirectory` varchar(255) NOT NULL,
-  PRIMARY KEY (`classLibraryName`),
-  UNIQUE KEY `classLibraryId` (`classLibraryId`),
-  KEY `classLibraryType` (`classLibraryType`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Third-party PHP class libraries used by modules';
+DROP TABLE IF EXISTS `component`;
+CREATE TABLE IF NOT EXISTS `component` (
+  `componentId` char(36) NOT NULL,
+  `docType` text,
+  `componentClassName` varchar(255) NOT NULL,
+  `templateFullPath` varchar(255) NOT NULL,
+  `lastModifiedTime` int(11) NOT NULL,
+  PRIMARY KEY (`componentId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `connector`
+--
+
+DROP TABLE IF EXISTS `connector`;
+CREATE TABLE IF NOT EXISTS `connector` (
+  `resourceId` char(36) NOT NULL,
+  `requestMethod` char(16) NOT NULL DEFAULT 'GET',
+  `transactionClassName` varchar(255) NOT NULL,
+  `authorityClassName` varchar(255) DEFAULT NULL,
+  `accessDeniedCode` int(11) NOT NULL DEFAULT '403',
+  PRIMARY KEY (`resourceId`,`requestMethod`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -122,36 +121,7 @@ CREATE TABLE IF NOT EXISTS `error` (
   `errorFunction` varchar(255) NOT NULL,
   `errorMessage` text NOT NULL,
   PRIMARY KEY (`errorId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `interface`
---
-
-DROP TABLE IF EXISTS `interface`;
-CREATE TABLE IF NOT EXISTS `interface` (
-  `interfaceName` varchar(255) NOT NULL,
-  PRIMARY KEY (`interfaceName`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `locks`
---
-
-DROP TABLE IF EXISTS `locks`;
-CREATE TABLE IF NOT EXISTS `locks` (
-  `service` varchar(255) NOT NULL,
-  `id` char(18) NOT NULL,
-  `createdbyid` char(18) NOT NULL,
-  `type` char(18) NOT NULL DEFAULT 'pending',
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`service`,`id`),
-  KEY `createdbyid` (`createdbyid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=98 ;
 
 -- --------------------------------------------------------
 
@@ -168,36 +138,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `eventMessage` text NOT NULL,
   PRIMARY KEY (`eventId`),
   KEY `user_id` (`userId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `outh2_login`
---
-
-DROP TABLE IF EXISTS `outh2_login`;
-CREATE TABLE IF NOT EXISTS `outh2_login` (
-  `login_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Primary identifier for login attempt.',
-  `login_time` int(11) NOT NULL DEFAULT '0' COMMENT 'UNIX timestamp indicating when login attempt occurred.',
-  `uid` int(10) unsigned NOT NULL COMMENT 'Drupal uid of the user if new or existing or zero if login was rejected.',
-  `oauth_user` text COMMENT 'Serialized OAuth 2.0 user information.',
-  PRIMARY KEY (`login_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores information on attempts to login with OAuth 2.0.' AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `outh2_token`
---
-
-DROP TABLE IF EXISTS `outh2_token`;
-CREATE TABLE IF NOT EXISTS `outh2_token` (
-  `session_id` varchar(255) NOT NULL DEFAULT '' COMMENT 'User session id.',
-  `service_provider` varchar(255) NOT NULL DEFAULT '' COMMENT 'Provider of OAuth 2.0 token.',
-  `token` text COMMENT 'The actual serialized OAuth 2.0 token.',
-  PRIMARY KEY (`session_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores OAuth 2.0 tokens based on session id.';
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=322 ;
 
 -- --------------------------------------------------------
 
@@ -234,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `request` (
   `transactionId` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`requestId`),
   KEY `remoteAddress` (`remoteAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=526 ;
 
 -- --------------------------------------------------------
 
@@ -248,9 +189,6 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `hostName` varchar(255) NOT NULL,
   `resourceName` varchar(255) NOT NULL,
   `resourceClassName` varchar(255) NOT NULL,
-  `transactionClassName` varchar(255) DEFAULT NULL,
-  `authorityClassName` varchar(255) DEFAULT NULL COMMENT 'Immediate access control authority (first in CoR).',
-  `resourceDenyCode` int(11) NOT NULL DEFAULT '403',
   `lastModifiedTime` int(11) NOT NULL,
   PRIMARY KEY (`resourceId`),
   UNIQUE KEY `resourceName` (`hostName`,`resourceName`),
@@ -321,7 +259,7 @@ CREATE TABLE IF NOT EXISTS `session` (
   `start` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`sessionNumber`),
   UNIQUE KEY `phpSessionId` (`phpSessionId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=48 ;
 
 -- --------------------------------------------------------
 
@@ -345,19 +283,3 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   KEY `resourceId` (`resourceId`),
   KEY `sessionNumber` (`sessionNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user`
---
-
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE IF NOT EXISTS `user` (
-  `userId` int(11) NOT NULL AUTO_INCREMENT,
-  `userAlias` varchar(255) NOT NULL,
-  `clientId` varchar(255) NOT NULL,
-  `userName` varchar(255) NOT NULL,
-  PRIMARY KEY (`userId`),
-  KEY `clientId` (`clientId`,`userName`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
