@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<polecat_database version="0.7.0" xmlns:polecat="http://polecat.kuhrman.com/">
+  <polecat:database>
+    <polecat:tables>
+      <polecat:table name="cache" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="resourceId" type="char" size="36" null="NOT" />
+          <polecat:field name="statusCode" type="int" size="11" null="NOT" />
+          <polecat:field name="mimeType" type="varchar" size="255" null="NOT">
+            <polecat:fieldValue>Content-type: text/xml; charset=utf-8</polecat:fieldValue>
+            <polecat:fieldComment>deprecated</polecat:fieldComment>
+          </polecat:field>
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+          <polecat:field name="cacheData" type="blob" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="UNIQUE KEY" name="cacheEntryKey">
+            <polecat:indexField name="resourceId" />
+            <polecat:indexField name="statusCode" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+    </polecat:tables>
+  </polecat:database>
+</polecat_database>
