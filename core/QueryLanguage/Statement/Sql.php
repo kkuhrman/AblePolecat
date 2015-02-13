@@ -580,7 +580,7 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
       //
       // @todo: obviously inadequate - need a better solution involving driver/schema & checking
       //
-      $ValuesQuotes[] = sprintf("'%s'", str_replace('\'', '\'\'', $value));
+      $ValuesQuotes[] = sprintf("'%s'", str_replace(array('\\', '\''), array('\\\\', '\'\''), $value));
     }
     $this->setValues($ValuesQuotes);
     return $this;
