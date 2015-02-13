@@ -187,6 +187,15 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             // Otherwise, install current schema.
             //
             AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
+            
+            //
+            // Register classes.
+            //
+            AblePolecat_Registry_Class::install(self::$ConfigMode->CoreDatabase);
+            
+            //
+            // @todo: Redirect home.
+            //
           }
           break;
         case 'PUT':

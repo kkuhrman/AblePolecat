@@ -11,31 +11,12 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
 
 interface AblePolecat_Registry_Entry_ClassInterface extends AblePolecat_Registry_EntryInterface {  
-  /**
-   * @return string.
-   */
-  public function getClassName();
-  
-  /**
-   * @return string.
-   */
-  public function getClassId();
   
   /**
    * @return string.
    */
   public function getClassLibraryId();
-  
-  /**
-   * @return string.
-   */
-  public function getClassScope();
-  
-  /**
-   * @return bool.
-   */
-  public function getIsRequired();
-  
+    
   /**
    * @return string.
    */
@@ -45,11 +26,6 @@ interface AblePolecat_Registry_Entry_ClassInterface extends AblePolecat_Registry
    * @return string.
    */
   public function getClassFactoryMethod();
-  
-  /**
-   * @return int Time of last modification to class file (Unix timestamp).
-   */
-  public function getClassLastModifiedTime();
 }
 
 /**
@@ -77,14 +53,11 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
     if ($name == 'classFullPath') {
       $this->fileStat = stat($value);
       if ($this->fileStat && isset($this->fileStat['mtime'])) {
-        parent::__set('classLastModifiedTime', $this->fileStat['mtime']);
+        parent::__set('lastModifiedTime', $this->fileStat['mtime']);
       }
       else {
         throw new AblePolecat_Registry_Exception("Failed to retrieve file stats on $value.");
       }
-    }
-    else if ($name == 'classLastModifiedTime') {
-      trigger_error("$name is read-only property.");
     }
     parent::__set($name, $value);
   }
@@ -121,7 +94,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * @return Array[string].
    */
   public static function getPrimaryKeyFieldNames() {
-    return array(0 => 'className');
+    return array(0 => 'id');
   }
   
   /**
@@ -130,31 +103,34 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
-  public function save() {
-    //
-    // @todo complete REPLACE [class]
-    //
+  public function save(AblePolecat_DatabaseInterface $Database = NULL) {
+    $sql = __SQL()->          
+      insert(
+        'id', 
+        'name', 
+        'classLibraryId', 
+        'classFullPath', 
+        'classFactoryMethod', 
+        'lastModifiedTime')->
+      into('class')->
+      values(
+        $this->getId(), 
+        $this->getName(), 
+        $this->getClassLibraryId(), 
+        $this->getClassFullPath(), 
+        $this->getClassFactoryMethod(), 
+        $this->getLastModifiedTime()
+      );
+    $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************
    * Implementation of AblePolecat_Registry_Entry_ClassInterface.
    ********************************************************************************/
-    
-  /**
-   * @return string.
-   */
-  public function getClassName() {
-    return $this->getPropertyValue('className');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getClassId() {
-    return $this->getPropertyValue('classId');
-  }
   
   /**
    * @return string.
@@ -162,21 +138,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
   public function getClassLibraryId() {
     return $this->getPropertyValue('classLibraryId');
   }
-  
-  /**
-   * @return string.
-   */
-  public function getClassScope() {
-    return $this->getPropertyValue('classScope');
-  }
-  
-  /**
-   * @return bool.
-   */
-  public function getIsRequired() {
-    return $this->getPropertyValue('isRequired');
-  }
-  
+    
   /**
    * @return string.
    */
@@ -191,13 +153,6 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
     return $this->getPropertyValue('classFactoryMethod');
   }
   
-  /**
-   * @return int Time of last modification to class file (Unix timestamp).
-   */
-  public function getClassLastModifiedTime() {
-    return $this->getPropertyValue('classLastModifiedTime');
-  }
-      
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -206,14 +161,13 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * Output class state to debug log.
    */
   public function dumpState() {
-    $message = sprintf("REGISTRY: className=%s, classId=%s; classLibraryId=%s; classScope=%s; classFullPath=%s, classFactoryMethod=%s, classLastModifiedTime=%d",
-      $this->getClassName(),
-      $this->getClassId(),
+    $message = sprintf("REGISTRY: name=%s, id=%s; classLibraryId=%s; classFullPath=%s, classFactoryMethod=%s, lastModifiedTime=%d",
+      $this->getName(),
+      $this->getId(),
       $this->getClassLibraryId(),
-      $this->getClassScope(),
       $this->getClassFullPath(),
       $this->getClassFactoryMethod(),
-      $this->getClassLastModifiedTime()
+      $this->getLastModifiedTime()
     );
     AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
   }

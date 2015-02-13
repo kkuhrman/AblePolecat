@@ -313,13 +313,29 @@ class AblePolecat_Server_Paths {
   }
   
   /**
-   * @todo:
+   * Remove dangerous characters and localize path string.
+   *
    * @param string $path The path to sanitize.
+   *
    * @return string A sanitized path or NULL.
-   * @throw AblePolecat_Server_Paths_Exception if paths is not valid.
    */
   public static function sanitizePath($path) {
+    //
+    // Remove leading, trailing white space.
+    //
     $sanitized_path = trim($path);
+    
+    //
+    // Localize path separators. First attempt assumes UNIX style path.
+    //
+    $replacements = 0;
+    $sanitized_path = str_replace ('/', DIRECTORY_SEPARATOR, $sanitized_path, $replacements);
+    if ($replacements === 0) {
+      //
+      // No replacements performed. Assume Windows style path.
+      //
+      $sanitized_path = str_replace ('\\', DIRECTORY_SEPARATOR, $sanitized_path, $replacements);
+    }
     return $sanitized_path;
   }
   

@@ -542,7 +542,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         // Validate given alias name against PHP globals
         // Eliminate OS-dependent path separators.
         //
-        $document_root = str_replace(DIRECTORY_SEPARATOR, '&#47;', ABLE_POLECAT_ROOT);
+        $document_root = str_replace(DIRECTORY_SEPARATOR, '&#47;', ABLE_POLECAT_DOCROOT);
         $script_filename = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_FILENAME']);
         $request_path = str_replace($document_root, '', $script_filename);
         $script_name = str_replace(self::URI_SLASH, '&#47;', $_SERVER['SCRIPT_NAME']);

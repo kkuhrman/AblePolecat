@@ -89,13 +89,26 @@
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', 'DEV-0.6.3');
-define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_3_DEV');
+define('ABLE_POLECAT_VERSION_NAME', '0.7.0-DEV');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_7_0_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
-define('ABLE_POLECAT_VERSION_MINOR', '6');
-define('ABLE_POLECAT_VERSION_REVISION', '3');
+define('ABLE_POLECAT_VERSION_MINOR', '7');
+define('ABLE_POLECAT_VERSION_REVISION', '0');
 
-final class AblePolecat_Version {
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
+
+final class AblePolecat_Version implements AblePolecat_AccessControl_Article_StaticInterface {
+  
+  /**
+   * Article Constants.
+   */
+  const UUID = '25226229-b3d6-11e4-976e-0050569e00a2';
+  const NAME = '0.7.0';
+  
+  /**
+   * Database schema.
+   */
+  const DB_SCHEMA = '0.7.0';
   
   /**
    * AblePolecat_Version INstance of singleton.
@@ -107,6 +120,52 @@ final class AblePolecat_Version {
    */
   private $info;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
+   ********************************************************************************/
+  
+  /**
+   * Return unique, system-wide identifier for security constraint.
+   *
+   * @return string Constraint identifier.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return common name for security constraint.
+   *
+   * @return string Constraint name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Get number of database schema in use by current version.
+   */
+  public static function getDatabaseSchemaNumber() {
+    return self::DB_SCHEMA;
+  }
+    
   /**
    * Get version number of server/core.
    */

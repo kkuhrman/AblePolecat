@@ -188,9 +188,11 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
-  public function save() {
+  public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     //
     // @todo: complete REPLACE [connector]
     //

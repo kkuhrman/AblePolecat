@@ -20,7 +20,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * Registry keys.
    */
   const KEY_ARTICLE_ID            = 'id';
-  const KEY_CLASS_NAME            = 'className';
+  const KEY_CLASS_NAME            = 'name';
   const KEY_CLASS_FULL_PATH       = 'classFullPath';
   const KEY_CLASS_FACTORY_METHOD  = 'classFactoryMethod';
   const KEY_INTERFACE             = 'interface';
@@ -71,8 +71,83 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_Database_InstallerInterface.
+   ********************************************************************************/
+   
+  /**
+   * Install class registry on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
+   * @throw AblePolecat_Database_Exception if install fails.
+   */
+  public static function install(AblePolecat_DatabaseInterface $Database) {
+    if (!isset(self::$Registry)) {
+      //
+      // Create instance of singleton.
+      //
+      self::$Registry = new AblePolecat_Registry_Class();
+      
+      //
+      // Load schema file.
+      //
+      $projectConfDir = AblePolecat_Server_Paths::getFullPath('conf');
+      $registryFilePath = implode(DIRECTORY_SEPARATOR, array($projectConfDir, 'project.xml'));
+      $registryFile = new DOMDocument();
+      $registryFile->load($registryFilePath);
+      
+      //
+      // Get package (class library) id.
+      //
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($registryFile, 'package');
+      $applicationNode = $DbNodes->item(0);
+      if (!isset($applicationNode)) {
+        throw new AblePolecat_Registry_Exception('project.xml must contain an package node.');
+      }
+      
+      //
+      // Create DML statements for classes.
+      //
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($registryFile, 'class');
+      $classDml = array();
+      foreach($DbNodes as $key => $Node) {
+        $classRegistration = AblePolecat_Registry_Entry_Class::create();
+        $classRegistration->id = $Node->getAttribute('id');
+        $classRegistration->name = $Node->getAttribute('name');
+        $classRegistration->classLibraryId = $applicationNode->getAttribute('id');
+        foreach($Node->childNodes as $key => $childNode) {
+          switch ($childNode->nodeName) {
+            default:
+              break;
+            case 'polecat:classFactoryMethod':
+              $classRegistration->classFactoryMethod = $childNode->nodeValue;
+              break;
+            case 'polecat:path':
+              $rawPath = ABLE_POLECAT_SRC. DIRECTORY_SEPARATOR . $childNode->nodeValue;
+              $classRegistration->classFullPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
+              break;
+          }
+        }
+        $classRegistration->save($Database);
+      }
+    }
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Parse DOM node encapsulating class registry entry and return DML.
+   *
+   * @param DOMNode $Node
+   *
+   * @return AblePolecat_QueryLanguage_Statement_Sql_Interface DML
+   * @throw AblePolecat_Database_Exception if node does not translate to DDL.
+   */
+  protected static function getClassDml(DOMNode $Node) {
+    
+  }
   
   /**
    * Load the classes associated with given library into registry.
@@ -90,7 +165,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     // Query application database for registered classes.
     //
     $sql = __SQL()->
-      select('className', 'classId', 'classScope', 'isRequired', 'classFullPath', 'classFactoryMethod')->
+      select('name', 'id', 'classScope', 'isRequired', 'classFullPath', 'classFactoryMethod')->
       from('class')->
       where("`classLibraryId` = '$classLibraryId'");
     $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
@@ -99,14 +174,14 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       $error_info = '';
       $ClassRegistrations = array();
       foreach($Classes as $key => $Class) {
-        $className = $Class['className'];
+        $className = $Class['name'];
         $ClassRegistration = $this->registerLoadableClass($className, $Class['classFullPath'], $Class['classFactoryMethod'], $error_info);
         if ($ClassRegistration) {
           $ClassRegistrations[$className] = $ClassRegistration;
         }
         else {
           $msg = sprintf("There is an invalid class definition in the database class registry for %s.",
-            $Class['className']
+            $Class['name']
           );
           $msg .= ' ' . $error_info;
           AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $msg, AblePolecat_LogInterface::WARNING);
@@ -216,19 +291,19 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
             }
           }
           $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-          $ClassRegistration->className = $className;
+          $ClassRegistration->name = $className;
           $ClassRegistration->classFullPath = $include_path;
           $ClassRegistration->classFactoryMethod = $method;
           //
           // @todo: core class ids and lib id
           //
-          // $ClassRegistration->classId;
+          // $ClassRegistration->id;
           // $ClassRegistration->classLibraryId;
           $ClassRegistration->classScope = 'core';
           $ClassRegistration->isRequired = TRUE;
           $this->Classes[self::KEY_CLASS_NAME][$className] = $ClassRegistration;
-          // if (isset($ClassRegistration->classId)) {
-            // $this->Classes[self::KEY_ARTICLE_ID][$ClassRegistration->classId] = $ClassRegistration;
+          // if (isset($ClassRegistration->id)) {
+            // $this->Classes[self::KEY_ARTICLE_ID][$ClassRegistration->id] = $ClassRegistration;
           // }
         }
       }
@@ -360,7 +435,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       // Registry
       //
       $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-      $ClassRegistration->className = $className;
+      $ClassRegistration->name = $className;
       $ClassRegistration->classFullPath = $path;
       $ClassRegistration->classFactoryMethod = $method;
       
@@ -372,7 +447,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       //
       // @todo: This methid needs to persist registration to db and deal with remaining field values
       //
-      // $ClassRegistration->classId;
+      // $ClassRegistration->id;
       // $ClassRegistration->classLibraryId;
       // $ClassRegistration->classScope = 'core';
       // $ClassRegistration->isRequired = TRUE;

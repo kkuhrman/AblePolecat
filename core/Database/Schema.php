@@ -8,17 +8,9 @@
  * @version   0.7.0
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Installer.php')));
 
-interface AblePolecat_Database_SchemaInterface extends AblePolecat_AccessControl_Article_StaticInterface {
-  /**
-   * Install current schema on existing Able Polecat database.
-   *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
-   * @throw AblePolecat_Database_Exception if install fails.
-   */
-  public static function install(AblePolecat_DatabaseInterface $Database);
+interface AblePolecat_Database_SchemaInterface extends AblePolecat_Database_InstallerInterface {
   
   /**
    * Get DDL statements for table objects.
@@ -34,7 +26,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    * Article Constants.
    */
   const UUID = '0ba2b3f8-b226-11e4-976e-0050569e00a2';
-  const NAME = '0.7.0';
+  const NAME = 'polecat';
   
   /**
    * Schema defaults.
@@ -88,18 +80,9 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Database_SchemaInterface.
+   * Implementation of AblePolecat_Database_InstallerInterface.
    ********************************************************************************/
-  
-  /**
-   * Get DDL statements for table objects.
-   *
-   * @return Array.
-   */
-  public function getTableDefinitions() {
-    return $this->tableDdl;
-  }
-  
+   
   /**
    * Install current schema on existing Able Polecat database.
    *
@@ -118,7 +101,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
       //
       // Load schema file.
       //
-      $schemaFileName = sprintf("polecat-database-%s.xml", self::getName());
+      $schemaFileName = sprintf("polecat-database-%s.xml", AblePolecat_Version::getDatabaseSchemaNumber());
       $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
       $schemaFile = new DOMDocument();
       $schemaFile->load($schemaFilePath);
@@ -136,6 +119,19 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
       //
       $Database->install(self::$Schema);
     }
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_Database_SchemaInterface.
+   ********************************************************************************/
+  
+  /**
+   * Get DDL statements for table objects.
+   *
+   * @return Array.
+   */
+  public function getTableDefinitions() {
+    return $this->tableDdl;
   }
   
   /********************************************************************************

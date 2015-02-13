@@ -8,9 +8,11 @@
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Dynamic.php')));
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 
-interface AblePolecat_Registry_EntryInterface extends AblePolecat_DynamicObjectInterface {
+interface AblePolecat_Registry_EntryInterface 
+  extends AblePolecat_AccessControl_Article_DynamicInterface, AblePolecat_DynamicObjectInterface {
   /**
    * Fetch registration record given by id.
    *
@@ -19,6 +21,11 @@ interface AblePolecat_Registry_EntryInterface extends AblePolecat_DynamicObjectI
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function fetch($primaryKey);
+  
+  /**
+   * @return int
+   */
+  public function getLastModifiedTime();
   
   /**
    * Returns name(s) of field(s) uniquely identifying records for encapsulated table.
@@ -33,22 +40,46 @@ interface AblePolecat_Registry_EntryInterface extends AblePolecat_DynamicObjectI
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
-  public function save();
-  
-  /**
-   * @return int
-   */
-  public function getLastModifiedTime();
+  public function save(AblePolecat_DatabaseInterface $Database = NULL);
 }
 
 abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_Registry_EntryInterface {
   
   /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   ********************************************************************************/
+  
+  /**
+   * Scope of operation.
+   *
+   * @return string SYSTEM.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
+  
+  /********************************************************************************
    * Implementation of AblePolecat_Registry_EntryInterface.
    ********************************************************************************/
-   
+  
+  /**
+   * @return string.
+   */
+  public function getId() {
+    return $this->getPropertyValue('id');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getName() {
+    return $this->getPropertyValue('name');
+  }
+  
   /**
    * @return int
    */
@@ -59,6 +90,29 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Execute DML to save registry entry to database.
+   *
+   * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
+   * @return Array Results/rowset.
+   */
+  protected function executeDml(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql,
+    AblePolecat_DatabaseInterface $Database) {
+    $Result = NULL;
+    if (isset($Database)) {
+      $Result = $Database->execute($sql);
+    }
+    else {
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();
+      }
+    }
+    return $Result;
+  }
   
   /**
    * Extends __construct().

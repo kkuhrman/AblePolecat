@@ -98,9 +98,11 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
-  public function save() {
+  public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     $sql = __SQL()->          
       replace(
         'componentId', 
@@ -116,8 +118,7 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
         $this->getTemplateFullPath(), 
         $this->getLastModifiedTime()
       );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
-    return $CommandResult->success();
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************
