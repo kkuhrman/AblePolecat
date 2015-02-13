@@ -126,6 +126,23 @@
           </polecat:index>
         </polecat:indexes>
       </polecat:table>
+      <polecat:table name="lib" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="libType" type="char" size="3" null="NOT" />
+          <polecat:field name="libFullPath" type="varchar" size="255" null="NOT" />
+          <polecat:field name="use" type="tinyint" size="4" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="KEY" name="libType">
+            <polecat:indexField name="libType" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
       <polecat:table name="log" engine="InnoDB" charset="latin1">
         <polecat:fields>
           <polecat:field name="eventId" type="int" size="11" null="NOT" auto="0" />
