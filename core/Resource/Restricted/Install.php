@@ -107,11 +107,12 @@ class AblePolecat_Resource_Restricted_Install extends AblePolecat_Resource_Restr
    * @throw AblePolecat_Exception If request URI path is not validated.
    */
   protected function validateRequestPath() {
-    $request_path = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
-    if (!isset($request_path[0]) || ($request_path[0] != 'install') || (count($request_path) > 1)) {
-      $request_path = AblePolecat_Host::getRequest()->getRequestPath();
-      throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
-    }
+    // $request_path = AblePolecat_Host::getRequest()->getRequestPath(FALSE);
+    // if (!isset($request_path[0]) || ($request_path[0] != 'install') || (count($request_path) > 1)) {
+      // $request_path = AblePolecat_Host::getRequest()->getRequestPath();
+      // throw new AblePolecat_Resource_Exception($request_path . ' is not a valid request URI path for ' . __CLASS__ . '.');
+    // }
+    return TRUE;
   }
   
   /**

@@ -27,8 +27,8 @@ if (!defined('ABLE_POLECAT_ETC')) {
 /**
  * Variable files directory.
  */
-if (!defined('ABLE_POLECAT_FILES')) {
-  $message = sprintf("Global variable %s should be defined in path.config.", 'ABLE_POLECAT_FILES');
+if (!defined('ABLE_POLECAT_VAR')) {
+  $message = sprintf("Global variable %s should be defined in path.config.", 'ABLE_POLECAT_VAR');
   trigger_error($message, E_USER_ERROR);
 }
 
@@ -38,6 +38,15 @@ if (!defined('ABLE_POLECAT_FILES')) {
  */
 if (!defined('ABLE_POLECAT_USR')) {
   $message = sprintf("Global variable %s should be defined in path.config.", 'ABLE_POLECAT_USR');
+}
+
+/**
+ * Top-level paths configuration file full path.
+ * This is used to differentiate from library and module path config file paths.
+ */
+if (!defined('ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH')) {
+  $ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH = implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_ETC, 'polecat', 'conf', 'path.config'));
+  define('ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH', $ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH);
 }
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Server', 'Paths.php')));
@@ -66,8 +75,14 @@ class AblePolecat_Server_Paths {
   
   /**
    * Path to log files directory.
+   * 'files' is an alias for 'var', which violates keyword constraints in PHP.
    */
-  const files = ABLE_POLECAT_FILES;
+  const files = ABLE_POLECAT_VAR;
+  
+  /**
+   * Configuration file constants.
+   */
+  const CONF_FILENAME_PROJECT     = 'project.xml';
   
   /**
    * @var Array Directories used for data storage.
@@ -150,7 +165,7 @@ class AblePolecat_Server_Paths {
           $made = @mkdir($sanitized_path, $mode);
           break;
         case FALSE;
-          $made = fopen($sanitized_path, 'r');
+          $made = fopen($sanitized_path, 'a+');
           break;
       }
       
@@ -216,11 +231,12 @@ class AblePolecat_Server_Paths {
           // $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
           $path = implode(DIRECTORY_SEPARATOR, array(self::etc, 'polecat', 'conf'));
           break;
-        case 'logs':
-          // $path = self::files . DIRECTORY_SEPARATOR . 'logs';
-          $path = implode(DIRECTORY_SEPARATOR, array(self::files, 'logs'));
+        case 'log':
+          // $path = self::files . DIRECTORY_SEPARATOR . 'log';
+          $path = implode(DIRECTORY_SEPARATOR, array(self::files, 'log'));
           break;
         case 'files':
+        case 'var':
           $path = self::files;
           break;
         case 'usr':
@@ -256,10 +272,11 @@ class AblePolecat_Server_Paths {
       case 'etc':
       case 'core':
       case 'conf';
-      case 'logs':
+      case 'log':
       case 'libs':
       case 'usr':
       case 'files':
+      case 'var':
       case 'mods':
         break;
     }
@@ -315,6 +332,17 @@ class AblePolecat_Server_Paths {
    */
   public static function verifyDirectory($path) {
     return file_exists($path) && is_dir($path);
+  }
+  
+  /**
+   * Verify that the given path points to an existing, accessible regular file.
+   * 
+   * @param string $path
+   *
+   * @return bool TRUE if $path is a valid regular file otherwise FALSE.
+   */
+  public static function verifyFile($path) {
+    return file_exists($path) && is_file($path);
   }
   
   /**

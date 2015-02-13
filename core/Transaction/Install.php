@@ -20,10 +20,11 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
    * Constants.
    */
   const UUID = '9e0398f2-604b-11e4-8bab-0050569e00a2';
-  const NAME = 'install transaction';
+  const NAME = 'AblePolecat_Transaction_Install';
 
-  const ARG_USER = 'user';
-  const ARG_PASS = 'pass';
+  const ARG_DB   = 'database-name';
+  const ARG_USER = 'username';
+  const ARG_PASS = 'password';
   const ARG_AUTH = 'authority';
   
   /**
@@ -130,8 +131,8 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
           // Database is not active. Save transaction in $_SESSION global variable.
           //
           $transactionId = $this->getTransactionId();
-          AblePolecat_Host::setSessionVariable($this, AblePolecat_Host::POLECAT_INSTALL_TRX, $transactionId);
-          AblePolecat_Host::setSessionVariable($this, AblePolecat_Host::POLECAT_INSTALL_SAVEPT, 'start');
+          AblePolecat_Mode_Session::setSessionVariable($this->getAgent(), AblePolecat_Host::POLECAT_INSTALL_TRX, $transactionId);
+          AblePolecat_Mode_Session::setSessionVariable($this->getAgent(), AblePolecat_Host::POLECAT_INSTALL_SAVEPT, 'start');
         }
         break;
       case 'POST':
@@ -192,7 +193,9 @@ class AblePolecat_Transaction_Install extends AblePolecat_TransactionAbstract {
                   $this->getAgent(),
                   'AblePolecat_Resource_Core_Form'
                 );
-                $Resource->addText('Enter name and password for user authorized to create database.');
+                $Resource->addText('Enter database name, user name and password for Able Polecat core database.');
+                $Resource->addControl('label', array('for' => 'databaseName'), 'Database: ');
+                $Resource->addControl('input', array('id' => 'databaseName', 'type' => 'text', 'name' => self::ARG_DB));
                 $Resource->addControl('label', array('for' => 'userName'), 'Username: ');
                 $Resource->addControl('input', array('id' => 'userName', 'type' => 'text', 'name' => self::ARG_USER));
                 $Resource->addControl('label', array('for' => 'passWord'), 'Password: ');

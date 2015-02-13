@@ -22,7 +22,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', '
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Syslog.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Config.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Version.php')));
 
 /**
@@ -274,11 +274,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       //
       error_reporting(self::$report_errors);
       ini_set('display_errors', self::$display_errors);
-      
-      //
-      // Open the boot log.
-      //
-      $this->BootLog = AblePolecat_Log_Boot::wakeup($this->getAgent());
     }
     else {
       //
@@ -286,7 +281,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       //
       error_reporting(self::$report_errors);
       ini_set('display_errors', self::$display_errors);
-      $this->BootLog = NULL;
     }
     //
     // Default error/exception handling
@@ -458,26 +452,17 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * Initialize connection to core database.
    */
   private function initializeCoreDatabase() {
-    if (isset($this->ServerEnvironment)) {
-      $this->db_state = $this->ServerEnvironment->getVariable($this->getAgent(), AblePolecat_Environment_Server::SYSVAR_CORE_DATABASE);
-      $this->db_state['connected'] = FALSE;
-      if (isset($this->db_state['dsn'])) {
+    
+    $this->db_state = AblePolecat_Mode_Config::getCoreDatabaseConnectionSettings();
+    $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
+    if (isset($this->db_state['connected']) && isset($this->db_state['dsn'])) {
+      if (FALSE === $this->db_state['connected']) {
         //
         // Attempt a connection.
         //
-        $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
         $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->db_state['dsn']);
         $this->db_state['connected'] = $this->CoreDatabase->open($this->getAgent(), $DbUrl);
       }
-          
-      //
-      // Stop loading if there is no connection to the core database.
-      //
-      $this->ServerEnvironment->setVariable(
-        $this->getAgent(), 
-        AblePolecat_Environment_Server::SYSVAR_CORE_DATABASE,
-        $this->db_state
-      );
       if ($this->db_state['connected']) {
         //
         // Start logging to database.
@@ -490,9 +475,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       }
     }
     else {
-      throw new AblePolecat_Mode_Exception('Boot sequence violation: Cannot initialize core database before server environment.',
-        AblePolecat_Error::BOOT_SEQ_VIOLATION
-      );
+      throw new AblePolecat_Mode_Exception('Core database connection settings in project configuration file appear to be corrupted.');
     }
   }
   
@@ -697,9 +680,29 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Error reporting initialized.');
     
     //
-    // Load class registry.
+    // Check critical configuration settings.
     //
-    $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this->getAgent());
+    AblePolecat_Mode_Config::wakeup();
+    
+    //
+    // Open the boot log.
+    //
+    if (self::$display_errors) {
+      $this->BootLog = AblePolecat_Log_Boot::wakeup($this->getAgent());
+    }
+    else {
+      $this->BootLog = NULL;
+    }
+    
+    //
+    // Load core database configuration settings.
+    //
+    $this->initializeCoreDatabase();
+    $dbErrors = $this->CoreDatabase->flushErrors();
+    foreach($dbErrors as $errorNumber => $error) {
+      $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+      $this->putBootMessage(AblePolecat_LogInterface::ERROR, $error);
+    }
     
     //
     // Load environment/configuration
@@ -708,14 +711,14 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     $this->ServerEnvironment = AblePolecat_Environment_Server::wakeup($this->getAgent());
     
     //
-    // Load core database configuration settings.
+    // Load class registry.
     //
-    $this->initializeCoreDatabase();
+    $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this->getAgent());
     
     //
     // Finalize initial logging.
     //
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Able Polecat core version is %s", AblePolecat_Version::getVersion(TRUE, 'text')));
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode is initialized.');
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Able Polecat core version is %s", AblePolecat_Version::getVersion(TRUE, 'text')));
+    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode is initialized.');
   }
 }

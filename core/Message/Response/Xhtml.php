@@ -107,6 +107,13 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   }
   
   /**
+   * @return Array [substitute marker => entity body substitute string value].
+   */
+  public function getEntityBodyStringSubstitutes() {
+    return $this->entityBodyStringSubstitutes;
+  }
+  
+  /**
    * @param AblePolecat_ResourceInterface $Resource
    */
   public function setEntityBody(AblePolecat_ResourceInterface $Resource) {

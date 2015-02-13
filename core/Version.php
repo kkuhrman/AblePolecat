@@ -63,6 +63,23 @@
  * Classes implementing AblePolecat_TransactionInterface serve the same purpose
  * as action controllers in an MVC architecture.
  * 
+ * A Connector binds a unique combination of request URI and request method to a
+ * transaction class, which acts on and/or returns the resultant resource.
+ *
+ * @section auto_install Auto Install
+ *
+ * Version 0.6.4 introduces the automatic install feature for projects and 
+ * modules.
+ *
+ * 1. When server mode initializes, it first looks for a project configuration file
+ *    ./usr/etc/polecat/conf/project.xml.
+ * 2. If the file exists, it will look for the locater for the project database and
+ *    if this is found and a connection to the database is made all further 
+ *    environment configuration settings are retrieved from the project database, 
+ *    with the exception of locater(s) to other restricted resources.
+ * 3. If the file does not exist, Able Polecat will attempt to create it and if 
+ *    that fails, server mode will exit and return an error message.
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] 
  * @ref       https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md

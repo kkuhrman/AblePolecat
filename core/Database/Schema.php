@@ -8,18 +8,24 @@
  * @version   0.7.0
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database.php')));
 
 interface AblePolecat_Database_SchemaInterface extends AblePolecat_AccessControl_Article_StaticInterface {
   /**
    * Install current schema on existing Able Polecat database.
    *
-   * @param AblePolecat_Database_PdoInterface $Database Handle to existing database.
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_Database_PdoInterface $Database);
+  public static function install(AblePolecat_DatabaseInterface $Database);
+  
+  /**
+   * Get DDL statements for table objects.
+   *
+   * @return Array.
+   */
+  public function getTableDefinitions();
 }
 
 class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterface {
@@ -36,6 +42,16 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
   const DEFAULT_ENGINE  = 'InnoDB';
   const DEFAULT_CHARSET = 'latin1';
   
+  /**
+   * @var AblePolecat_Database_Schema Instance of schema singleton.
+   */
+  private static $Schema;
+  
+  /**
+   * @var Array Table DDL.
+   */
+  private $tableDdl;
+  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
@@ -46,7 +62,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    * @return string.
    */
   public static function getScope() {
-    return 'RESOURCE';
+    return 'SYSTEM';
   }
   
   /********************************************************************************
@@ -76,24 +92,50 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    ********************************************************************************/
   
   /**
+   * Get DDL statements for table objects.
+   *
+   * @return Array.
+   */
+  public function getTableDefinitions() {
+    return $this->tableDdl;
+  }
+  
+  /**
    * Install current schema on existing Able Polecat database.
    *
-   * @param AblePolecat_Database_PdoInterface $Database Handle to existing database.
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_Database_PdoInterface $Database) {
+  public static function install(AblePolecat_DatabaseInterface $Database) {
     
-    $schemaFileName = sprintf("polecat-database-%s.xml", self::getName());
-    $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
-    $schemaFile = new DOMDocument();
-    $schemaFile->load($schemaFilePath);
-    $DbNodes = AblePolecat_Dom::getElementsByTagName($schemaFile, 'table');
-    foreach($DbNodes as $key => $Node) {
-      // AblePolecat_Debug::kill($Node);
-      $sql = self::getDdl($Node);
+    if (!isset(self::$Schema)) {
+      //
+      // Create instance of schema class.
+      //
+      self::$Schema = new AblePolecat_Database_Schema();
+      
+      //
+      // Load schema file.
+      //
+      $schemaFileName = sprintf("polecat-database-%s.xml", self::getName());
+      $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
+      $schemaFile = new DOMDocument();
+      $schemaFile->load($schemaFilePath);
+      
+      //
+      // Create DDL statements for table objects.
+      //
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($schemaFile, 'table');
+      foreach($DbNodes as $key => $Node) {
+        self::$Schema->tableDdl[] = self::getTableDdl($Node);
+      }
+      
+      //
+      // Pass schema object to database object to complete installation.
+      //
+      $Database->install(self::$Schema);
     }
-    AblePolecat_Debug::kill($sql);
   }
   
   /********************************************************************************
@@ -108,7 +150,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    * @return string DDL
    * @throw AblePolecat_Database_Exception if node does not translate to DDL.
    */
-  protected static function getDdl(DOMNode $Node) {
+  protected static function getTableDdl(DOMNode $Node) {
     
     $sql = '';
     
@@ -214,7 +256,12 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
                   default:
                     break;
                   case 'polecat:fieldValue':
-                    $columnDef .= sprintf(" DEFAULT '%s'", $fieldChildNode->nodeValue);
+                    $fmtStr = " DEFAULT '%s'";
+                    $quotes = $fieldChildNode->getAttribute('quotes');
+                    if ($quotes === '0') {
+                      $fmtStr = " DEFAULT %s";
+                    }
+                    $columnDef .= sprintf($fmtStr, $fieldChildNode->nodeValue);
                     break;
                   case 'polecat:fieldComment':
                     $columnDef .= sprintf(" COMMENT '%s'", $fieldChildNode->nodeValue);
@@ -298,7 +345,23 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
       $sql .= ',' . implode(',', $indexList);
     }
     $sql .= sprintf(") ENGINE=%s DEFAULT CHARSET=%s;", $engine, $charset);
-    AblePolecat_Debug::kill($sql);
     return $sql;
+  }
+  
+  /**
+   * Extends __construct().
+   * Sub-classes override this method to initialize properties here.
+   */
+  protected function initialize() {
+  }
+  
+  /**
+   * Cached objects must be created by wakeup().
+   * Initialization of sub-classes should take place in initialize().
+   * @see initialize().
+   */
+  final protected function __construct() {
+    $this->initialize();
+    $this->tableDdl = array();
   }
 }

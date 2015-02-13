@@ -113,7 +113,63 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
           $ConnectorRegistration->accessDeniedCode = $classInfo[0]['accessDeniedCode'];
         }
       }
+    
+      //
+      // Handle built-in resources in the event database connection is not active.
+      //
+      if (!isset($ConnectorRegistration->transactionClassName)) {
+        //
+        // Assign transaction class name.
+        //
+        switch ($ConnectorRegistration->resourceId) {
+          default:
+            //
+            // Unrestricted resource.
+            //
+            $ConnectorRegistration->transactionClassName = NULL;
+            break;
+          case AblePolecat_Resource_Restricted_Util::UUID:
+            $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+            break;
+          case AblePolecat_Resource_Restricted_Install::UUID:
+            $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
+            break;
+        }
+        
+        //
+        // Assign authority and access denied code.
+        //
+        switch ($ConnectorRegistration->resourceId) {
+          default:
+            //
+            // Unrestricted resource.
+            //
+            $ConnectorRegistration->authorityClassName = NULL;
+            $ConnectorRegistration->accessDeniedCode = 200;
+            break;
+          case AblePolecat_Resource_Restricted_Util::UUID:
+          case AblePolecat_Resource_Restricted_Install::UUID:
+            $Request = AblePolecat_Host::getRequest();
+            switch ($Request->getMethod()) {
+              default:
+                break;
+              case 'GET':
+                $ConnectorRegistration->authorityClassName = 'AblePolecat_Transaction_AccessControl_Authority';
+                $ConnectorRegistration->accessDeniedCode = 401;
+                break;
+              case 'POST':
+                $ConnectorRegistration->authorityClassName = NULL;
+                $ConnectorRegistration->accessDeniedCode = 403;
+                break;
+            }
+            break;
+        }
+      }
     }
+    else {
+      throw new AblePolecat_Registry_Exception('Invalid Primary Key passed to ' . __METHOD__);
+    }
+    
     return $ConnectorRegistration;
   }
   

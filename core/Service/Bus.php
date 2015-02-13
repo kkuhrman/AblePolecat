@@ -344,57 +344,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   protected function getConnectorRegistration(AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration, $requestMethod) {
     
     $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::fetch(array($ResourceRegistration->resourceId, $requestMethod));
-    if (!isset($ConnectorRegistration)) {
-      $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
-      $ConnectorRegistration->resourceId = $ResourceRegistration->resourceId;
-      $ConnectorRegistration->requestMethod = $requestMethod;
-      
-      //
-      // Assign transaction class name.
-      //
-      switch ($ResourceRegistration->resourceName) {
-        default:
-          //
-          // Unrestricted resource.
-          //
-          $ConnectorRegistration->transactionClassName = NULL;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-          $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
-          break;
-      }
-      
-      //
-      // Assign authority and access denied code.
-      //
-      switch ($ResourceRegistration->resourceName) {
-        default:
-          //
-          // Unrestricted resource.
-          //
-          $ConnectorRegistration->authorityClassName = NULL;
-          $ConnectorRegistration->accessDeniedCode = 200;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          switch ($Request->getMethod()) {
-            default:
-              break;
-            case 'GET':
-              $ConnectorRegistration->authorityClassName = 'AblePolecat_Transaction_AccessControl_Authority';
-              $ConnectorRegistration->accessDeniedCode = 401;
-              break;
-            case 'POST':
-              $ConnectorRegistration->authorityClassName = NULL;
-              $ConnectorRegistration->accessDeniedCode = 403;
-              break;
-          }
-          break;
-      }
-    }
     return $ConnectorRegistration;
   }
   
@@ -452,38 +401,48 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       }
     }
     if (!isset($ResourceRegistration->resourceClassName)) {
-      //
-      // Resource is not registered. Use a system resource.      
-      // Assign resource id and class name.
-      //
-      switch ($resourceName) {
-        default:
-          //
-          // Request did not resolve to a registered or system resource class.
-          // Log status and return error resource.
-          //
-          $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
-            $resourceName, 
-            $Request->getRequestPath(),
-            $Request->getHostName()
-          );
-          AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Error::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Error';
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Ack::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Ack';
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
-          $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
-          break;
+      if (AblePolecat_Mode_Server::getActiveCoreDatabaseName()) {
+        //
+        // Resource is not registered. Use a system resource.      
+        // Assign resource id and class name.
+        //
+        switch ($resourceName) {
+          default:
+            //
+            // Request did not resolve to a registered or system resource class.
+            // Log status and return error resource.
+            //
+            $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
+              $resourceName, 
+              $Request->getRequestPath(),
+              $Request->getHostName()
+            );
+            AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
+            $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Error::UUID;
+            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Error';
+            break;
+          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+            $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Ack::UUID;
+            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Ack';
+            break;
+          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+            $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::UUID;
+            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
+            break;
+          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+            $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
+            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
+            break;
+        }
+      }
+      else {
+        //
+        // There is no active database connection, redirect to install resource.
+        //
+        $ResourceRegistration->resourceName = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
+        $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
+        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
       }
     }
     

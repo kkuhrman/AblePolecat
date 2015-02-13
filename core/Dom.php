@@ -90,7 +90,7 @@ class AblePolecat_Dom {
       $Node = $document->documentElement->appendChild($importChild);
     }
     if (!isset($Node)) {
-      throw new Exception(sprintf("Failed to merge element given by [%s] with document body.", $child->nodeName));
+      throw new AblePolecat_Dom_Exception(sprintf("Failed to merge element given by [%s] with document body.", $child->nodeName));
     }
     return $Node;
   }
@@ -253,10 +253,6 @@ class AblePolecat_Dom {
     // Notation is {!property_name} where the entire string will be replaced with the
     // value corresponding to the property given by property_name.
     //
-    // $Resource = $this->getResource();
-    // $elementTemplateStr = $AbleTabby_List_Business_Hours;
-    // $SObjectList = $Resource->Business_Hours__r;
-    // $parentElement = $AbleTabby_List_Business_Hours_Element;
           
     $substituteMarkers = array();
     $substituteValues = array();
@@ -688,7 +684,7 @@ class AblePolecat_Dom {
       }
       
       if (!isset($childElement)) {
-        throw new AbleTabby_Exception("Could not locate DOM element with id=$parentElementId");
+        throw new AblePolecat_Dom_Exception("Could not locate DOM element with id=$parentElementId");
       }
       
       //

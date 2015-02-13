@@ -53,7 +53,7 @@ interface AblePolecat_Database_PdoInterface extends AblePolecat_DatabaseInterfac
 }
 
 class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements AblePolecat_Database_PdoInterface {
-  
+    
   /**
    * @var AblePolecat_Database_Pdo Instance of singleton.
    */
@@ -121,7 +121,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   /********************************************************************************
    * Implementation of AblePolecat_DatabaseInterface.
    ********************************************************************************/
-  
+    
   /**
    * Opens an existing resource or makes an empty one accessible depending on permissions.
    * 
@@ -172,6 +172,27 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   }
   
   /**
+   * Install database objects for given schema.
+   *
+   * @param AblePolecat_Database_SchemaInterface $Schema
+   *
+   * @throw AblePolecat_Database_Exception if install fails.
+   */
+  public function install(AblePolecat_Database_SchemaInterface $Schema) {
+    
+    $Results = array();
+    
+    //
+    // Install tables.
+    //
+    $tableDdl = $Schema->getTableDefinitions();
+    foreach ($tableDdl as $key => $ddlStatement) {
+      $Results[] = $this->executeStatement($ddlStatement, 'CREATE TABLE');
+    }
+    
+  }
+  
+  /**
    * Execute SQL DML and return number of rows effected.
    * 
    * NOTE: USE execute() for INSERT, DELETE, UPDATE, REPLACE.
@@ -186,38 +207,18 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $Results = array();
     
-    if (isset($this->DatabaseConnection)) {
-      switch ($sql->getDmlOp()) {
-        default:
-          $RecordCount = $this->DatabaseConnection->exec($sql);
-          if (!$RecordCount) {
-            $Results['recordsEffected'] = 0;
-            $Results['errorInfo'] = $this->DatabaseConnection->errorInfo();
-            $this->error_info[] = $this->DatabaseConnection->errorInfo();
-          }
-          else {
-            $Results['recordsEffected'] = $RecordCount;
-            if (AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT == $sql->getDmlOp()) {
-              $lastInsertId = $this->DatabaseConnection->lastInsertId();
-              $Results['lastInsertId'] = $lastInsertId;
-            }
-          }
-          break;
-        case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
-          $message = 'query() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
-          $Results['errorInfo'] = $message;
-          $this->error_info[] = $message;
-          throw new AblePolecat_Database_Exception($message);
-          break;
-      }
-      
+    switch ($sql->getDmlOp()) {
+      default:
+        $Results = $this->executeStatement($sql->__toString(), $sql->getDmlOp());
+        break;
+      case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
+        $message = 'query() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
+        $Results['errorInfo'] = $message;
+        $this->error_info[] = $message;
+        throw new AblePolecat_Database_Exception($message);
+        break;
     }
-    else {
-      $message = 'Cannot execute SQL. No database connection is available.';
-      $Results['errorInfo'] = $message;
-      $this->error_info[] = $message;
-      throw new AblePolecat_Database_Exception($message);
-    }
+    
     return $Results;
   }
   
@@ -464,6 +465,17 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   }
   
   /**
+   * Return an reset internal error cache.
+   *
+   * @return array.
+   */
+  public function flushErrors() {
+    $error_info = $this->error_info;
+    $this->error_info = array();
+    return $error_info;
+  }
+  
+  /**
    * Helper function returns a count of 'significant' database errors.
    *
    * NOTE: PDO::errorInfo will return blank error info arrays on some successful DML
@@ -504,6 +516,45 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         throw new AblePolecat_Database_Exception(strval($value));
       }
     }
+  }
+  
+  /**
+   * Execute SQL DML or DDL passed as string.
+   *
+   * @param string $sql DML or DDL statement.
+   * @param string $op  DML or DDL command.
+   *
+   * @return Array Results/rowset.
+   */
+  protected function executeStatement($sql, $op) {
+    
+    //
+    // @todo: sub-classes can pass type unsafe parameters.
+    //
+    $Results = array();
+    
+    if (isset($this->DatabaseConnection)) {
+      $RecordCount = $this->DatabaseConnection->exec($sql);
+      if (!$RecordCount) {
+        $Results['recordsEffected'] = 0;
+        $Results['errorInfo'] = $this->DatabaseConnection->errorInfo();
+        $this->error_info[] = $this->DatabaseConnection->errorInfo();
+      }
+      else {
+        $Results['recordsEffected'] = $RecordCount;
+        if (AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT == $op) {
+          $lastInsertId = $this->DatabaseConnection->lastInsertId();
+          $Results['lastInsertId'] = $lastInsertId;
+        }
+      }
+    }
+    else {
+      $message = 'Cannot execute SQL. No database connection is available.';
+      $Results['errorInfo'] = $message;
+      $this->error_info[] = $message;
+      throw new AblePolecat_Database_Exception($message);
+    }
+    return $Results;
   }
   
   /**

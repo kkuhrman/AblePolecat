@@ -105,7 +105,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    * Dump raw request data to a file.
    */
   public function dumpRawRequest() {
-    $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . self::LOG_NAME_REQUEST;
+    $file_name = AblePolecat_Server_Paths::getFullPath('log') . DIRECTORY_SEPARATOR . self::LOG_NAME_REQUEST;
     $this->flog = @fopen($file_name, 'a');
     if ($this->flog) {
       // 
@@ -210,7 +210,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     $this->Clock = new AblePolecat_Clock();
     $this->Clock->start();
     
-    $file_name = AblePolecat_Server_Paths::getFullPath('logs') . DIRECTORY_SEPARATOR . self::LOG_NAME_BOOTSEQ;
+    $file_name = AblePolecat_Server_Paths::getFullPath('log') . DIRECTORY_SEPARATOR . self::LOG_NAME_BOOTSEQ;
     $this->flog = @fopen($file_name, 'a');
     if ($this->flog) {
       $DateTimeZone = new DateTimeZone('America/Chicago');

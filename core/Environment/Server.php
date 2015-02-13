@@ -8,24 +8,14 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
+// require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   
   const UUID = '318df280-5def-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Server Environment';
-  
-  /**
-   * System environment variable names
-   */
-  const SYSVAR_CORE_DATABASE    = 'coreDatabase';
-  
-  /**
-   * Configuration file constants.
-   */
-  const CONF_FILENAME_HOST        = 'host.xml';
-  
+      
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
    */
@@ -75,65 +65,10 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Environment)) {
-      try {
-        //
-        // Initialize singleton instance.
-        //
-        self::$Environment = new AblePolecat_Environment_Server($Subject);
-        
-        //
-        // Get database settings from configuration file.
-        //
-        $confPath = implode(DIRECTORY_SEPARATOR, 
-          array(
-            AblePolecat_Server_Paths::getFullPath('conf'),
-            self::CONF_FILENAME_HOST
-          )
-        );
-        $Conf = new DOMDocument();
-        $Conf->load($confPath);
-        $DbNodes = AblePolecat_Dom::getElementsByTagName($Conf, 'database');
-        $db_state = array();
-        foreach($DbNodes as $key => $Node) {
-          //
-          // Only one instance of core (server mode) database can be active.
-          // Otherwise, Able Polecat stops boot and throws exception.
-          // @see ./polecat/etc/conf/host.xml
-          // <database id="core" name="polecat" mode="server" use="1">
-          //   <dsn>mysql://user:pass@localhost/polecat</dsn>
-          // </database>
-          //
-          if (($Node->getAttribute('id') == 'core') &&
-              ($Node->getAttribute('name') == 'polecat') && 
-              ($Node->getAttribute('mode') == 'server') && 
-              ($Node->getAttribute('use'))) 
-          {
-            $db_state['name'] = $Node->getAttribute('name');
-            $db_state['mode'] = $Node->getAttribute('mode');
-            $db_state['use'] = $Node->getAttribute('use');
-            foreach($Node->childNodes as $key => $childNode) {
-              if($childNode->nodeName == 'dsn') {
-                $db_state['dsn'] = $childNode->nodeValue;
-              }
-            }
-          }
-        }
-        
-        //
-        // Initialize system environment variables from conf file.
-        //
-        self::$Environment->setVariable(
-          $Subject,
-          self::SYSVAR_CORE_DATABASE,
-          $db_state
-        );
-        
-        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server environment initialized.');
-      }
-      catch (Exception $Exception) {
-        throw new AblePolecat_Environment_Exception("Failure to initialize server environment. " . $Exception->getMessage(), 
-          AblePolecat_Error::BOOTSTRAP_CONFIG);
-      }
+      //
+      // Initialize singleton instance.
+      //
+      self::$Environment = new AblePolecat_Environment_Server($Subject);
     }
     return self::$Environment;
   }

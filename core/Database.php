@@ -10,7 +10,8 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Resource', 'Locater', 'Dsn.php')));
-require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'CacheObject.php');
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Schema.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Database.php')));
 
 interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
@@ -19,6 +20,15 @@ interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_Resour
    * @return AblePolecat_AccessControl_Resource_Locater_DsnInterface URL used to open resource or NULL.
    */
   public function getLocater();
+  
+  /**
+   * Install database objects for given schema.
+   *
+   * @param AblePolecat_Database_SchemaInterface $Schema
+   *
+   * @throw AblePolecat_Database_Exception if install fails.
+   */
+  public function install(AblePolecat_Database_SchemaInterface $Schema);
   
   /**
    * Execute SQL DML and return number of rows effected.
