@@ -241,11 +241,11 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
             }
             
             //
-            // Character set.
+            // Auto increment.
             //
-            $fieldCharset = $fieldNode->getAttribute('charset');
-            if ($fieldCharset === '') {
-              $fieldCharset = NULL;
+            $fieldAuto = $fieldNode->getAttribute('auto');
+            if ($fieldAuto === '0') {
+              $columnDef .= ' AUTO_INCREMENT';
             }
             
             $fieldValue = NULL;

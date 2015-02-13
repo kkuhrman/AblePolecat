@@ -189,7 +189,6 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     foreach ($tableDdl as $key => $ddlStatement) {
       $Results[] = $this->executeStatement($ddlStatement, 'CREATE TABLE');
     }
-    
   }
   
   /**

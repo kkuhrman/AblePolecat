@@ -108,7 +108,7 @@
       <polecat:table name="error" engine="InnoDB" charset="latin1">
         <polecat:fields>
           <polecat:field name="errorId" type="bigint" size="20" null="NOT" auto="0" />
-          <polecat:field name="errorTime" type="timestamp" size="0" null="NOT">
+          <polecat:field name="errorTime" type="timestamp" null="NOT">
             <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
           </polecat:field>
           <polecat:field name="errorType" type="varchar" size="16" null="NOT">
@@ -129,7 +129,7 @@
       <polecat:table name="log" engine="InnoDB" charset="latin1">
         <polecat:fields>
           <polecat:field name="eventId" type="int" size="11" null="NOT" auto="0" />
-          <polecat:field name="eventTime" type="timestamp" size="0" null="NOT">
+          <polecat:field name="eventTime" type="timestamp" null="NOT">
             <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
           </polecat:field>
           <polecat:field name="userId" type="int" size="11" null="NOT">
@@ -267,7 +267,7 @@
           <polecat:field name="phpSessionId" type="varchar" size="255" null="NOT" />
           <polecat:field name="hostName" type="varchar" size="255" null="NOT" />
           <polecat:field name="remoteAddress" type="varchar" size="32" null="NOT" />
-          <polecat:field name="start" type="timestamp" size="0" null="NOT">
+          <polecat:field name="start" type="timestamp" null="NOT">
             <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
           </polecat:field>
         </polecat:fields>
