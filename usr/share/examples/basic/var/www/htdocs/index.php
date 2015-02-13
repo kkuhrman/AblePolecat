@@ -1,16 +1,24 @@
 <?php
 /**
- * @file      polecat\usr\share\examples\basic\index.php
+ * @file      AblePolecat\usr\share\examples\basic\var\www\htdocs\index.php
  * @brief     All requests to Able Polecat are routed through index.php.
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  */
  
 /**
+ * Document root is the parent directory of this file (index.php).
+ */
+if (!defined('ABLE_POLECAT_DOCROOT')) {
+  $ABLE_POLECAT_DOCROOT = __DIR__;
+  define('ABLE_POLECAT_DOCROOT', $ABLE_POLECAT_DOCROOT);
+}
+
+/**
  * Root directory of the entire Able Polecat core project.
  */
 if (!defined('ABLE_POLECAT_ROOT')) {
-  $ABLE_POLECAT_ROOT = __DIR__;
+  $ABLE_POLECAT_ROOT = dirname(dirname(dirname(__DIR__)));
   define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
 }
 
