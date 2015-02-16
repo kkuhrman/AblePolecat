@@ -30,14 +30,24 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private $bootLogFilePath;
   
   /**
-   * @var DOMDOcument The project configuration file.
+   * @var DOMDOcument The local project configuration file.
    */
-  private $projectConfFile;
+  private $localProjectConfFile;
   
   /**
-   * @var string Full path to project configuration file on local machine.
+   * @var string Full path to local project configuration file.
    */
-  private $projectConfFilepath;
+  private $localProjectConfFilepath;
+  
+  /**
+   * @var DOMDOcument The master project configuration file.
+   */
+  private $masterProjectConfFile;
+  
+  /**
+   * @var string Full path to master project configuration file.
+   */
+  private $masterProjectConfFilepath;
   
   /**
    * @var AblePolecat_Database_Pdo
@@ -129,8 +139,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             //
             // Project configuration file exists, get core database connection string. 
             //
-            self::$ConfigMode->projectConfFile = new DOMDocument();
-            self::$ConfigMode->projectConfFile->load(self::$ConfigMode->projectConfFilepath);
+            self::$ConfigMode->localProjectConfFile = new DOMDocument();
+            self::$ConfigMode->localProjectConfFile->load(self::$ConfigMode->localProjectConfFilepath);
             
             //
             // Attempt to connect to database.
@@ -157,9 +167,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             isset($_POST[AblePolecat_Transaction_Install::ARG_DB]) ? $databaseName = $_POST[AblePolecat_Transaction_Install::ARG_DB] : $databaseName = 'databasename';
             isset($_POST[AblePolecat_Transaction_Install::ARG_USER]) ? $userName = $_POST[AblePolecat_Transaction_Install::ARG_USER] : $userName = 'username';
             isset($_POST[AblePolecat_Transaction_Install::ARG_PASS]) ? $password = $_POST[AblePolecat_Transaction_Install::ARG_PASS] : $password = 'password';
-            self::$ConfigMode->projectConfFile = new DOMDocument();
-            self::$ConfigMode->projectConfFile->load(self::$ConfigMode->projectConfFilepath);
-            $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->projectConfFile, self::ACTIVE_CORE_DATABASE_ID);
+            self::$ConfigMode->localProjectConfFile = new DOMDocument();
+            self::$ConfigMode->localProjectConfFile->load(self::$ConfigMode->localProjectConfFilepath);
+            $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->localProjectConfFile, self::ACTIVE_CORE_DATABASE_ID);
             foreach($Node->childNodes as $key => $childNode) {
               if($childNode->nodeName == 'dsn') {
                 $childNode->nodeValue = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
@@ -170,7 +180,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             //
             // Save file.
             //
-            self::$ConfigMode->projectConfFile->save(self::$ConfigMode->projectConfFilepath);
+            self::$ConfigMode->localProjectConfFile->save(self::$ConfigMode->localProjectConfFilepath);
             
             //
             // Attempt to connect to database.
@@ -186,7 +196,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             //
             // Otherwise, install current schema.
             //
-            AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
+            // AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
             
             //
             // Register classes.
@@ -263,9 +273,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private function initializeCoreDatabase() {
     
     if (!isset($this->CoreDatabase)) {
-      $projectConfFile = $this->getProjectConfFile();
-      if (isset($projectConfFile)) {
-        $DbNodes = AblePolecat_Dom::getElementsByTagName($projectConfFile, 'database');
+      $localProjectConfFile = $this->getLocalProjectConfFile();
+      if (isset($localProjectConfFile)) {
+        $DbNodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'database');
         $this->CoreDatabaseConnectionSettings = array();
         $this->CoreDatabaseConnectionSettings['connected'] = FALSE;
         foreach($DbNodes as $key => $Node) {
@@ -352,49 +362,103 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * @return DOMDOcument The project configuration file.
+   * @return DOMDOcument The local project configuration file.
    */
-  public static function getProjectConfFile() {
+  public static function getLocalProjectConfFile() {
     
-    $projectConfFile = NULL;
+    $localProjectConfFile = NULL;
     if (isset(self::$ConfigMode)) {
-      $projectConfFile = self::$ConfigMode->projectConfFile;
+      if (!isset(self::$ConfigMode->localProjectConfFile)) {
+        $localProjectConfFile = self::createProjectConfFile();
+      }
+      else {
+        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
+      }
     }
-    return $projectConfFile;
+    return $localProjectConfFile;
   }
   
   /**
-   * Returns Full path to project configuration file on local machine.
+   * Returns Full path to local project configuration file.
    *
    * @param bool $asStr If FALSE, return path hierarchy as array, otherwise path as string.
    *
    * @return mixed.
    */
-  public static function getProjectConfFilepath($asStr = TRUE) {
+  public static function getLocalProjectConfFilepath($asStr = TRUE) {
     
-    static $projectConfFilepathParts;
-    $projectConfFilepathParts = array(
+    static $localProjectConfFilepathParts;
+    $localProjectConfFilepathParts = array(
       AblePolecat_Server_Paths::getFullPath('usr'), 
       'etc',
       'polecat',
       'conf',
       AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
     );
-    $projectConfFilepath = NULL;
+    $localProjectConfFilepath = NULL;
     
     if ($asStr) {
         if (isset(self::$ConfigMode)) {
-          if (!isset(self::$ConfigMode->projectConfFilepath)) {
-            self::$ConfigMode->projectConfFilepath = implode(DIRECTORY_SEPARATOR, $projectConfFilepathParts);
+          if (!isset(self::$ConfigMode->localProjectConfFilepath)) {
+            self::$ConfigMode->localProjectConfFilepath = implode(DIRECTORY_SEPARATOR, $localProjectConfFilepathParts);
           }
-          $projectConfFilepath = self::$ConfigMode->projectConfFilepath;
+          $localProjectConfFilepath = self::$ConfigMode->localProjectConfFilepath;
         }
     }
     else {
-      $projectConfFilepath = $projectConfFilepathParts;
+      $localProjectConfFilepath = $localProjectConfFilepathParts;
     }
     
-    return $projectConfFilepath;
+    return $localProjectConfFilepath;
+  }
+  
+  /**
+   * @return DOMDOcument The master project configuration file.
+   */
+  public static function getMasterProjectConfFile() {
+    
+    $masterProjectConfFile = NULL;
+    
+    if (isset(self::$ConfigMode)) {
+      if (!isset(self::$ConfigMode->masterProjectConfFile)) {
+        $masterProjectConfFilepath = self::getMasterProjectConfFilepath();
+        self::$ConfigMode->masterProjectConfFile = new DOMDocument();
+        self::$ConfigMode->masterProjectConfFile->load($masterProjectConfFilepath);
+      }
+      $masterProjectConfFile = self::$ConfigMode->masterProjectConfFile;
+    }
+    return $masterProjectConfFile;
+  }
+  
+  /**
+   * Returns Full path to master project configuration file.
+   *
+   * @param bool $asStr If FALSE, return path hierarchy as array, otherwise path as string.
+   *
+   * @return mixed.
+   */
+  public static function getMasterProjectConfFilepath($asStr = TRUE) {
+    
+    static $masterProjectConfFilepathParts;
+    $masterProjectConfFilepathParts = array(
+      AblePolecat_Server_Paths::getFullPath('conf'), 
+      AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
+    );
+    $masterProjectConfFilepath = NULL;
+    
+    if ($asStr) {
+        if (isset(self::$ConfigMode)) {
+          if (!isset(self::$ConfigMode->masterProjectConfFilepath)) {
+            self::$ConfigMode->masterProjectConfFilepath = implode(DIRECTORY_SEPARATOR, $masterProjectConfFilepathParts);
+          }
+          $masterProjectConfFilepath = self::$ConfigMode->masterProjectConfFilepath;
+        }
+    }
+    else {
+      $masterProjectConfFilepath = $masterProjectConfFilepathParts;
+    }
+    
+    return $masterProjectConfFilepath;
   }
   
   /**
@@ -404,63 +468,63 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
    */
   protected static function createProjectConfFile() {
     
-    $projectConfFile = FALSE;
+    $localProjectConfFile = FALSE;
     
     if (isset(self::$ConfigMode)) {
-      if (isset(self::$ConfigMode->projectConfFile)) {
-        $projectConfFile = self::$ConfigMode->projectConfFile;
+      if (isset(self::$ConfigMode->localProjectConfFile)) {
+        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
       }
       else {
         //
         // Create the project configuration file itself.
         //
-        self::$ConfigMode->projectConfFile = AblePolecat_Dom::createXmlDocument('polecat');
-        self::$ConfigMode->projectConfFile->formatOutput = TRUE;
+        self::$ConfigMode->localProjectConfFile = AblePolecat_Dom::createXmlDocument('polecat');
+        self::$ConfigMode->localProjectConfFile->formatOutput = TRUE;
         
         //
         // project element.
         //
-        $projectElement = self::$ConfigMode->projectConfFile->createElement('project');
+        $projectElement = self::$ConfigMode->localProjectConfFile->createElement('project');
         $projectElement = AblePolecat_Dom::appendChildToParent(
           $projectElement, 
-          self::$ConfigMode->projectConfFile, 
-          self::$ConfigMode->projectConfFile->firstChild
+          self::$ConfigMode->localProjectConfFile, 
+          self::$ConfigMode->localProjectConfFile->firstChild
         );
         
         //
         // application element
         //
-        $applicationElement = self::$ConfigMode->projectConfFile->createElement('application');
+        $applicationElement = self::$ConfigMode->localProjectConfFile->createElement('application');
         $applicationElement = AblePolecat_Dom::appendChildToParent(
           $applicationElement, 
-          self::$ConfigMode->projectConfFile, 
+          self::$ConfigMode->localProjectConfFile, 
           $projectElement
         );
         
         //
         // locaters element
         //
-        $locatersElement = self::$ConfigMode->projectConfFile->createElement('locaters');
+        $locatersElement = self::$ConfigMode->localProjectConfFile->createElement('locaters');
         $locatersElement = AblePolecat_Dom::appendChildToParent(
           $locatersElement, 
-          self::$ConfigMode->projectConfFile, 
+          self::$ConfigMode->localProjectConfFile, 
           $applicationElement
         );
         
         //
         // databases element
         //
-        $databasesElement = self::$ConfigMode->projectConfFile->createElement('databases');
+        $databasesElement = self::$ConfigMode->localProjectConfFile->createElement('databases');
         $databasesElement = AblePolecat_Dom::appendChildToParent(
           $databasesElement, 
-          self::$ConfigMode->projectConfFile, 
+          self::$ConfigMode->localProjectConfFile, 
           $locatersElement
         );
         
         //
         // core database element
         //
-        $databaseElement = self::$ConfigMode->projectConfFile->createElement('database');
+        $databaseElement = self::$ConfigMode->localProjectConfFile->createElement('database');
         $idAttr = $databaseElement->setAttribute('id', self::ACTIVE_CORE_DATABASE_ID);
         $databaseElement->setIdAttribute('id', TRUE);
         $databaseElement->setAttribute('name', 'polecat');
@@ -468,28 +532,28 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         $databaseElement->setAttribute('use', '1');
         $databaseElement = AblePolecat_Dom::appendChildToParent(
           $databaseElement, 
-          self::$ConfigMode->projectConfFile, 
+          self::$ConfigMode->localProjectConfFile, 
           $databasesElement
         );
         
         //
         // dsn element
         //
-        $dsnElement = self::$ConfigMode->projectConfFile->createElement('dsn', 'mysql://username:password@localhost/databasename');
+        $dsnElement = self::$ConfigMode->localProjectConfFile->createElement('dsn', 'mysql://username:password@localhost/databasename');
         $dsnElement = AblePolecat_Dom::appendChildToParent(
           $dsnElement, 
-          self::$ConfigMode->projectConfFile, 
+          self::$ConfigMode->localProjectConfFile, 
           $databaseElement
         );
         
         //
         // Database schema element.
         //
-        $dbSchemaElement = self::$ConfigMode->projectConfFile->createElement('schema', AblePolecat_Database_Schema::getName());
+        $dbSchemaElement = self::$ConfigMode->localProjectConfFile->createElement('schema', AblePolecat_Database_Schema::getName());
         $dbSchemaElement->setAttribute('id', AblePolecat_Database_Schema::getId());
         $dbSchemaElement = AblePolecat_Dom::appendChildToParent(
           $dbSchemaElement, 
-          self::$ConfigMode->projectConfFile, 
+          self::$ConfigMode->localProjectConfFile, 
           $databaseElement
         );
         
@@ -524,12 +588,12 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         //
         // Save file.
         //
-        $projectConfFilepath = self::getProjectConfFilepath();
-        self::$ConfigMode->projectConfFile->save($projectConfFilepath);
-        $projectConfFile = self::$ConfigMode->projectConfFile;
+        $localProjectConfFilepath = self::getLocalProjectConfFilepath();
+        self::$ConfigMode->localProjectConfFile->save($localProjectConfFilepath);
+        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
       }
     }
-    return $projectConfFile;
+    return $localProjectConfFile;
   }
   
   /**
@@ -552,8 +616,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       default:
         break;
       case AblePolecat_Server_Paths::CONF_FILENAME_PROJECT:
-        $sysFilePathParts = self::getProjectConfFilepath(FALSE);
-        $sysFilePath = self::getProjectConfFilepath();
+        $sysFilePathParts = self::getLocalProjectConfFilepath(FALSE);
+        $sysFilePath = self::getLocalProjectConfFilepath();
         break;
       case AblePolecat_Log_Boot::LOG_NAME_BOOTSEQ:
         $sysFilePathParts = self::getBootLogFilePath(FALSE);
@@ -611,7 +675,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     
     $this->bootLogFilePath = NULL;
     $this->CoreDatabase = NULL;
-    $this->projectConfFile = NULL;
-    $this->projectConfFilepath = NULL;
+    $this->localProjectConfFile = NULL;
+    $this->localProjectConfFilepath = NULL;
+    $this->masterProjectConfFile = NULL;
+    $this->masterProjectConfFilepath = NULL;
   }
 }

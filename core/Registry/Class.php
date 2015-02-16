@@ -89,12 +89,9 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       self::$Registry = new AblePolecat_Registry_Class();
       
       //
-      // Load schema file.
+      // Load master project configuration file.
       //
-      $projectConfDir = AblePolecat_Server_Paths::getFullPath('conf');
-      $registryFilePath = implode(DIRECTORY_SEPARATOR, array($projectConfDir, 'project.xml'));
-      $registryFile = new DOMDocument();
-      $registryFile->load($registryFilePath);
+      $registryFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
       
       //
       // Get package (class library) id.
