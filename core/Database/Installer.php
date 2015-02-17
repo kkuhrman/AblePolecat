@@ -1,7 +1,7 @@
 <?php
 /**
  * @file      polecat/core/Database/Installer.php
- * @brief     Encapsulates the Able Polecat database schema.
+ * @brief     Generates DDL or DML to install or update the project registry.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -19,4 +19,24 @@ interface AblePolecat_Database_InstallerInterface extends AblePolecat_AccessCont
    * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database);
+  
+  /**
+   * Write a message to boot log and trigger PHP error.
+   *
+   * Most errors in registry entry classes will result in a fatal application
+   * error. But most will also likely occur before standard error handling and
+   * logging are operational. This method provides a means to catch these.
+   *
+   * @param string $message.
+   */
+  public static function triggerError($message);
+  
+  /**
+   * Update current schema on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
+   * @throw AblePolecat_Database_Exception if update fails.
+   */
+  public static function update(AblePolecat_DatabaseInterface $Database);
 }

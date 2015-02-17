@@ -115,7 +115,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
                   $ClassLibraryRegistration->name,
                   $childNode->nodeValue
                 );
-                self::triggerError($message);
+                AblePolecat_Registry_ClassLibrary::triggerError($message);
               }
             }
             $ClassLibraryRegistration->libFullPath = $checkSanitizedPath;

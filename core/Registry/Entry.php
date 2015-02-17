@@ -167,21 +167,6 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
   }
   
   /**
-   * Write a message to boot log and trigger PHP error.
-   *
-   * Most errors in registry entry classes will result in a fatal application
-   * error. But most will also likely occur before standard error handling and
-   * logging are operational. This method provides a means to catch these.
-   *
-   * @param string $message.
-   */
-  public static function triggerError($message) {
-    AblePolecat_Log_Boot::wakeup()->
-      putMessage(AblePolecat_LogInterface::ERROR, $message);
-    trigger_error($message, E_USER_ERROR);
-  }
-  
-  /**
    * Extends __construct().
    *
    * Sub-classes should override to initialize arguments.

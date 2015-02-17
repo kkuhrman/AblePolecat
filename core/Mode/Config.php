@@ -201,14 +201,14 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
             
             //
-            // Register class libraries.
+            // @todo: AblePolecat_Registry_ClassLibrary::update()
             //
-            AblePolecat_Registry_ClassLibrary::install(self::$ConfigMode->CoreDatabase);
+            // AblePolecat_Registry_ClassLibrary::install(self::$ConfigMode->CoreDatabase);
             
             //
-            // Register classes.
+            // @todo: AblePolecat_Registry_Class::update()
             //
-            AblePolecat_Registry_Class::install(self::$ConfigMode->CoreDatabase);
+            // AblePolecat_Registry_Class::install(self::$ConfigMode->CoreDatabase);
             
             //
             // @todo: Redirect home.

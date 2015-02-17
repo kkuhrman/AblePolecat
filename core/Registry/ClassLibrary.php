@@ -139,6 +139,17 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     }
   }
   
+  /**
+   * Update current schema on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
+   * @throw AblePolecat_Database_Exception if update fails.
+   */
+  public static function update(AblePolecat_DatabaseInterface $Database) {
+    
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/

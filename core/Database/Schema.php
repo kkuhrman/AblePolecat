@@ -87,8 +87,6 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    * Install current schema on existing Able Polecat database.
    *
    * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
-   * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
     
@@ -121,6 +119,30 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
     }
   }
   
+  /**
+   * Write a message to boot log and trigger PHP error.
+   *
+   * Most errors in registry entry classes will result in a fatal application
+   * error. But most will also likely occur before standard error handling and
+   * logging are operational. This method provides a means to catch these.
+   *
+   * @param string $message.
+   */
+  public static function triggerError($message) {
+    AblePolecat_Log_Boot::wakeup()->
+      putMessage(AblePolecat_LogInterface::ERROR, $message);
+    trigger_error($message, E_USER_ERROR);
+  }
+  
+  /**
+   * Update current schema on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   */
+  public static function update(AblePolecat_DatabaseInterface $Database) {
+    
+  }
+  
   /********************************************************************************
    * Implementation of AblePolecat_Database_SchemaInterface.
    ********************************************************************************/
@@ -144,7 +166,6 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    * @param DOMNode $Node
    *
    * @return string DDL
-   * @throw AblePolecat_Database_Exception if node does not translate to DDL.
    */
   protected static function getTableDdl(DOMNode $Node) {
     
@@ -155,7 +176,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
     //
     $tableName = $Node->getAttribute('name');
     if ($tableName === '') {
-      throw new AblePolecat_Database_Exception('Database schema element `table` must contain `name` attribute.');
+      AblePolecat_Database_SchemaInterface::triggerError('Database schema element `table` must contain `name` attribute.');
     }
     
     //
@@ -202,7 +223,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
             //
             $fieldName = $fieldNode->getAttribute('name');
             if ($fieldName === '') {
-              throw new AblePolecat_Database_Exception('Database schema element `field` must contain `name` attribute.');
+              AblePolecat_Database_SchemaInterface::triggerError('Database schema element `field` must contain `name` attribute.');
             }
             $columnDef = "`$fieldName`";
             
@@ -211,7 +232,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
             //
             $fieldType = $fieldNode->getAttribute('type');
             if ($fieldType === '') {
-              throw new AblePolecat_Database_Exception('Database schema element `field` must contain `type` attribute.');
+              AblePolecat_Database_SchemaInterface::triggerError('Database schema element `field` must contain `type` attribute.');
             }
             
             //
@@ -223,7 +244,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
                 $fieldType .= sprintf("(%s)", $fieldSize);
               }
               else {
-                throw new AblePolecat_Database_Exception('Database schema element `field` attribute `size` must be numeric.');
+                AblePolecat_Database_SchemaInterface::triggerError('Database schema element `field` attribute `size` must be numeric.');
               }
             }
             $columnDef .= " $fieldType";
@@ -283,14 +304,14 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
             $indexType = $indexNode->getAttribute('type');
             $indexName = NULL;
             if ($indexType === '') {
-              throw new AblePolecat_Database_Exception('Database schema element `index` must contain `type` attribute.');
+              AblePolecat_Database_SchemaInterface::triggerError('Database schema element `index` must contain `type` attribute.');
             }
             else {
               $indexDef = $indexType;
               if ($indexType != 'PRIMARY KEY') {
                 $indexName = $indexNode->getAttribute('name');
                 if ($indexName === '') {
-                  throw new AblePolecat_Database_Exception('Database schema element `index` must contain `name` attribute if it is not PRIMARY KEY.');
+                  AblePolecat_Database_SchemaInterface::triggerError('Database schema element `index` must contain `name` attribute if it is not PRIMARY KEY.');
                 }
                 $indexDef .= " `$indexName`";
               }
@@ -306,7 +327,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
                   case 'polecat:indexField':
                     $indexFieldName = $indexChildNode->getAttribute('name');
                     if ($indexFieldName === '') {
-                      throw new AblePolecat_Database_Exception('Database schema element `indexField` must contain `name` attribute.');
+                      AblePolecat_Database_SchemaInterface::triggerError('Database schema element `indexField` must contain `name` attribute.');
                     }
                     $indexFields[] = "`$indexFieldName`";
                     break;
@@ -314,7 +335,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
               }
             }
             if (0 === count($indexFields)) {
-              throw new AblePolecat_Database_Exception('Database table index definition must contain at least one field.');
+              AblePolecat_Database_SchemaInterface::triggerError('Database table index definition must contain at least one field.');
             }
             $indexDef .= sprintf(" (%s)", implode(',', $indexFields));
             
@@ -328,7 +349,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
     // Cannot define a table with no fields.
     //
     if (0 === count($fieldList)) {
-      throw new AblePolecat_Database_Exception("Database table definition for `$tableName` must contain at least one field.");
+      AblePolecat_Database_SchemaInterface::triggerError("Database table definition for `$tableName` must contain at least one field.");
     }
     
     //

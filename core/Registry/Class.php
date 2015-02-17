@@ -99,7 +99,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       $applicationNode = $DbNodes->item(0);
       if (!isset($applicationNode)) {
         $message = 'project.xml must contain an package node.';
-        trigger_error($message, E_USER_ERROR);
+        AblePolecat_Registry_Class::triggerError($message);
       }
       
       //
@@ -112,6 +112,17 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
         $classRegistration->save($Database);
       }
     }
+  }
+  
+  /**
+   * Update current schema on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
+   * @throw AblePolecat_Database_Exception if update fails.
+   */
+  public static function update(AblePolecat_DatabaseInterface $Database) {
+    
   }
   
   /********************************************************************************
