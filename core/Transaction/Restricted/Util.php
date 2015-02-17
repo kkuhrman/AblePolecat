@@ -129,7 +129,10 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
    * @return UUID Id of redirect resource on authentication.
    */
   public function getRedirectResourceId() {
-    
+    //
+    // POST to self.
+    //
+    return '';
   }
   
   /********************************************************************************

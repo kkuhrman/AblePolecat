@@ -130,7 +130,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               //
               AblePolecat_Registry_Class::install($CoreDatabase);
               break;
-            case self::UUID:
+            case AblePolecat_Resource_Restricted_Update::UUID:
               //
               // UPDATE [lib]
               //
@@ -164,7 +164,10 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
    * @return UUID Id of redirect resource on authentication.
    */
   public function getRedirectResourceId() {
-    
+    //
+    // POST to self.
+    //
+    return '';
   }
   
   /********************************************************************************

@@ -213,9 +213,24 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
           //
           $Request = AblePolecat_Host::getRequest();
           $redirect = $Request->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_REDIRECT);
-          if (isset($redirect)) {
+          $referer = $Request->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_REFERER);
+          if (isset($redirect) && ($redirect != '')) {
+            //
+            // This would be the case when submission of a form redirects to a 
+            // resource other than the one, which presented the form.
+            //
             if (isset(self::$coreResourceRegistryEntries[$redirect])) {
               $connectorData = self::$coreResourceRegistryEntries[$redirect];
+            }
+          }
+          else {
+            if (isset($referer) && ($referer != '')) {
+              //
+              // The referer presented the form and intends to POST to itself.
+              //
+              if (isset(self::$coreResourceRegistryEntries[$referer])) {
+                $connectorData = self::$coreResourceRegistryEntries[$referer];
+              }
             }
           }
           break;
@@ -230,7 +245,8 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
         //
         // @todo: this is a 405 (Method Not Allowed) condition.
         //
-        die('Method Not Allowed');
+        $message = sprintf("%s request for ./%s - Method Not Allowed (405).", $requestMethod, $resourceId);
+        AblePolecat_Registry_Connector::triggerError($message);
       }
     }
     return $ConnectorRegistration;
