@@ -41,6 +41,14 @@ if (!defined('ABLE_POLECAT_USR')) {
 }
 
 /**
+ * This is the root directory containing all the interface implementations and 
+ * extension class source files.
+ */
+if (!defined('ABLE_POLECAT_SRC')) {
+  $message = sprintf("Global variable %s should be defined in path.config.", 'ABLE_POLECAT_SRC');
+}
+
+/**
  * Top-level paths configuration file full path.
  * This is used to differentiate from library and module path config file paths.
  */
@@ -72,6 +80,11 @@ class AblePolecat_Server_Paths {
    * Path to third-pary and custom modules/code.
    */
   const usr = ABLE_POLECAT_USR;
+  
+  /**
+   * Path to project source files.
+   */
+  const src = ABLE_POLECAT_SRC;
   
   /**
    * Path to log files directory.
@@ -242,6 +255,9 @@ class AblePolecat_Server_Paths {
         case 'usr':
           $path = self::usr;
           break;
+        case 'src':
+          $path = self::src;
+          break;
         case 'mods':
           // $path = self::usr . DIRECTORY_SEPARATOR . 'mods';
           $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'mods'));
@@ -275,6 +291,7 @@ class AblePolecat_Server_Paths {
       case 'log':
       case 'libs':
       case 'usr':
+      case 'src':
       case 'files':
       case 'var':
       case 'mods':

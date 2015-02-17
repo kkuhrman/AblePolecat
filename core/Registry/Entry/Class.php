@@ -76,6 +76,51 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    ********************************************************************************/
   
   /**
+   * Create the registry entry object and populate with given DOMNode data.
+   *
+   * @param DOMNode $Node DOMNode encapsulating registry entry.
+   *
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function import(DOMNode $Node) {
+    
+    //
+    // @todo: throw exception if Node does not comply with schema
+    //
+    $classRegistration = AblePolecat_Registry_Entry_Class::create();
+    $classRegistration->id = $Node->getAttribute('id');
+    $classRegistration->name = $Node->getAttribute('name');
+    foreach($Node->childNodes as $key => $childNode) {
+      switch ($childNode->nodeName) {
+        default:
+          break;
+        case 'polecat:classFactoryMethod':
+          $classRegistration->classFactoryMethod = $childNode->nodeValue;
+          break;
+        case 'polecat:path':
+          $rawPath = ABLE_POLECAT_SRC. DIRECTORY_SEPARATOR . $childNode->nodeValue;
+          $classRegistration->classFullPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
+          break;
+      }
+    }
+    return $classRegistration;
+  }
+  
+  /**
+   * Create DOMNode and populate with registry entry data .
+   *
+   * @param DOMDocument $Document Registry entry will be exported to this DOM Document.
+   * @param DOMElement $Parent Registry entry will be appended to this DOM Element.
+   *
+   * @return DOMElement Exported element or NULL.
+   */
+  public function export(DOMDocument $Document, DOMElement $Parent) {
+    //
+    // @todo: export class registry entry.
+    //
+  }
+  
+  /**
    * Fetch registration record given by id.
    *
    * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.

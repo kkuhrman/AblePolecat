@@ -8,7 +8,6 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
 
 class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstract {
@@ -106,7 +105,6 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
           )
         );
         self::$Environment->registerClassLibraries($classLibrariesConfFilePath, $ClassLibraryRegistrations);
-        // AblePolecat_Debug::kill($ClassLibraryRegistrations);
         
         //
         // Initialize system environment variables from conf file.

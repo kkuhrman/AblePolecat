@@ -13,6 +13,26 @@ require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'DynamicObject.php');
 
 interface AblePolecat_Registry_EntryInterface 
   extends AblePolecat_AccessControl_Article_DynamicInterface, AblePolecat_DynamicObjectInterface {
+  
+  /**
+   * Create the registry entry object and populate with given DOMNode data.
+   *
+   * @param DOMNode $Node DOMNode encapsulating registry entry.
+   *
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function import(DOMNode $Node);
+  
+  /**
+   * Create DOMNode and populate with registry entry data .
+   *
+   * @param DOMDocument $Document Registry entry will be exported to this DOM Document.
+   * @param DOMElement $Parent Registry entry will be appended to this DOM Element.
+   *
+   * @return DOMElement Exported element or NULL.
+   */
+  public function export(DOMDocument $Document, DOMElement $Parent);
+  
   /**
    * Fetch registration record given by id.
    *
@@ -23,7 +43,7 @@ interface AblePolecat_Registry_EntryInterface
   public static function fetch($primaryKey);
   
   /**
-   * @return int
+   * @return int Typically the last modified date of the object source file.
    */
   public function getLastModifiedTime();
   
@@ -45,12 +65,21 @@ interface AblePolecat_Registry_EntryInterface
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL);
+  
+  /**
+   * Validates given value against primary key schema.
+   *
+   * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
+   *
+   * @return boolean TRUE if given value meets schema requirements for PK, otherwise FALSE.
+   */
+  public static function validatePrimaryKey($primaryKey = NULL);
 }
 
 abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObjectAbstract implements AblePolecat_Registry_EntryInterface {
   
   /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
    ********************************************************************************/
   
   /**
@@ -63,28 +92,51 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Registry_EntryInterface.
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
    ********************************************************************************/
-  
+   
   /**
-   * @return string.
+   * @return UUID Universally unique identifier of registry object.
    */
   public function getId() {
     return $this->getPropertyValue('id');
   }
   
   /**
-   * @return string.
+   * @return string Common name of registry object.
    */
   public function getName() {
     return $this->getPropertyValue('name');
   }
   
+  /********************************************************************************
+   * Implementation of AblePolecat_Registry_EntryInterface.
+   ********************************************************************************/
+  
   /**
-   * @return int
+   * @return int Typically the last modified date of the object source file.
    */
   public function getLastModifiedTime() {
     return $this->getPropertyValue('lastModifiedTime');
+  }
+  
+  /**
+   * Validates given value against primary key schema.
+   *
+   * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
+   *
+   * @return boolean TRUE if given value meets schema requirements for PK, otherwise FALSE.
+   */
+  public static function validatePrimaryKey($primaryKey = NULL) {
+    
+    $validPrimaryKeyValue = FALSE;
+    if (isset($primaryKey) && is_array($primaryKey) && isset($primaryKey['id'])) {
+        $validPrimaryKeyValue = TRUE;
+    }
+    else if (is_string($primaryKey) && (36 === strlen($primaryKey))) {
+      $validPrimaryKeyValue = TRUE;
+    }
+    return $validPrimaryKeyValue;
   }
   
   /********************************************************************************
@@ -112,6 +164,21 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
       }
     }
     return $Result;
+  }
+  
+  /**
+   * Write a message to boot log and trigger PHP error.
+   *
+   * Most errors in registry entry classes will result in a fatal application
+   * error. But most will also likely occur before standard error handling and
+   * logging are operational. This method provides a means to catch these.
+   *
+   * @param string $message.
+   */
+  public static function triggerError($message) {
+    AblePolecat_Log_Boot::wakeup()->
+      putMessage(AblePolecat_LogInterface::ERROR, $message);
+    trigger_error($message, E_USER_ERROR);
   }
   
   /**

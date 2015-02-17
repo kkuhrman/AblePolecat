@@ -12,7 +12,6 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Class.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
 
 class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   
@@ -91,40 +90,25 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       //
       // Load master project configuration file.
       //
-      $registryFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+      $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
       
       //
       // Get package (class library) id.
       //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($registryFile, 'package');
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
       $applicationNode = $DbNodes->item(0);
       if (!isset($applicationNode)) {
-        throw new AblePolecat_Registry_Exception('project.xml must contain an package node.');
+        $message = 'project.xml must contain an package node.';
+        trigger_error($message, E_USER_ERROR);
       }
       
       //
       // Create DML statements for classes.
       //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($registryFile, 'class');
-      $classDml = array();
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
       foreach($DbNodes as $key => $Node) {
-        $classRegistration = AblePolecat_Registry_Entry_Class::create();
-        $classRegistration->id = $Node->getAttribute('id');
-        $classRegistration->name = $Node->getAttribute('name');
+        $classRegistration = AblePolecat_Registry_Entry_Class::import($Node);
         $classRegistration->classLibraryId = $applicationNode->getAttribute('id');
-        foreach($Node->childNodes as $key => $childNode) {
-          switch ($childNode->nodeName) {
-            default:
-              break;
-            case 'polecat:classFactoryMethod':
-              $classRegistration->classFactoryMethod = $childNode->nodeValue;
-              break;
-            case 'polecat:path':
-              $rawPath = ABLE_POLECAT_SRC. DIRECTORY_SEPARATOR . $childNode->nodeValue;
-              $classRegistration->classFullPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
-              break;
-          }
-        }
         $classRegistration->save($Database);
       }
     }

@@ -9,6 +9,8 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Install.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
 
@@ -196,7 +198,12 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             //
             // Otherwise, install current schema.
             //
-            // AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
+            AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
+            
+            //
+            // Register class libraries.
+            //
+            AblePolecat_Registry_ClassLibrary::install(self::$ConfigMode->CoreDatabase);
             
             //
             // Register classes.

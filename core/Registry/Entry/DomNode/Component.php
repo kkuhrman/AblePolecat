@@ -46,6 +46,33 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    ********************************************************************************/
   
   /**
+   * Create the registry entry object and populate with given DOMNode data.
+   *
+   * @param DOMNode $Node DOMNode encapsulating registry entry.
+   *
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function import(DOMNode $Node) {
+    //
+    // @todo: import [component] registry entry.
+    //
+  }
+  
+  /**
+   * Create DOMNode and populate with registry entry data .
+   *
+   * @param DOMDocument $Document Registry entry will be exported to this DOM Document.
+   * @param DOMElement $Parent Registry entry will be appended to this DOM Element.
+   *
+   * @return DOMElement Exported element or NULL.
+   */
+  public function export(DOMDocument $Document, DOMElement $Parent) {
+    //
+    // @todo: export [component] registry entry.
+    //
+  }
+  
+  /**
    * Fetch registration record given by id.
    *
    * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.

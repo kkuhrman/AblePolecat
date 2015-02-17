@@ -9,7 +9,7 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Paths.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'ClassLibrary.php')));
 
 class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   
@@ -57,6 +57,89 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_Database_InstallerInterface.
+   ********************************************************************************/
+   
+  /**
+   * Install class registry on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   *
+   * @throw AblePolecat_Database_Exception if install fails.
+   */
+  public static function install(AblePolecat_DatabaseInterface $Database) {
+    
+    if (!isset(self::$Registry)) {
+      //
+      // Create instance of singleton.
+      //
+      self::$Registry = new AblePolecat_Registry_ClassLibrary();
+
+      //
+      // Load master project configuration file.
+      //
+      $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+      
+      //
+      // Get package (class library) id.
+      //
+      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+      $applicationNode = $Nodes->item(0);
+      if (isset($applicationNode)) {
+        $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+        $ClassLibraryRegistration->id = $applicationNode->getAttribute('id');
+        $ClassLibraryRegistration->name = $applicationNode->getAttribute('name');
+        $ClassLibraryRegistration->libType = strtolower($applicationNode->getAttribute('type'));
+        $ClassLibraryRegistration->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
+        $ClassLibraryRegistration->useLib = '1';
+        $ClassLibraryRegistration->save($Database);
+      }
+      else {
+        //
+        // @todo: this type of schema checking should be done by implementing an XML schema.
+        //
+        $message = 'project.xml must contain an package node.';
+        trigger_error($message, E_USER_ERROR);
+      }
+
+      //
+      // Create DML statements for classes.
+      //
+      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
+      foreach($Nodes as $key => $Node) {
+        $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
+        if (isset($ClassLibraryRegistration)) {
+          $ClassLibraryRegistration->save($Database);
+        }
+        
+        //
+        // If the class library is a module, load the corresponding project 
+        // configuration file and register any dependent class libraries.
+        //
+        if ($ClassLibraryRegistration->libType === 'mod') {
+          $modConfFilePath = implode(DIRECTORY_SEPARATOR, array(
+            $ClassLibraryRegistration->libFullPath,
+            'etc',
+            'polecat',
+            'conf',
+            AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
+          ));
+          $modConfFile = new DOMDocument();
+          $modConfFile->load($modConfFilePath);
+          
+          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
+          foreach($modNodes as $key => $modNode) {
+            $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
+            if (isset($modClassLibraryRegistration)) {
+              $modClassLibraryRegistration->save($Database);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
   
@@ -64,22 +147,9 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    * Extends constructor.
    */
   protected function initialize() {
-    
     //
     // Supported modules.
     //
     $this->ClassLibraries = array();
-    
-    $sql = __SQL()->          
-      select('classLibraryName', 'classLibraryId', 'classLibraryType', 'major', 'minor', 'revision', 'classLibraryDirectory')->
-      from('classlib');
-    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    if($Result->success()) {
-      $ClassLibraries = $Result->value();
-      foreach($ClassLibraries as $key => $classlib) {
-        $classLibraryName = $classlib['classLibraryName'];
-        $this->ClassLibraries[$classLibraryName] = $classlib;
-      }
-    }
   }
 }

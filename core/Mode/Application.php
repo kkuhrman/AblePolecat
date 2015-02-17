@@ -11,7 +11,6 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Application.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Server.php')));
 
 class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
@@ -194,15 +193,15 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
           // Boot log can help with troubleshooting third party library installs.
           //
           $message = sprintf("REGISTRY: %s class library (id=%s)",
-            $ClassLibraryRegistration->getClassLibraryName(),
-            $ClassLibraryRegistration->getClassLibraryId()
+            $ClassLibraryRegistration->getName(),
+            $ClassLibraryRegistration->getId()
           );
           AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
           
           //
           // Register library classes.
           //
-          $ClassRegistrations = $ClassRegistry->loadLibrary($ClassLibraryRegistration->getClassLibraryId());
+          $ClassRegistrations = $ClassRegistry->loadLibrary($ClassLibraryRegistration->getId());
         }
       }
     }
