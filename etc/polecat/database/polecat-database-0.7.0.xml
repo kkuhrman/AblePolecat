@@ -132,7 +132,8 @@
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
           <polecat:field name="libType" type="char" size="3" null="NOT" />
           <polecat:field name="libFullPath" type="varchar" size="255" null="NOT" />
-          <polecat:field name="use" type="tinyint" size="4" null="NOT" />
+          <polecat:field name="useLib" type="tinyint" size="4" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
           <polecat:index type="PRIMARY KEY">
