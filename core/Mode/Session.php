@@ -323,7 +323,7 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
       switch ($className) {
         default:
           break;
-        case 'AblePolecat_Transaction_Install':
+        case 'AblePolecat_Transaction_Restricted_Install':
           $value = self::$SessionMode->sessionGlobal[$className][$variableName];
           break;
       }
@@ -347,7 +347,7 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
       switch ($className) {
         default:
           break;
-        case 'AblePolecat_Transaction_Install':
+        case 'AblePolecat_Transaction_Restricted_Install':
           !isset(self::$SessionMode->sessionGlobal[$className]) ? self::$SessionMode->sessionGlobal[$className] = array() : NULL;
           switch ($variableName) {
             default:

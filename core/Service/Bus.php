@@ -15,7 +15,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
+// require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
 
 /**
  * Manages multiple web services initiator connections and routes messages
@@ -344,6 +344,13 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
   protected function getConnectorRegistration(AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration, $requestMethod) {
     
     $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::fetch(array($ResourceRegistration->resourceId, $requestMethod));
+    
+    //
+    // Handle built-in resources in the event database connection is not active.
+    //
+    if (!isset($ConnectorRegistration)) {
+      $ConnectorRegistration = AblePolecat_Registry_Connector::getCoreResourceConnector($ResourceRegistration->resourceId, $requestMethod);
+    }
     return $ConnectorRegistration;
   }
   
@@ -434,6 +441,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
             $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
             break;
+          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
+            $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Update::UUID;
+            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Update';
+            break;
         }
       }
       else {
@@ -518,6 +529,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           $Response = AblePolecat_Message_Response_Xml::create($ResponseRegistration);
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
           $Response = AblePolecat_Message_Response_Xhtml::create($ResponseRegistration);
           break;
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_FORM:
@@ -546,6 +558,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       case AblePolecat_Resource_Core_Error::UUID:
       case AblePolecat_Resource_Core_Form::UUID:
       case AblePolecat_Resource_Restricted_Install::UUID:
+      case AblePolecat_Resource_Restricted_Update::UUID:
       case AblePolecat_Resource_Restricted_Util::UUID:
         break;
     }

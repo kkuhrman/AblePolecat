@@ -80,37 +80,30 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_DatabaseInterface $Database) {
-    if (!isset(self::$Registry)) {
-      //
-      // Create instance of singleton.
-      //
-      self::$Registry = new AblePolecat_Registry_Class();
-      
-      //
-      // Load master project configuration file.
-      //
-      $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
-      
-      //
-      // Get package (class library) id.
-      //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
-      $applicationNode = $DbNodes->item(0);
-      if (!isset($applicationNode)) {
-        $message = 'project.xml must contain an package node.';
-        AblePolecat_Registry_Class::triggerError($message);
-      }
-      
-      //
-      // Create DML statements for classes.
-      //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
-      foreach($DbNodes as $key => $Node) {
-        $classRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-        $classRegistration->classLibraryId = $applicationNode->getAttribute('id');
-        $classRegistration->save($Database);
-      }
+  public static function install(AblePolecat_DatabaseInterface $Database) {      
+    //
+    // Load master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    
+    //
+    // Get package (class library) id.
+    //
+    $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $applicationNode = $DbNodes->item(0);
+    if (!isset($applicationNode)) {
+      $message = 'project.xml must contain an package node.';
+      AblePolecat_Registry_Class::triggerError($message);
+    }
+    
+    //
+    // Create DML statements for classes.
+    //
+    $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
+    foreach($DbNodes as $key => $Node) {
+      $classRegistration = AblePolecat_Registry_Entry_Class::import($Node);
+      $classRegistration->classLibraryId = $applicationNode->getAttribute('id');
+      $classRegistration->save($Database);
     }
   }
   

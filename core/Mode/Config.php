@@ -11,7 +11,8 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
-require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Install.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Connector.php')));
+
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
 
 class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
@@ -166,9 +167,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             //
             // Project configuration file exists, get core database connection string. 
             //
-            isset($_POST[AblePolecat_Transaction_Install::ARG_DB]) ? $databaseName = $_POST[AblePolecat_Transaction_Install::ARG_DB] : $databaseName = 'databasename';
-            isset($_POST[AblePolecat_Transaction_Install::ARG_USER]) ? $userName = $_POST[AblePolecat_Transaction_Install::ARG_USER] : $userName = 'username';
-            isset($_POST[AblePolecat_Transaction_Install::ARG_PASS]) ? $password = $_POST[AblePolecat_Transaction_Install::ARG_PASS] : $password = 'password';
+            isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_DB]) ? $databaseName = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_DB] : $databaseName = 'databasename';
+            isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_USER]) ? $userName = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_USER] : $userName = 'username';
+            isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_PASS]) ? $password = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_PASS] : $password = 'password';
             self::$ConfigMode->localProjectConfFile = new DOMDocument();
             self::$ConfigMode->localProjectConfFile->load(self::$ConfigMode->localProjectConfFilepath);
             $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->localProjectConfFile, self::ACTIVE_CORE_DATABASE_ID);
@@ -199,16 +200,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             // Otherwise, install current schema.
             //
             AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
-            
-            //
-            // @todo: AblePolecat_Registry_ClassLibrary::update()
-            //
-            // AblePolecat_Registry_ClassLibrary::install(self::$ConfigMode->CoreDatabase);
-            
-            //
-            // @todo: AblePolecat_Registry_Class::update()
-            //
-            // AblePolecat_Registry_Class::install(self::$ConfigMode->CoreDatabase);
             
             //
             // @todo: Redirect home.

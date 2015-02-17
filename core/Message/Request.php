@@ -30,7 +30,8 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   const RESOURCE_NAME_FORM      = 'form'; // basic, built-in UI form
   const RESOURCE_NAME_INSTALL   = 'install'; // interactive install
   const RESOURCE_NAME_SEARCH    = 'search'; // list view of search results
-  const RESOURCE_NAME_UTIL      = 'util'; // Project utilities (install, update, more...)
+  const RESOURCE_NAME_UPDATE    = 'update'; // update project configuration
+  const RESOURCE_NAME_UTIL      = 'util'; // Project utilities
   
   /**
    * @return string
@@ -296,6 +297,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
       // case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
         $resolvedResourceName = $sanitizedResourceName;
         break;
@@ -333,6 +335,9 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     $fieldValue = NULL;
     if (isset($this->query_string[$fieldName])) {
       $fieldValue = $this->query_string[$fieldName];
+      if (is_array($fieldValue) && (1 === count($fieldValue))) {
+        $fieldValue = $fieldValue[0];
+      }
     }
     return $fieldValue;
   }

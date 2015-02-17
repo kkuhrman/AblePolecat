@@ -56,7 +56,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
         parent::__set('lastModifiedTime', $this->fileStat['mtime']);
       }
       else {
-        throw new AblePolecat_Registry_Exception("Failed to retrieve file stats on $value.");
+        AblePolecat_Registry_Class::triggerError("Failed to retrieve file stats on $value.");
       }
     }
     parent::__set($name, $value);

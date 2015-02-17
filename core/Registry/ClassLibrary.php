@@ -68,71 +68,63 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Load master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
-    if (!isset(self::$Registry)) {
+    //
+    // Get package (class library) id.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $applicationNode = $Nodes->item(0);
+    if (isset($applicationNode)) {
+      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $ClassLibraryRegistration->id = $applicationNode->getAttribute('id');
+      $ClassLibraryRegistration->name = $applicationNode->getAttribute('name');
+      $ClassLibraryRegistration->libType = strtolower($applicationNode->getAttribute('type'));
+      $ClassLibraryRegistration->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
+      $ClassLibraryRegistration->useLib = '1';
+      $ClassLibraryRegistration->save($Database);
+    }
+    else {
       //
-      // Create instance of singleton.
+      // @todo: this type of schema checking should be done by implementing an XML schema.
       //
-      self::$Registry = new AblePolecat_Registry_ClassLibrary();
+      $message = 'project.xml must contain an package node.';
+      trigger_error($message, E_USER_ERROR);
+    }
 
-      //
-      // Load master project configuration file.
-      //
-      $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
-      
-      //
-      // Get package (class library) id.
-      //
-      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
-      $applicationNode = $Nodes->item(0);
-      if (isset($applicationNode)) {
-        $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-        $ClassLibraryRegistration->id = $applicationNode->getAttribute('id');
-        $ClassLibraryRegistration->name = $applicationNode->getAttribute('name');
-        $ClassLibraryRegistration->libType = strtolower($applicationNode->getAttribute('type'));
-        $ClassLibraryRegistration->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
-        $ClassLibraryRegistration->useLib = '1';
+    //
+    // Create DML statements for classes.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
+    foreach($Nodes as $key => $Node) {
+      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
+      if (isset($ClassLibraryRegistration)) {
         $ClassLibraryRegistration->save($Database);
       }
-      else {
-        //
-        // @todo: this type of schema checking should be done by implementing an XML schema.
-        //
-        $message = 'project.xml must contain an package node.';
-        trigger_error($message, E_USER_ERROR);
-      }
-
+      
       //
-      // Create DML statements for classes.
+      // If the class library is a module, load the corresponding project 
+      // configuration file and register any dependent class libraries.
       //
-      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
-      foreach($Nodes as $key => $Node) {
-        $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
-        if (isset($ClassLibraryRegistration)) {
-          $ClassLibraryRegistration->save($Database);
-        }
+      if ($ClassLibraryRegistration->libType === 'mod') {
+        $modConfFilePath = implode(DIRECTORY_SEPARATOR, array(
+          $ClassLibraryRegistration->libFullPath,
+          'etc',
+          'polecat',
+          'conf',
+          AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
+        ));
+        $modConfFile = new DOMDocument();
+        $modConfFile->load($modConfFilePath);
         
-        //
-        // If the class library is a module, load the corresponding project 
-        // configuration file and register any dependent class libraries.
-        //
-        if ($ClassLibraryRegistration->libType === 'mod') {
-          $modConfFilePath = implode(DIRECTORY_SEPARATOR, array(
-            $ClassLibraryRegistration->libFullPath,
-            'etc',
-            'polecat',
-            'conf',
-            AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
-          ));
-          $modConfFile = new DOMDocument();
-          $modConfFile->load($modConfFilePath);
-          
-          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
-          foreach($modNodes as $key => $modNode) {
-            $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
-            if (isset($modClassLibraryRegistration)) {
-              $modClassLibraryRegistration->save($Database);
-            }
+        $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
+        foreach($modNodes as $key => $modNode) {
+          $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
+          if (isset($modClassLibraryRegistration)) {
+            $modClassLibraryRegistration->save($Database);
           }
         }
       }

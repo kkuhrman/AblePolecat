@@ -27,6 +27,9 @@
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Install.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Util.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
 
 interface AblePolecat_Registry_Entry_ConnectorInterface extends AblePolecat_Registry_EntryInterface {
@@ -118,9 +121,8 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
     $ConnectorRegistration = NULL;
     
     if (is_array($primaryKey) && (2 == count($primaryKey))) {
-      $ConnectorRegistration = new AblePolecat_Registry_Entry_Connector();
-      isset($primaryKey['resourceId']) ? $ConnectorRegistration->resourceId = $primaryKey['resourceId'] : $ConnectorRegistration->resourceId = $primaryKey[0];
-      isset($primaryKey['requestMethod']) ? $ConnectorRegistration->requestMethod = $primaryKey['requestMethod'] : $ConnectorRegistration->requestMethod = $primaryKey[1];
+      isset($primaryKey['resourceId']) ? $resourceId = $primaryKey['resourceId'] : $resourceId = $primaryKey[0];
+      isset($primaryKey['requestMethod']) ? $requestMethod = $primaryKey['requestMethod'] : $requestMethod = $primaryKey[1];
       
       $sql = __SQL()->          
           select(
@@ -130,66 +132,17 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
             'authorityClassName', 
             'accessDeniedCode')->
           from('connector')->
-          where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $ConnectorRegistration->resourceId, $ConnectorRegistration->requestMethod));
+          where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
       $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $classInfo = $CommandResult->value();
         if (isset($classInfo[0])) {
+          $ConnectorRegistration = new AblePolecat_Registry_Entry_Connector();
+          $ConnectorRegistration->resourceId = $classInfo[0]['resourceId'];
+          $ConnectorRegistration->requestMethod = $classInfo[0]['requestMethod'];
           $ConnectorRegistration->transactionClassName = $classInfo[0]['transactionClassName'];
           $ConnectorRegistration->authorityClassName = $classInfo[0]['authorityClassName'];
           $ConnectorRegistration->accessDeniedCode = $classInfo[0]['accessDeniedCode'];
-        }
-      }
-    
-      //
-      // Handle built-in resources in the event database connection is not active.
-      //
-      if (!isset($ConnectorRegistration->transactionClassName)) {
-        //
-        // Assign transaction class name.
-        //
-        switch ($ConnectorRegistration->resourceId) {
-          default:
-            //
-            // Unrestricted resource.
-            //
-            $ConnectorRegistration->transactionClassName = NULL;
-            break;
-          case AblePolecat_Resource_Restricted_Util::UUID:
-            $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_AccessControl_Authority';
-            break;
-          case AblePolecat_Resource_Restricted_Install::UUID:
-            $ConnectorRegistration->transactionClassName = 'AblePolecat_Transaction_Install';
-            break;
-        }
-        
-        //
-        // Assign authority and access denied code.
-        //
-        switch ($ConnectorRegistration->resourceId) {
-          default:
-            //
-            // Unrestricted resource.
-            //
-            $ConnectorRegistration->authorityClassName = NULL;
-            $ConnectorRegistration->accessDeniedCode = 200;
-            break;
-          case AblePolecat_Resource_Restricted_Util::UUID:
-          case AblePolecat_Resource_Restricted_Install::UUID:
-            $Request = AblePolecat_Host::getRequest();
-            switch ($Request->getMethod()) {
-              default:
-                break;
-              case 'GET':
-                $ConnectorRegistration->authorityClassName = 'AblePolecat_Transaction_AccessControl_Authority';
-                $ConnectorRegistration->accessDeniedCode = 401;
-                break;
-              case 'POST':
-                $ConnectorRegistration->authorityClassName = NULL;
-                $ConnectorRegistration->accessDeniedCode = 403;
-                break;
-            }
-            break;
         }
       }
     }
