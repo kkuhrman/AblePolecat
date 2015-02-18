@@ -128,9 +128,42 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function fetch($primaryKey) {
-    //
-    // @todo: complete fetch from [class]
-    //
+    
+    $classRegistration = NULL;
+    
+    if (self::validatePrimaryKey($primaryKey)) {
+      //
+      // Create registry object and initialize primary key.
+      //
+      $classRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+      isset($primaryKey['id']) ? $classRegistration->id = $primaryKey['id'] : $classRegistration->id = $primaryKey;
+      
+      //
+      // Generate and execute SELECT statement.
+      //
+      $sql = __SQL()->          
+        select(
+          'id', 
+          'name', 
+          'classLibraryId', 
+          'classFullPath', 
+          'classFactoryMethod', 
+          'lastModifiedTime')->
+        from('lib')->
+        where(sprintf("`id` = '%s' AND `statusCode` = %d", $primaryKey));
+      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        if (isset($registrationInfo[0])) {
+          isset($registrationInfo[0]['name']) ? $classRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['classLibraryId']) ? $classRegistration->classLibraryId = $registrationInfo[0]['classLibraryId'] : NULL;
+          isset($registrationInfo[0]['classFullPath']) ? $classRegistration->classFullPath = $registrationInfo[0]['classFullPath'] : NULL;
+          isset($registrationInfo[0]['classFactoryMethod']) ? $classRegistration->classFactoryMethod = $registrationInfo[0]['classFactoryMethod'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $classRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+        }
+      }
+    }
+    return $classRegistration; 
   }
   
   /**

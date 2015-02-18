@@ -96,7 +96,7 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         self::VAR_REG_LIB,
         $ClassLibraryRegistry
       );
-      AblePolecat_Debug::kill($ClassLibraryRegistry);
+      
       //
       // Class registry.
       //

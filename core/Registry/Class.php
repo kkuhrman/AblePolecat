@@ -58,7 +58,36 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     
     if (!isset(self::$Registry)) {
       try {
+        //
+        // Create instance of singleton.
+        //
         self::$Registry = new AblePolecat_Registry_Class($Subject);
+        
+        //
+        // Get project database.
+        //
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+        
+        //
+        // Load [lib]
+        //
+        $sql = __SQL()->
+          select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
+          from('class');
+        $QueryResult = $CoreDatabase->query($sql);
+        foreach($QueryResult as $key => $Class) {
+          $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+          $id = $Class['id'];
+          $ClassRegistration->id = $id;
+          $name = $Class['name'];
+          $ClassRegistration->name = $name;
+          isset($Class['classLibraryId']) ? $ClassRegistration->classLibraryId = $Class['classLibraryId'] : NULL;
+          isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
+          isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
+          isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
+          self::$Registry->Classes[self::KEY_ARTICLE_ID][$id] = $ClassRegistration;
+          self::$Registry->Classes[self::KEY_CLASS_NAME][$name] = $ClassRegistration;
+        }
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
       catch (Exception $Exception) {
@@ -101,9 +130,9 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     //
     $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
     foreach($DbNodes as $key => $Node) {
-      $classRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-      $classRegistration->classLibraryId = $applicationNode->getAttribute('id');
-      $classRegistration->save($Database);
+      $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
+      $ClassRegistration->classLibraryId = $applicationNode->getAttribute('id');
+      $ClassRegistration->save($Database);
     }
   }
   
@@ -115,25 +144,67 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
+    
     $Registry = AblePolecat_Registry_Class::wakeup();
-    AblePolecat_Debug::kill($Registry->Classes);
+    if (isset($Registry)) {
+      //
+      // Make a list of potential delete candidates.
+      //
+      $registeredClassIds = array_flip(array_keys($Registry->Classes[self::KEY_ARTICLE_ID]));
+      
+      //
+      // Load master project configuration file.
+      //
+      $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+      
+      //
+      // Get package (class library) id.
+      //
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+      $applicationNode = $DbNodes->item(0);
+      if (!isset($applicationNode)) {
+        $message = 'project.xml must contain an package node.';
+        AblePolecat_Registry_Class::triggerError($message);
+      }
+      
+      //
+      // Create DML statements for classes.
+      //
+      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
+      foreach($DbNodes as $key => $Node) {
+        $id = $Node->getAttribute('id');
+        if (!isset($Registry->Classes[self::KEY_ARTICLE_ID][$id])) {
+          //
+          // Class is not registered.
+          //
+          $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
+          $ClassRegistration->classLibraryId = $applicationNode->getAttribute('id');
+          $ClassRegistration->save($Database);
+        }
+        
+        //
+        // Since class is in master project conf file, remove it from delete list.
+        //
+        unset($registeredClassIds[$id]);
+      }
+      
+      //
+      // Remove any registered classes not in master project conf file.
+      //
+      // AblePolecat_Debug::kill($registeredClassIds);
+      foreach($registeredClassIds as $id => $index) {
+        $sql = __SQL()->
+          delete()->
+          from('class')->
+          where("`id` = '$id'");
+        $Database->execute($sql);
+      }
+    }
   }
   
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-  
-  /**
-   * Parse DOM node encapsulating class registry entry and return DML.
-   *
-   * @param DOMNode $Node
-   *
-   * @return AblePolecat_QueryLanguage_Statement_Sql_Interface DML
-   * @throw AblePolecat_Database_Exception if node does not translate to DDL.
-   */
-  protected static function getClassDml(DOMNode $Node) {
-    
-  }
   
   /**
    * Load the classes associated with given library into registry.
