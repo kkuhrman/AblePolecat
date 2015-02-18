@@ -394,14 +394,13 @@
         <polecat:path>Transaction/Restricted/Update.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
+      <polecat:class id="25226229-b3d6-11e4-976e-0050569e00a2" name="AblePolecat_Version" register="0">
+        <polecat:path>Version.php</polecat:path>
+      </polecat:class>
       <polecat:class id="19f03e3b-b6c5-11e4-a12d-0050569e00a2" name="AblePolecat_Transaction_Restricted_Util">
         <polecat:path>Transaction/Restricted/Util.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
-      <polecat:class id="25226229-b3d6-11e4-976e-0050569e00a2" name="AblePolecat_Version" register="0">
-        <polecat:path>Version.php</polecat:path>
-      </polecat:class>
-      
     </polecat:classes>
   </polecat:package>
 </polecat_core>

@@ -19,6 +19,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   const NAME = 'AblePolecat_Mode_Config';
   
   const ACTIVE_CORE_DATABASE_ID = 'active-core-db';
+  const VAR_CONF_PATH_DBSCHEMA  = 'conf_path_dbschema';
+  const VAR_CONF_PATH_CORE      = 'conf_path_core';
   
   /**
    * @var AblePolecat_Mode_Config Instance of singleton.
@@ -61,9 +63,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private $CoreDatabaseConnectionSettings;
   
   /**
-   * @var AblePolecat_EnvironmentInterface.
+   * @var Array.
    */
-  private $Environment;
+  private $Variables;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
@@ -115,14 +117,25 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       self::$ConfigMode = new AblePolecat_Mode_Config();
       
       //
-        // Verify ./etc/polecat/conf
-        //
-        $configFileDirectory = AblePolecat_Server_Paths::getFullPath('conf');
-        if (FALSE === AblePolecat_Server_Paths::verifyDirectory($configFileDirectory)) {
-          throw new AblePolecat_Mode_Exception('Boot sequence violation: Project configuration directory is not accessible.',
-            AblePolecat_Error::BOOT_SEQ_VIOLATION
-          );
-        }
+      // core conf file paths.
+      //
+      $schemaFileName = sprintf("polecat-database-%s.xml", AblePolecat_Version::getDatabaseSchemaNumber());
+      $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
+      self::$ConfigMode->Variables[self::VAR_CONF_PATH_DBSCHEMA] = $schemaFilePath;
+      
+      $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getName());
+      $coreFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'core', $coreFileName));
+      self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = $coreFilePath;
+      
+      //
+      // Verify ./etc/polecat/conf
+      //
+      $configFileDirectory = AblePolecat_Server_Paths::getFullPath('conf');
+      if (FALSE === AblePolecat_Server_Paths::verifyDirectory($configFileDirectory)) {
+        throw new AblePolecat_Mode_Exception('Boot sequence violation: Project configuration directory is not accessible.',
+          AblePolecat_Error::BOOT_SEQ_VIOLATION
+        );
+      }
       
       //
       // Initialize boot log.
@@ -259,8 +272,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   public static function getEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name) {
     
     $VariableValue = NULL;
-    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->Environment)) {
-      $VariableValue = self::$ConfigMode->Environment->getVariable($Agent, $name);
+    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->Variables[$name])) {
+      $VariableValue = self::$ConfigMode->Variables[$name];
     }
     else {
       throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
@@ -280,8 +293,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
    */
   public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value) {
     $VariableSet = NULL;
-    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->Environment)) {
-      $VariableSet = self::$ConfigMode->Environment->setVariable($Agent, $name, $value);
+    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->Variables)) {
+      $VariableSet = $value;
+      self::$ConfigMode->Variables[$name]= $value;
     }
     else {
       throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
@@ -716,7 +730,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     
     parent::initialize();
     
-    $this->Environment = NULL;
+    $this->Variables = array();
     $this->bootLogFilePath = NULL;
     $this->CoreDatabase = NULL;
     $this->localProjectConfFile = NULL;

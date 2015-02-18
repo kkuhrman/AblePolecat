@@ -99,8 +99,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
       //
       // Load schema file.
       //
-      $schemaFileName = sprintf("polecat-database-%s.xml", AblePolecat_Version::getDatabaseSchemaNumber());
-      $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
+      $schemaFilePath = AblePolecat_Mode_Config::getEnvironmentVariable(AblePolecat_Mode_Config::VAR_CONF_PATH_DBSCHEMA);
       $schemaFile = new DOMDocument();
       $schemaFile->load($schemaFilePath);
       
