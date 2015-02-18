@@ -104,7 +104,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
         }
         
         if (isset($sql)) {
-          $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke($this, $sql);
           if ($CommandResult->success() && count($CommandResult->value())) {
             $result = $CommandResult->value();
           }
@@ -133,7 +133,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
         from('role')->
         where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
       $result = FALSE;
-      $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke($this, $sql);
       if ($CommandResult->success() && count($CommandResult->value())) {
         $result = $CommandResult->value();
       }
@@ -166,7 +166,7 @@ abstract class AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract 
         from('role')->
         where(__SQLEXPR('session_id', '=', $session_id), 'AND', __SQLEXPR('interface', '=', $interface));
       $result = FALSE;
-      $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke($this, $sql);
       if ($CommandResult->success() && count($CommandResult->value())) {
         $result = $CommandResult->value();
       }

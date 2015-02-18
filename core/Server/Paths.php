@@ -138,16 +138,29 @@ class AblePolecat_Server_Paths {
     
     $ret = FALSE;
     
-    $search_path = $default_directory_name . DIRECTORY_SEPARATOR . $file_name;
+    //
+    // First assume full path passed as first parameter.
+    //
+    $search_path = $file_name;
     if (file_exists($search_path)) {
       $once ? include_once($search_path) : include($search_path);
       $ret = $search_path;
     }
-    else if (isset($directories) && is_array($directories)){
-      foreach($directories as $key => $directory) {
-        $ret = self::includeFile($file_name, $directory, NULL, $once);
-        if ($ret) {
-          break;
+    else {
+      //
+      // Search for file using hints provided by other parameters.
+      //
+      $search_path = $default_directory_name . DIRECTORY_SEPARATOR . $file_name;
+      if (file_exists($search_path)) {
+        $once ? include_once($search_path) : include($search_path);
+        $ret = $search_path;
+      }
+      else if (isset($directories) && is_array($directories)){
+        foreach($directories as $key => $directory) {
+          $ret = self::includeFile($file_name, $directory, NULL, $once);
+          if ($ret) {
+            break;
+          }
         }
       }
     }

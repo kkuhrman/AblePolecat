@@ -158,7 +158,7 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
       $Result = $Database->execute($sql);
     }
     else {
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $Result = $CommandResult->value();
       }

@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      Command/DbQuery.php
+ * @file      AblePolecat/core/Command/Database/Query.php
  * @brief     Execute SQL on core/application database.
  *
  * @author    Karl Kuhrman
@@ -10,10 +10,10 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Reverse.php')));
 
-class AblePolecat_Command_DbQuery extends AblePolecat_Command_ReverseAbstract {
+class AblePolecat_Command_Database_Query extends AblePolecat_Command_ReverseAbstract {
   
   const UUID = 'ef797050-715c-11e3-981f-0800200c9a66';
-  const NAME = 'DbQuery';
+  const NAME = 'Query';
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
@@ -66,7 +66,7 @@ class AblePolecat_Command_DbQuery extends AblePolecat_Command_ReverseAbstract {
     //
     // Create and dispatch command
     //
-    $Command = new AblePolecat_Command_DbQuery($Invoker, $sql);
+    $Command = new AblePolecat_Command_Database_Query($Invoker, $sql);
     return $Command->dispatch();
   }
 }

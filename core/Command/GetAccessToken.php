@@ -8,7 +8,6 @@
  * @version   0.6.3
  */
 
-// require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint', 'Read.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Reverse.php')));
 
 class AblePolecat_Command_GetAccessToken extends AblePolecat_Command_ReverseAbstract {

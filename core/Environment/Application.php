@@ -14,17 +14,7 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   
   const UUID = 'df5e0c10-5f4d-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Application Environment';
-  
-  /**
-   * System environment variable names
-   */
-  const SYSVAR_CORE_CLASSLIBS    = 'classLibraries';
-  
-  /**
-   * Configuration file constants.
-   */
-  const CONF_FILENAME_LIBS        = 'libs.xml';
-  
+    
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
    */
@@ -76,44 +66,10 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
     if (!isset(self::$Environment)) {
       try {
         //
-        // Verify ./etc/polecat/conf
-        //
-        $configFileDirectory = AblePolecat_Server_Paths::getFullPath('conf');
-        
-        //
-        // sync registry entries in database with configuration files.
-        //
-        
-        
-        //
         // Initialize singleton instance.
         //
         self::$Environment = new AblePolecat_Environment_Application($Subject);
         
-        //
-        // Containers for variables form any conf files.
-        //
-        $ClassLibraryRegistrations = array();
-        
-        //
-        // Get application settings from configuration file.
-        //
-        $classLibrariesConfFilePath = implode(DIRECTORY_SEPARATOR, 
-          array(
-            $configFileDirectory,
-            self::CONF_FILENAME_LIBS
-          )
-        );
-        self::$Environment->registerClassLibraries($classLibrariesConfFilePath, $ClassLibraryRegistrations);
-        
-        //
-        // Initialize system environment variables from conf file.
-        //
-        self::$Environment->setVariable(
-          $Subject,
-          self::SYSVAR_CORE_CLASSLIBS,
-          $ClassLibraryRegistrations
-        );
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) environment initialized.');
       }
       catch (Exception $Exception) {

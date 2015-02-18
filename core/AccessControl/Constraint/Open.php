@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Open.php
- * Base class for constraint on opening an access controlled resource.
+ * @file      polecat/core/AccessControl/Constraint/Open.php
+ * @brief     Constraint on open.
+ * 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint.php')));
@@ -11,7 +15,7 @@ class AblePolecat_AccessControl_Constraint_Open implements AblePolecat_AccessCon
   /**
    * Constants.
    */
-  const UUID = 'open';
+  const UUID = '93556821-b7a3-11e4-a12d-0050569e00a2';
   const NAME = 'open';
   
   /********************************************************************************

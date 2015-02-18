@@ -303,7 +303,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
             $requestMethod, 
             $requestUri
           );
-        $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
+        $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
           $Records = $CommandResult->value();
           isset($Records['lastInsertId']) ? $requestId = $Records['lastInsertId'] : NULL;

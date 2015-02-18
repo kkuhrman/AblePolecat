@@ -182,4 +182,6 @@ class AblePolecat_Debug {
     }
     return $backtrace;
   }
+  
+  final protected function __construct() {}
 }

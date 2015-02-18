@@ -100,7 +100,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
             break;
           case 'polecat:path':
             //
-            // @todo: alternate full paths for class libs and mods; this only assumes usr\lib or usr\mod
+            // Check for path at usr\lib or usr\mod.
             //
             $rawPath = implode(DIRECTORY_SEPARATOR, array(
               AblePolecat_Server_Paths::getFullPath('usr'),
@@ -109,6 +109,9 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
             ));
             $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
             if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
+              //
+              // Check if this is a full path.
+              //
               $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($childNode->nodeValue);
               if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
                 $message = sprintf("Invalid path given for active class library %s (%s).",
@@ -171,7 +174,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
           'lastModifiedTime')->
         from('lib')->
         where(sprintf("`id` = '%s' AND `statusCode` = %d", $primaryKey));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {

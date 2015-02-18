@@ -90,7 +90,7 @@ class AblePolecat_Message_Response_Template extends AblePolecat_Message_Response
         select('mimeType', 'defaultHeaders', 'body')->
         from('template')->
         where("resourceId = '" . $Response->resource_id . "'");
-      $Result = AblePolecat_Command_DbQuery::invoke($Invoker, $sql);
+      $Result = AblePolecat_Command_Database_Query::invoke($Invoker, $sql);
       if($Result->success()) {
         $Template = $Result->value();
         

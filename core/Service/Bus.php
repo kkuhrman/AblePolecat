@@ -237,7 +237,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               $ResourceRegistration->getPropertyValue('resourceId'), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );
-          $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
           if ($CommandResult->success() && count($CommandResult->value())) {
             //
             // Resume existing transaction.
@@ -397,7 +397,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           select('resourceClassName', 'resourceId', 'lastModifiedTime')->
           from('resource')->
           where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $classInfo = $CommandResult->value();
         if (isset($classInfo[0])) {
@@ -469,7 +469,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             set('lastModifiedTime')->
             values($ClassRegistration->classLastModifiedTime)->
             where(sprintf("resourceId = '%s'", $ResourceRegistration->resourceId));
-          $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
           if ($CommandResult->success()) {
             $ResourceRegistration->lastModifiedTime = $ClassRegistration->classLastModifiedTime;
           }
@@ -588,7 +588,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       select('responseClassName', 'docType', 'defaultHeaders', 'templateFullPath', 'lastModifiedTime')->
       from('response')->
       where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $ResponseRegistration->resourceId, $ResponseRegistration->statusCode));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
     if ($CommandResult->success() && is_array($CommandResult->value())) {
       $registrationInfo = $CommandResult->value();
       if (isset($registrationInfo[0])) {
@@ -634,7 +634,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         set('lastModifiedTime')->
         values($lastModifiedTime)->
         where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $ResponseRegistration->resourceId, $ResponseRegistration->statusCode));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
       if ($CommandResult->success()) {
         $ResponseRegistration->lastModifiedTime = $lastModifiedTime;
       }
@@ -777,10 +777,10 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // These are not loaded unless needed to avoid unnecessary overhead of creating a 
       // client connection.
       //
-      $ServiceInitiators = $this->getClassRegistry()->getClassListByKey(AblePolecat_Registry_Class::KEY_INTERFACE, 'AblePolecat_Service_InitiatorInterface');
-      foreach ($ServiceInitiators as $className => $classInfo) {
-        $Id = $classInfo[AblePolecat_Registry_Class::KEY_ARTICLE_ID];
-        $this->ServiceInitiators[$Id] = $className;
+      $ServiceInitiators = $this->getClassRegistry()->getInterfaceImplementations('AblePolecat_Service_InitiatorInterface');
+      isset($ServiceInitiators[AblePolecat_Registry_Class::KEY_ARTICLE_ID]) ? $ServiceInitiatorsById = $ServiceInitiators[AblePolecat_Registry_Class::KEY_ARTICLE_ID] : $ServiceInitiatorsById = array();
+      foreach ($ServiceInitiatorsById as $RegistryEntryId => $RegistryEntry) {
+        $this->ServiceInitiators[$RegistryEntryId] = $RegistryEntry->name;
       }
     }
     if (isset($this->ServiceInitiators[$id])) {

@@ -146,7 +146,7 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
       select('sessionNumber', 'roleId', 'userId', 'roleData')->
       from('role')->
       where(sprintf("sessionNumber = '%s'", AblePolecat_Host::getSessionNumber()));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this, $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this, $sql);
     if ($CommandResult->success()) {
       $results = $CommandResult->value();
       try {

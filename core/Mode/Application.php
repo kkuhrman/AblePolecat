@@ -211,41 +211,12 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     $CommandChain = AblePolecat_Command_Chain::wakeup();
     $ServerMode = AblePolecat_Mode_Server::wakeup();
     $CommandChain->setCommandLink($ServerMode, $this);
-    
-    //
-    // Load class registry.
-    //
-    $ClassRegistry = AblePolecat_Registry_Class::wakeup($this->getAgent());
-    
+        
     //
     // Load environment/configuration
     //
     //
     $this->ApplicationEnvironment = AblePolecat_Environment_Application::wakeup($this->getAgent($this));
-    if (isset($ClassRegistry)) {
-      //
-      // Register classes in registered libraries.
-      //
-      $ClassLibraryRegistrations = $this->ApplicationEnvironment->
-        getVariable($this->getAgent($this), AblePolecat_Environment_Application::SYSVAR_CORE_CLASSLIBS);
-      if (isset($ClassLibraryRegistrations)) {
-        foreach($ClassLibraryRegistrations as $key => $ClassLibraryRegistration) {
-          //
-          // Boot log can help with troubleshooting third party library installs.
-          //
-          $message = sprintf("REGISTRY: %s class library (id=%s)",
-            $ClassLibraryRegistration->getName(),
-            $ClassLibraryRegistration->getId()
-          );
-          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
-          
-          //
-          // Register library classes.
-          //
-          $ClassRegistrations = $ClassRegistry->loadLibrary($ClassLibraryRegistration->getId());
-        }
-      }
-    }
     
     AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) mode is initialized.');
   }

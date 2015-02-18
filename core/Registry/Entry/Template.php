@@ -1,7 +1,7 @@
 <?php
 /**
- * @file      polecat/core/Registry/Entry/Class.php
- * @brief     Encapsulates record of a resource registered in [class].
+ * @file      polecat/core/Registry/Entry/Template.php
+ * @brief     Encapsulates record of a template registered in [template].
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -10,33 +10,32 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
 
-interface AblePolecat_Registry_Entry_ClassInterface extends AblePolecat_Registry_EntryInterface {  
+interface AblePolecat_Registry_Entry_TemplateInterface extends AblePolecat_Registry_EntryInterface {  
+  /**
+   * @return string.
+   */
+  public function getArticleId();
   
   /**
    * @return string.
    */
-  public function getClassLibraryId();
-    
-  /**
-   * @return string.
-   */
-  public function getClassFullPath();
+  public function getDocType();
   
   /**
    * @return string.
    */
-  public function getClassFactoryMethod();
+  public function getDefaultHeaders();
+  
+  /**
+   * @return string.
+   */
+  public function getFullPath();
 }
 
 /**
  * Standard argument list.
  */
-class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstract implements AblePolecat_Registry_Entry_ClassInterface {
-  
-  /**
-   * @var Array File statistics from stat().
-   */
-  private $fileStat;
+class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbstract implements AblePolecat_Registry_Entry_TemplateInterface {
   
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
@@ -50,7 +49,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    */
   public function __set($name, $value) {
     
-    if ($name == 'classFullPath') {
+    if ($name == 'fullPath') {
       $this->fileStat = stat($value);
       if ($this->fileStat && isset($this->fileStat['mtime'])) {
         parent::__set('lastModifiedTime', $this->fileStat['mtime']);
@@ -68,7 +67,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_Class();
+    return new AblePolecat_Registry_Entry_Template();
   }
   
   /********************************************************************************
@@ -83,27 +82,9 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
-    
     //
-    // @todo: throw exception if Node does not comply with schema
+    // @todo: import [template] registry entry.
     //
-    $classRegistration = AblePolecat_Registry_Entry_Class::create();
-    $classRegistration->id = $Node->getAttribute('id');
-    $classRegistration->name = $Node->getAttribute('name');
-    foreach($Node->childNodes as $key => $childNode) {
-      switch ($childNode->nodeName) {
-        default:
-          break;
-        case 'polecat:classFactoryMethod':
-          $classRegistration->classFactoryMethod = $childNode->nodeValue;
-          break;
-        case 'polecat:path':
-          $rawPath = ABLE_POLECAT_SRC. DIRECTORY_SEPARATOR . $childNode->nodeValue;
-          $classRegistration->classFullPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
-          break;
-      }
-    }
-    return $classRegistration;
   }
   
   /**
@@ -116,7 +97,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    */
   public function export(DOMDocument $Document, DOMElement $Parent) {
     //
-    // @todo: export class registry entry.
+    // @todo: export [template] registry entry.
     //
   }
   
@@ -129,41 +110,36 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    */
   public static function fetch($primaryKey) {
     
-    $classRegistration = NULL;
+    $TemplateRegistration = NULL;
     
-    if (self::validatePrimaryKey($primaryKey)) {
+    if (is_array($primaryKey) && (1 == count($primaryKey))) {
       //
       // Create registry object and initialize primary key.
       //
-      $classRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-      isset($primaryKey['id']) ? $classRegistration->id = $primaryKey['id'] : $classRegistration->id = $primaryKey;
+      $TemplateRegistration = new AblePolecat_Registry_Entry_Template();
+      isset($primaryKey['id']) ? $TemplateRegistration->id = $primaryKey['id'] : $TemplateRegistration->id = $primaryKey[0];
       
       //
       // Generate and execute SELECT statement.
       //
       $sql = __SQL()->          
-        select(
-          'id', 
-          'name', 
-          'classLibraryId', 
-          'classFullPath', 
-          'classFactoryMethod', 
-          'lastModifiedTime')->
-        from('lib')->
-        where(sprintf("`id` = '%s' AND `statusCode` = %d", $primaryKey));
+        select('id', 'name', 'articleId', 'docType', 'defaultHeaders', 'fullPath', 'lastModifiedTime')->
+        from('template')->
+        where(sprintf("`id` = '%s'", $TemplateRegistration->id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          isset($registrationInfo[0]['name']) ? $classRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['classLibraryId']) ? $classRegistration->classLibraryId = $registrationInfo[0]['classLibraryId'] : NULL;
-          isset($registrationInfo[0]['classFullPath']) ? $classRegistration->classFullPath = $registrationInfo[0]['classFullPath'] : NULL;
-          isset($registrationInfo[0]['classFactoryMethod']) ? $classRegistration->classFactoryMethod = $registrationInfo[0]['classFactoryMethod'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $classRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          isset($registrationInfo[0]['name']) ? $TemplateRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['articleId']) ? $TemplateRegistration->articleId = $registrationInfo[0]['articleId'] : NULL;
+          isset($registrationInfo[0]['docType']) ? $TemplateRegistration->docType = $registrationInfo[0]['docType'] : NULL;
+          isset($registrationInfo[0]['defaultHeaders']) ? $TemplateRegistration->defaultHeaders = $registrationInfo[0]['defaultHeaders'] : NULL;
+          isset($registrationInfo[0]['fullPath']) ? $TemplateRegistration->fullPath = $registrationInfo[0]['fullPath'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $TemplateRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         }
       }
     }
-    return $classRegistration; 
+    return $TemplateRegistration;
   }
   
   /**
@@ -187,68 +163,62 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     $sql = __SQL()->          
-      insert(
-        'id', 
-        'name', 
-        'classLibraryId', 
-        'classFullPath', 
-        'classFactoryMethod', 
+      replace(
+        'id',
+        'name',
+        'articleId',
+        'docType', 
+        'defaultHeaders', 
+        'fullPath',
         'lastModifiedTime')->
-      into('class')->
+      into('template')->
       values(
-        $this->getId(), 
-        $this->getName(), 
-        $this->getClassLibraryId(), 
-        $this->getClassFullPath(), 
-        $this->getClassFactoryMethod(), 
-        $this->getLastModifiedTime()
+        $this->getId(),
+        $this->getName(),
+        $this->getArticleId(), 
+        $this->getDocType(), 
+        $this->getDefaultHeaders(), 
+        $this->getFullPath(),
+        $this->getLastModifiedTime(), 
       );
-    $this->executeDml($sql, $Database);
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Registry_Entry_ClassInterface.
+   * Implementation of AblePolecat_Registry_Entry_TemplateInterface.
    ********************************************************************************/
-  
-  /**
-   * @return string.
-   */
-  public function getClassLibraryId() {
-    return $this->getPropertyValue('classLibraryId');
-  }
     
   /**
    * @return string.
    */
-  public function getClassFullPath() {
-    return $this->getPropertyValue('classFullPath');
+  public function getArticleId() {
+    return $this->getPropertyValue('articleId');
   }
   
   /**
    * @return string.
    */
-  public function getClassFactoryMethod() {
-    return $this->getPropertyValue('classFactoryMethod');
+  public function getDocType() {
+    return $this->getPropertyValue('docType');
   }
   
+  /**
+   * @return string.
+   */
+  public function getDefaultHeaders() {
+    return $this->getPropertyValue('defaultHeaders');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getFullPath() {
+    return $this->getPropertyValue('fullPath');
+  }
+      
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-  
-  /**
-   * Output class state to debug log.
-   */
-  public function dumpState() {
-    $message = sprintf("REGISTRY: name=%s, id=%s; classLibraryId=%s; classFullPath=%s, classFactoryMethod=%s, lastModifiedTime=%d",
-      $this->getName(),
-      $this->getId(),
-      $this->getClassLibraryId(),
-      $this->getClassFullPath(),
-      $this->getClassFactoryMethod(),
-      $this->getLastModifiedTime()
-    );
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
-  }
   
   /**
    * Extends __construct().

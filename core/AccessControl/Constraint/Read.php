@@ -1,7 +1,11 @@
 <?php
 /**
- * @file: Read.php
- * Base class for constraint on reading an access controlled resource.
+ * @file      polecat/core/AccessControl/Constraint/Read.php
+ * @brief     Constraint on read.
+ * 
+ * @author    Karl Kuhrman
+ * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
+ * @version   0.6.3
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Constraint.php')));
@@ -11,7 +15,7 @@ class AblePolecat_AccessControl_Constraint_Read implements AblePolecat_AccessCon
   /**
    * Constants.
    */
-  const UUID = 'read';
+  const UUID = 'e8c99c39-b7a3-11e4-a12d-0050569e00a2';
   const NAME = 'read';
   
   /********************************************************************************

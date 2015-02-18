@@ -274,7 +274,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         $updateTime,
         self::TX_STATE_COMMITTED)->
       where(sprintf("`transactionId` = '%s'", $this->getTransactionId()));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
     if ($CommandResult->success() == FALSE) {
       //
       // @todo:
@@ -400,7 +400,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       set('transactionId')->
       values($this->getTransactionId())->
       where(sprintf("`requestId` = %d", $this->getRequest()->getRawRequestLogRecordId()));
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
     
     //
     // check save point
@@ -571,7 +571,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
             $updateTime,
             $savepointId)->
           where(sprintf("transactionId = '%s'", $this->getTransactionId()));
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+        $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
         $transactionUpdated = $CommandResult->success();
         $transactionStarted = $transactionUpdated;
         break;
@@ -601,7 +601,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
             $savepointId,
             $parentTransactionId
         );
-        $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+        $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
         $transactionStarted = $CommandResult->success();
         $transactionUpdated = $transactionStarted;
         break;
@@ -622,7 +622,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         $transactionId, 
         $savepointName
     );
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
     $savepointCreated = $CommandResult->success();
     
     if (($transactionStarted == FALSE) || ($transactionUpdated == FALSE) || ($savepointCreated == FALSE)) {

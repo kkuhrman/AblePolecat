@@ -24,9 +24,166 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Server', 'Pa
 
 interface AblePolecat_RegistryInterface 
   extends AblePolecat_CacheObjectInterface, AblePolecat_Database_InstallerInterface {
+  
+  /**
+   * Registry keys.
+   */
+  const KEY_ARTICLE_ID            = 'id';
+  const KEY_CLASS_NAME            = 'name';
+  
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry);
+  
+  /**
+   * Retrieve registered object by given id.
+   *
+   * @param UUID $id Id of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationById($id);
+  
+  /**
+   * Retrieve registered object by given name.
+   *
+   * @param string $name Name of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationByName($name);
+  
+  /**
+   * Retrieve a list of registered objects corresponding to the given key name/value.
+   *
+   * @param string $keyName The name of a registry key.
+   * @param string $keyValue Optional value of registry key.
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public function getRegistrations($key, $value = NULL);
 }
 
-abstract class AblePolecat_RegistryAbstract extends AblePolecat_CacheObjectAbstract {
+abstract class AblePolecat_RegistryAbstract 
+  extends AblePolecat_CacheObjectAbstract 
+  implements AblePolecat_RegistryInterface {
+  
+  /**
+   * @var Array Registry of classes which can be loaded.
+   */
+  private $Registrations;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_ArticleInterface.
+   ********************************************************************************/
+  
+  /**
+   * General purpose of object implementing this interface.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SYSTEM';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_RegistryInterface.
+   ********************************************************************************/
+  
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
+    
+    isset($RegistryEntry->id) ? $id = $RegistryEntry->id : $id = NULL;
+    isset($RegistryEntry->name) ? $name = $RegistryEntry->name : $name = NULL;
+    
+    if (isset($id) && isset($name)) {
+      $this->Registrations[self::KEY_ARTICLE_ID][$id] = $RegistryEntry;
+      $this->Registrations[self::KEY_CLASS_NAME][$name] = $RegistryEntry;
+    }
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("%s must include properties 'id' and 'name'.",
+        AblePolecat_Data::getDataTypeName($RegistryEntry)
+      ));
+    }
+  }
+  
+  /**
+   * Retrieve registered object by given id.
+   *
+   * @param UUID $id Id of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationById($id) {
+    
+    $RegistryEntry = NULL;
+    
+    if (isset($this->Registrations[self::KEY_ARTICLE_ID][$id])) {
+      $RegistryEntry = $this->Registrations[self::KEY_ARTICLE_ID][$id];
+    }
+    return $RegistryEntry;
+  }
+  
+  /**
+   * Retrieve registered object by given name.
+   *
+   * @param string $name Name of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationByName($name) {
+    
+    $RegistryEntry = NULL;
+    
+    if (isset($this->Registrations[self::KEY_CLASS_NAME][$name])) {
+      $RegistryEntry = $this->Registrations[self::KEY_CLASS_NAME][$name];
+    }
+    return $RegistryEntry;
+  }
+  
+  /**
+   * Retrieve a list of registered objects corresponding to the given key name/value.
+   *
+   * @param string $keyName The name of a registry key.
+   * @param string $keyValue Optional value of registry key.
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public function getRegistrations($key, $value = NULL) {
+    
+    $Registrations = array();
+    
+    switch($key) {
+      case self::KEY_ARTICLE_ID:
+      case self::KEY_CLASS_NAME:
+        if (isset($value)) {
+          if (isset($this->Registrations[$key][$value])) {
+            $Registrations = $this->Registrations[$key][$value];
+          }
+        }
+        else {
+          $Registrations = $this->Registrations[$key];
+        }
+        break;
+    }
+    return $Registrations;
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
   /**
    * Write a message to boot log and trigger PHP error.
    *
@@ -40,5 +197,18 @@ abstract class AblePolecat_RegistryAbstract extends AblePolecat_CacheObjectAbstr
     AblePolecat_Log_Boot::wakeup()->
       putMessage(AblePolecat_LogInterface::ERROR, $message);
     trigger_error($message, E_USER_ERROR);
+  }
+  
+  /**
+   * Extends constructor.
+   */
+  protected function initialize() {
+    //
+    // Class registration.
+    //
+    $this->Registrations = array(
+      self::KEY_ARTICLE_ID => array(),
+      self::KEY_CLASS_NAME => array(),
+    );
   }
 }

@@ -64,7 +64,7 @@ class AblePolecat_Log_Pdo extends AblePolecat_LogAbstract {
       insert('userId', 'eventSeverity', 'eventMessage')->
       into('log')->
       values(1, $type, $message);
-    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
+    $Result = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
     if(!$Result->success()) {
       //
       // @todo: what if log to DB fails?

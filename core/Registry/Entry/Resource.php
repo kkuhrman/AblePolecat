@@ -113,7 +113,7 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
             'lastModifiedTime')->
           from('resource')->
           where(sprintf("`resourceId` = '%s'", $ResourceRegistration->resourceId));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $classInfo = $CommandResult->value();
         if (isset($classInfo[0])) {

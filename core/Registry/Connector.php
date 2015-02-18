@@ -14,6 +14,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', '
 class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
   
   /**
+   * AblePolecat_AccessControl_Article_StaticInterface
+   */
+  const UUID = 'd17c3989-b7b0-11e4-a12d-0050569e00a2';
+  const NAME = __CLASS__;
+  
+  /**
    * @var AblePolecat_Registry_Connector Singleton instance.
    */
   private static $Registry = NULL;
@@ -27,6 +33,28 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
    * @var List of Able Polecat modules.
    */
   private $ClassLibraries = NULL;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
+   ********************************************************************************/
+   
+  /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
@@ -256,6 +284,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
    * Extends constructor.
    */
   protected function initialize() {
+    parent::initialize();
     //
     // Supported modules.
     //

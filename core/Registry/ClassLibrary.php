@@ -14,6 +14,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', '
 class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   
   /**
+   * AblePolecat_AccessControl_Article_StaticInterface
+   */
+  const UUID = '9e5f5eda-b7b0-11e4-a12d-0050569e00a2';
+  const NAME = __CLASS__;
+  
+  /**
    * @var AblePolecat_Registry_ClassLibrary Singleton instance.
    */
   private static $Registry = NULL;
@@ -22,6 +28,28 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    * @var List of Able Polecat modules.
    */
   private $ClassLibraries = NULL;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
+   ********************************************************************************/
+   
+  /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
@@ -151,6 +179,11 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
         foreach($modNodes as $key => $modNode) {
           $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
+          if ($ClassLibraryRegistration->id === $modClassLibraryRegistration->id) {
+            self::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
+              $ClassLibraryRegistration->name
+            ));
+          }
           if (isset($modClassLibraryRegistration)) {
             $modClassLibraryRegistration->save($Database);
           }

@@ -481,7 +481,7 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
           'sessionNumber')->
         from('session')->
         where(sprintf("`phpSessionId` = '%s'", $this->sessionId));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
       if ($CommandResult->success() && count($CommandResult->value())) {
         $Records = $CommandResult->value();
         isset($Records[0]['sessionNumber']) ? $this->sessionNumber = $Records[0]['sessionNumber'] : NULL;
@@ -499,7 +499,7 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
             AblePolecat_Host::getRequest()->getHostName(),
             $remoteAddress
           );
-        $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
+        $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
           $Records = $CommandResult->value();
           isset($Records['lastInsertId']) ? $this->sessionNumber = $Records['lastInsertId'] : NULL;

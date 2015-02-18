@@ -95,7 +95,7 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
           'lastModifiedTime')->
         from('component')->
         where(sprintf("`componentId` = '%s'", $ComponentRegistration->componentId));
-      $CommandResult = AblePolecat_Command_DbQuery::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {

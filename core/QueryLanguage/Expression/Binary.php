@@ -107,24 +107,7 @@ abstract class AblePolecat_QueryLanguage_Expression_BinaryAbstract implements Ab
     }
   }
   
-  final public function __construct() {
-    //
-    // transformation support class
-    // @todo: verify all core classes loadable by convention.
-    //
-    // $ClassRegistry = NULL;
-    // $CommandResult = AblePolecat_Command_GetRegistry::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), 'AblePolecat_Registry_Class');
-    // if ($CommandResult->success()) {
-      // $ClassRegistry = $CommandResult->value();
-    // }
-    // if (isset($ClassRegistry) && !$ClassRegistry->isLoadable('AblePolecat_Data_Primitive_Scalar_String')) {
-      // $ClassRegistry->registerLoadableClass(
-        // 'AblePolecat_Data_Primitive_Scalar_String', 
-        // implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Scalar', 'String.php')),
-        // 'typeCast'
-      // );
-    // }
-      
+  final public function __construct() {      
     $this->expression = array(
       self::LVALUE => '',
       self::OPERATOR => '',

@@ -28,7 +28,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Version.php'
  * Core Commands
  */
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'AccessControl', 'Authenticate.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'DbQuery.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Database', 'Query.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAccessToken.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetAgent.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'GetRegistry.php')));
@@ -189,7 +189,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         //
         $Result = new AblePolecat_Command_Result($this->getAgent(), AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         break;
-      case AblePolecat_Command_DbQuery::UUID:
+      case AblePolecat_Command_Database_Query::UUID:
         //
         // DbQuery
         //

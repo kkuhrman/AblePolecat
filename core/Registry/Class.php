@@ -13,16 +13,31 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Class.php')));
 
-class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
-  
+interface AblePolecat_Registry_ClassInterface extends AblePolecat_RegistryInterface {
   /**
    * Registry keys.
    */
-  const KEY_ARTICLE_ID            = 'id';
-  const KEY_CLASS_NAME            = 'name';
-  const KEY_CLASS_FULL_PATH       = 'classFullPath';
-  const KEY_CLASS_FACTORY_METHOD  = 'classFactoryMethod';
-  const KEY_INTERFACE             = 'interface';
+  const KEY_INTERFACE   = 'interface';
+  
+  /**
+   * Return a list of all classes implementing given interface.
+   *
+   * @param string $interfaceName
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public function getInterfaceImplementations($interfaceName);
+}
+
+class AblePolecat_Registry_Class 
+  extends AblePolecat_RegistryAbstract 
+  implements AblePolecat_Registry_ClassInterface {
+    
+  /**
+   * AblePolecat_AccessControl_Article_StaticInterface
+   */
+  const UUID = '7b70a499-b7b0-11e4-a12d-0050569e00a2';
+  const NAME = __CLASS__;
   
   /**
    * @var AblePolecat_Registry_Class Singleton instance.
@@ -30,9 +45,31 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   private static $Registry = NULL;
   
   /**
-   * @var Array Registry of classes which can be loaded.
+   * @var Array[AblePolecat_Registry_EntryInterface].
    */
-  private $Classes;
+  private $InterfaceImplementations;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
+   ********************************************************************************/
+   
+  /**
+   * Return unique, system-wide identifier.
+   *
+   * @return UUID.
+   */
+  public static function getId() {
+    return self::UUID;
+  }
+  
+  /**
+   * Return Common name.
+   *
+   * @return string Common name.
+   */
+  public static function getName() {
+    return self::NAME;
+  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
@@ -85,8 +122,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
           isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
           isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
           isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
-          self::$Registry->Classes[self::KEY_ARTICLE_ID][$id] = $ClassRegistration;
-          self::$Registry->Classes[self::KEY_CLASS_NAME][$name] = $ClassRegistration;
+          self::$Registry->addRegistration($ClassRegistration);
         }
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
@@ -150,7 +186,7 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       //
       // Make a list of potential delete candidates.
       //
-      $registeredClassIds = array_flip(array_keys($Registry->Classes[self::KEY_ARTICLE_ID]));
+      $registeredClassIds = array_flip(array_keys($Registry->getRegistrations(self::KEY_ARTICLE_ID)));
       
       //
       // Load master project configuration file.
@@ -173,7 +209,8 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
       $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
       foreach($DbNodes as $key => $Node) {
         $id = $Node->getAttribute('id');
-        if (!isset($Registry->Classes[self::KEY_ARTICLE_ID][$id])) {
+        $ClassRegistration = $Registry->getRegistrationById($id);
+        if (!isset($ClassRegistration)) {
           //
           // Class is not registered.
           //
@@ -203,189 +240,135 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   }
   
   /********************************************************************************
-   * Helper functions.
+   * Implementation of AblePolecat_RegistryInterface.
    ********************************************************************************/
   
   /**
-   * Load the classes associated with given library into registry.
+   * Add a registry entry.
    *
-   * @param string $classLibraryId
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
    *
-   * @return Array Class registration entries OR FALSE.
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
    */
-  public function loadLibrary($classLibraryId) {
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
     
-    $ClassRegistrations = FALSE;
-    
-    //
-    // Populate class from application database
-    // Query application database for registered classes.
-    //
-    $sql = __SQL()->
-      select('name', 'id', 'classScope', 'isRequired', 'classFullPath', 'classFactoryMethod')->
-      from('class')->
-      where("`classLibraryId` = '$classLibraryId'");
-    $Result = AblePolecat_Command_DbQuery::invoke($this->getDefaultCommandInvoker(), $sql);
-    if($Result->success()) {
-      $Classes = $Result->value();
-      $error_info = '';
-      $ClassRegistrations = array();
-      foreach($Classes as $key => $Class) {
-        $className = $Class['name'];
-        $ClassRegistration = $this->registerLoadableClass($className, $Class['classFullPath'], $Class['classFactoryMethod'], $error_info);
-        if ($ClassRegistration) {
-          $ClassRegistrations[$className] = $ClassRegistration;
-        }
-        else {
-          $msg = sprintf("There is an invalid class definition in the database class registry for %s.",
-            $Class['name']
+    if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_ClassInterface')) {
+      //
+      // Include file if not already.
+      //
+      $include_path = $RegistryEntry->getClassFullPath();
+      $include_path = AblePolecat_Server_Paths::includeFile($include_path);
+      if (!$include_path) {
+        throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. Invalid path given for %s (%s).",
+          __CLASS__,
+          $RegistryEntry->getName(),
+          $RegistryEntry->getClassFullPath()
+        ));
+      }
+      
+      //
+      // Add to base registry class.
+      //
+      parent::addRegistration($RegistryEntry);
+      
+      //
+      // Register by interface name(s).
+      //
+      $interfaces = class_implements($RegistryEntry->name, FALSE);
+      foreach($interfaces as $interfaceName) {
+        $id = $RegistryEntry->id;
+        $name = $RegistryEntry->name;
+        if (!isset($this->InterfaceImplementations[$interfaceName])) {
+          $this->InterfaceImplementations[$interfaceName] = array(
+            self::KEY_ARTICLE_ID => array(),
+            self::KEY_CLASS_NAME => array(),
           );
-          $msg .= ' ' . $error_info;
-          AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $msg, AblePolecat_LogInterface::WARNING);
+        }
+        if (!isset($this->InterfaceImplementations[$interfaceName][self::KEY_ARTICLE_ID][$id])) {
+          $this->InterfaceImplementations[$interfaceName][self::KEY_ARTICLE_ID][$id] = $RegistryEntry;
+        }
+        if (!isset($this->InterfaceImplementations[$interfaceName][self::KEY_CLASS_NAME][$name])) {
+          $this->InterfaceImplementations[$interfaceName][self::KEY_CLASS_NAME][$name] = $RegistryEntry;
         }
       }
     }
-    return $ClassRegistrations;
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",
+        __CLASS__,
+        AblePolecat_Data::getDataTypeName($RegistryEntry),
+        'AblePolecat_Registry_Entry_ClassInterface'
+      ));
+    }
   }
   
   /**
-   * Extends constructor.
-   */
-  protected function initialize() {
-    
-    //
-    // Class registration.
-    //
-    $this->Classes = array(
-      self::KEY_ARTICLE_ID => array(),
-      self::KEY_CLASS_NAME => array(),
-      self::KEY_INTERFACE => array(),
-    );
-    
-  }
-  
-  /**
-   * Retrieve a list of classes corresponding to the given key name/value.
+   * Retrieve a list of registered objects corresponding to the given key name/value.
    *
    * @param string $keyName The name of a registry key.
    * @param string $keyValue Optional value of registry key.
    *
-   * @return Array List of registered class names.
+   * @return Array[AblePolecat_Registry_EntryInterface].
    */
-  public function getClassListByKey($key, $value = NULL) {
+  public function getRegistrations($key, $value = NULL) {
     
-    $ClassList = array();
+    $Registrations = array();
     
-    switch($key) {
-      case self::KEY_ARTICLE_ID:
-      case self::KEY_CLASS_NAME:
-      case self::KEY_INTERFACE:
-        if (isset($value)) {
-          if (isset($this->Classes[$key][$value])) {
-            $ClassList = $this->Classes[$key][$value];
-          }
-        }
-        else {
-          $ClassList = $this->Classes[$key];
-        }
-        break;
-
-    }
-    return $ClassList;
-  }
-  
-  /**
-   * Attempt to include class definition file and make it loadable.
-   *
-   * This function will determine location of include file from class name, assuming
-   * class name follows standard core class library naming convention.
-   *
-   * This function assumes class name will follow proper naming and include file location 
-   * convention (above) where name of class follows AblePolecat_Some_Class_Name and the 
-   * include file is ./core/path/to/Some/Class/Name.php.
-   *
-   * @param $className Name of class to get include file path for.
-   * @param $extension File extension.
-   *
-   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR FALSE.
-   */
-  public function registerByConvention($className, $extension = 'php') {
-    
-    $ClassRegistration = FALSE;
-    
-    if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
-      $ClassRegistration = $this->Classes[self::KEY_CLASS_NAME][$className];
+    if ($key === self::KEY_INTERFACE) {
+      $Registrations = $this->getInterfaceImplementations($value);
     }
     else {
-      //
-      // The relative path is contructed by trimming the file name (sans extension) from the end 
-      // and the root directory name from the beginning of the class name. Underscores are then 
-      // converted to directory separators.
-      //
-      $paths = explode('_', $className);
-      $nesting_levels = count($paths) - 1;
-      if ($nesting_levels >= 0) {
-        $file_name = sprintf("%s.%s", array_pop($paths), $extension);
-        $root_directory_name = array_shift($paths);
-        $relative_path = implode(DIRECTORY_SEPARATOR, $paths);
-        $default_directory_name = ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . $relative_path;
-        $include_path = AblePolecat_Server_Paths::includeFile($file_name, $default_directory_name);
-        if ($include_path) {
-          //
-          // Register class
-          // @todo: the guessing of create method is very limited here.
-          //
-          $method = '__construct';
-          if ($interfaces = class_implements($className)) {
-            foreach($interfaces as $key => $interface) {
-              switch ($interface) {
-                default:
-                  break;
-                case 'AblePolecat_CacheObjectInterface';
-                  $method = 'wakeup';
-                  break;
-              }
-            }
-          }
-          $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-          $ClassRegistration->name = $className;
-          $ClassRegistration->classFullPath = $include_path;
-          $ClassRegistration->classFactoryMethod = $method;
-          //
-          // @todo: core class ids and lib id
-          //
-          // $ClassRegistration->id;
-          // $ClassRegistration->classLibraryId;
-          $ClassRegistration->classScope = 'core';
-          $ClassRegistration->isRequired = TRUE;
-          $this->Classes[self::KEY_CLASS_NAME][$className] = $ClassRegistration;
-          // if (isset($ClassRegistration->id)) {
-            // $this->Classes[self::KEY_ARTICLE_ID][$ClassRegistration->id] = $ClassRegistration;
-          // }
-        }
+      $Registrations = parent::getRegistrations($key, $value);
+    }
+    return $Registrations;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_Registry_ClassInterface.
+   ********************************************************************************/
+  
+  /**
+   * Return a list of all classes implementing given interface.
+   *
+   * @param string $interfaceName
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public function getInterfaceImplementations($interfaceName = NULL) {
+    
+    $Registrations = array();
+    
+    if (isset($interfaceName)) {
+      if (isset($this->InterfaceImplementations[self::KEY_INTERFACE][$interfaceName])) {
+        $Registrations = $this->InterfaceImplementations[self::KEY_INTERFACE][$interfaceName];
       }
     }
-    return $ClassRegistration;
+    else {
+      $Registrations = $this->InterfaceImplementations;
+    }
+    return $Registrations;
   }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
   
   /**
    * Check if class can be loaded in current environment.
    * 
    * @param string $className The name of class to check for.
    *
-   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR FALSE.
+   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR NULL.
    */
   public function isLoadable($className) {
     
-    $ClassRegistration = FALSE;
+    $ClassRegistration = $this->getRegistrationByName($className);
     
     //
     // Boot log is used for troubleshooting.
     //
     AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "Checking if $className is loadable.");
     
-    if (isset($this->Classes[self::KEY_CLASS_NAME][$className])) {
-      $ClassRegistration = $this->Classes[self::KEY_CLASS_NAME][$className];
+    if (isset($ClassRegistration)) {
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
     }
     else {
@@ -417,9 +400,9 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
     
     if ($ClassRegistration) {
       //
-      // Dump class registration data to boot log.
+      // @todo: query string parameter requesting Dump class registration data to boot log.
       //
-      $ClassRegistration->dumpState();
+      // $ClassRegistration->dumpState();
       
       if (isset($ClassRegistration->classFactoryMethod)) {
         //
@@ -449,92 +432,80 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
   }
   
   /**
-   * Registers path and creation method for loadable class.
+   * Attempt to include class definition file and make it loadable.
    *
-   * @param string $className The name of class to register.
-   * @param string $path Full path of include file if not given elsewhere in script.
-   * @param string $method Method used for creation (default is __construct()).
-   * @param string &$error_info If passed any error info is stored here.
+   * This function will determine location of include file from class name, assuming
+   * class name follows standard core class library naming convention.
    *
-   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR FALSE.
+   * This function assumes class name will follow proper naming and include file location 
+   * convention (above) where name of class follows AblePolecat_Some_Class_Name and the 
+   * include file is ./core/path/to/Some/Class/Name.php.
+   *
+   * In order to be auto-loadable in this manner, class must define constant UUID.
+   *
+   * @param $className Name of class to get include file path for.
+   * @param $extension File extension.
+   *
+   * @return AblePolecat_Registry_Entry_ClassInterface Class registration entry OR NULL.
    */
-  public function registerLoadableClass($className, $path = NULL, $method = NULL, &$error_info = NULL) {
+  public function registerByConvention($className, $extension = 'php') {
     
-    $ClassRegistration = FALSE;
-    
-    if (!isset($path)) {
-      //
-      // Attempt to define path based on core class naming convention.
-      //
-      $path = str_replace(array('AblePolecat', '_'), array(ABLE_POLECAT_CORE, DIRECTORY_SEPARATOR), $className);
-      $path .= '.php';
-    }
-    if (is_file($path)) {
-      include_once($path);
+    $ClassRegistration = NULL;
     
       //
-      // If a creational (factory) method is not provided, assume use of default constructor.
+      // The relative path is contructed by trimming the file name (sans extension) from the end 
+      // and the root directory name from the beginning of the class name. Underscores are then 
+      // converted to directory separators.
       //
-      if (!isset($method)) {
-        $method = '__construct';
-      }
-      else if ($method != '__construct') {
-      
-        $methods = get_class_methods($className);
-        isset($methods) ? $methods = array_flip($methods) : NULL;
-        if (!isset($methods[$method])) {
-          $error_info .= "Class factory method $className::$method does not exist.";
-          throw new AblePolecat_Registry_Exception("Class factory method $className::$method does not exist.");
+      $paths = explode('_', $className);
+      $nesting_levels = count($paths) - 1;
+      if ($nesting_levels >= 0) {
+        $file_name = sprintf("%s.%s", array_pop($paths), $extension);
+        $root_directory_name = array_shift($paths);
+        $relative_path = implode(DIRECTORY_SEPARATOR, $paths);
+        $default_directory_name = ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . $relative_path;
+        $include_path = AblePolecat_Server_Paths::includeFile($file_name, $default_directory_name);
+        if ($include_path) {
+          AblePolecat_Debug::kill(get_class_methods($className));
+          $interfaces = class_implements($className);
+          if ($interfaces) {
+            $interfaces = array_flip($interfaces);
+            if (isset($interfaces['AblePolecat_Registry_Entry_ClassInterface'])) {
+              //
+              // Register class
+              // @todo: the guessing of create method is very limited here.
+              //
+              $method = '__construct';
+              if ($interfaces = class_implements($className)) {
+                foreach($interfaces as $key => $interface) {
+                  switch ($interface) {
+                    default:
+                      break;
+                    case 'AblePolecat_CacheObjectInterface';
+                      $method = 'wakeup';
+                      break;
+                  }
+                }
+              }
+              $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+              $ClassRegistration->id = $className::getId();
+              $ClassRegistration->name = $className;
+              // $ClassRegistration->classLibraryId;
+              $ClassRegistration->classFullPath = $include_path;
+              $ClassRegistration->classFactoryMethod = $method;
+              $this->addRegistration($ClassRegistration);
+            }
+          }
         }
       }
-      
-      //
-      // Registry
-      //
-      $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-      $ClassRegistration->name = $className;
-      $ClassRegistration->classFullPath = $path;
-      $ClassRegistration->classFactoryMethod = $method;
-      
-      //
-      // Dump class registration data to boot log.
-      //
-      $ClassRegistration->dumpState();
-      
-      //
-      // @todo: This methid needs to persist registration to db and deal with remaining field values
-      //
-      // $ClassRegistration->id;
-      // $ClassRegistration->classLibraryId;
-      // $ClassRegistration->classScope = 'core';
-      // $ClassRegistration->isRequired = TRUE;
-      $this->Classes[self::KEY_CLASS_NAME][$className] = $ClassRegistration;
-      
-      //
-      // Interfaces implemented by class.
-      //
-      $interfaces = class_implements($className, FALSE);
-      array_key_exists('AblePolecat_AccessControl_Article_StaticInterface', $interfaces) ? $Id = $className::getId() : $Id = NULL;;
-      foreach($interfaces as $interfaceName) {
-        //
-        // Map by interface name.
-        //
-        if (!isset($this->Classes[self::KEY_INTERFACE][$interfaceName])) {
-          $this->Classes[self::KEY_INTERFACE][$interfaceName] = array();
-        }
-        if (!isset($this->Classes[self::KEY_INTERFACE][$interfaceName][$className])) {
-          $this->Classes[self::KEY_INTERFACE][$interfaceName][$className] = array();
-        }
-        $this->Classes[self::KEY_INTERFACE][$interfaceName][$className][self::KEY_CLASS_NAME] = $className;
-        if (isset($Id)) {
-          $this->Classes[self::KEY_INTERFACE][$interfaceName][$className][self::KEY_ARTICLE_ID] = $Id;
-        }
-      }
-    }
-    else if (isset($error_info)) {      
-      $error_info .= "Invalid include path ($path)";
-    }
-    
     return $ClassRegistration;
+  }
+  
+  /**
+   * Extends constructor.
+   */
+  protected function initialize() {
+    parent::initialize();
+    $this->InterfaceImplementations = array();
   }
 }

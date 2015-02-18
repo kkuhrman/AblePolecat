@@ -221,7 +221,7 @@ class AblePolecat_Transaction_AccessControl_Authority
       insert('sessionNumber', 'roleId', 'userId', 'roleData')->
       into('role')->
       values(AblePolecat_Host::getSessionNumber(), $Role->getId(), 0, '');
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
     if ($CommandResult->success()) {
       $result = TRUE;
     }
@@ -265,7 +265,7 @@ class AblePolecat_Transaction_AccessControl_Authority
       insert('sessionNumber', 'resourceId', 'constraintId', 'subjectId', 'authorityId')->
       into('permission')->
       values(AblePolecat_Host::getSessionNumber(), $this->getResourceRegistration()->getResourceId(), $Constraint::getId(), $Subject->getId(), $this->getId());
-    $CommandResult = AblePolecat_Command_DbQuery::invoke($this->getAgent(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
     if ($CommandResult->success()) {
       $result = TRUE;
     }
