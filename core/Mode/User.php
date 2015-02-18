@@ -115,6 +115,52 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+  
+  /**
+   * Returns assigned value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   *
+   * @return mixed Assigned value of given variable or NULL.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function getEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name) {
+    
+    $VariableValue = NULL;
+    if (isset(self::$UserMode) && isset(self::$UserMode->UserEnvironment)) {
+      $VariableValue = self::$UserMode->UserEnvironment->getVariable($Agent, $name);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableValue;
+  }
+  
+  /**
+   * Assign value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   * @param mixed $value Value of variable.
+   *
+   * @return bool TRUE if variable is set, otherwise FALSE.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value) {
+    $VariableSet = NULL;
+    if (isset(self::$UserMode) && isset(self::$UserMode->UserEnvironment)) {
+      $VariableSet = self::$UserMode->UserEnvironment->setVariable($Agent, $name, $value);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableSet;
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
   

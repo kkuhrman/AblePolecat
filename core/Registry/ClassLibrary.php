@@ -46,7 +46,40 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     
     if (!isset(self::$Registry)) {
       try {
+        //
+        // Create instance of singleton.
+        //
         self::$Registry = new AblePolecat_Registry_ClassLibrary($Subject);
+        
+        //
+        // Get project database.
+        //
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+        
+        //
+        // Load [lib]
+        //
+        $sql = __SQL()->
+          select('id', 'name', 'libType', 'libFullPath', 'useLib', 'lastModifiedTime')->
+          from('lib');
+        AblePolecat_Debug::kill("$sql");
+        $Result = AblePolecat_Command_DbQuery::invoke(self::$Registry->getDefaultCommandInvoker(), $sql);
+        if($Result->success()) {
+          $Libraries = $Result->value();
+          $error_info = '';
+          foreach($Libraries as $key => $Library) {
+            $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+            $id = $Library['id'];
+            $ClassLibraryRegistration->id = $id;
+            isset($Library['name']) ? $ClassLibraryRegistration->name = $Library['name'] : NULL;
+            isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
+            isset($Library['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $Library['libFullPath'] : NULL;
+            isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
+            isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
+            self::$Registry->ClassLibraries[] = $ClassLibraryRegistration;
+          }
+          AblePolecat_Debug::kill(self::$Registry->ClassLibraries);
+        }
       }
       catch (Exception $Exception) {
         self::$Registry = NULL;

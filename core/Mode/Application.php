@@ -38,11 +38,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    */
   private $ApplicationEnvironment;
   
-  /**
-   * @var AblePolecat_Registry_ClassLibrary
-   */
-  private $ClassLibraryRegistry;
-        
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_SubjectInterface.
    ********************************************************************************/
@@ -126,6 +121,52 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     //
     $Result = $this->delegateCommand($Command, $Result);
     return $Result;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+  
+  /**
+   * Returns assigned value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   *
+   * @return mixed Assigned value of given variable or NULL.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function getEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name) {
+    
+    $VariableValue = NULL;
+    if (isset(self::$ApplicationMode) && isset(self::$ApplicationMode->ApplicationEnvironment)) {
+      $VariableValue = self::$ApplicationMode->ApplicationEnvironment->getVariable($Agent, $name);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableValue;
+  }
+  
+  /**
+   * Assign value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   * @param mixed $value Value of variable.
+   *
+   * @return bool TRUE if variable is set, otherwise FALSE.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value) {
+    $VariableSet = NULL;
+    if (isset(self::$ApplicationMode) && isset(self::$ApplicationMode->ApplicationEnvironment)) {
+      $VariableSet = self::$ApplicationMode->ApplicationEnvironment->setVariable($Agent, $name, $value);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableSet;
   }
     
   /********************************************************************************

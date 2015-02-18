@@ -52,11 +52,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   private $BootLog;
   
   /**
-   * @var AblePolecat_Registry_Class
-   */
-  private $ClassRegistry;
-  
-  /**
    * @var AblePolecat_Registry_Interface
    */
   // private $InterfaceRegistry;
@@ -203,15 +198,9 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         $Result = new AblePolecat_Command_Result($QueryResult, $success);
         break;
       case AblePolecat_Command_GetRegistry::UUID:
-        switch($Command->getArguments()) {
-          default:
-            break;
-          case 'AblePolecat_Registry_Class':
-            $ClassRegistry = $this->getClassRegistry();
-            if (isset($ClassRegistry)) {
-              $Result = new AblePolecat_Command_Result($ClassRegistry, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
-            }
-            break;
+        $Registry = self::getEnvironmentVariable($this->getAgent(), $Command->getArguments());
+        if (isset($Registry)) {
+          $Result = new AblePolecat_Command_Result($Registry, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
         }
         break;
       case AblePolecat_Command_Log::UUID:
@@ -244,6 +233,52 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         break;
     }
     return $Result;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+  
+  /**
+   * Returns assigned value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   *
+   * @return mixed Assigned value of given variable or NULL.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function getEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name) {
+    
+    $VariableValue = NULL;
+    if (isset(self::$ServerMode) && isset(self::$ServerMode->ServerEnvironment)) {
+      $VariableValue = self::$ServerMode->ServerEnvironment->getVariable($Agent, $name);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableValue;
+  }
+  
+  /**
+   * Assign value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   * @param mixed $value Value of variable.
+   *
+   * @return bool TRUE if variable is set, otherwise FALSE.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value) {
+    $VariableSet = NULL;
+    if (isset(self::$ServerMode) && isset(self::$ServerMode->ServerEnvironment)) {
+      $VariableSet = self::$ServerMode->ServerEnvironment->setVariable($Agent, $name, $value);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableSet;
   }
   
   /********************************************************************************
@@ -613,21 +648,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-  
-  /**
-   * @return AblePolecat_Registry_Class.
-   */
-  protected function getClassRegistry() {
     
-    if (!isset($this->ClassRegistry)) {
-      //
-      // Load class registry.
-      //
-      $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this->getAgent());
-    }
-    return $this->ClassRegistry;
-  }
-  
   /**
    * Shut down Able Polecat server and send HTTP response.
    *
@@ -708,12 +729,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     //
     $this->ServerEnvironment = AblePolecat_Environment_Server::wakeup($this->getAgent());
-    
-    //
-    // Load class registry.
-    //
-    $this->ClassRegistry = AblePolecat_Registry_Class::wakeup($this->getAgent());
-    
+        
     //
     // Finalize initial logging.
     //

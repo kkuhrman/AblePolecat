@@ -8,18 +8,35 @@
  * @version   0.6.3
  */
 
-// require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
   
   const UUID = '318df280-5def-11e3-949a-0800200c9a66';
   const NAME = 'Able Polecat Server Environment';
+  
+  /**
+   * Variable names.
+   */
+  const VAR_REG_CLASS     = 'AblePolecat_Registry_Class';
+  const VAR_REG_LIB       = 'AblePolecat_Registry_ClassLibrary';
       
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
    */
   private static $Environment = NULL;
+  
+  /**
+   * @var AblePolecat_Registry_Class
+   */
+  // private $ClassRegistry;
+  
+  /**
+   * @var AblePolecat_Registry_ClassLibrary
+   */
+  // private $ClassLibraryRegistry;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
@@ -69,6 +86,26 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
       // Initialize singleton instance.
       //
       self::$Environment = new AblePolecat_Environment_Server($Subject);
+      
+      //
+      // Class library registry.
+      //
+      $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup($Subject);
+      self::$Environment->setVariable(
+        $Subject,
+        self::VAR_REG_LIB,
+        $ClassLibraryRegistry
+      );
+      AblePolecat_Debug::kill($ClassLibraryRegistry);
+      //
+      // Class registry.
+      //
+      $ClassRegistry = AblePolecat_Registry_Class::wakeup($Subject);
+      self::$Environment->setVariable(
+        $Subject,
+        self::VAR_REG_CLASS,
+        $ClassRegistry
+      );
     }
     return self::$Environment;
   }

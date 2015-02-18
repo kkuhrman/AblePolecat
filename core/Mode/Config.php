@@ -9,8 +9,6 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Connector.php')));
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
@@ -61,6 +59,11 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
    * @var Array Core server database connection settings.
    */
   private $CoreDatabaseConnectionSettings;
+  
+  /**
+   * @var AblePolecat_EnvironmentInterface.
+   */
+  private $Environment;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
@@ -199,11 +202,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             //
             // Otherwise, install current schema.
             //
-            AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);
-            
-            //
-            // @todo: Redirect home.
-            //
+            AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);            
           }
           break;
         case 'PUT':
@@ -242,6 +241,52 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     }
     
     return $Result;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+  
+  /**
+   * Returns assigned value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   *
+   * @return mixed Assigned value of given variable or NULL.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function getEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name) {
+    
+    $VariableValue = NULL;
+    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->Environment)) {
+      $VariableValue = self::$ConfigMode->Environment->getVariable($Agent, $name);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableValue;
+  }
+  
+  /**
+   * Assign value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   * @param mixed $value Value of variable.
+   *
+   * @return bool TRUE if variable is set, otherwise FALSE.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value) {
+    $VariableSet = NULL;
+    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->Environment)) {
+      $VariableSet = self::$ConfigMode->Environment->setVariable($Agent, $name, $value);
+    }
+    else {
+      throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
+    }
+    return $VariableSet;
   }
   
   /********************************************************************************
@@ -671,6 +716,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     
     parent::initialize();
     
+    $this->Environment = NULL;
     $this->bootLogFilePath = NULL;
     $this->CoreDatabase = NULL;
     $this->localProjectConfFile = NULL;

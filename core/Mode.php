@@ -32,6 +32,29 @@ interface AblePolecat_ModeInterface extends
   
   const ARG_SUBJECT         = 'subject';
   const ARG_REVERSE_TARGET  = 'reverseTarget';
+  
+  /**
+   * Returns assigned value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   *
+   * @return mixed Assigned value of given variable or NULL.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function getEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name);
+  
+  /**
+   * Assign value of given environment variable.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
+   * @param string $name Name of requested environment variable.
+   * @param mixed $value Value of variable.
+   *
+   * @return bool TRUE if variable is set, otherwise FALSE.
+   * @throw AblePolecat_Mode_Exception If environment is not initialized.
+   */
+  public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value);
 }
 
 abstract class AblePolecat_ModeAbstract 

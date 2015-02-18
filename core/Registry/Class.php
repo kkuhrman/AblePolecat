@@ -115,7 +115,8 @@ class AblePolecat_Registry_Class extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
-    
+    $Registry = AblePolecat_Registry_Class::wakeup();
+    AblePolecat_Debug::kill($Registry->Classes);
   }
   
   /********************************************************************************
