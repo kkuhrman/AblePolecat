@@ -55,6 +55,13 @@ interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_Resour
    * @see execute()
    */
   public function query(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql);
+  
+  /**
+   * Indicates whether database connection is established and accessible.
+   *
+   * @return boolean TRUE if database connection is functional, otherwise FALSE.
+   */
+  public static function ready();
 }
 
 abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_DatabaseInterface {

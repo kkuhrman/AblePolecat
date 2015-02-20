@@ -110,12 +110,10 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * @return AblePolecat_Database_Pdo or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    $Database = NULL;    
     if (!isset(self::$Database)) {
       self::$Database = new AblePolecat_Database_Pdo($Subject);
     }
-    $Database = self::$Database;
-    return $Database;
+    return self::$Database;
   }
   
   /********************************************************************************
@@ -261,6 +259,15 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       throw new AblePolecat_Database_Exception($message);
     }
     return $Results;
+  }
+  
+  /**
+   * Indicates whether database connection is established and accessible.
+   *
+   * @return boolean TRUE if database connection is functional, otherwise FALSE.
+   */
+  public static function ready() {
+    return (isset(self::$Database) && isset(self::$Database->DatabaseConnection));
   }
   
   /********************************************************************************

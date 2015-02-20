@@ -100,31 +100,33 @@ class AblePolecat_Registry_Class
         //
         self::$Registry = new AblePolecat_Registry_Class($Subject);
         
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
-        
-        //
-        // Load [lib]
-        //
-        $sql = __SQL()->
-          select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
-          from('class');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Class) {
-          $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-          $id = $Class['id'];
-          $ClassRegistration->id = $id;
-          $name = $Class['name'];
-          $ClassRegistration->name = $name;
-          isset($Class['classLibraryId']) ? $ClassRegistration->classLibraryId = $Class['classLibraryId'] : NULL;
-          isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
-          isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
-          isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
-          self::$Registry->addRegistration($ClassRegistration);
+        if (AblePolecat_Database_Pdo::ready()) {
+          //
+          // Get project database.
+          //
+          $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+          
+          //
+          // Load [lib]
+          //
+          $sql = __SQL()->
+            select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
+            from('class');
+          $QueryResult = $CoreDatabase->query($sql);
+          foreach($QueryResult as $key => $Class) {
+            $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+            $id = $Class['id'];
+            $ClassRegistration->id = $id;
+            $name = $Class['name'];
+            $ClassRegistration->name = $name;
+            isset($Class['classLibraryId']) ? $ClassRegistration->classLibraryId = $Class['classLibraryId'] : NULL;
+            isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
+            isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
+            isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
+            self::$Registry->addRegistration($ClassRegistration);
+          }
+          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
         }
-        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
       catch (Exception $Exception) {
         self::$Registry = NULL;
@@ -149,7 +151,8 @@ class AblePolecat_Registry_Class
     //
     // Core class library conf file.
     //
-    $coreFilePath = AblePolecat_Mode_Config::getEnvironmentVariable(AblePolecat_Mode_Config::VAR_CONF_PATH_CORE);
+    $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
+    $coreFilePath = AblePolecat_Mode_Config::getEnvironmentVariable($Agent, AblePolecat_Mode_Config::VAR_CONF_PATH_CORE);
     $coreFile = new DOMDocument();
     $coreFile->load($coreFilePath);
     
@@ -161,7 +164,7 @@ class AblePolecat_Registry_Class
     $coreClassLibraryId = $corePackageNode->getAttribute('id');
     if (!isset($corePackageNode)) {
       $message = 'project.xml must contain an package node.';
-      AblePolecat_Registry_Class::triggerError($message);
+      AblePolecat_Command_Chain::triggerError($message);
     }
     
     //
@@ -188,7 +191,7 @@ class AblePolecat_Registry_Class
     $applicationClassLibraryId = $applicationNode->getAttribute('id');
     if (!isset($applicationNode)) {
       $message = 'project.xml must contain an package node.';
-      AblePolecat_Registry_Class::triggerError($message);
+      AblePolecat_Command_Chain::triggerError($message);
     }
     
     //
@@ -222,7 +225,8 @@ class AblePolecat_Registry_Class
       //
       // Core class library conf file.
       //
-      $coreFilePath = AblePolecat_Mode_Config::getEnvironmentVariable(AblePolecat_Mode_Config::VAR_CONF_PATH_CORE);
+      $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
+      $coreFilePath = AblePolecat_Mode_Config::getEnvironmentVariable($Agent, AblePolecat_Mode_Config::VAR_CONF_PATH_CORE);
       $coreFile = new DOMDocument();
       $coreFile->load($coreFilePath);
       
@@ -233,7 +237,7 @@ class AblePolecat_Registry_Class
       $corePackageNode = $DbNodes->item(0);
       if (!isset($corePackageNode)) {
         $message = 'project.xml must contain an package node.';
-        AblePolecat_Registry_Class::triggerError($message);
+        AblePolecat_Command_Chain::triggerError($message);
       }
       
       //
@@ -270,7 +274,7 @@ class AblePolecat_Registry_Class
       $applicationNode = $DbNodes->item(0);
       if (!isset($applicationNode)) {
         $message = 'project.xml must contain an package node.';
-        AblePolecat_Registry_Class::triggerError($message);
+        AblePolecat_Command_Chain::triggerError($message);
       }
       
       //
@@ -441,8 +445,9 @@ class AblePolecat_Registry_Class
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
     }
     else {
-      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is not registered. Attempt to register by convention.");
-      $ClassRegistration = $this->registerByConvention($className);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is not registered. Attempt to load as core class.");
+      $this->registerCoreClasses();
+      $ClassRegistration = $this->getRegistrationByName($className);
     }
     return $ClassRegistration;
   }
@@ -501,6 +506,49 @@ class AblePolecat_Registry_Class
   }
   
   /**
+   * Register core (built-in) classes in case of no database connection.
+   */
+  private function registerCoreClasses() {
+    //
+    // There are a few classes required to install database and registries.
+    //
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Resource_Core_Ack::UUID;
+    $ClassRegistration->name = 'AblePolecat_Resource_Core_Ack';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Ack.php'));
+    $ClassRegistration->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
+    $ClassRegistration->name = 'AblePolecat_Resource_Restricted_Install';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Install.php'));
+    $ClassRegistration->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Transaction_Restricted_Install::UUID;
+    $ClassRegistration->name = 'AblePolecat_Transaction_Restricted_Install';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Install.php'));
+    $ClassRegistration->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Resource_Restricted_Update::UUID;
+    $ClassRegistration->name = 'AblePolecat_Resource_Restricted_Update';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Update.php'));
+    $ClassRegistration->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Transaction_Restricted_Update::UUID;
+    $ClassRegistration->name = 'AblePolecat_Transaction_Restricted_Update';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php'));
+    $ClassRegistration->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($ClassRegistration);
+  }
+  
+  /**
    * Attempt to include class definition file and make it loadable.
    *
    * This function will determine location of include file from class name, assuming
@@ -510,7 +558,7 @@ class AblePolecat_Registry_Class
    * convention (above) where name of class follows AblePolecat_Some_Class_Name and the 
    * include file is ./core/path/to/Some/Class/Name.php.
    *
-   * In order to be auto-loadable in this manner, class must define constant UUID.
+   * DEPRECATED
    *
    * @param $className Name of class to get include file path for.
    * @param $extension File extension.
@@ -535,7 +583,6 @@ class AblePolecat_Registry_Class
         $default_directory_name = ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . $relative_path;
         $include_path = AblePolecat_Server_Paths::includeFile($file_name, $default_directory_name);
         if ($include_path) {
-          AblePolecat_Debug::kill(get_class_methods($className));
           $interfaces = class_implements($className);
           if ($interfaces) {
             $interfaces = array_flip($interfaces);
@@ -576,6 +623,7 @@ class AblePolecat_Registry_Class
    * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
    * @param string $classLibraryId
+   * @param string $classLibraryFullPath
    *
    */
   protected static function insertList(AblePolecat_DatabaseInterface $Database, DOMNodeList $Nodes, $classLibraryId) {
@@ -584,6 +632,9 @@ class AblePolecat_Registry_Class
       if ($registerFlag != '0') {
         $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
         $ClassRegistration->classLibraryId = $classLibraryId;
+        if (!isset($ClassRegistration->classFullPath)) {
+          trigger_error('Hey dip weed, you need to fix the problem here with class library path definitions.');
+        }
         $ClassRegistration->save($Database);
       }
     }

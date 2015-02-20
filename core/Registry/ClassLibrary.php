@@ -24,11 +24,6 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    */
   private static $Registry = NULL;
   
-  /**
-   * @var List of Able Polecat modules.
-   */
-  private $ClassLibraries = NULL;
-  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
@@ -79,30 +74,32 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         //
         self::$Registry = new AblePolecat_Registry_ClassLibrary($Subject);
         
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
-        
-        //
-        // Load [lib]
-        //
-        $sql = __SQL()->
-          select('id', 'name', 'libType', 'libFullPath', 'useLib', 'lastModifiedTime')->
-          from('lib');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Library) {
-          $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-          $id = $Library['id'];
-          $ClassLibraryRegistration->id = $id;
-          isset($Library['name']) ? $ClassLibraryRegistration->name = $Library['name'] : NULL;
-          isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
-          isset($Library['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $Library['libFullPath'] : NULL;
-          isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
-          isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
-          self::$Registry->ClassLibraries[$id] = $ClassLibraryRegistration;
+        if (AblePolecat_Database_Pdo::ready()) {
+          //
+          // Get project database.
+          //
+          $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+          
+          //
+          // Load [lib]
+          //
+          $sql = __SQL()->
+            select('id', 'name', 'libType', 'libFullPath', 'useLib', 'lastModifiedTime')->
+            from('lib');
+          $QueryResult = $CoreDatabase->query($sql);
+          foreach($QueryResult as $key => $Library) {
+            $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+            $id = $Library['id'];
+            $ClassLibraryRegistration->id = $id;
+            isset($Library['name']) ? $ClassLibraryRegistration->name = $Library['name'] : NULL;
+            isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
+            isset($Library['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $Library['libFullPath'] : NULL;
+            isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
+            isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
+            self::$Registry->addRegistration($ClassLibraryRegistration);
+          }
+          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
         }
-        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
       }
       catch (Exception $Exception) {
         self::$Registry = NULL;
@@ -180,7 +177,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         foreach($modNodes as $key => $modNode) {
           $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
           if ($ClassLibraryRegistration->id === $modClassLibraryRegistration->id) {
-            self::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
+            AblePolecat_Command_Chain::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
               $ClassLibraryRegistration->name
             ));
           }
@@ -211,9 +208,6 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    * Extends constructor.
    */
   protected function initialize() {
-    //
-    // Supported modules.
-    //
-    $this->ClassLibraries = array();
+    parent::initialize();
   }
 }

@@ -34,6 +34,16 @@ interface AblePolecat_ModeInterface extends
   const ARG_REVERSE_TARGET  = 'reverseTarget';
   
   /**
+   * Boot state messages.
+   */
+  const BOOT_STATE_BEGIN    = 0x00000000;
+  const BOOT_STATE_ERR_INIT = 0x00000001;
+  const BOOT_STATE_CONFIG   = 0x00000010;
+  const BOOT_STATE_DATABASE = 0x00000100;
+  
+  const BOOT_STATE_FINISH   = 0x10000000;
+  
+  /**
    * Returns assigned value of given environment variable.
    *
    * @param AblePolecat_AccessControl_AgentInterface $Agent Agent seeking access.
@@ -60,6 +70,26 @@ interface AblePolecat_ModeInterface extends
 abstract class AblePolecat_ModeAbstract 
   extends AblePolecat_Command_TargetAbstract 
   implements AblePolecat_ModeInterface {
+  
+  /**
+   * @var Array Data of state of boot (start up) process.
+   */
+  private static $bootState;
+  
+  /**
+   * @var int Error display directive.
+   */
+  private static $display_errors;
+  
+  /**
+   * @var int Error reporting directive.
+   */
+  private static $report_errors;
+  
+  /**
+   * @var AblePolecat_Log_Boot
+   */
+  private $BootLog;
   
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
@@ -106,6 +136,43 @@ abstract class AblePolecat_ModeAbstract
   }
   
   /********************************************************************************
+   * Error and exception handling functions.
+   ********************************************************************************/
+  
+  /**
+   * Configure error reporting/handling.
+   */
+  protected function initializeErrorReporting() {
+    self::$report_errors = E_ALL;
+    self::$display_errors = 0;
+    if (isset($_REQUEST['display_errors'])) {
+      $display_errors = strval($_REQUEST['display_errors']);
+      switch ($display_errors) {
+        default:
+          self::$display_errors = E_ALL;
+          break;
+        case 'strict':
+          self::$report_errors = E_STRICT;
+          self::$display_errors = E_STRICT;
+          break;
+      }
+      
+      //
+      // Error settings for local development only
+      //
+      error_reporting(self::$report_errors);
+      ini_set('display_errors', self::$display_errors);
+    }
+    else {
+      //
+      // Error settings for production web server
+      //
+      error_reporting(self::$report_errors);
+      ini_set('display_errors', self::$display_errors);
+    }
+  }
+    
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
    
@@ -116,6 +183,72 @@ abstract class AblePolecat_ModeAbstract
    */
   protected function getAgent() {
     return $this->getDefaultCommandInvoker();
+  }
+  
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param int $status Return code.
+   */
+  protected static function shutdown($status = 0) {
+    exit($status);
+  }
+  
+  /**
+   * Return information about current state of boot (start up process).
+   *
+   * @return Array.
+   */
+  public static function getBootState() {
+    return self::$bootState;
+  }
+  
+  /**
+   * Report current progress on boot (start up process).
+   *
+   * @param int $code
+   * @param string $message
+   */
+  public static function reportBootState($code, $message) {
+    
+    $backtrace = debug_backtrace();
+    if (isset($backtrace[1])) {
+      isset($backtrace[1]['class']) ? $class = $backtrace[1]['class'] : $class = '';
+      isset($backtrace[1]['type']) ? $type = $backtrace[1]['type'] : $type = '';
+      isset($backtrace[1]['function']) ? $function = $backtrace[1]['function'] : $function = '';
+      if (!isset(self::$bootState)) {
+        self::$bootState = array();
+      }
+      self::$bootState['method'] = $class . $type . $function;
+      self::$bootState['code'] = $code;
+      self::$bootState['message'] = $message;
+    }
+  }
+  
+  /**
+   * Write information to the boot log if it is open.
+   *
+   * @param string $type STATUS | WARNING | ERROR.
+   * @param string $msg  Body of message.
+   * 
+   * @return mixed Message as sent, if written, otherwise FALSE.
+   */
+  protected function putBootMessage($type, $msg) {    
+    if (self::$display_errors) {
+      switch (self::$bootState) {
+        default:
+          $this->BootLog = AblePolecat_Log_Boot::wakeup($this->getAgent());
+          break;
+        case self::BOOT_STATE_BEGIN:
+        case self::BOOT_STATE_ERR_INIT:
+          //
+          // Before self::BOOT_STATE_CONFIG
+          //
+          $this->BootLog = AblePolecat_Log_Syslog::wakeup($this->getAgent());
+          break;
+      }
+      $this->BootLog->putMessage($type, $msg);
+    }
   }
   
   /**

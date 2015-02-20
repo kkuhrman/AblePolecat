@@ -274,7 +274,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
         // @todo: this is a 405 (Method Not Allowed) condition.
         //
         $message = sprintf("%s request for ./%s - Method Not Allowed (405).", $requestMethod, $resourceId);
-        AblePolecat_Registry_Connector::triggerError($message);
+        AblePolecat_Command_Chain::triggerError($message);
       }
     }
     return $ConnectorRegistration;

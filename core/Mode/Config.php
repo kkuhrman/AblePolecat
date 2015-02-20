@@ -117,17 +117,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       self::$ConfigMode = new AblePolecat_Mode_Config();
       
       //
-      // core conf file paths.
-      //
-      $schemaFileName = sprintf("polecat-database-%s.xml", AblePolecat_Version::getDatabaseSchemaNumber());
-      $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
-      self::$ConfigMode->Variables[self::VAR_CONF_PATH_DBSCHEMA] = $schemaFilePath;
-      
-      $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getName());
-      $coreFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'core', $coreFileName));
-      self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = $coreFilePath;
-      
-      //
       // Verify ./etc/polecat/conf
       //
       $configFileDirectory = AblePolecat_Server_Paths::getFullPath('conf');
@@ -145,6 +134,17 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           AblePolecat_Error::BOOT_SEQ_VIOLATION
         );
       }
+      
+      //
+      // core conf file paths.
+      //
+      $schemaFileName = sprintf("polecat-database-%s.xml", AblePolecat_Version::getDatabaseSchemaNumber());
+      $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
+      self::$ConfigMode->Variables[self::VAR_CONF_PATH_DBSCHEMA] = $schemaFilePath;
+      
+      $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getName());
+      $coreFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'core', $coreFileName));
+      self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = $coreFilePath;
       
       //
       // Peek at HTTP request.
@@ -223,6 +223,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           break;
       }
     }
+    self::reportBootState(self::BOOT_STATE_CONFIG, 'Host configuration initialized.');
     return self::$ConfigMode;
   }
   

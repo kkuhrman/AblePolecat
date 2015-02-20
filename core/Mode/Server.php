@@ -45,11 +45,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * AblePolecat_Mode_Server Instance of singleton.
    */
   private static $ServerMode;
-    
-  /**
-   * @var AblePolecat_Log_Boot
-   */
-  private $BootLog;
   
   /**
    * @var AblePolecat_Registry_Interface
@@ -75,16 +70,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * @var AblePolecat_Log_Pdo
    */
   private $Log;
-    
-  /**
-   * @var int Error display directive.
-   */
-  private static $display_errors;
-  
-  /**
-   * @var int Error reporting directive.
-   */
-  private static $report_errors;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
@@ -134,6 +119,33 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       // Create instance of singleton.
       //
       self::$ServerMode = new AblePolecat_Mode_Server();
+      
+      //
+      // Check critical configuration settings.
+      //
+      AblePolecat_Mode_Config::wakeup();
+
+      //
+      // Load core database configuration settings.
+      //
+      self::$ServerMode->initializeCoreDatabase();
+      $dbErrors = self::$ServerMode->CoreDatabase->flushErrors();
+      foreach($dbErrors as $errorNumber => $error) {
+        $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+        self::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+      }
+
+      //
+      // Load environment/configuration
+      //
+      //
+      self::$ServerMode->ServerEnvironment = AblePolecat_Environment_Server::wakeup(self::$ServerMode->getAgent());
+       
+      //
+      // Finalize initial logging.
+      //
+      self::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Able Polecat core version is %s", AblePolecat_Version::getVersion(TRUE, 'text')));
+      self::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode is initialized.');
     }
     return self::$ServerMode;
   }
@@ -288,39 +300,16 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   /**
    * Configure error reporting/handling.
    */
-  private function initializeErrorReporting() {
-    self::$report_errors = E_ALL;
-    self::$display_errors = 0;
-    if (isset($_REQUEST['display_errors'])) {
-      $display_errors = strval($_REQUEST['display_errors']);
-      switch ($display_errors) {
-        default:
-          self::$display_errors = E_ALL;
-          break;
-        case 'strict':
-          self::$report_errors = E_STRICT;
-          self::$display_errors = E_STRICT;
-          break;
-      }
-      
-      //
-      // Error settings for local development only
-      //
-      error_reporting(self::$report_errors);
-      ini_set('display_errors', self::$display_errors);
-    }
-    else {
-      //
-      // Error settings for production web server
-      //
-      error_reporting(self::$report_errors);
-      ini_set('display_errors', self::$display_errors);
-    }
+  protected function initializeErrorReporting() {
+    
+    parent::initializeErrorReporting();
+    
     //
     // Default error/exception handling
     //
     set_error_handler(array('AblePolecat_Mode_Server', 'handleError'));
     set_exception_handler(array('AblePolecat_Mode_Server', 'handleException'));
+    self::reportBootState(self::BOOT_STATE_ERR_INIT, 'Error reporting initialized.');
   }
   
   /**
@@ -363,6 +352,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Log to database if connected.
     //
+    // AblePolecat_Debug::kill(self::getActiveCoreDatabaseName());
     if (self::getActiveCoreDatabaseName()) {
       $sql = __SQL()->          
         insert(
@@ -393,17 +383,17 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // @todo: give user, application modes chance to do something with shut down command.
     //
-    
-    if ($shutdown && (self::$display_errors != 0)) {
+    $display_errors = ini_get('display_errors');
+    if ($shutdown && ($display_errors != 0)) {
       $reason = 'Critical Error';
       $code = $errno;
       self::shutdown($code);
     }
-    else if (self::$display_errors != 0) {
+    else if ($display_errors != 0) {
       //
       // User induced script to vomit error on screen.
       //
-      print('<p>display_errors set to ' . self::$display_errors . '</p>');
+      print('<p>display_errors set to ' . $display_errors . '</p>');
       print('<p>' . 
         $msg . 
         '<ul><li>' .
@@ -510,20 +500,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     }
     else {
       throw new AblePolecat_Mode_Exception('Core database connection settings in project configuration file appear to be corrupted.');
-    }
-  }
-  
-  /**
-   * Write information to the boot log if it is open.
-   *
-   * @param string $type STATUS | WARNING | ERROR.
-   * @param string $msg  Body of message.
-   * 
-   * @return mixed Message as sent, if written, otherwise FALSE.
-   */
-  private function putBootMessage($type, $msg) {    
-    if (isset($this->BootLog)) {
-      $this->BootLog->putMessage($type, $msg);
     }
   }
   
@@ -655,7 +631,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * @param int $status Return code.
    */
   protected static function shutdown($status = 0) {
-    exit($status);
+    parent::shutdown($status);
   }
   
   /**
@@ -697,43 +673,5 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     // Error and exception handling.
     //
     $this->initializeErrorReporting();
-    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Error reporting initialized.');
-    
-    //
-    // Check critical configuration settings.
-    //
-    AblePolecat_Mode_Config::wakeup();
-    
-    //
-    // Open the boot log.
-    //
-    if (self::$display_errors) {
-      $this->BootLog = AblePolecat_Log_Boot::wakeup($this->getAgent());
-    }
-    else {
-      $this->BootLog = NULL;
-    }
-    
-    //
-    // Load core database configuration settings.
-    //
-    $this->initializeCoreDatabase();
-    $dbErrors = $this->CoreDatabase->flushErrors();
-    foreach($dbErrors as $errorNumber => $error) {
-      $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-      $this->putBootMessage(AblePolecat_LogInterface::ERROR, $error);
-    }
-    
-    //
-    // Load environment/configuration
-    //
-    //
-    $this->ServerEnvironment = AblePolecat_Environment_Server::wakeup($this->getAgent());
-        
-    //
-    // Finalize initial logging.
-    //
-    $this->putBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Able Polecat core version is %s", AblePolecat_Version::getVersion(TRUE, 'text')));
-    $this->putBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode is initialized.');
   }
 }

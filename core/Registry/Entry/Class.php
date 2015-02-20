@@ -51,12 +51,16 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
   public function __set($name, $value) {
     
     if ($name == 'classFullPath') {
-      $this->fileStat = stat($value);
-      if ($this->fileStat && isset($this->fileStat['mtime'])) {
+      if (file_exists($value)) {
+        $this->fileStat = stat($value);
+      }
+      if (isset($this->fileStat) && isset($this->fileStat['mtime'])) {
         parent::__set('lastModifiedTime', $this->fileStat['mtime']);
       }
       else {
-        AblePolecat_Registry_Class::triggerError("Failed to retrieve file stats on $value.");
+        AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), 
+          "Failed to retrieve file stats on $value.", AblePolecat_LogInterface::WARNING);
+        $value = NULL;
       }
     }
     parent::__set($name, $value);
@@ -98,7 +102,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
           $classRegistration->classFactoryMethod = $childNode->nodeValue;
           break;
         case 'polecat:path':
-          $rawPath = ABLE_POLECAT_SRC. DIRECTORY_SEPARATOR . $childNode->nodeValue;
+          $rawPath = ABLE_POLECAT_SRC . DIRECTORY_SEPARATOR . $childNode->nodeValue;
           $classRegistration->classFullPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
           break;
       }

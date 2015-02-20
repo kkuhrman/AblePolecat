@@ -85,9 +85,51 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
    ********************************************************************************/
   
   /**
+   * Add class library to application environment.
+   *
+   * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration
+   * @param Array $ClassLibraryRegistrations Optional container
+   *
+   * @return Array Container with zero or more AblePolecat_Registry_Entry_ClassLibrary.
+   */
+  public static function registerClassLibrary(AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration) {
+    
+    $registered = FALSE;
+    
+    if (AblePolecat_Server_Paths::verifyDirectory($ClassLibraryRegistration->libFullPath)) {
+      //
+      // Append path to PHP INI paths
+      //
+      set_include_path(get_include_path() . PATH_SEPARATOR . $ClassLibraryRegistration->libFullPath);
+      
+      //
+      // Add path to Able Polecat configurable paths.
+      //
+      AblePolecat_Server_Paths::setFullPath($ClassLibraryRegistration->id, $ClassLibraryRegistration->libFullPath);
+      
+      //
+      // if there is a paths.config file, include that, too...
+      //
+      $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
+        array(
+          $ClassLibraryRegistration->libFullPath, 
+          'etc', 
+          'polecat', 
+          'conf', 
+          'path.config'
+        )
+      );
+      if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
+        include_once($pathConfFilePath);
+      }
+    }
+    return $registered;
+  }
+  
+  /**
    * Register a class library and its dependencies.
    *
-   * @param string $classLibrariesConfFilePath
+   * @param AblePolecat_Registry_Entry_ClassLibrary $classLibrary
    * @param Array $ClassLibraryRegistrations Optional container
    *
    * @return Array Container with zero or more AblePolecat_Registry_Entry_ClassLibrary.
@@ -123,38 +165,28 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
         if ($Node->getAttribute('use')) {
           $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
           $ClassLibraryRegistration->classLibraryName = $Node->getAttribute('name');
-          $ClassLibraryRegistration->classLibraryId = $Node->getAttribute('id');
+          $ClassLibraryRegistration->id = $Node->getAttribute('id');
           $ClassLibraryRegistration->classLibraryType = $Node->getAttribute('type');
           foreach($Node->childNodes as $key => $childNode) {
-            if($childNode->nodeName == 'fullPath') {
-              $ClassLibraryRegistration->classLibraryDirectory = $childNode->nodeValue;
+            if($childNode->nodeName == 'polecat:path') {
+              $ClassLibraryRegistration->libFullPath = $childNode->nodeValue;
             }
           }
           
           //
           // If library full path is not defined, try default.
           //
-          if (!isset($ClassLibraryRegistration->classLibraryDirectory)) {
-            $ClassLibraryRegistration->classLibraryDirectory = AblePolecat_Server_Paths::getFullPath('libs') .
+          if (!isset($ClassLibraryRegistration->libFullPath)) {
+            $ClassLibraryRegistration->libFullPath = AblePolecat_Server_Paths::getFullPath('lib') .
               DIRECTORY_SEPARATOR . $ClassLibraryRegistration->classLibraryName;
           }
-          if (AblePolecat_Server_Paths::verifyDirectory($ClassLibraryRegistration->classLibraryDirectory)) {
-            //
-            // Append path to PHP INI paths
-            //
-            set_include_path(get_include_path() . PATH_SEPARATOR . $ClassLibraryRegistration->classLibraryDirectory);
-            
-            //
-            // Add path to Able Polecat configurable paths.
-            //
-            AblePolecat_Server_Paths::setFullPath($ClassLibraryRegistration->classLibraryId, $ClassLibraryRegistration->classLibraryDirectory);
-            
+          if ($this->registerClassLibrary($ClassLibraryRegistration)) {
             //
             // Check if MOD or library has any dependencies and register those, too.
             //
             $depLibsConfFilePath = implode(DIRECTORY_SEPARATOR, 
               array(
-                $ClassLibraryRegistration->classLibraryDirectory, 
+                $ClassLibraryRegistration->libFullPath, 
                 'etc', 
                 'polecat', 
                 'conf', 
@@ -168,24 +200,8 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
             if ($classLibrariesConfFilePath != $depLibsConfFilePath) {
               $this->registerClassLibraries($depLibsConfFilePath, $ClassLibraryRegistrations);
             }
-            
-            //
-            // if there is a paths.config file, include that, too...
-            //
-            $depLibPathConfFilePath = implode(DIRECTORY_SEPARATOR, 
-              array(
-                $ClassLibraryRegistration->classLibraryDirectory, 
-                'etc', 
-                'polecat', 
-                'conf', 
-                'path.config'
-              )
-            );
-            if (file_exists($depLibPathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $depLibPathConfFilePath)) {
-              include_once($depLibPathConfFilePath);
-            }
+            $ClassLibraryRegistrations[] = $ClassLibraryRegistration;
           }
-          $ClassLibraryRegistrations[] = $ClassLibraryRegistration;
         }
       }
     }

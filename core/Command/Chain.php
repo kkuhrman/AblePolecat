@@ -54,6 +54,17 @@ interface AblePolecat_Command_ChainInterface
     AblePolecat_Command_TargetInterface $Superior, 
     AblePolecat_Command_TargetInterface $Subordinate
   );
+  
+  /**
+   * Write a message to boot log and trigger PHP error.
+   *
+   * Most errors in registry entry classes will result in a fatal application
+   * error. But most will also likely occur before standard error handling and
+   * logging are operational. This method provides a means to catch these.
+   *
+   * @param string $message.
+   */
+  public static function triggerError($message);
 }
 
 class AblePolecat_Command_Chain 
@@ -190,7 +201,8 @@ class AblePolecat_Command_Chain
       $Target = $this->targetList;
     }
     catch (RuntimeException $Exception) {
-      throw new AblePolecat_Command_Exception('There are no command targets assigned to chain of responsibility.');
+      // throw new AblePolecat_Command_Exception('There are no command targets assigned to chain of responsibility.');
+      self::triggerError('There are no command targets assigned to chain of responsibility.');
     }
     return $Target->bottom();
   }
@@ -208,7 +220,8 @@ class AblePolecat_Command_Chain
       $Target = $this->targetList->top();
     }
     catch (RuntimeException $Exception) {
-      throw new AblePolecat_Command_Exception('There are no command targets assigned to chain of responsibility.');
+      // throw new AblePolecat_Command_Exception('There are no command targets assigned to chain of responsibility.');
+      self::triggerError('There are no command targets assigned to chain of responsibility.');
     }
     return $Target;
   }
@@ -284,8 +297,24 @@ class AblePolecat_Command_Chain
       }
     }
     if ($violationMessage) {
-      throw new AblePolecat_Command_Exception($violationMessage);
+      // throw new AblePolecat_Command_Exception($violationMessage);
+      self::triggerError($violationMessage);
     }
+  }
+  
+  /**
+   * Write a message to boot log and trigger PHP error.
+   *
+   * Most errors in registry entry classes will result in a fatal application
+   * error. But most will also likely occur before standard error handling and
+   * logging are operational. This method provides a means to catch these.
+   *
+   * @param string $message.
+   */
+  public static function triggerError($message) {
+    AblePolecat_Log_Boot::wakeup()->
+      putMessage(AblePolecat_LogInterface::ERROR, $message);
+    trigger_error($message, E_USER_ERROR);
   }
   
   /********************************************************************************
