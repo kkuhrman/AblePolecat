@@ -97,7 +97,6 @@ class AblePolecat_Transaction_Restricted_Install extends AblePolecat_Transaction
           // Attempt to load resource class
           //
           try {
-            // $Resource = AblePolecat_Resource_Restricted_Install::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
             $Resource = AblePolecat_Resource_Core_Factory::wakeup(
               $this->getDefaultCommandInvoker(),
               'AblePolecat_Resource_Restricted_Install'

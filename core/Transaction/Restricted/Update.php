@@ -129,6 +129,11 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               // INSERT [class]
               //
               AblePolecat_Registry_Class::install($CoreDatabase);
+              
+              //
+              // INSERT [component]
+              //
+              AblePolecat_Registry_Component::install($CoreDatabase);
               break;
             case AblePolecat_Resource_Restricted_Update::UUID:
               //
