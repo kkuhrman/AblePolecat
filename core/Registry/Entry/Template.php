@@ -179,7 +179,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
         $this->getDocType(), 
         $this->getDefaultHeaders(), 
         $this->getFullPath(),
-        $this->getLastModifiedTime(), 
+        $this->getLastModifiedTime()
       );
     return $this->executeDml($sql, $Database);
   }

@@ -82,6 +82,9 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
   /**
    * Create the registry entry object and populate with given DOMNode data.
    *
+   * Some properties, notably classLibraryId and classFullPath, are dependent on 
+   * the parent node and are not set herein.
+   *
    * @param DOMNode $Node DOMNode encapsulating registry entry.
    *
    * @return AblePolecat_Registry_EntryInterface.
@@ -102,8 +105,13 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
           $classRegistration->classFactoryMethod = $childNode->nodeValue;
           break;
         case 'polecat:path':
-          $rawPath = ABLE_POLECAT_SRC . DIRECTORY_SEPARATOR . $childNode->nodeValue;
-          $classRegistration->classFullPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
+          //
+          // NOTE: path is only set in case of non-standard path given (i.e. full path).
+          //
+          $sanitizePath = AblePolecat_Server_Paths::sanitizePath($childNode->nodeValue);
+          if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
+            $ClassRegistration->classFullPath = $sanitizePath;
+          }
           break;
       }
     }

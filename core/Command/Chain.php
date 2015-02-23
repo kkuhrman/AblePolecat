@@ -168,16 +168,22 @@ class AblePolecat_Command_Chain
     $CommandResult = NULL;
     $Target = NULL;
     
-    switch ($Command::direction()) {
-      default:
-        break;
-      case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-        $Target = $CommandChain->getBottomCommandTarget();
-        break;
-      case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-        $Target = $CommandChain->getTopCommandTarget();
-        break;
+    if (isset($CommandChain->targetList) && ($CommandChain->targetList->isEmpty() === FALSE)) {
+      switch ($Command::direction()) {
+        default:
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
+          $Target = $CommandChain->getBottomCommandTarget();
+          break;
+        case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
+          $Target = $CommandChain->getTopCommandTarget();
+          break;
+      }
     }
+    else {
+      self::triggerError(__METHOD__ . ' There are no command targets assigned to chain of responsibility.');
+    }
+    
     if (isset($Target)) {
       $CommandResult = $Target->execute($Command);
     }
@@ -198,13 +204,12 @@ class AblePolecat_Command_Chain
     $Target = NULL;
     
     try {
-      $Target = $this->targetList;
+      $Target = $this->targetList->bottom();
     }
     catch (RuntimeException $Exception) {
-      // throw new AblePolecat_Command_Exception('There are no command targets assigned to chain of responsibility.');
-      self::triggerError('There are no command targets assigned to chain of responsibility.');
+      self::triggerError(__METHOD__ . ' There are no command targets assigned to chain of responsibility.');
     }
-    return $Target->bottom();
+    return $Target;
   }
   
   /**
@@ -220,8 +225,7 @@ class AblePolecat_Command_Chain
       $Target = $this->targetList->top();
     }
     catch (RuntimeException $Exception) {
-      // throw new AblePolecat_Command_Exception('There are no command targets assigned to chain of responsibility.');
-      self::triggerError('There are no command targets assigned to chain of responsibility.');
+      self::triggerError(__METHOD__ . ' There are no command targets assigned to chain of responsibility.');
     }
     return $Target;
   }

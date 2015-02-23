@@ -275,9 +275,7 @@ interface AblePolecat_Dom_DocumentInterface extends AblePolecat_Dom_NodeInterfac
   // public bool registerNodeClass ( string $baseclass , string $extendedclass )
 }
 
-abstract class AblePolecat_Dom_DocumentAbstract 
-  extends AblePolecat_Dom_NodeAbstract 
-  implements AblePolecat_Dom_DocumentInterface {
+abstract class AblePolecat_Dom_DocumentAbstract implements AblePolecat_Dom_DocumentInterface {
   
   /**
    * @var DOMDocument.

@@ -10,11 +10,6 @@
 
 interface AblePolecat_Dom_NodeInterface {
   /**
-   * @return Data expressed as a string.
-   */
-  public function __toString();
-  
-  /**
    * @param DOMDocument $Document.
    *
    * @return DOMNode Encapsulated data expressed as DOM node.

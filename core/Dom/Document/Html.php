@@ -11,7 +11,7 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Document.php')));
 
 interface AblePolecat_Dom_Document_HtmlInterface extends AblePolecat_Dom_DocumentInterface {
-)
+}
 
 class AblePolecat_Dom_Document_Html 
   extends AblePolecat_Dom_DocumentAbstract 

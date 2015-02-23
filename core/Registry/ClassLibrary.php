@@ -85,18 +85,56 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
           //
           $sql = __SQL()->
             select('id', 'name', 'libType', 'libFullPath', 'useLib', 'lastModifiedTime')->
-            from('lib');
+            from('lib')->
+            where('`useLib` = 1');
           $QueryResult = $CoreDatabase->query($sql);
           foreach($QueryResult as $key => $Library) {
             $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-            $id = $Library['id'];
-            $ClassLibraryRegistration->id = $id;
+            isset($Library['id']) ? $ClassLibraryRegistration->id = $Library['id'] : NULL;
             isset($Library['name']) ? $ClassLibraryRegistration->name = $Library['name'] : NULL;
-            isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
-            isset($Library['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $Library['libFullPath'] : NULL;
-            isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
-            isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
-            self::$Registry->addRegistration($ClassLibraryRegistration);
+            
+            //
+            // Check library full path setting.
+            //
+            isset($Library['libFullPath']) ? $libFullPath = $Library['libFullPath'] : $libFullPath = NULL;
+            if (isset($libFullPath) && AblePolecat_Server_Paths::verifyDirectory($libFullPath)) {
+              //
+              // Append class library path path to PHP INI paths
+              //
+              $ClassLibraryRegistration->libFullPath = $libFullPath;
+              set_include_path(get_include_path() . PATH_SEPARATOR . $ClassLibraryRegistration->libFullPath);
+              
+              //
+              // Add path to Able Polecat configurable paths.
+              //
+              AblePolecat_Server_Paths::setFullPath($ClassLibraryRegistration->id, $ClassLibraryRegistration->libFullPath);
+              
+              //
+              // if there is a paths.config file, include that, too...
+              //
+              $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
+                array(
+                  $ClassLibraryRegistration->libFullPath, 
+                  'etc', 
+                  'polecat', 
+                  'conf', 
+                  'path.config'
+                )
+              );
+              if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
+                include_once($pathConfFilePath);
+              }
+      
+              isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
+              isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
+              isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
+              self::$Registry->addRegistration($ClassLibraryRegistration);
+            }
+            else {
+              AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, 
+                sprintf("Invalid path provided for class library %s (%s).", $ClassLibraryRegistration->id, $ClassLibraryRegistration->name)
+              );
+            }
           }
           AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
         }
@@ -122,6 +160,31 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
     //
+    // Core class library conf file.
+    //
+    $coreFile = AblePolecat_Mode_Config::getCoreClassLibraryConfFile();
+    
+    //
+    // Get package (core class library) id.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
+    $corePackageNode = $Nodes->item(0);
+    $coreClassLibraryId = $corePackageNode->getAttribute('id');
+    if (isset($corePackageNode)) {
+      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $ClassLibraryRegistration->id = $corePackageNode->getAttribute('id');
+      $ClassLibraryRegistration->name = $corePackageNode->getAttribute('name');
+      $ClassLibraryRegistration->libType = strtolower($corePackageNode->getAttribute('type'));
+      $ClassLibraryRegistration->libFullPath = ABLE_POLECAT_CORE;
+      $ClassLibraryRegistration->useLib = '1';
+      $ClassLibraryRegistration->save($Database);
+    }
+    else {
+      $message = 'core class library configuration file must contain a package node.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    
+    //
     // Load master project configuration file.
     //
     $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
@@ -145,7 +208,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       // @todo: this type of schema checking should be done by implementing an XML schema.
       //
       $message = 'project.xml must contain an package node.';
-      trigger_error($message, E_USER_ERROR);
+      AblePolecat_Command_Chain::triggerError($message);
     }
 
     //

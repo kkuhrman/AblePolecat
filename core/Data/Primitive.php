@@ -13,6 +13,11 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Dom', 'Node.
 
 interface AblePolecat_Data_PrimitiveInterface extends AblePolecat_Dom_NodeInterface, Serializable {
   /**
+   * @return Data expressed as a string.
+   */
+  public function __toString();
+  
+  /**
    * Casts the given parameter into an instance of data class.
    *
    * @param mixed $data

@@ -68,6 +68,19 @@ class AblePolecat_Session extends AblePolecat_CacheObjectAbstract implements Abl
    ********************************************************************************/
   
   /**
+   * Scope of operation.
+   *
+   * @return string.
+   */
+  public static function getScope() {
+    return 'SESSION';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
+   ********************************************************************************/
+  
+  /**
    * Ideally unique id will be UUID.
    *
    * @return string PHP session ID.

@@ -352,7 +352,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Log to database if connected.
     //
-    // AblePolecat_Debug::kill(self::getActiveCoreDatabaseName());
     if (self::getActiveCoreDatabaseName()) {
       $sql = __SQL()->          
         insert(

@@ -33,6 +33,16 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private $bootLogFilePath;
   
   /**
+   * @var DOMDOcument The core class library configuration file.
+   */
+  private $coreClassLibraryConfFile;
+  
+  /**
+   * @var string Full path to core class library configuration file.
+   */
+  private $coreClassLibraryConfFilepath;
+  
+  /**
    * @var DOMDOcument The local project configuration file.
    */
   private $localProjectConfFile;
@@ -142,9 +152,10 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       $schemaFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'database', $schemaFileName));
       self::$ConfigMode->Variables[self::VAR_CONF_PATH_DBSCHEMA] = $schemaFilePath;
       
-      $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getName());
-      $coreFilePath = implode(DIRECTORY_SEPARATOR, array(dirname(ABLE_POLECAT_CORE), 'etc', 'polecat', 'core', $coreFileName));
-      self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = $coreFilePath;
+      //
+      // Core class library path.
+      //
+      self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = self::getCoreClassLibraryConfFilepath();
       
       //
       // Peek at HTTP request.
@@ -417,6 +428,59 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       $CoreDatabaseConnectionSettings = self::$ConfigMode->CoreDatabaseConnectionSettings;
     }
     return $CoreDatabaseConnectionSettings;
+  }
+  
+  /**
+   * @return DOMDOcument The local project configuration file.
+   */
+  public static function getCoreClassLibraryConfFile() {
+    
+    $coreClassLibraryConfFile = NULL;
+    if (isset(self::$ConfigMode)) {
+      if (!isset(self::$ConfigMode->coreClassLibraryConfFile)) {
+        $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
+        $coreFilePath = self::getCoreClassLibraryConfFilepath();
+        self::$ConfigMode->coreClassLibraryConfFile = new DOMDocument();
+        self::$ConfigMode->coreClassLibraryConfFile->load($coreFilePath);
+      }
+      $coreClassLibraryConfFile = self::$ConfigMode->coreClassLibraryConfFile;
+    }
+    return $coreClassLibraryConfFile;
+  }
+  
+  /**
+   * Returns Full path to local project configuration file.
+   *
+   * @param bool $asStr If FALSE, return path hierarchy as array, otherwise path as string.
+   *
+   * @return mixed.
+   */
+  public static function getCoreClassLibraryConfFilepath($asStr = TRUE) {
+    
+    static $coreClassLibraryConfFilepathParts;
+    $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getName());
+    $coreClassLibraryConfFilepathParts = array(
+      dirname(ABLE_POLECAT_CORE), 
+      'etc',
+      'polecat',
+      'core',
+      $coreFileName
+    );
+    $coreClassLibraryConfFilepath = NULL;
+    
+    if ($asStr) {
+        if (isset(self::$ConfigMode)) {
+          if (!isset(self::$ConfigMode->coreClassLibraryConfFilepath)) {
+            self::$ConfigMode->coreClassLibraryConfFilepath = implode(DIRECTORY_SEPARATOR, $coreClassLibraryConfFilepathParts);
+          }
+          $coreClassLibraryConfFilepath = self::$ConfigMode->coreClassLibraryConfFilepath;
+        }
+    }
+    else {
+      $coreClassLibraryConfFilepath = $coreClassLibraryConfFilepathParts;
+    }
+    
+    return $coreClassLibraryConfFilepath;
   }
   
   /**

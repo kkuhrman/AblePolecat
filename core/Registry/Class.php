@@ -149,35 +149,33 @@ class AblePolecat_Registry_Class
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
     //
+    // Load class library registry.
+    //
+    $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup();
+    
+    //
     // Core class library conf file.
     //
-    $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
-    $coreFilePath = AblePolecat_Mode_Config::getEnvironmentVariable($Agent, AblePolecat_Mode_Config::VAR_CONF_PATH_CORE);
-    $coreFile = new DOMDocument();
-    $coreFile->load($coreFilePath);
+    $coreFile = AblePolecat_Mode_Config::getCoreClassLibraryConfFile();
     
     //
     // Get package (core class library) id.
     //
-    $DbNodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
-    $corePackageNode = $DbNodes->item(0);
-    $coreClassLibraryId = $corePackageNode->getAttribute('id');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
+    $corePackageNode = $Nodes->item(0);
     if (!isset($corePackageNode)) {
-      $message = 'project.xml must contain an package node.';
+      $message = 'core class library configuration file must contain a package node.';
       AblePolecat_Command_Chain::triggerError($message);
     }
     
     //
     // Create DML statements for classes.
     //
+    $coreClassLibraryId = $corePackageNode->getAttribute('id');
+    $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($coreClassLibraryId);
     $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'class');
-    self::insertList($Database, $Nodes, $coreClassLibraryId);
-    // foreach($DbNodes as $key => $Node) {
-      // $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-      // $ClassRegistration->classLibraryId = $corePackageNode->getAttribute('id');
-      // $ClassRegistration->save($Database);
-    // }
-      
+    self::insertList($Database, $ClassLibraryRegistration, $Nodes);
+    
     //
     // Load master project configuration file.
     //
@@ -186,9 +184,8 @@ class AblePolecat_Registry_Class
     //
     // Get package (class library) id.
     //
-    $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
-    $applicationNode = $DbNodes->item(0);
-    $applicationClassLibraryId = $applicationNode->getAttribute('id');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $applicationNode = $Nodes->item(0);
     if (!isset($applicationNode)) {
       $message = 'project.xml must contain an package node.';
       AblePolecat_Command_Chain::triggerError($message);
@@ -197,13 +194,10 @@ class AblePolecat_Registry_Class
     //
     // Create DML statements for classes.
     //
+    $applicationClassLibraryId = $applicationNode->getAttribute('id');
+    $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($applicationClassLibraryId);
     $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
-    self::insertList($Database, $Nodes, $applicationClassLibraryId);
-    // foreach($DbNodes as $key => $Node) {
-      // $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-      // $ClassRegistration->classLibraryId = $applicationNode->getAttribute('id');
-      // $ClassRegistration->save($Database);
-    // }
+    self::insertList($Database, $ClassLibraryRegistration, $Nodes);
   }
   
   /**
@@ -214,6 +208,10 @@ class AblePolecat_Registry_Class
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Load class library registry.
+    //
+    $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup();
     
     $Registry = AblePolecat_Registry_Class::wakeup();
     if (isset($Registry)) {
@@ -225,35 +223,32 @@ class AblePolecat_Registry_Class
       //
       // Core class library conf file.
       //
-      $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
-      $coreFilePath = AblePolecat_Mode_Config::getEnvironmentVariable($Agent, AblePolecat_Mode_Config::VAR_CONF_PATH_CORE);
-      $coreFile = new DOMDocument();
-      $coreFile->load($coreFilePath);
+      $coreFile = AblePolecat_Mode_Config::getCoreClassLibraryConfFile();
       
       //
       // Get package (core class library) id.
       //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
-      $corePackageNode = $DbNodes->item(0);
+      $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
+      $corePackageNode = $Nodes->item(0);
       if (!isset($corePackageNode)) {
-        $message = 'project.xml must contain an package node.';
+        $message = 'core class library configuration file must contain a package node.';
         AblePolecat_Command_Chain::triggerError($message);
       }
       
       //
       // Create DML statements for classes.
       //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'class');
-      foreach($DbNodes as $key => $Node) {
+      $coreClassLibraryId = $corePackageNode->getAttribute('id');
+      $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($coreClassLibraryId);
+      $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'class');
+      foreach($Nodes as $key => $Node) {
         $id = $Node->getAttribute('id');
         $ClassRegistration = $Registry->getRegistrationById($id);
         if (!isset($ClassRegistration)) {
           //
           // Class is not registered.
           //
-          $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-          $ClassRegistration->classLibraryId = $corePackageNode->getAttribute('id');
-          $ClassRegistration->save($Database);
+          self::insertNode($Database, $ClassLibraryRegistration, $Node);
         }
         
         //
@@ -270,8 +265,8 @@ class AblePolecat_Registry_Class
       //
       // Get package (class library) id.
       //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
-      $applicationNode = $DbNodes->item(0);
+      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+      $applicationNode = $Nodes->item(0);
       if (!isset($applicationNode)) {
         $message = 'project.xml must contain an package node.';
         AblePolecat_Command_Chain::triggerError($message);
@@ -280,17 +275,17 @@ class AblePolecat_Registry_Class
       //
       // Create DML statements for classes.
       //
-      $DbNodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
-      foreach($DbNodes as $key => $Node) {
+      $applicationClassLibraryId = $applicationNode->getAttribute('id');
+      $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($applicationClassLibraryId);
+      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
+      foreach($Nodes as $key => $Node) {
         $id = $Node->getAttribute('id');
         $ClassRegistration = $Registry->getRegistrationById($id);
         if (!isset($ClassRegistration)) {
           //
           // Class is not registered.
           //
-          $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-          $ClassRegistration->classLibraryId = $applicationNode->getAttribute('id');
-          $ClassRegistration->save($Database);
+          self::insertNode($Database, $ClassLibraryRegistration, $Node);
         }
         
         //
@@ -621,22 +616,45 @@ class AblePolecat_Registry_Class
    * Insert DOMNodeList into registry.
    *
    * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration 
    * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
-   * @param string $classLibraryId
-   * @param string $classLibraryFullPath
    *
    */
-  protected static function insertList(AblePolecat_DatabaseInterface $Database, DOMNodeList $Nodes, $classLibraryId) {
+  protected static function insertList(
+    AblePolecat_DatabaseInterface $Database, 
+    AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration,
+    DOMNodeList $Nodes) {
     foreach($Nodes as $key => $Node) {
-      $registerFlag = $Node->getAttribute('register');
-      if ($registerFlag != '0') {
-        $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-        $ClassRegistration->classLibraryId = $classLibraryId;
-        if (!isset($ClassRegistration->classFullPath)) {
-          trigger_error('Hey dip weed, you need to fix the problem here with class library path definitions.');
+      self::insertNode($Database, $ClassLibraryRegistration, $Node);
+    }
+  }
+  
+  /**
+   * Insert DOMNode into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration 
+   * @param DOMNode $Node DOMNode containing registry entry.
+   *
+   */
+  protected static function insertNode(
+    AblePolecat_DatabaseInterface $Database, 
+    AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration,
+    DOMNode $Node) {
+    $registerFlag = $Node->getAttribute('register');
+    if ($registerFlag != '0') {
+      $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
+      $ClassRegistration->classLibraryId = $ClassLibraryRegistration->id;
+      if (!isset($ClassRegistration->classFullPath)) {
+        foreach($Node->childNodes as $key => $childNode) {
+          $conventionalPath = $ClassLibraryRegistration->libFullPath . DIRECTORY_SEPARATOR . $childNode->nodeValue;
+          $sanitizePath = AblePolecat_Server_Paths::sanitizePath($conventionalPath);
+          if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
+            $ClassRegistration->classFullPath = $sanitizePath;
+          }
         }
-        $ClassRegistration->save($Database);
       }
+      $ClassRegistration->save($Database);
     }
   }
   

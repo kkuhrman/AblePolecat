@@ -57,4 +57,15 @@ class AblePolecat_AccessControl_Role_User_Anonymous extends AblePolecat_AccessCo
     $Role = new AblePolecat_AccessControl_Role_User_Anonymous();
     return $Role;
   }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    
+  }
 }

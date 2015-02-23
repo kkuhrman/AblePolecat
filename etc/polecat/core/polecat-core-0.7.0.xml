@@ -74,7 +74,7 @@
       <polecat:class id="85fc7590-724d-11e3-981f-0800200c9a66" name="AblePolecat_Command_Log" register="0">
         <polecat:path>Command/Log.php</polecat:path>
       </polecat:class>
-      <polecat:class id="" name="AblePolecat_Command_Result">
+      <polecat:class id="5c4716ea-bb73-11e4-a12d-0050569e00a2" name="AblePolecat_Command_Result" register="0">
         <polecat:path>Command/Result.php</polecat:path>
         <polecat:classFactoryMethod>__construct</polecat:classFactoryMethod>
       </polecat:class>
@@ -229,10 +229,6 @@
       </polecat:class>
       <polecat:class id="c2710e7b-b7ae-11e4-a12d-0050569e00a2" name="AblePolecat_Message_Response_Cached">
         <polecat:path>Message/Response/Cached.php</polecat:path>
-        <polecat:classFactoryMethod>create</polecat:classFactoryMethod>
-      </polecat:class>
-      <polecat:class id="e2dfc935-b7ae-11e4-a12d-0050569e00a2" name="AblePolecat_Message_Response_Template">
-        <polecat:path>Message/Response/Template.php</polecat:path>
         <polecat:classFactoryMethod>create</polecat:classFactoryMethod>
       </polecat:class>
       <polecat:class id="022ac5f8-b7af-11e4-a12d-0050569e00a2" name="AblePolecat_Message_Response_Xhtml_Tpl">
