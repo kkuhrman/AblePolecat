@@ -63,6 +63,16 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private $masterProjectConfFilepath;
   
   /**
+   * @var DOMDOcument Module project configuration files.
+   */
+  private $moduleConfFiles;
+  
+  /**
+   * @var string Full paths to module project configuration files.
+   */
+  private $moduleConfFilepaths;
+  
+  /**
    * @var AblePolecat_Database_Pdo
    */
   private $CoreDatabase;
@@ -584,6 +594,79 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   }
   
   /**
+   * Return master project configuration file for given module.
+   *
+   * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration
+   *
+   * @return DOMDocument or NULL.
+   */
+  public static function getModuleConfFile(AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration) {
+    
+    $moduleConfFile = NULL;
+    
+    if ($ClassLibraryRegistration->libType === 'mod') {
+      if (isset(self::$ConfigMode)) {
+        $id = $ClassLibraryRegistration->id;
+        if (!isset(self::$ConfigMode->moduleConfFile)) {
+          self::$ConfigMode->moduleConfFile = array();
+        }
+        if (!isset(self::$ConfigMode->moduleConfFile[$id])) {
+          $moduleConfFilepath = self::getModuleConfFilePath($ClassLibraryRegistration);
+          self::$ConfigMode->moduleConfFile[$id] = new DOMDocument();
+          self::$ConfigMode->moduleConfFile[$id]->load($moduleConfFilepath);
+        }
+        $moduleConfFile = self::$ConfigMode->moduleConfFile[$id];
+      }
+    }
+    return $moduleConfFile;
+  }
+  
+  /**
+   * Return full path of master project configuration file for given module.
+   *
+   * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration
+   * @param bool $asStr If FALSE, return path hierarchy as array, otherwise path as string.
+   *
+   * @return mixed.
+   */
+  public static function getModuleConfFilePath(AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration, $asStr = TRUE) {
+    
+    static $moduleConfFilepathParts;
+    $moduleConfFilepath = NULL;
+    
+    if ($ClassLibraryRegistration->libType === 'mod') {
+      if (!isset($moduleConfFilepathParts)) {
+        $moduleConfFilepathParts = array();
+      }
+      $id = $ClassLibraryRegistration->id;
+      if (!isset($moduleConfFilepathParts[$id])) {
+        $moduleConfFilepathParts[$id] = array(
+          $ClassLibraryRegistration->libFullPath,
+          'etc',
+          'polecat',
+          'conf',
+          AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
+        );
+      }
+      if ($asStr) {
+        if (isset(self::$ConfigMode)) {
+          if (!isset(self::$ConfigMode->moduleConfFilepath)) {
+            self::$ConfigMode->moduleConfFilepath = array();
+          }
+          if (!isset(self::$ConfigMode->moduleConfFilepath[$id])) {
+            self::$ConfigMode->moduleConfFilepath[$id] = implode(DIRECTORY_SEPARATOR, $moduleConfFilepathParts[$id]);
+          }
+          $moduleConfFilepath = self::$ConfigMode->moduleConfFilepath[$id];
+        }
+        }
+        else {
+          $moduleConfFilepath = $moduleConfFilepathParts[$id];
+        }
+    }    
+    return $moduleConfFilepath;
+  }
+  
+  /**
    * Create a new project configuration file.
    *
    * @return mixed The newly created project configuration file or FALSE.
@@ -798,9 +881,13 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     $this->Variables = array();
     $this->bootLogFilePath = NULL;
     $this->CoreDatabase = NULL;
+    $this->coreClassLibraryConfFile = NULL;
+    $this->coreClassLibraryConfFilepath = NULL;
     $this->localProjectConfFile = NULL;
     $this->localProjectConfFilepath = NULL;
     $this->masterProjectConfFile = NULL;
     $this->masterProjectConfFilepath = NULL;
+    $this->moduleConfFiles = array();
+    $this->moduleConfFilepaths = array();
   }
 }

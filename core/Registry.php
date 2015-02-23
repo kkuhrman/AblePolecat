@@ -59,6 +59,11 @@ interface AblePolecat_RegistryInterface
   public function getRegistrationByName($name);
   
   /**
+   * @return int Count of registry entries.
+   */
+  public function getRegistrationCount();
+  
+  /**
    * Retrieve a list of registered objects corresponding to the given key name/value.
    *
    * @param string $keyName The name of a registry key.
@@ -150,6 +155,19 @@ abstract class AblePolecat_RegistryAbstract
       $RegistryEntry = $this->Registrations[self::KEY_CLASS_NAME][$name];
     }
     return $RegistryEntry;
+  }
+  
+  /**
+   * @return int Count of registry entries.
+   */
+  public function getRegistrationCount() {
+    
+    $RegistryEntryCount = 0;
+    
+    if (isset($this->Registrations[self::KEY_ARTICLE_ID])) {
+      $RegistryEntryCount = count($this->Registrations[self::KEY_ARTICLE_ID]);
+    }
+    return $RegistryEntryCount;
   }
   
   /**

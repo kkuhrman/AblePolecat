@@ -90,6 +90,29 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Load class library and class registries.
+    //
+    $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup();
+    $ClassRegistry = AblePolecat_Registry_Class::wakeup();
+    
+    //
+    // @todo: at present no components registered as part of core class library.
+    //
+    
+    //
+    // Load all class library registrations.
+    //
+    $ClassLibraryRegistrations = $ClassLibraryRegistry->getRegistrations();
+    if (isset($ClassLibraryRegistrations[AblePolecat_RegistryInterface::KEY_ARTICLE_ID])) {
+      foreach($ClassLibraryRegistrations[AblePolecat_RegistryInterface::KEY_ARTICLE_ID] as $classLibraryId => $ClassLibraryRegistration) {
+        $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
+        if (isset($modConfFile)) {
+          $Nodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
+          self::insertList($Database, $ClassLibraryRegistration, $Nodes);
+        }
+      }
+    }
   }
   
   /**
@@ -103,8 +126,164 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_RegistryInterface.
+   ********************************************************************************/
+  
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
+    
+    if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_ComponentInterface')) {
+      //
+      // Add to base registry class.
+      //
+      parent::addRegistration($RegistryEntry);
+    }
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",
+        __CLASS__,
+        AblePolecat_Data::getDataTypeName($RegistryEntry),
+        'AblePolecat_Registry_Entry_ComponentInterface'
+      ));
+    }
+  }
+  
+  /**
+   * Retrieve registered object by given id.
+   *
+   * @param UUID $id Id of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationById($id) {
+    
+    $RegistryEntry = parent::getRegistrationById($id);
+    if (!isset($RegistryEntry)) {
+      $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::fetch($id);
+      if (!isset($RegistryEntry)) {
+        parent::addRegistration($RegistryEntry);
+      }
+    }
+    return $RegistryEntry;
+  }
+  
+  /**
+   * Retrieve registered object by given name.
+   *
+   * @param string $name Name of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationByName($name) {
+    
+    $RegistryEntry = parent::getRegistrationByName($name);
+    if (!isset($RegistryEntry)) {
+      $sql = __SQL()->
+        select('id', 'name', 'classId')->
+        from('component')->
+        where(sprintf("`name` = '%s'", $name));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $Records = $CommandResult->value();
+        if (isset($Records[0])) {
+          $Record = $Records[0];
+          $RegistryEntry = new AblePolecat_Registry_Entry_DomNode_Component();
+          $id = $Record['id'];
+          $RegistryEntry->id = $id;
+          $name = $Record['name'];
+          $RegistryEntry->name = $name;
+          isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+        }
+      if (!isset($RegistryEntry)) {
+        parent::addRegistration($RegistryEntry);
+      }
+    }
+    return $RegistryEntry;
+  }
+  
+  /**
+   * Retrieve a list of registered objects corresponding to the given key name/value.
+   *
+   * Some registry classes (AblePolecat_Registry_ClassInterface, AblePolecat_Registry_ClassLibrary)
+   * load all registry entries at wakeup() as any number (if not all) are in demand at run time.
+   * Others will be queried for only one or a small number of entries, depending on HTTP request.
+   * This function is provided in those cases where all entries must be retrieved.
+   * 
+   * @param string $keyName The name of a registry key.
+   * @param string $keyValue Optional value of registry key.
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public function getRegistrations($key, $value = NULL) {
+    
+    $Registrations = array();
+    
+    if (0 === $this->getRegistrationCount()) {
+      if (AblePolecat_Database_Pdo::ready()) {
+        //
+        // Get project database.
+        //
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+        
+        //
+        // Load [lib]
+        //
+        $sql = __SQL()->
+          select('id', 'name', 'classId')->
+          from('component');
+        $QueryResult = $CoreDatabase->query($sql);
+        foreach($QueryResult as $key => $Record) {
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create();
+          $id = $Record['id'];
+          $RegistryEntry->id = $id;
+          $name = $Record['name'];
+          $RegistryEntry->name = $name;
+          isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+          self::$Registry->addRegistration($RegistryEntry);
+        }
+      }
+    }
+    $Registrations = parent::getRegistrations($key, $value);
+    return $Registrations;
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Insert DOMNodeList into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
+   *
+   */
+  protected static function insertList(AblePolecat_DatabaseInterface $Database, DOMNodeList $Nodes) {
+    foreach($Nodes as $key => $Node) {
+      self::insertNode($Database, $Node);
+    }
+  }
+  
+  /**
+   * Insert DOMNode into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNode $Node DOMNode containing registry entry.
+   *
+   */
+  protected static function insertNode(AblePolecat_DatabaseInterface $Database, DOMNode $Node) {
+    $registerFlag = $Node->getAttribute('register');
+    if ($registerFlag != '0') {
+      $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::import($Node);
+      $ComponentRegistration->classId = $ComponentRegistration->id;
+      $ComponentRegistration->save($Database);
+    }
+  }
   
   /**
    * Extends constructor.

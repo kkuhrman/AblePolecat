@@ -53,9 +53,16 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
-    //
-    // @todo: import [component] registry entry.
-    //
+    $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::create();
+    $ComponentRegistration->id = $Node->getAttribute('id');
+    $ComponentRegistration->name = $Node->getAttribute('name');
+    foreach($Node->childNodes as $key => $childNode) {
+      switch ($childNode->nodeName) {
+        default:
+          break;
+      }
+    }
+    return $ComponentRegistration;
   }
   
   /**
@@ -85,25 +92,22 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
     
     if (is_array($primaryKey) && (1 == count($primaryKey))) {
       $ComponentRegistration = new AblePolecat_Registry_Entry_DomNode_Component();
-      isset($primaryKey['componentId']) ? $ComponentRegistration->componentId = $primaryKey['componentId'] : $ComponentRegistration->componentId = $primaryKey[0];
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey[0];
       
-      $sql = __SQL()->          
-        select(
-          'docType', 
-          'componentClassName', 
-          'templateFullPath', 
-          'lastModifiedTime')->
+      $sql = __SQL()->
+        select('id', 'name', 'classId')->
         from('component')->
-        where(sprintf("`componentId` = '%s'", $ComponentRegistration->componentId));
+        where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {
           $Record = $Records[0];
-          $ComponentRegistration->unserializeDocType($Record['docType']);
-          $ComponentRegistration->componentClassName = $Record['componentClassName'];
-          $ComponentRegistration->templateFullPath = $Record['templateFullPath'];
-          $ComponentRegistration->lastModifiedTime = $Record['lastModifiedTime'];
+          $id = $Component['id'];
+          $ComponentRegistration->id = $id;
+          $name = $Component['name'];
+          $ComponentRegistration->name = $name;
+          isset($Component['classId']) ? $ComponentRegistration->classId = $Component['classId'] : NULL;
         }
       }
     }
@@ -116,7 +120,7 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    * @return Array[string].
    */
   public static function getPrimaryKeyFieldNames() {
-    return array(0 => 'componentId');
+    return array(0 => 'id');
   }
   
   /**
@@ -132,7 +136,7 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     $sql = __SQL()->          
       replace(
-        'componentId', 
+        'id', 
         'docType', 
         'componentClassName',
         'templateFullPath', 
@@ -156,7 +160,7 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    * @return string.
    */
   public function getComponentId() {
-    return $this->getPropertyValue('componentId');
+    return $this->getPropertyValue('id');
   }
   
   /**

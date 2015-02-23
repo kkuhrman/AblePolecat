@@ -225,17 +225,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       // If the class library is a module, load the corresponding project 
       // configuration file and register any dependent class libraries.
       //
-      if ($ClassLibraryRegistration->libType === 'mod') {
-        $modConfFilePath = implode(DIRECTORY_SEPARATOR, array(
-          $ClassLibraryRegistration->libFullPath,
-          'etc',
-          'polecat',
-          'conf',
-          AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
-        ));
-        $modConfFile = new DOMDocument();
-        $modConfFile->load($modConfFilePath);
-        
+      $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
+      if (isset($modConfFile)) {
         $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
         foreach($modNodes as $key => $modNode) {
           $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
@@ -249,6 +240,30 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
           }
         }
       }
+      // if ($ClassLibraryRegistration->libType === 'mod') {
+        // $modConfFilePath = implode(DIRECTORY_SEPARATOR, array(
+          // $ClassLibraryRegistration->libFullPath,
+          // 'etc',
+          // 'polecat',
+          // 'conf',
+          // AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
+        // ));
+        // $modConfFile = new DOMDocument();
+        // $modConfFile->load($modConfFilePath);
+        
+        // $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
+        // foreach($modNodes as $key => $modNode) {
+          // $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
+          // if ($ClassLibraryRegistration->id === $modClassLibraryRegistration->id) {
+            // AblePolecat_Command_Chain::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
+              // $ClassLibraryRegistration->name
+            // ));
+          // }
+          // if (isset($modClassLibraryRegistration)) {
+            // $modClassLibraryRegistration->save($Database);
+          // }
+        // }
+      // }
     }
   }
   

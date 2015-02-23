@@ -58,7 +58,7 @@
           <polecat:index type="UNIQUE KEY" name="name">
             <polecat:indexField name="name" />
           </polecat:index>
-          <polecat:index type="UNIQUE KEY" name="classId">
+          <polecat:index type="KEY" name="classId">
             <polecat:indexField name="classId" />
           </polecat:index>
         </polecat:indexes>
@@ -225,6 +225,9 @@
           <polecat:index type="UNIQUE KEY" name="name">
             <polecat:indexField name="name" />
             <polecat:indexField name="hostName" />
+          </polecat:index>
+          <polecat:index type="KEY" name="classId">
+            <polecat:indexField name="classId" />
           </polecat:index>
         </polecat:indexes>
       </polecat:table>
