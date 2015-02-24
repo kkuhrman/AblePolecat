@@ -27,9 +27,10 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Install.php')));
-require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php')));
-require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Util.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Install.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Util.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Get', 'Resource.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
 
 interface AblePolecat_Registry_Entry_ConnectorInterface extends AblePolecat_Registry_EntryInterface {
@@ -43,21 +44,16 @@ interface AblePolecat_Registry_Entry_ConnectorInterface extends AblePolecat_Regi
    * @return string
    */
   public function getRequestMethod();
-    
-  /**
-   * @return string.
-   */
-  public function getTransactionClassName();
-  
-  /**
-   * @return string.
-   */
-  public function getAuthorityClassName();
   
   /**
    * @return int.
    */
   public function getAccessDeniedCode();
+  
+  /**
+   * @return string.
+   */
+  public function getClassId();
 }
 
 /**
@@ -120,36 +116,35 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
     
     $ConnectorRegistration = NULL;
     
-    if (is_array($primaryKey) && (2 == count($primaryKey))) {
-      isset($primaryKey['resourceId']) ? $resourceId = $primaryKey['resourceId'] : $resourceId = $primaryKey[0];
-      isset($primaryKey['requestMethod']) ? $requestMethod = $primaryKey['requestMethod'] : $requestMethod = $primaryKey[1];
+    if (self::validatePrimaryKey($primaryKey)) {
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
-      $sql = __SQL()->          
-          select(
-            'resourceId', 
-            'requestMethod', 
-            'transactionClassName', 
-            'authorityClassName', 
-            'accessDeniedCode')->
-          from('connector')->
-          where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'requestMethod',
+          'accessDeniedCode', 
+          'classId', 
+          'lastModifiedTime')->
+        from('connector')->
+        where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
-        $classInfo = $CommandResult->value();
-        if (isset($classInfo[0])) {
+        $registrationInfo = $CommandResult->value();
+        if (isset($registrationInfo[0])) {
           $ConnectorRegistration = new AblePolecat_Registry_Entry_Connector();
-          $ConnectorRegistration->resourceId = $classInfo[0]['resourceId'];
-          $ConnectorRegistration->requestMethod = $classInfo[0]['requestMethod'];
-          $ConnectorRegistration->transactionClassName = $classInfo[0]['transactionClassName'];
-          $ConnectorRegistration->authorityClassName = $classInfo[0]['authorityClassName'];
-          $ConnectorRegistration->accessDeniedCode = $classInfo[0]['accessDeniedCode'];
+          isset($registrationInfo[0]['id']) ? $ConnectorRegistration->id = $registrationInfo[0]['id'] : NULL;
+          isset($registrationInfo[0]['name']) ? $ConnectorRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['resourceId']) ? $ConnectorRegistration->resourceId = $registrationInfo[0]['resourceId'] : NULL;
+          isset($registrationInfo[0]['requestMethod']) ? $ConnectorRegistration->requestMethod = $registrationInfo[0]['requestMethod'] : NULL;
+          isset($registrationInfo[0]['accessDeniedCode']) ? $ConnectorRegistration->accessDeniedCode = $registrationInfo[0]['accessDeniedCode'] : NULL;
+          isset($registrationInfo[0]['classId']) ? $ConnectorRegistration->classId = $registrationInfo[0]['classId'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $ConnectorRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         }
       }
     }
-    else {
-      throw new AblePolecat_Registry_Exception('Invalid Primary Key passed to ' . __METHOD__);
-    }
-    
     return $ConnectorRegistration;
   }
   
@@ -159,7 +154,7 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    * @return Array[string].
    */
   public static function getPrimaryKeyFieldNames() {
-    return array(0 => 'resourceId', 1 => 'requestMethod');
+    return array(0 => 'id');
   }
   
   /**
@@ -173,9 +168,26 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
-    //
-    // @todo: complete REPLACE [connector]
-    //
+    $sql = __SQL()->          
+      replace(
+        'id', 
+        'name', 
+        'resourceId', 
+        'requestMethod', 
+        'accessDeniedCode', 
+        'classId',
+        'lastModifiedTime')->
+      into('connector')->
+      values(
+        $this->getId(), 
+        $this->getName(), 
+        $this->getResourceId(),
+        $this->getRequestMethod(),
+        $this->getAccessDeniedCode(),
+        $this->getClassId(),
+        $this->getLastModifiedTime()
+      );
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************
@@ -197,24 +209,17 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
   }
   
   /**
-   * @return string.
-   */
-  public function getTransactionClassName() {
-    return $this->getPropertyValue('transactionClassName');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getAuthorityClassName() {
-    return $this->getPropertyValue('authorityClassName');
-  }
-  
-  /**
    * @return int.
    */
   public function getAccessDeniedCode() {
     return $this->getPropertyValue('accessDeniedCode');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getClassId() {
+    return $this->getPropertyValue('classId');
   }
     
   /********************************************************************************

@@ -96,8 +96,8 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
         // Attempt to load resource class
         //
         try {
-          $resourceClassName = $this->getResourceRegistration()->getResourceClassName();
-          if (isset($resourceClassName) && ($resourceClassName === 'AblePolecat_Resource_Restricted_Update')) {
+          $ResourceRegistration = $this->getResourceRegistration();
+          if (isset($ResourceRegistration) && ($ResourceRegistration->getClassId() === AblePolecat_Resource_Restricted_Update::UUID)) {
             $Resource = AblePolecat_Resource_Core_Factory::wakeup(
               $this->getDefaultCommandInvoker(),
               'AblePolecat_Resource_Restricted_Update'

@@ -11,10 +11,6 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode.php')));
 
 interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Registry_Entry_DomNodeInterface {
-  /**
-   * @return string.
-   */
-  public function getResourceName();
   
   /**
    * @return string.
@@ -29,12 +25,7 @@ interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Regis
   /**
    * @return Array.
    */
-  public function getDefaultHeaders();
-  
-  /**
-   * @return int.
-   */
-  public function getResponseClassName();
+  public function getClassId();
 }
 
 /**
@@ -94,9 +85,37 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function fetch($primaryKey) {
-    //
-    // @todo: SELECT FROM [response]
-    //
+    
+    $ResponseRegistration = NULL;
+    
+    if (self::validatePrimaryKey($primaryKey)) {
+      $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
+      
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'statusCode', 
+          'classId', 
+          'lastModifiedTime')->
+        from('response')->
+        where(sprintf("`id` = '%s'", $id));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        if (isset($registrationInfo[0])) {
+          isset($registrationInfo[0]['id']) ? $ResponseRegistration->id = $registrationInfo[0]['id'] : NULL;
+          isset($registrationInfo[0]['name']) ? $ResponseRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['resourceId']) ? $ResponseRegistration->resourceId = $registrationInfo[0]['resourceId'] : NULL;
+          isset($registrationInfo[0]['statusCode']) ? $ResponseRegistration->statusCode = $registrationInfo[0]['statusCode'] : NULL;
+          isset($registrationInfo[0]['classId']) ? $ResponseRegistration->classId = $registrationInfo[0]['classId'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $ResponseRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+        }
+      }
+    }
+    return $ResponseRegistration;
   }
   
   /**
@@ -105,7 +124,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    * @return Array[string].
    */
   public static function getPrimaryKeyFieldNames() {
-    return array(0 => 'resourceId', 1 => 'statusCode');
+    return array(0 => 'id');
   }
   
   /**
@@ -119,22 +138,30 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
-    //
-    // @todo: complete REPLACE [response]
-    //
+    $sql = __SQL()->          
+      replace(
+        'id', 
+        'name', 
+        'resourceId', 
+        'statusCode', 
+        'classId',
+        'lastModifiedTime')->
+      into('component')->
+      values(
+        $this->getId(), 
+        $this->getName(), 
+        $this->getResourceId(),
+        $this->getStatusCode(),
+        $this->getClassId(),
+        $this->getLastModifiedTime()
+      );
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************
    * Implementation of AblePolecat_Registry_Entry_ResponseInterface.
    ********************************************************************************/
-  
-  /**
-   * @return string.
-   */
-  public function getResourceName() {
-    return $this->getPropertyValue('resourceName');
-  }
-  
+    
   /**
    * @return string.
    */
@@ -152,15 +179,8 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
   /**
    * @return string.
    */
-  public function getDefaultHeaders() {
-    return $this->getPropertyValue('defaultHeaders');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getResponseClassName() {
-    return $this->getPropertyValue('responseClassName');
+  public function getClassId() {
+    return $this->getPropertyValue('classId');
   }
     
   /********************************************************************************

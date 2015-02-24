@@ -91,8 +91,8 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
     
     $Resource = NULL;
     
-    $resourceClassName = $this->getResourceRegistration()->getResourceClassName();
-    if (isset($resourceClassName) && ($resourceClassName === 'AblePolecat_Resource_Restricted_Util')) {
+    $ResourceRegistration = $this->getResourceRegistration();
+    if (isset($ResourceRegistration) && ($ResourceRegistration->getClassId() === AblePolecat_Resource_Restricted_Util::UUID)) {
       switch ($this->getRequest()->getMethod()) {
         default:
           break;

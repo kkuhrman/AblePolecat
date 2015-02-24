@@ -27,17 +27,7 @@ interface AblePolecat_Registry_Entry_ResourceInterface extends AblePolecat_Regis
   /**
    * @return string.
    */
-  public function getResourceName();
-  
-  /**
-   * @return string.
-   */
-  public function getResourceId();
-  
-  /**
-   * @return string.
-   */
-  public function getResourceClassName();
+  public function getClassId();
 }
 
 /**
@@ -100,27 +90,28 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
     
     $ResourceRegistration = NULL;
     
-    if (is_array($primaryKey) && (1 == count($primaryKey))) {
-      $ResourceRegistration = new AblePolecat_Registry_Entry_Resource();
-      isset($primaryKey['resourceId']) ? $ResourceRegistration->resourceId = $primaryKey['resourceId'] : $ResourceRegistration->resourceId = $primaryKey[0];
+    if (self::validatePrimaryKey($primaryKey)) {
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       $sql = __SQL()->          
-          select(
-            'resourceId', 
-            'hostName', 
-            'resourceName', 
-            'resourceClassName', 
-            'lastModifiedTime')->
-          from('resource')->
-          where(sprintf("`resourceId` = '%s'", $ResourceRegistration->resourceId));
+        select(
+          'id', 
+          'name', 
+          'hostName', 
+          'classId', 
+          'lastModifiedTime')->
+        from('resource')->
+        where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $classInfo = $CommandResult->value();
         if (isset($classInfo[0])) {
-          $ResourceRegistration->hostName = $classInfo[0]['hostName'];
-          $ResourceRegistration->resourceName = $classInfo[0]['resourceName'];
-          $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
-          $ResourceRegistration->lastModifiedTime = $classInfo[0]['lastModifiedTime'];
+          $ResourceRegistration = new AblePolecat_Registry_Entry_Resource();
+          isset($registrationInfo[0]['id']) ? $ResourceRegistration->id = $registrationInfo[0]['id'] : NULL;
+          isset($registrationInfo[0]['name']) ? $ResourceRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['hostName']) ? $ResourceRegistration->hostName = $registrationInfo[0]['hostName'] : NULL;
+          isset($registrationInfo[0]['classId']) ? $ResourceRegistration->classId = $registrationInfo[0]['classId'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $ResourceRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         }
       }
     }
@@ -147,9 +138,22 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    * @return AblePolecat_Registry_EntryInterface or NULL.
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
-    //
-    // @todo: complete REPLACE [resource]
-    //
+    $sql = __SQL()->          
+      insert(
+        'id', 
+        'name', 
+        'hostName', 
+        'classId', 
+        'lastModifiedTime')->
+      into('class')->
+      values(
+        $this->getId(), 
+        $this->getName(), 
+        $this->getHostName(), 
+        $this->getClassId(), 
+        $this->getLastModifiedTime()
+      );
+    $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************
@@ -166,22 +170,8 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
   /**
    * @return string.
    */
-  public function getResourceName() {
-    return $this->getPropertyValue('resourceName');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getResourceId() {
-    return $this->getPropertyValue('resourceId');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getResourceClassName() {
-    return $this->getPropertyValue('resourceClassName');
+  public function getClassId() {
+    return $this->getPropertyValue('classId');
   }
     
   /********************************************************************************

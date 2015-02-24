@@ -67,13 +67,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Registry)) {
-      try {
-        self::$Registry = new AblePolecat_Registry_Component($Subject);
-      }
-      catch (Exception $Exception) {
-        self::$Registry = NULL;
-        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
-      }
+      self::$Registry = new AblePolecat_Registry_Component($Subject);
     }
     return self::$Registry;
   }
@@ -91,24 +85,42 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
     //
-    // Load class library and class registries.
+    // Load class library registry.
     //
     $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup();
-    $ClassRegistry = AblePolecat_Registry_Class::wakeup();
     
     //
-    // @todo: at present no components registered as part of core class library.
+    // Load master project configuration file.
     //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    
+    //
+    // Get package (class library) id.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $applicationNode = $Nodes->item(0);
+    if (!isset($applicationNode)) {
+      //
+      // @todo: this type of schema checking should be done by implementing an XML schema.
+      //
+      $message = 'project.xml must contain an package node.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
+    self::insertList($Database, $Nodes);
+    
     
     //
     // Load all class library registrations.
     //
-    AblePolecat_Debug::kill($ClassLibraryRegistry);
+    // AblePolecat_Debug::kill($ClassLibraryRegistry);
     // $ClassLibraryRegistrations = $ClassLibraryRegistry->getRegistrations(AblePolecat_RegistryInterface::KEY_ARTICLE_ID);
     // if (isset($ClassLibraryRegistrations[AblePolecat_RegistryInterface::KEY_ARTICLE_ID])) {
       // foreach($ClassLibraryRegistrations[AblePolecat_RegistryInterface::KEY_ARTICLE_ID] as $classLibraryId => $ClassLibraryRegistration) {
         // $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
         // if (isset($modConfFile)) {
+          // AblePolecat_Debug::kill($modConfFile);
           // $Nodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
           // self::insertList($Database, $ClassLibraryRegistration, $Nodes);
         // }
@@ -265,7 +277,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
    *
    */
-  protected static function insertList(AblePolecat_DatabaseInterface $Database, DOMNodeList $Nodes) {
+  protected static function insertList(AblePolecat_DatabaseInterface $Database, DOMNodeList $Nodes) {    
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
     }
@@ -279,11 +291,20 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    *
    */
   protected static function insertNode(AblePolecat_DatabaseInterface $Database, DOMNode $Node) {
+    
+    if (!isset(self::$Registry)) {
+      $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
       $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::import($Node);
-      $ComponentRegistration->classId = $ComponentRegistration->id;
-      $ComponentRegistration->save($Database);
+      AblePolecat_Debug::kill($ComponentRegistration);
+      if (isset($ComponentRegistration)) {
+        $ComponentRegistration->save($Database);
+        self::$Registry->addRegistration($ComponentRegistration);
+      }
     }
   }
   

@@ -10,7 +10,6 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Class.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'ClassLibrary.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Component.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment.php')));
 
 class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
@@ -107,6 +106,8 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
         self::VAR_REG_CLASS,
         $ClassRegistry
       );
+      
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server environment initialized.');
     }
     return self::$Environment;
   }

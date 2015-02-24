@@ -8,6 +8,7 @@
  * @version   0.7.0
  */
  
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database.php')));
 
 interface AblePolecat_Database_InstallerInterface extends AblePolecat_AccessControl_Article_StaticInterface {

@@ -11,16 +11,11 @@
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode.php')));
 
 interface AblePolecat_Registry_Entry_ComponentInterface extends AblePolecat_Registry_Entry_DomNodeInterface {
-  
-  /**
-   * @return string.
-   */
-  public function getComponentId();
-  
+    
   /**
    * @return int.
    */
-  public function getComponentClassName();
+  public function getClassId();
 }
 
 /**
@@ -56,12 +51,13 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
     $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::create();
     $ComponentRegistration->id = $Node->getAttribute('id');
     $ComponentRegistration->name = $Node->getAttribute('name');
-    foreach($Node->childNodes as $key => $childNode) {
-      switch ($childNode->nodeName) {
-        default:
-          break;
-      }
-    }
+    $ComponentRegistration->classId = $Node->getAttribute('id');
+    // foreach($Node->childNodes as $key => $childNode) {
+      // switch ($childNode->nodeName) {
+        // default:
+          // break;
+      // }
+    // }
     return $ComponentRegistration;
   }
   
@@ -90,24 +86,22 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
     
     $ComponentRegistration = NULL;
     
-    if (is_array($primaryKey) && (1 == count($primaryKey))) {
+    if (self::validatePrimaryKey($primaryKey)) {
       $ComponentRegistration = new AblePolecat_Registry_Entry_DomNode_Component();
-      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey[0];
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       $sql = __SQL()->
-        select('id', 'name', 'classId')->
+        select('id', 'name', 'classId', 'lastModifiedTime')->
         from('component')->
         where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
-        $Records = $CommandResult->value();
-        if (isset($Records[0])) {
-          $Record = $Records[0];
-          $id = $Component['id'];
-          $ComponentRegistration->id = $id;
-          $name = $Component['name'];
-          $ComponentRegistration->name = $name;
-          isset($Component['classId']) ? $ComponentRegistration->classId = $Component['classId'] : NULL;
+        $registrationInfo = $CommandResult->value();
+        if (isset($registrationInfo[0])) {
+          isset($registrationInfo[0]['id']) ? $ComponentRegistration->id = $registrationInfo[0]['id'] : NULL;
+          isset($registrationInfo[0]['name']) ? $ComponentRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['classId']) ? $ComponentRegistration->classId = $registrationInfo[0]['classId'] : NULL;
+          isset($registrationInfo[0]['lastModifiedTime']) ? $ComponentRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         }
       }
     }
@@ -137,16 +131,14 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
     $sql = __SQL()->          
       replace(
         'id', 
-        'docType', 
-        'componentClassName',
-        'templateFullPath', 
+        'name', 
+        'classId',
         'lastModifiedTime')->
       into('component')->
       values(
-        $this->getComponentId(), 
-        $this->serializeDocType(), 
-        $this->getComponentClassName(),
-        $this->getTemplateFullPath(), 
+        $this->getId(), 
+        $this->getName(), 
+        $this->getClassId(),
         $this->getLastModifiedTime()
       );
     return $this->executeDml($sql, $Database);
@@ -159,15 +151,8 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
   /**
    * @return string.
    */
-  public function getComponentId() {
-    return $this->getPropertyValue('id');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getComponentClassName() {
-    return $this->getPropertyValue('componentClassName');
+  public function getClassId() {
+    return $this->getPropertyValue('classId');
   }
     
   /********************************************************************************

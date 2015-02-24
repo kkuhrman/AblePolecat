@@ -125,7 +125,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
               // );
               // $Resource = $ChildTransaction->run();
             // }
-            $Referer = $this->getResourceRegistration()->getResourceId();
+            $Referer = $this->getResourceRegistration()->getId();
             $Resource = AblePolecat_Resource_Core_Factory::wakeup(
               $this->getAgent(),
               'AblePolecat_Resource_Core_Form'

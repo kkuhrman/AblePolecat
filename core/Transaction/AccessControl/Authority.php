@@ -264,7 +264,7 @@ class AblePolecat_Transaction_AccessControl_Authority
     $sql = __SQL()->
       insert('sessionNumber', 'resourceId', 'constraintId', 'subjectId', 'authorityId')->
       into('permission')->
-      values(AblePolecat_Host::getSessionNumber(), $this->getResourceRegistration()->getResourceId(), $Constraint::getId(), $Subject->getId(), $this->getId());
+      values(AblePolecat_Host::getSessionNumber(), $this->getResourceRegistration()->getId(), $Constraint::getId(), $Subject->getId(), $this->getId());
     $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
     if ($CommandResult->success()) {
       $result = TRUE;

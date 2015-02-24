@@ -607,15 +607,18 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     if ($ClassLibraryRegistration->libType === 'mod') {
       if (isset(self::$ConfigMode)) {
         $id = $ClassLibraryRegistration->id;
-        if (!isset(self::$ConfigMode->moduleConfFile)) {
-          self::$ConfigMode->moduleConfFile = array();
+        if (!isset(self::$ConfigMode->moduleConfFiles)) {
+          self::$ConfigMode->moduleConfFiles = array();
         }
-        if (!isset(self::$ConfigMode->moduleConfFile[$id])) {
+        if (!isset(self::$ConfigMode->moduleConfFiles[$id])) {
           $moduleConfFilepath = self::getModuleConfFilePath($ClassLibraryRegistration);
-          self::$ConfigMode->moduleConfFile[$id] = new DOMDocument();
-          self::$ConfigMode->moduleConfFile[$id]->load($moduleConfFilepath);
+          $moduleConfFile = new DOMDocument();
+          $moduleConfFile->load($moduleConfFilepath);
+          self::$ConfigMode->moduleConfFiles[$id] = $moduleConfFile;
         }
-        $moduleConfFile = self::$ConfigMode->moduleConfFile[$id];
+        else {
+          $moduleConfFile = self::$ConfigMode->moduleConfFiles[$id];
+        }
       }
     }
     return $moduleConfFile;
@@ -650,18 +653,18 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       }
       if ($asStr) {
         if (isset(self::$ConfigMode)) {
-          if (!isset(self::$ConfigMode->moduleConfFilepath)) {
-            self::$ConfigMode->moduleConfFilepath = array();
+          if (!isset(self::$ConfigMode->moduleConfFilepaths)) {
+            self::$ConfigMode->moduleConfFilepaths = array();
           }
-          if (!isset(self::$ConfigMode->moduleConfFilepath[$id])) {
-            self::$ConfigMode->moduleConfFilepath[$id] = implode(DIRECTORY_SEPARATOR, $moduleConfFilepathParts[$id]);
+          if (!isset(self::$ConfigMode->moduleConfFilepaths[$id])) {
+            self::$ConfigMode->moduleConfFilepaths[$id] = implode(DIRECTORY_SEPARATOR, $moduleConfFilepathParts[$id]);
           }
-          $moduleConfFilepath = self::$ConfigMode->moduleConfFilepath[$id];
+          $moduleConfFilepath = self::$ConfigMode->moduleConfFilepaths[$id];
         }
-        }
-        else {
-          $moduleConfFilepath = $moduleConfFilepathParts[$id];
-        }
+      }
+      else {
+        $moduleConfFilepath = $moduleConfFilepathParts[$id];
+      }
     }    
     return $moduleConfFilepath;
   }

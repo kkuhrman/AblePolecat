@@ -78,13 +78,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Registry)) {
-      try {
-        self::$Registry = new AblePolecat_Registry_Connector($Subject);
-      }
-      catch (Exception $Exception) {
-        self::$Registry = NULL;
-        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
-      }
+      self::$Registry = new AblePolecat_Registry_Connector($Subject);
     }
     return self::$Registry;
   }
@@ -202,20 +196,25 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     if (!isset(self::$coreResourceRegistryEntries)) {
       self::$coreResourceRegistryEntries = array(
         AblePolecat_Resource_Core_Ack::UUID => array(
+          'resourceId' => AblePolecat_Resource_Core_Ack::UUID,
+          'classId' => AblePolecat_Transaction_Get_Resource::UUID,
           'accessDeniedCode' => 200
         ),
         AblePolecat_Resource_Restricted_Install::UUID => array(
-          'transactionClassName' => 'AblePolecat_Transaction_Restricted_Install',
+          'resourceId' => AblePolecat_Resource_Restricted_Install::UUID, 
+          'classId' => AblePolecat_Transaction_Restricted_Install::UUID,
           'authorityClassName' => 'AblePolecat_Transaction_AccessControl_Authority',
           'accessDeniedCode' => 401,
         ),
         AblePolecat_Resource_Restricted_Update::UUID => array(
-          'transactionClassName' => 'AblePolecat_Transaction_Restricted_Update',
+          'resourceId' => AblePolecat_Resource_Restricted_Update::UUID,
+          'classId' => AblePolecat_Transaction_Restricted_Update::UUID,
           'authorityClassName' => 'AblePolecat_Transaction_AccessControl_Authority',
           'accessDeniedCode' => 401,
         ),
         AblePolecat_Resource_Restricted_Util::UUID => array(
-          'transactionClassName' => 'AblePolecat_Transaction_Restricted_Util',
+          'resourceId' => AblePolecat_Resource_Restricted_Util::UUID,
+          'classId' => AblePolecat_Transaction_Restricted_Util::UUID,
           'authorityClassName' => 'AblePolecat_Transaction_AccessControl_Authority',
           'accessDeniedCode' => 401,
         ),
@@ -265,7 +264,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
       }
       if (isset($connectorData)) {
         $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
-        isset($connectorData['transactionClassName']) ? $ConnectorRegistration->transactionClassName = $connectorData['transactionClassName'] : $ConnectorRegistration->transactionClassName = NULL;
+        isset($connectorData['classId']) ? $ConnectorRegistration->classId = $connectorData['classId'] : $ConnectorRegistration->classId = NULL;
         isset($connectorData['authorityClassName']) ? $ConnectorRegistration->authorityClassName = $connectorData['authorityClassName'] : $ConnectorRegistration->authorityClassName = NULL;
         isset($connectorData['accessDeniedCode']) ? $ConnectorRegistration->accessDeniedCode = $connectorData['accessDeniedCode'] : $ConnectorRegistration->accessDeniedCode = NULL;
       }
@@ -276,6 +275,62 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
         $message = sprintf("%s request for ./%s - Method Not Allowed (405).", $requestMethod, $resourceId);
         AblePolecat_Command_Chain::triggerError($message);
       }
+    }
+    return $ConnectorRegistration;
+  }
+  
+  /**
+   * Return registration data on connector corresponding to request path and method.
+   *
+   * @param UUID $resourceId
+   * @param string $requestMethod
+   *
+   * @return AblePolecat_Registry_Entry_ConnectorInterface or NULL.
+   */
+  public static function getRegisteredResourceConnector($resourceId, $requestMethod) {
+    
+    $ConnectorRegistration = NULL;
+    
+    if (AblePolecat_Database_Pdo::ready()) {
+      //
+      // Get project database.
+      //
+      $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+      
+      //
+      // Load [lib]
+      //
+      $sql = __SQL()->
+      select(
+        'id', 
+        'name', 
+        'resourceId', 
+        'requestMethod',
+        'accessDeniedCode', 
+        'classId', 
+        'lastModifiedTime')->
+      from('connector')->
+      where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
+      $QueryResult = $CoreDatabase->query($sql);
+      if (isset($QueryResult[0])) {
+        $ConnectorRegistration = new AblePolecat_Registry_Entry_Connector();
+        isset($QueryResult[0]['id']) ? $ConnectorRegistration->id = $QueryResult[0]['id'] : NULL;
+        isset($QueryResult[0]['name']) ? $ConnectorRegistration->name = $QueryResult[0]['name'] : NULL;
+        isset($QueryResult[0]['resourceId']) ? $ConnectorRegistration->resourceId = $QueryResult[0]['resourceId'] : NULL;
+        isset($QueryResult[0]['requestMethod']) ? $ConnectorRegistration->requestMethod = $QueryResult[0]['requestMethod'] : NULL;
+        isset($QueryResult[0]['accessDeniedCode']) ? $ConnectorRegistration->accessDeniedCode = $QueryResult[0]['accessDeniedCode'] : NULL;
+        isset($QueryResult[0]['classId']) ? $ConnectorRegistration->classId = $QueryResult[0]['classId'] : NULL;
+        isset($QueryResult[0]['lastModifiedTime']) ? $ConnectorRegistration->lastModifiedTime = $QueryResult[0]['lastModifiedTime'] : NULL;
+        if (isset(self::$Registry)) {
+          self::$Registry->addRegistration($ConnectorRegistration);
+        }
+      }
+    }
+    if (!isset($ConnectorRegistration)) {
+      //
+      // Handle built-in resources in the event database connection is not active.
+      //
+      $ConnectorRegistration = self::getCoreResourceConnector($resourceId, $requestMethod);
     }
     return $ConnectorRegistration;
   }

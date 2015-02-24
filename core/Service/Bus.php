@@ -174,8 +174,11 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         //
         // Get resource/representation registration info.
         //
-        $ResourceRegistration = $this->getResourceRegistration($Message);
-        $ConnectorRegistration = $this->getConnectorRegistration($ResourceRegistration, $requestMethod);
+        $ResourceRegistration = AblePolecat_Registry_Resource::getRegisteredResource($Message);
+        $ConnectorRegistration = AblePolecat_Registry_Connector::getRegisteredResourceConnector(
+          $ResourceRegistration->getId(), 
+          $requestMethod
+        );
         
         //
         // If method is GET and resource is not restricted, check cache first.
@@ -188,12 +191,12 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           // Check current cache entry against modified dates for both resource and response objects.
           //
           $ResponseRegistration = $this->getResponseRegistration(
-            $ResourceRegistration->getResourceId(), 
-            $ResourceRegistration->getResourceName(), 
+            $ResourceRegistration->getId(), 
+            $ResourceRegistration->getName(), 
             200
           );
           
-          $primaryKey = array($ResourceRegistration->getResourceId(), 200);
+          $primaryKey = array($ResourceRegistration->getId(), 200);
           $CacheRegistration = AblePolecat_Registry_Entry_Cache::fetch($primaryKey);
           if ($CacheRegistration->getLastModifiedTime()) {
             //
@@ -234,7 +237,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             from('transaction')->
             where(sprintf("`sessionNumber` = %s AND `resourceId` = '%s' AND `status` != '%s'", 
               AblePolecat_Mode_Session::getSessionNumber(),
-              $ResourceRegistration->getPropertyValue('resourceId'), 
+              $ResourceRegistration->getId(), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );
           $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
@@ -252,35 +255,13 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             //
             // Validate registered parent transaction class name.
             //
-            $transactionClassName = $ConnectorRegistration->getTransactionClassName();
-            if (!isset($transactionClassName)) {
-              switch ($requestMethod) {
-                default:
-                  throw new AblePolecat_Service_Exception(sprintf("No transaction class registered for %s method on resource named %s",
-                    $requestMethod,
-                    $ResourceRegistration->getResourceName()
-                  ));
-                  break;
-                case 'GET':
-                  $transactionClassName = 'AblePolecat_Transaction_Get_Resource';
-                  break;
-              }
-            }
-            else {
-              if ($this->getClassRegistry()->isLoadable($transactionClassName)) {
-                if (!is_subclass_of($transactionClassName, 'AblePolecat_TransactionInterface')) {
-                  throw new AblePolecat_Service_Exception(sprintf("Transaction class registered for %s method on resource named %s does not implement AblePolecat_TransactionInterface",
-                    $transactionClassName,
-                    $requestMethod,
-                    $ResourceRegistration->getResourceName()
-                  ));
-                }
-              }
-              else {
-                throw new AblePolecat_Service_Exception(sprintf("Transaction class %s is not loadable.",
-                  $transactionClassName
-                ));
-              }
+            $transactionClassId = $ConnectorRegistration->getClassId();
+            $transactionClassRegistration = $this->getClassRegistry()->getRegistrationById($transactionClassId);
+            if (!isset($transactionClassRegistration)) {
+              throw new AblePolecat_Service_Exception(sprintf("No transaction class registered for %s method on resource named %s",
+                $requestMethod,
+                $ResourceRegistration->getName()
+              ));
             }
             
             // 
@@ -288,7 +269,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             // @todo: $parentTransactionId must be parent (object)
             //
             $Transaction = $this->getClassRegistry()->loadClass(
-              $transactionClassName,
+              $transactionClassRegistration->getName(),
               $this->getDefaultCommandInvoker(),
               $Agent,
               $Message,
@@ -331,153 +312,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       // throw new AblePolecat_Service_Exception($Exception->getMessage());
     }
     return $Response;
-  }
-  
-  /**
-   * Return registration data on connector corresponding to request path and method.
-   *
-   * @param AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration
-   * @param string $requestMethod
-   * 
-   * @return AblePolecat_Registry_Entry_Connector
-   */
-  protected function getConnectorRegistration(AblePolecat_Registry_Entry_ResourceInterface $ResourceRegistration, $requestMethod) {
-    
-    $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::fetch(array($ResourceRegistration->resourceId, $requestMethod));
-    
-    //
-    // Handle built-in resources in the event database connection is not active.
-    //
-    if (!isset($ConnectorRegistration)) {
-      $ConnectorRegistration = AblePolecat_Registry_Connector::getCoreResourceConnector($ResourceRegistration->resourceId, $requestMethod);
-    }
-    return $ConnectorRegistration;
-  }
-  
-  /**
-   * Return registration data on resource corresponding to request URI/path.
-   *
-   * Able Polecat expects the part of the URI, which follows the host or virtual host
-   * name to define a 'resource' on the system. This function returns the data (model)
-   * corresponding to request. If no corresponding resource is located on the system, 
-   * or if an application error is encountered along the way, Able Polecat has a few 
-   * built-in resources to deal with these situations.
-   *
-   * NOTE: Although a 'resource' may comprise more than one path component (e.g. 
-   * ./books/[ISBN] or ./products/[SKU] etc), an Able Polecat resource is identified by
-   * the first part only (e.g. 'books' or 'products') combined with a UUID. Additional
-   * path parts are passed to the top-level resource for further resolution. This is 
-   * why resource classes validate the URI, to ensure it follows expectations for syntax
-   * and that request for resource can be fulfilled. In short, the Able Polecat server
-   * really only fulfils the first part of the resource request and delegates the rest to
-   * the 'resource' itself.
-   *
-   * @see AblePolecat_ResourceAbstract::validateRequestPath()
-   *
-   * @param AblePolecat_Message_RequestInterface $Request
-   * 
-   * @return AblePolecat_Registry_Entry_Resource
-   */
-  protected function getResourceRegistration(AblePolecat_Message_RequestInterface $Request) {
-    
-    $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
-    
-    //
-    // Extract the part of the URI, which defines the resource.
-    //
-    $requestPathInfo = $Request->getRequestPathInfo();
-    isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME]) ? $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME] : $resourceName  = NULL;
-    if (isset($resourceName)) {
-      $ResourceRegistration->resourceName = $resourceName;
-      $ResourceRegistration->hostName = $Request->getHostName();
-      //
-      // Look up resource registration in [resource]
-      //
-      $sql = __SQL()->          
-          select('resourceClassName', 'resourceId', 'lastModifiedTime')->
-          from('resource')->
-          where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
-      if ($CommandResult->success() && is_array($CommandResult->value())) {
-        $classInfo = $CommandResult->value();
-        if (isset($classInfo[0])) {
-          $ResourceRegistration->resourceId = $classInfo[0]['resourceId'];
-          $ResourceRegistration->resourceClassName = $classInfo[0]['resourceClassName'];
-          $ResourceRegistration->lastModifiedTime = $classInfo[0]['lastModifiedTime'];
-        }
-      }
-    }
-    if (!isset($ResourceRegistration->resourceClassName)) {
-      if (AblePolecat_Mode_Server::getActiveCoreDatabaseName()) {
-        //
-        // Resource is not registered. Use a system resource.      
-        // Assign resource id and class name.
-        //
-        switch ($resourceName) {
-          default:
-            //
-            // Request did not resolve to a registered or system resource class.
-            // Log status and return error resource.
-            //
-            $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
-              $resourceName, 
-              $Request->getRequestPath(),
-              $Request->getHostName()
-            );
-            AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
-            $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Error::UUID;
-            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Error';
-            break;
-          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
-          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-            $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Ack::UUID;
-            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Ack';
-            break;
-          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-            $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Util::UUID;
-            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Util';
-            break;
-          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-            $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
-            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
-            break;
-          case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
-            $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Update::UUID;
-            $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Update';
-            break;
-        }
-      }
-      else {
-        //
-        // There is no active database connection, redirect to install resource.
-        //
-        $ResourceRegistration->resourceName = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
-        $ResourceRegistration->resourceId = AblePolecat_Resource_Restricted_Install::UUID;
-        $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Restricted_Install';
-      }
-    }
-    
-    //
-    // Update cache entry if resource class file has been modified since last resource registry entry update.
-    //
-    if (isset($ResourceRegistration->resourceClassName)) {
-      $ClassRegistration = $this->getClassRegistry()->isLoadable($ResourceRegistration->resourceClassName);
-      if ($ClassRegistration && isset($ClassRegistration->classLastModifiedTime)) {
-        if ($ClassRegistration->classLastModifiedTime > $ResourceRegistration->lastModifiedTime) {
-          $sql = __SQL()->          
-            update('resource')->
-            set('lastModifiedTime')->
-            values($ClassRegistration->classLastModifiedTime)->
-            where(sprintf("resourceId = '%s'", $ResourceRegistration->resourceId));
-          $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
-          if ($CommandResult->success()) {
-            $ResourceRegistration->lastModifiedTime = $ClassRegistration->classLastModifiedTime;
-          }
-        }
-      }
-    }
-    
-    return $ResourceRegistration;
   }
   
   /**

@@ -86,8 +86,8 @@ class AblePolecat_Transaction_Restricted_Install extends AblePolecat_Transaction
     
     $Resource = NULL;
     
-    $resourceClassName = $this->getResourceRegistration()->getResourceClassName();
-    if (isset($resourceClassName) && ($resourceClassName === 'AblePolecat_Resource_Restricted_Install')) {
+    $ResourceRegistration = $this->getResourceRegistration();
+    if (isset($ResourceRegistration) && ($ResourceRegistration->getClassId() === AblePolecat_Resource_Restricted_Install::UUID)) {
       switch ($this->getRequest()->getMethod()) {
         default:
           break;

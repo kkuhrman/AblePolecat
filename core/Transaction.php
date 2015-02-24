@@ -595,7 +595,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
             $transactionId, 
             $sessionNumber,
             $this->getRequest()->getMethod(),
-            $this->getResourceRegistration()->getResourceId(),
+            $this->getResourceRegistration()->getId(),
             $updateTime,
             $updateTime,
             $savepointId,

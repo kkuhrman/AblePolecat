@@ -189,7 +189,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     $resourceName = NULL;
     
     if (isset($this->ResponseRegistration)) {
-      $resourceName = $this->ResponseRegistration->getResourceName();
+      $resourceName = $this->ResponseRegistration->getName();
     }
     return $resourceName;
   }

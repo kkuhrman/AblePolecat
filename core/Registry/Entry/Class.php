@@ -137,7 +137,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    *
    * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
    *
-   * @return AblePolecat_Registry_EntryInterface.
+   * @return AblePolecat_Registry_EntryInterface OR NULL.
    */
   public static function fetch($primaryKey) {
     
@@ -147,8 +147,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
       //
       // Create registry object and initialize primary key.
       //
-      $classRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-      isset($primaryKey['id']) ? $classRegistration->id = $primaryKey['id'] : $classRegistration->id = $primaryKey;
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       //
       // Generate and execute SELECT statement.
@@ -162,11 +161,13 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
           'classFactoryMethod', 
           'lastModifiedTime')->
         from('lib')->
-        where(sprintf("`id` = '%s' AND `statusCode` = %d", $primaryKey));
+        where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
+          $classRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
+          isset($registrationInfo[0]['id']) ? $classRegistration->id = $registrationInfo[0]['id'] : NULL;
           isset($registrationInfo[0]['name']) ? $classRegistration->name = $registrationInfo[0]['name'] : NULL;
           isset($registrationInfo[0]['classLibraryId']) ? $classRegistration->classLibraryId = $registrationInfo[0]['classLibraryId'] : NULL;
           isset($registrationInfo[0]['classFullPath']) ? $classRegistration->classFullPath = $registrationInfo[0]['classFullPath'] : NULL;

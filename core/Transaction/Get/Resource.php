@@ -108,16 +108,17 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
     
     $Resource = NULL;
     
-    $resourceClassName = $this->getResourceRegistration()->getResourceClassName();
-    if (isset($resourceClassName)) {
+    $resourceClassId = $this->getResourceRegistration()->getClassId();
+    $resourceClassRegistration = $this->getClassRegistry()->getRegistrationById($resourceClassId);
+    if (isset($resourceClassRegistration)) {
       //
       // Resource request resolves to registered class name, try to load.
       // Attempt to load resource class
       //
       try {
-        $Resource = $this->getClassRegistry()->loadClass($resourceClassName, $this->getAgent());
-        $Resource->setId($this->getResourceRegistration()->getResourceId());
-        $Resource->setName($this->getResourceRegistration()->getResourceName());
+        $Resource = $this->getClassRegistry()->loadClass($resourceClassRegistration->getName(), $this->getAgent());
+        $Resource->setId($this->getResourceRegistration()->getId());
+        $Resource->setName($this->getResourceRegistration()->getName());
         $this->setStatus(self::TX_STATE_COMPLETED);
       }
       catch(AblePolecat_AccessControl_Exception $Exception) {
@@ -163,13 +164,13 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       // Request did not resolve to a registered resource class.
       // Return one of the 'built-in' resources.
       //
-      switch ($this->getResourceName()) {
+      switch ($this->getResourceRegistration()->getName()) {
         default:
           $Resource = AblePolecat_Resource_Core_Factory::wakeup(
             $this->getDefaultCommandInvoker(),
             'AblePolecat_Resource_Core_Error',
             'Resource not found',
-            sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceName())
+            sprintf("Able Polecat cannot locate resource given by [%s]", $this->getResourceRegistration()->getName())
           );
           $this->setStatus(self::TX_STATE_COMPLETED);
           break;
