@@ -50,6 +50,7 @@
           <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
           <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
           <polecat:index type="PRIMARY KEY">
@@ -75,6 +76,7 @@
             <polecat:fieldValue>403</polecat:fieldValue>
           </polecat:field>
           <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
           <polecat:index type="PRIMARY KEY">
@@ -217,6 +219,7 @@
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
           <polecat:field name="hostName" type="varchar" size="255" null="NOT" />
           <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
           <polecat:index type="PRIMARY KEY">
@@ -238,6 +241,7 @@
           <polecat:field name="resourceId" type="char" size="36" null="NOT" />
           <polecat:field name="statusCode" type="int" size="11" null="NOT" />
           <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
           <polecat:index type="PRIMARY KEY">
