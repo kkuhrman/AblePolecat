@@ -242,7 +242,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
         //
         // Get project database.
         //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
         
         //
         // Load [lib]
@@ -300,7 +300,6 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
       $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::import($Node);
-      AblePolecat_Debug::kill($ComponentRegistration);
       if (isset($ComponentRegistration)) {
         $ComponentRegistration->save($Database);
         self::$Registry->addRegistration($ComponentRegistration);

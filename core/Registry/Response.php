@@ -112,20 +112,20 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     //
     // No response registration record; use one of the core response classes.
     //
-    $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
+    $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
     $ResponseRegistration->resourceId = $resourceId; 
     $ResponseRegistration->statusCode = $statusCode;
     
-    switch ($Resource->getName()) {
+    switch ($resourceId) {
       default:
         $ResponseRegistration->id = AblePolecat_Message_Response_Xml::UUID;
         $ResponseRegistration->name = 'AblePolecat_Message_Response_Xml';
         $ResponseRegistration->classId = AblePolecat_Message_Response_Xml::UUID;
         break;
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_FORM:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+      case AblePolecat_Resource_Core_Form::UUID:
+      case AblePolecat_Resource_Restricted_Install::UUID:
+      case AblePolecat_Resource_Restricted_Update::UUID:
+      case AblePolecat_Resource_Restricted_Util::UUID:
         $ResponseRegistration->id = AblePolecat_Message_Response_Xhtml::UUID;
         $ResponseRegistration->name = 'AblePolecat_Message_Response_Xhtml';
         $ResponseRegistration->classId = AblePolecat_Message_Response_Xhtml::UUID;
@@ -150,7 +150,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
       //
       // Get project database.
       //
-      $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+      $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
       
       $sql = __SQL()->
         select(
@@ -164,7 +164,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
         where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
       $QueryResult = $CoreDatabase->query($sql);
       if (isset($QueryResult[0])) {
-        $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
+        $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
         isset($QueryResult[0]['id']) ? $ResponseRegistration->id = $QueryResult[0]['id'] : NULL;
         isset($QueryResult[0]['name']) ? $ResponseRegistration->name = $QueryResult[0]['name'] : NULL;
         isset($QueryResult[0]['resourceId']) ? $ResponseRegistration->resourceId = $QueryResult[0]['resourceId'] : NULL;

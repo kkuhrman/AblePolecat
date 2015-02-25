@@ -210,7 +210,7 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
       //
       // Get project database.
       //
-      $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+      $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
       
       //
       // Look up resource registration in [resource]

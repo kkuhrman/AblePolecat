@@ -26,7 +26,7 @@ interface AblePolecat_Message_ResponseInterface extends AblePolecat_MessageInter
    */
   const HEAD_CONTENT_TYPE_XML   = 'Content-type: text/xml; charset=utf-8';
   const HEAD_CONTENT_TYPE_HTML  = 'Content-type: text/html';
-  
+    
   /**
    * @return string Entity body as text.
    */
@@ -428,7 +428,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
    *
    * @param Array $fields.
    */
-  protected function appendHeaderFields($fields) {
+  protected function appendHeaderFields($fields = NULL) {
     if (isset($fields) && is_array($fields)) {
       foreach($fields as $key => $field) {
         if ($this->validateHeaderField($field)) {

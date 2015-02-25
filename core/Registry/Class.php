@@ -10,6 +10,9 @@
  * @version   0.6.3
  */
 
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml', 'Tpl.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Class.php')));
 
@@ -433,13 +436,21 @@ class AblePolecat_Registry_Class
    */
   public function isLoadable($className) {
     
+    if (!is_scalar($className)) {
+      $message = sprintf("%s requires first parameter to be scalar type. %s passed.", __METHOD__, AblePolecat_Data::getDataTypeName($className));
+      throw new AblePolecat_Registry_Exception($message);
+    }
+    
+    //
+    // Try registration by name.
+    //
     $ClassRegistration = $this->getRegistrationByName($className);
-    
-    //
-    // Boot log is used for troubleshooting.
-    //
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "Checking if $className is loadable.");
-    
+    if (!isset($ClassRegistration)) {
+      //
+      // By id?
+      //
+      $ClassRegistration = $this->getRegistrationById($className);
+    }
     if (isset($ClassRegistration)) {
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
     }
@@ -453,51 +464,59 @@ class AblePolecat_Registry_Class
   /**
    * Get instance of given class.
    *
-   * @param string $className The name of class to instantiate.
+   * @param mixed $classInfo AblePolecat_Registry_Entry_ClassInterface or string.
    * @param mixed $param Zero or more optional parameters to be passed to creational method.
    * 
    * @return object Instance of given class or NULL.
    */
-  public function loadClass($className, $param = NULL) {
+  public function loadClass($classInfo, $param = NULL) {
     
     $Instance = NULL;
     $parameters = array();
-    $ClassRegistration = $this->isLoadable($className);
+    $ClassRegistration = NULL;
+    
+    if (is_object($classInfo) && is_a($classInfo, 'AblePolecat_Registry_Entry_ClassInterface')) {
+      $ClassRegistration = $classInfo;
+    }
+    else {
+      if (is_string('$classInfo')) {
+        $ClassRegistration = $this->isLoadable($classInfo);
+      }
+    }
     
     //
     // Boot log is used for troubleshooting faulty extension code.
     //
-    $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($ClassRegistration));
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
+    // $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($ClassRegistration));
+    // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     
     if ($ClassRegistration) {
       //
-      // @todo: query string parameter requesting Dump class registration data to boot log.
+      // Get any parameters passed.
       //
-      // $ClassRegistration->dumpState();
-      
-      if (isset($ClassRegistration->classFactoryMethod)) {
-        //
-        // Get any parameters passed.
-        //
-        if (isset($param)) {
-          $args = func_get_args();
-          array_shift($args);
-          $parameters = $args;
-        }
-        switch ($ClassRegistration->classFactoryMethod) {
-          default:
-            $Instance = @call_user_func_array(array($className, $ClassRegistration->classFactoryMethod), $parameters);
-            break;
-          case '__construct':
-            $Instance = new $className;
-            break;
-        }
+      if (isset($param)) {
+        $args = func_get_args();
+        array_shift($args);
+        $parameters = $args;
+      }
+      switch ($ClassRegistration->getClassFactoryMethod()) {
+        default:
+          $Instance = call_user_func_array(
+            array(
+              $ClassRegistration->getName(), 
+              $ClassRegistration->getClassFactoryMethod()
+            ), 
+            $parameters
+          );
+          break;
+        case '__construct':
+          $Instance = new $ClassRegistration->getName();
+          break;
       }
     }
     
     if (!isset($Instance)) {
-      $message = sprintf("Could not load class %s with parameter set %s.", $className, serialize($parameters));
+      $message = sprintf("Could not load class %s with parameter set %s.", $ClassRegistration->getName(), serialize($parameters));
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     }
     return $Instance;
@@ -543,6 +562,37 @@ class AblePolecat_Registry_Class
     $ClassRegistration->name = 'AblePolecat_Transaction_Restricted_Update';
     $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php'));
     $ClassRegistration->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Message_Response_Xml::UUID;
+    $ClassRegistration->name = 'AblePolecat_Message_Response_Xml';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php'));
+    $ClassRegistration->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Message_Response_Xhtml::UUID;
+    $ClassRegistration->name = 'AblePolecat_Message_Response_Xhtml';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php'));
+    $ClassRegistration->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Message_Response_Xhtml_Tpl::UUID;
+    $ClassRegistration->name = 'AblePolecat_Message_Response_Xhtml_Tpl';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml', 'Tpl.php'));
+    $ClassRegistration->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($ClassRegistration);
+    
+    //
+    // @todo: not really needed, core anyway.
+    //
+    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+    $ClassRegistration->id = AblePolecat_Message_Response_Cached::UUID;
+    $ClassRegistration->name = 'AblePolecat_Message_Response_Cached';
+    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php'));
+    $ClassRegistration->classFactoryMethod = 'create';
     self::$Registry->addRegistration($ClassRegistration);
   }
   

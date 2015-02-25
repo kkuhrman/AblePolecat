@@ -14,6 +14,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 class AblePolecat_Message_Response_Cached extends AblePolecat_Message_ResponseAbstract {
   
   /**
+   * Registry article constants.
+   */
+  const UUID = 'c2710e7b-b7ae-11e4-a12d-0050569e00a2';
+  const NAME = 'AblePolecat_Message_Response_Cached';
+  
+  /**
    * @var AblePolecat_Registry_Entry_Cache
    */
   private $CacheRegistration;

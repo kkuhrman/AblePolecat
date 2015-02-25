@@ -116,7 +116,7 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       // Attempt to load resource class
       //
       try {
-        $Resource = $this->getClassRegistry()->loadClass($resourceClassRegistration->getName(), $this->getAgent());
+        $Resource = $this->getClassRegistry()->loadClass($resourceClassRegistration, $this->getAgent());
         $Resource->setId($this->getResourceRegistration()->getId());
         $Resource->setName($this->getResourceRegistration()->getName());
         $this->setStatus(self::TX_STATE_COMPLETED);

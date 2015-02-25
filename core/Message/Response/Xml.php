@@ -12,6 +12,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 
 class AblePolecat_Message_Response_Xml extends AblePolecat_Message_ResponseAbstract {
   
+  /**
+   * Registry article constants.
+   */
+  const UUID = '3dcd0564-b7af-11e4-a12d-0050569e00a2';
+  const NAME = 'AblePolecat_Message_Response_Xml';
+  
   const BODY_DOCTYPE_XML        = "<?xml version='1.0' standalone='yes'?>";
   
   /**

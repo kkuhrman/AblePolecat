@@ -10,12 +10,7 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode', 'Response.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Initiator.php')));
-// require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
 
 /**
  * Manages multiple web services initiator connections and routes messages
@@ -268,7 +263,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             // @todo: $parentTransactionId must be parent (object)
             //
             $Transaction = $this->getClassRegistry()->loadClass(
-              $transactionClassRegistration->getName(),
+              $transactionClassRegistration,
               $this->getDefaultCommandInvoker(),
               $Agent,
               $Message,
@@ -292,7 +287,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             //
             $Resource = $this->recoverFromTransactionFailure($Exception, $ResourceRegistration);
           }
-          $Response = $this->getResponse($ResourceRegistration, $Transaction, $Resource);
+          $Response = $this->getResponse($Resource, $Transaction->getStatusCode());
         }
       }
       else if (is_a($Message, 'AblePolecat_Message_ResponseInterface')) {
@@ -326,31 +321,25 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
    * - PHP class file modified time is newer than registry entry modified time
    * - .tpl file modified time is newer than registry entry modified time
    *
-   * @param AblePolecat_Registry_Entry_Resource $ResourceRegistration
-   * @param AblePolecat_TransactionInterface $Transaction
    * @param AblePolecat_ResourceInterface $Resource
+   * @param int $statusCode
    * 
    * @return AblePolecat_Message_ResponseInterface
    */
-  protected function getResponse(
-    AblePolecat_Registry_Entry_Resource $ResourceRegistration,
-    AblePolecat_TransactionInterface $Transaction, 
-    AblePolecat_ResourceInterface $Resource
-  ) {
+  protected function getResponse(AblePolecat_ResourceInterface $Resource, $statusCode) {
     
     $Response = NULL;
     
     //
     // Search core database for corresponding response registration.
     //
-    $ResponseRegistration = AblePolecat_Registry_Response::getRegisteredResponse($Resource->getId(), $Transaction->getStatusCode());
-    AblePolecat_Debug::kill($ResponseRegistration);
+    $ResponseRegistration = AblePolecat_Registry_Response::getRegisteredResponse($Resource->getId(), $statusCode);
     $ResponseClassRegistration = $this->getClassRegistry()->getRegistrationById($ResponseRegistration->getClassId());
     if(isset($ResponseClassRegistration)) {
       //
-      // @todo: load response class and set entity body.
+      // load response class and set entity body.
       //
-      $Response = $this->getClassRegistry()->loadClass($ResponseClassRegistration->getName(), $ResponseRegistration);
+      $Response = $this->getClassRegistry()->loadClass($ResponseClassRegistration, $ResponseRegistration);
       $Response->setEntityBody($Resource);
     }
     

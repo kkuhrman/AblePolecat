@@ -14,6 +14,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Response_Xhtml {
   
   /**
+   * Registry article constants.
+   */
+  const UUID = '022ac5f8-b7af-11e4-a12d-0050569e00a2';
+  const NAME = 'AblePolecat_Message_Response_Xhtml_Tpl';
+  
+  /**
    * @var string.
    */
   private $templateFullPath;

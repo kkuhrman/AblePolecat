@@ -24,11 +24,6 @@ interface AblePolecat_Registry_Entry_TemplateInterface extends AblePolecat_Regis
   /**
    * @return string.
    */
-  public function getDefaultHeaders();
-  
-  /**
-   * @return string.
-   */
   public function getFullPath();
 }
 
@@ -175,7 +170,6 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
         'name',
         'articleId',
         'docType', 
-        'defaultHeaders', 
         'fullPath',
         'lastModifiedTime')->
       into('template')->
@@ -184,7 +178,6 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
         $this->getName(),
         $this->getArticleId(), 
         $this->getDocType(), 
-        $this->getDefaultHeaders(), 
         $this->getFullPath(),
         $this->getLastModifiedTime()
       );
@@ -207,13 +200,6 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
    */
   public function getDocType() {
     return $this->getPropertyValue('docType');
-  }
-  
-  /**
-   * @return string.
-   */
-  public function getDefaultHeaders() {
-    return $this->getPropertyValue('defaultHeaders');
   }
   
   /**

@@ -23,6 +23,11 @@ interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Regis
   public function getStatusCode();
   
   /**
+   * @return string.
+   */
+  public function getDefaultHeaders();
+  
+  /**
    * @return Array.
    */
   public function getClassId();
@@ -96,7 +101,8 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
           'id', 
           'name', 
           'resourceId', 
-          'statusCode', 
+          'statusCode',
+          'defaultHeaders', 
           'classId', 
           'lastModifiedTime')->
         from('response')->
@@ -110,6 +116,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
           isset($registrationInfo[0]['name']) ? $ResponseRegistration->name = $registrationInfo[0]['name'] : NULL;
           isset($registrationInfo[0]['resourceId']) ? $ResponseRegistration->resourceId = $registrationInfo[0]['resourceId'] : NULL;
           isset($registrationInfo[0]['statusCode']) ? $ResponseRegistration->statusCode = $registrationInfo[0]['statusCode'] : NULL;
+          isset($registrationInfo[0]['defaultHeaders']) ? $ResponseRegistration->defaultHeaders = $registrationInfo[0]['defaultHeaders'] : NULL;
           isset($registrationInfo[0]['classId']) ? $ResponseRegistration->classId = $registrationInfo[0]['classId'] : NULL;
           isset($registrationInfo[0]['lastModifiedTime']) ? $ResponseRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         }
@@ -143,7 +150,8 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
         'id', 
         'name', 
         'resourceId', 
-        'statusCode', 
+        'statusCode',
+        'defaultHeaders', 
         'classId',
         'lastModifiedTime')->
       into('component')->
@@ -152,6 +160,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
         $this->getName(), 
         $this->getResourceId(),
         $this->getStatusCode(),
+        $this->getDefaultHeaders(), 
         $this->getClassId(),
         $this->getLastModifiedTime()
       );
@@ -174,6 +183,13 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    */
   public function getStatusCode() {
     return $this->getPropertyValue('statusCode');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getDefaultHeaders() {
+    return $this->getPropertyValue('defaultHeaders');
   }
   
   /**
