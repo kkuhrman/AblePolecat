@@ -86,9 +86,43 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
+    
+    $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
+    $ConnectorRegistration->id = $Node->getAttribute('id');
+    $ConnectorRegistration->name = $Node->getAttribute('name');
+    $ConnectorRegistration->requestMethod = $Node->getAttribute('requestMethod');
+    $ConnectorRegistration->accessDeniedCode = $Node->getAttribute('accessDeniedCode');
+    foreach($Node->childNodes as $key => $childNode) {
+      switch ($childNode->nodeName) {
+        default:
+          break;
+        case 'polecat:resourceId':
+          $ConnectorRegistration->resourceId = $childNode->nodeValue;
+          break;
+        case 'polecat:classId':
+          $ConnectorRegistration->classId = $childNode->nodeValue;
+          break;
+      }
+    }
+    
     //
-    // @todo: import [connector] registry entry.
+    // Verify class reference.
     //
+    $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
+      getRegistrationById($ConnectorRegistration->getClassId());
+    if (isset($ClassRegistration)) {
+      $ConnectorRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+    }
+    else {
+      $message = sprintf("connector %s (%s) references invalid class %s.",
+        $ConnectorRegistration->getName(),
+        $ConnectorRegistration->getId(),
+        $ConnectorRegistration->getClassId()
+      );
+      $ConnectorRegistration = NULL;
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    return $ConnectorRegistration;
   }
   
   /**

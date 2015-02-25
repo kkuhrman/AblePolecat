@@ -29,11 +29,6 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
    */
   private static $coreResourceRegistryEntries = NULL;
   
-  /**
-   * @var List of Able Polecat modules.
-   */
-  private $ClassLibraries = NULL;
-  
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
    ********************************************************************************/
@@ -95,75 +90,16 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Load master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
-    if (!isset(self::$Registry)) {
-      //
-      // Create instance of singleton.
-      //
-      self::$Registry = new AblePolecat_Registry_Connector();
-
-      //
-      // Load master project configuration file.
-      //
-      $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
-      
-      //
-      // Get package (class library) id.
-      //
-      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
-      $applicationNode = $Nodes->item(0);
-      if (isset($applicationNode)) {
-        $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
-        $ConnectorRegistration->id = $applicationNode->getAttribute('id');
-        $ConnectorRegistration->name = $applicationNode->getAttribute('name');
-        $ConnectorRegistration->libType = strtolower($applicationNode->getAttribute('type'));
-        $ConnectorRegistration->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
-        $ConnectorRegistration->useLib = '1';
-        $ConnectorRegistration->save($Database);
-      }
-      else {
-        //
-        // @todo: this type of schema checking should be done by implementing an XML schema.
-        //
-        $message = 'project.xml must contain an package node.';
-        trigger_error($message, E_USER_ERROR);
-      }
-
-      //
-      // Create DML statements for classes.
-      //
-      $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'connector');
-      foreach($Nodes as $key => $Node) {
-        $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::import($Node);
-        if (isset($ConnectorRegistration)) {
-          $ConnectorRegistration->save($Database);
-        }
-        
-        //
-        // If the class library is a module, load the corresponding project 
-        // configuration file and register any dependent class libraries.
-        //
-        if ($ConnectorRegistration->libType === 'mod') {
-          $modConfFilePath = implode(DIRECTORY_SEPARATOR, array(
-            $ConnectorRegistration->libFullPath,
-            'etc',
-            'polecat',
-            'conf',
-            AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
-          ));
-          $modConfFile = new DOMDocument();
-          $modConfFile->load($modConfFilePath);
-          
-          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'connector');
-          foreach($modNodes as $key => $modNode) {
-            $modConnectorRegistration = AblePolecat_Registry_Entry_Connector::import($modNode);
-            if (isset($modConnectorRegistration)) {
-              $modConnectorRegistration->save($Database);
-            }
-          }
-        }
-      }
-    }
+    //
+    // Get list of package connectors.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'connector');
+    self::insertList($Database, $Nodes);
   }
   
   /**
@@ -178,13 +114,41 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_RegistryInterface.
+   ********************************************************************************/
+   
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
+    
+    if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_ConnectorInterface')) {      
+      //
+      // Add to base registry class.
+      //
+      parent::addRegistration($RegistryEntry);
+    }
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",
+        __CLASS__,
+        AblePolecat_Data::getDataTypeName($RegistryEntry),
+        'AblePolecat_Registry_Entry_ConnectorInterface'
+      ));
+    }
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
   
   /**
    * Return connector registration entry for core resource by given id.
    *
-   * @param UUID $resourceId
+   * @param UUID $connectorId
    * @param string $requestMethod
    *
    * @return AblePolecat_Registry_Entry_ConnectorInterface or NULL.
@@ -336,13 +300,48 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
   }
   
   /**
+   * Insert DOMNodeList into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
+   *
+   */
+  protected static function insertList(
+    AblePolecat_DatabaseInterface $Database, 
+    DOMNodeList $Nodes) {
+    foreach($Nodes as $key => $Node) {
+      self::insertNode($Database, $Node);
+    }
+  }
+  
+  /**
+   * Insert DOMNode into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNode $Node DOMNode containing registry entry.
+   *
+   */
+  protected static function insertNode(
+    AblePolecat_DatabaseInterface $Database, 
+    DOMNode $Node) {
+
+    if (!isset(self::$Registry)) {
+      $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+
+    $registerFlag = $Node->getAttribute('register');
+    if ($registerFlag != '0') {
+      $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::import($Node);
+      $ConnectorRegistration->save($Database);
+      self::$Registry->addRegistration($ConnectorRegistration);
+    }
+  }
+  
+  /**
    * Extends constructor.
    */
   protected function initialize() {
     parent::initialize();
-    //
-    // Supported modules.
-    //
-    $this->ClassLibraries = array();
   }
 }
