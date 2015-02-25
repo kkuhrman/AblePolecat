@@ -131,9 +131,29 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               AblePolecat_Registry_Class::install($CoreDatabase);
               
               //
+              // INSERT [connector]
+              //
+              AblePolecat_Registry_Connector::install($CoreDatabase);
+              
+              //
               // INSERT [component]
               //
               AblePolecat_Registry_Component::install($CoreDatabase);
+              
+              //
+              // INSERT [resource]
+              //
+              AblePolecat_Registry_Resource::install($CoreDatabase);
+              
+              //
+              // INSERT [response]
+              //
+              AblePolecat_Registry_Response::install($CoreDatabase);
+              
+              //
+              // INSERT [template]
+              //
+              AblePolecat_Registry_Template::install($CoreDatabase);
               break;
             case AblePolecat_Resource_Restricted_Update::UUID:
               //
@@ -145,6 +165,31 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               // UPDATE [class]
               //
               AblePolecat_Registry_Class::update($CoreDatabase);
+              
+              //
+              // UPDATE [connector]
+              //
+              AblePolecat_Registry_Connector::update($CoreDatabase);
+              
+              //
+              // UPDATE [component]
+              //
+              AblePolecat_Registry_Component::update($CoreDatabase);
+              
+              //
+              // UPDATE [resource]
+              //
+              AblePolecat_Registry_Resource::update($CoreDatabase);
+              
+              //
+              // UPDATE [response]
+              //
+              AblePolecat_Registry_Response::update($CoreDatabase);
+              
+              //
+              // UPDATE [template]
+              //
+              AblePolecat_Registry_Template::update($CoreDatabase);
               break;
           }
         }

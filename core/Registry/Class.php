@@ -97,44 +97,38 @@ class AblePolecat_Registry_Class
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Registry)) {
-      try {
+      //
+      // Create instance of singleton.
+      //
+      self::$Registry = new AblePolecat_Registry_Class($Subject);
+      self::$Registry->registerCoreClasses();
+      
+      if (AblePolecat_Database_Pdo::ready()) {
         //
-        // Create instance of singleton.
+        // Get project database.
         //
-        self::$Registry = new AblePolecat_Registry_Class($Subject);
-        self::$Registry->registerCoreClasses();
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
         
-        if (AblePolecat_Database_Pdo::ready()) {
-          //
-          // Get project database.
-          //
-          $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
-          
-          //
-          // Load [lib]
-          //
-          $sql = __SQL()->
-            select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
-            from('class');
-          $QueryResult = $CoreDatabase->query($sql);
-          foreach($QueryResult as $key => $Class) {
-            $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-            $id = $Class['id'];
-            $ClassRegistration->id = $id;
-            $name = $Class['name'];
-            $ClassRegistration->name = $name;
-            isset($Class['classLibraryId']) ? $ClassRegistration->classLibraryId = $Class['classLibraryId'] : NULL;
-            isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
-            isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
-            isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
-            self::$Registry->addRegistration($ClassRegistration);
-          }
-          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
+        //
+        // Load [lib]
+        //
+        $sql = __SQL()->
+          select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
+          from('class');
+        $QueryResult = $CoreDatabase->query($sql);
+        foreach($QueryResult as $key => $Class) {
+          $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
+          $id = $Class['id'];
+          $ClassRegistration->id = $id;
+          $name = $Class['name'];
+          $ClassRegistration->name = $name;
+          isset($Class['classLibraryId']) ? $ClassRegistration->classLibraryId = $Class['classLibraryId'] : NULL;
+          isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
+          isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
+          isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
+          self::$Registry->addRegistration($ClassRegistration);
         }
-      }
-      catch (Exception $Exception) {
-        self::$Registry = NULL;
-        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
     }
     return self::$Registry;
@@ -198,7 +192,7 @@ class AblePolecat_Registry_Class
     }
     
     //
-    // Create DML statements for classes.
+    // Get list of package classes.
     //
     $applicationClassLibraryId = $applicationNode->getAttribute('id');
     $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($applicationClassLibraryId);

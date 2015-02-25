@@ -10,7 +10,7 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'DomNode.php')));
 
-interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Registry_Entry_DomNodeInterface {
+interface AblePolecat_Registry_Entry_DomNode_ResponseInterface extends AblePolecat_Registry_Entry_DomNodeInterface {
   
   /**
    * @return string.
@@ -36,7 +36,7 @@ interface AblePolecat_Registry_Entry_ResponseInterface extends AblePolecat_Regis
 /**
  * Standard argument list.
  */
-class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_Entry_DomNodeAbstract implements AblePolecat_Registry_Entry_ResponseInterface {
+class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_Entry_DomNodeAbstract implements AblePolecat_Registry_Entry_DomNode_ResponseInterface {
   
   /********************************************************************************
    * Implementation of AblePolecat_DynamicObjectInterface.
@@ -63,9 +63,45 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
+    
+    $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
+    $ResponseRegistration->id = $Node->getAttribute('id');
+    $ResponseRegistration->name = $Node->getAttribute('name');
+    $ResponseRegistration->statusCode = $Node->getAttribute('statusCode');
+    foreach($Node->childNodes as $key => $childNode) {
+      //
+      // @todo: add default headers to <polecat:response>
+      //
+      switch ($childNode->nodeName) {
+        default:
+          break;
+        case 'polecat:resourceId':
+          $ResponseRegistration->resourceId = $childNode->nodeValue;
+          break;
+        case 'polecat:classId':
+          $ResponseRegistration->classId = $childNode->nodeValue;
+          break;
+      }
+    }
+    
     //
-    // @todo: import [response] registry entry.
+    // Verify class reference.
     //
+    $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
+      getRegistrationById($ResponseRegistration->getClassId());
+    if (isset($ClassRegistration)) {
+      $ResponseRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+    }
+    else {
+      $message = sprintf("response %s (%s) references invalid class %s.",
+        $ResponseRegistration->getName(),
+        $ResponseRegistration->getId(),
+        $ResponseRegistration->getClassId()
+      );
+      $ResponseRegistration = NULL;
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    return $ResponseRegistration;
   }
   
   /**
@@ -154,7 +190,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
         'defaultHeaders', 
         'classId',
         'lastModifiedTime')->
-      into('component')->
+      into('response')->
       values(
         $this->getId(), 
         $this->getName(), 
@@ -168,7 +204,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Registry_Entry_ResponseInterface.
+   * Implementation of AblePolecat_Registry_Entry_DomNode_ResponseInterface.
    ********************************************************************************/
     
   /**

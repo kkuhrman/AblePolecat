@@ -87,7 +87,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   private $dataResource;
   
   /**
-   * @var AblePolecat_Registry_Entry_ResponseInterface
+   * @var AblePolecat_Registry_Entry_DomNode_ResponseInterface
    */
   private $ResponseRegistration;
   
@@ -138,7 +138,7 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
               if (is_numeric($value)) {
                 $ArgsList->{AblePolecat_Message_ResponseInterface::STATUS_CODE} = $value;
               }
-              else if (is_object($value) && is_a($value, 'AblePolecat_Registry_Entry_ResponseInterface')) {
+              else if (is_object($value) && is_a($value, 'AblePolecat_Registry_Entry_DomNode_ResponseInterface')) {
                 $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION} = $value;
               }
               break;

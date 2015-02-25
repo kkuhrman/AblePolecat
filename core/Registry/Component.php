@@ -109,23 +109,6 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     
     $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
     self::insertList($Database, $Nodes);
-    
-    
-    //
-    // Load all class library registrations.
-    //
-    // AblePolecat_Debug::kill($ClassLibraryRegistry);
-    // $ClassLibraryRegistrations = $ClassLibraryRegistry->getRegistrations(AblePolecat_RegistryInterface::KEY_ARTICLE_ID);
-    // if (isset($ClassLibraryRegistrations[AblePolecat_RegistryInterface::KEY_ARTICLE_ID])) {
-      // foreach($ClassLibraryRegistrations[AblePolecat_RegistryInterface::KEY_ARTICLE_ID] as $classLibraryId => $ClassLibraryRegistration) {
-        // $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
-        // if (isset($modConfFile)) {
-          // AblePolecat_Debug::kill($modConfFile);
-          // $Nodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
-          // self::insertList($Database, $ClassLibraryRegistration, $Nodes);
-        // }
-      // }
-    // }
   }
   
   /**

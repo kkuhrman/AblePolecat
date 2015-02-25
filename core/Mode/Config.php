@@ -468,7 +468,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   public static function getCoreClassLibraryConfFilepath($asStr = TRUE) {
     
     static $coreClassLibraryConfFilepathParts;
-    $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getName());
+    $coreFileName = sprintf("polecat-core-%s.xml", AblePolecat_Version::getCoreClassLibraryNumber());
     $coreClassLibraryConfFilepathParts = array(
       dirname(ABLE_POLECAT_CORE), 
       'etc',

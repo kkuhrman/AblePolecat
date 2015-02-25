@@ -89,11 +89,11 @@
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', '0.7.0-DEV');
-define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_7_0_DEV');
+define('ABLE_POLECAT_VERSION_NAME', '0.6.9-DEV');
+define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_6_9_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
-define('ABLE_POLECAT_VERSION_MINOR', '7');
-define('ABLE_POLECAT_VERSION_REVISION', '0');
+define('ABLE_POLECAT_VERSION_MINOR', '6');
+define('ABLE_POLECAT_VERSION_REVISION', '9');
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 
@@ -103,7 +103,12 @@ final class AblePolecat_Version implements AblePolecat_AccessControl_Article_Sta
    * Article Constants.
    */
   const UUID = '25226229-b3d6-11e4-976e-0050569e00a2';
-  const NAME = '0.7.0';
+  const NAME = '0.6.9';
+  
+  /**
+   * Core class library configuration file number.
+   */
+  const CORE_CLASS_LIB_NUMBER = '0.7.0';
   
   /**
    * Database schema.
@@ -158,6 +163,13 @@ final class AblePolecat_Version implements AblePolecat_AccessControl_Article_Sta
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Get the number of the core class library configuration file.
+   */
+  public static function getCoreClassLibraryNumber() {
+    return self::CORE_CLASS_LIB_NUMBER;
+  }
   
   /**
    * Get number of database schema in use by current version.

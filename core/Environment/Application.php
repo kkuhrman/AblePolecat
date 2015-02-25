@@ -20,6 +20,10 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
   const NAME = 'Able Polecat Application Environment';
   
   const VAR_REG_COMPONENT = 'AblePolecat_Registry_Component';
+  const VAR_REG_CONNECTOR = 'AblePolecat_Registry_Connector';
+  const VAR_REG_RESOURCE  = 'AblePolecat_Registry_Resource';
+  const VAR_REG_RESPONSE  = 'AblePolecat_Registry_Response';
+  const VAR_REG_TEMPLATE  = 'AblePolecat_Registry_Template';
     
   /**
    * @var AblePolecat_Environment_Server Singleton instance.
@@ -83,6 +87,46 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
         $Subject,
         self::VAR_REG_COMPONENT,
         $ComponentRegistry
+      );
+      
+      //
+      // Connector registry.
+      //
+      $ConnectorRegistry = AblePolecat_Registry_Connector::wakeup($Subject);
+      self::$Environment->setVariable(
+        $Subject,
+        self::VAR_REG_CONNECTOR,
+        $ConnectorRegistry
+      );
+      
+      //
+      // Resource registry.
+      //
+      $ResourceRegistry = AblePolecat_Registry_Resource::wakeup($Subject);
+      self::$Environment->setVariable(
+        $Subject,
+        self::VAR_REG_RESOURCE,
+        $ResourceRegistry
+      );
+      
+      //
+      // Response registry.
+      //
+      $ResponseRegistry = AblePolecat_Registry_Response::wakeup($Subject);
+      self::$Environment->setVariable(
+        $Subject,
+        self::VAR_REG_RESPONSE,
+        $ResponseRegistry
+      );
+      
+      //
+      // Template registry.
+      //
+      $TemplateRegistry = AblePolecat_Registry_Template::wakeup($Subject);
+      self::$Environment->setVariable(
+        $Subject,
+        self::VAR_REG_TEMPLATE,
+        $TemplateRegistry
       );
       
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) environment initialized.');

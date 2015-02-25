@@ -60,9 +60,42 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
+    
+    static $hostName;
+    $hostName = AblePolecat_Host::getRequest()->getHostName();
+    
+    $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
+    $ResourceRegistration->id = $Node->getAttribute('id');
+    $ResourceRegistration->name = $Node->getAttribute('name');
+    $ResourceRegistration->hostName = $hostName;
+    foreach($Node->childNodes as $key => $childNode) {
+      switch ($childNode->nodeName) {
+        default:
+          break;
+        case 'polecat:classId':
+          $ResourceRegistration->classId = $childNode->nodeValue;
+          break;
+      }
+    }
+    
     //
-    // @todo: import [resource] registry entry.
+    // Verify class reference.
     //
+    $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
+      getRegistrationById($ResourceRegistration->getClassId());
+    if (isset($ClassRegistration)) {
+      $ResourceRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+    }
+    else {
+      $message = sprintf("resource %s (%s) references invalid class %s.",
+        $ResourceRegistration->getName(),
+        $ResourceRegistration->getId(),
+        $ResourceRegistration->getClassId()
+      );
+      $ResourceRegistration = NULL;
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    return $ResourceRegistration;
   }
   
   /**
@@ -145,7 +178,7 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
         'hostName', 
         'classId', 
         'lastModifiedTime')->
-      into('class')->
+      into('resource')->
       values(
         $this->getId(), 
         $this->getName(), 

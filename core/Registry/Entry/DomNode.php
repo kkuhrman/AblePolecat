@@ -58,7 +58,7 @@ interface AblePolecat_Registry_Entry_DomNodeInterface extends AblePolecat_Regist
 abstract class AblePolecat_Registry_Entry_DomNodeAbstract extends AblePolecat_Registry_EntryAbstract implements AblePolecat_Registry_Entry_DomNodeInterface {
   
   /********************************************************************************
-   * Implementation of AblePolecat_Registry_Entry_ResponseInterface.
+   * Implementation of AblePolecat_Registry_Entry_DomNode_ResponseInterface.
    ********************************************************************************/
   
   /**

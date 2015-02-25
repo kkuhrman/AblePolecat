@@ -84,6 +84,16 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Load master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    
+    //
+    // Get list of package resources.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'response');
+    self::insertList($Database, $Nodes);
   }
   
   /**
@@ -94,6 +104,34 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_RegistryInterface.
+   ********************************************************************************/
+   
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
+    
+    if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_DomNodeInterface')) {      
+      //
+      // Add to base registry class.
+      //
+      parent::addRegistration($RegistryEntry);
+    }
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",
+        __CLASS__,
+        AblePolecat_Data::getDataTypeName($RegistryEntry),
+        'AblePolecat_Registry_Entry_DomNodeInterface'
+      ));
+    }
   }
   
   /********************************************************************************
@@ -208,6 +246,45 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
       $ResponseRegistration = self::getCoreResponseRegistration($resourceId, $statusCode);
     }
     return $ResponseRegistration;
+  }
+  
+  /**
+   * Insert DOMNodeList into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
+   *
+   */
+  protected static function insertList(
+    AblePolecat_DatabaseInterface $Database, 
+    DOMNodeList $Nodes) {
+    foreach($Nodes as $key => $Node) {
+      self::insertNode($Database, $Node);
+    }
+  }
+  
+  /**
+   * Insert DOMNode into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNode $Node DOMNode containing registry entry.
+   *
+   */
+  protected static function insertNode(
+    AblePolecat_DatabaseInterface $Database, 
+    DOMNode $Node) {
+
+    if (!isset(self::$Registry)) {
+      $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+
+    $registerFlag = $Node->getAttribute('register');
+    if ($registerFlag != '0') {
+      $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::import($Node);
+      $ResponseRegistration->save($Database);
+      self::$Registry->addRegistration($ResponseRegistration);
+    }
   }
   
   /**

@@ -67,13 +67,7 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Registry)) {
-      try {
-        self::$Registry = new AblePolecat_Registry_Template($Subject);
-      }
-      catch (Exception $Exception) {
-        self::$Registry = NULL;
-        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
-      }
+      self::$Registry = new AblePolecat_Registry_Template($Subject);
     }
     return self::$Registry;
   }

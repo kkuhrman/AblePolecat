@@ -92,49 +92,11 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
             $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
             isset($Library['id']) ? $ClassLibraryRegistration->id = $Library['id'] : NULL;
             isset($Library['name']) ? $ClassLibraryRegistration->name = $Library['name'] : NULL;
-            
-            //
-            // Check library full path setting.
-            //
-            isset($Library['libFullPath']) ? $libFullPath = $Library['libFullPath'] : $libFullPath = NULL;
-            if (isset($libFullPath) && AblePolecat_Server_Paths::verifyDirectory($libFullPath)) {
-              //
-              // Append class library path path to PHP INI paths
-              //
-              $ClassLibraryRegistration->libFullPath = $libFullPath;
-              set_include_path(get_include_path() . PATH_SEPARATOR . $ClassLibraryRegistration->libFullPath);
-              
-              //
-              // Add path to Able Polecat configurable paths.
-              //
-              AblePolecat_Server_Paths::setFullPath($ClassLibraryRegistration->id, $ClassLibraryRegistration->libFullPath);
-              
-              //
-              // if there is a paths.config file, include that, too...
-              //
-              $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
-                array(
-                  $ClassLibraryRegistration->libFullPath, 
-                  'etc', 
-                  'polecat', 
-                  'conf', 
-                  'path.config'
-                )
-              );
-              if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
-                include_once($pathConfFilePath);
-              }
-      
-              isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
-              isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
-              isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
-              self::$Registry->addRegistration($ClassLibraryRegistration);
-            }
-            else {
-              AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, 
-                sprintf("Invalid path provided for class library %s (%s).", $ClassLibraryRegistration->id, $ClassLibraryRegistration->name)
-              );
-            }
+            isset($Library['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $Library['libFullPath'] : $ClassLibraryRegistration->libFullPath = NULL;
+            isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
+            isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
+            isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
+            self::$Registry->addRegistration($ClassLibraryRegistration);
           }
           AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
         }
@@ -253,6 +215,68 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
     
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_RegistryInterface.
+   ********************************************************************************/
+  
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
+    
+    if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_ClassLibrary')) {
+      if (isset($RegistryEntry->libFullPath) && AblePolecat_Server_Paths::verifyDirectory($RegistryEntry->libFullPath)) {
+        //
+        // Add to base registry class.
+        //
+        parent::addRegistration($RegistryEntry);
+        
+        //
+        // Append class library path path to PHP INI paths
+        //
+        set_include_path(get_include_path() . PATH_SEPARATOR . $RegistryEntry->libFullPath);
+        
+        //
+        // Add path to Able Polecat configurable paths.
+        //
+        AblePolecat_Server_Paths::setFullPath($RegistryEntry->id, $RegistryEntry->libFullPath);
+        
+        //
+        // if there is a paths.config file, include that, too...
+        //
+        $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
+          array(
+            $RegistryEntry->libFullPath, 
+            'etc', 
+            'polecat', 
+            'conf', 
+            'path.config'
+          )
+        );
+        if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
+          include_once($pathConfFilePath);
+        }
+      }
+      else {
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, 
+          sprintf("Invalid path provided for class library %s (%s).", $RegistryEntry->id, $RegistryEntry->name)
+        );
+      }
+      
+    }
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",
+        __CLASS__,
+        AblePolecat_Data::getDataTypeName($RegistryEntry),
+        'AblePolecat_Registry_Entry_ClassLibrary'
+      ));
+    }
   }
   
   /********************************************************************************
