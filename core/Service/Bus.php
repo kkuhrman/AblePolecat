@@ -190,9 +190,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           //
           // Check current cache entry against modified dates for both resource and response objects.
           //
-          $ResponseRegistration = $this->getResponseRegistration(
+          $ResponseRegistration = AblePolecat_Registry_Response::getRegisteredResponse(
             $ResourceRegistration->getId(), 
-            $ResourceRegistration->getName(), 
             200
           );
           
@@ -344,33 +343,14 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     //
     // Search core database for corresponding response registration.
     //
-    $ResponseRegistration = $this->getResponseRegistration($Resource->getId(), $Resource->getName(), $Transaction->getStatusCode());
-    $responseClassName = $ResponseRegistration->getResponseClassName();
-    if(isset($responseClassName)) {
+    $ResponseRegistration = AblePolecat_Registry_Response::getRegisteredResponse($Resource->getId(), $Transaction->getStatusCode());
+    AblePolecat_Debug::kill($ResponseRegistration);
+    $ResponseClassRegistration = $this->getClassRegistry()->getRegistrationById($ResponseRegistration->getClassId());
+    if(isset($ResponseClassRegistration)) {
       //
       // @todo: load response class and set entity body.
       //
-      $Response = $this->getClassRegistry()->loadClass($responseClassName, $ResponseRegistration);
-      $Response->setEntityBody($Resource);
-    }
-    else {
-      //
-      // No response registration record; use one of the core response classes.
-      //
-      $headerFields = array();
-      switch ($Resource->getName()) {
-        default:
-          $Response = AblePolecat_Message_Response_Xml::create($ResponseRegistration);
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
-          $Response = AblePolecat_Message_Response_Xhtml::create($ResponseRegistration);
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_FORM:
-          $Response = AblePolecat_Message_Response_Xhtml::create($ResponseRegistration);
-          $Response->setEntityBody($Resource);
-          break;
-      }
+      $Response = $this->getClassRegistry()->loadClass($ResponseClassRegistration->getName(), $ResponseRegistration);
       $Response->setEntityBody($Resource);
     }
     
@@ -398,83 +378,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     }
     
     return $Response;
-  }
-  
-  /**
-   * Return registration data on response corresponding to the given resource and status code.
-   *
-   * @param string $resourceId
-   * @param int $statusCode
-   * 
-   * @return AblePolecat_Message_ResponseInterface
-   */
-  protected function getResponseRegistration($resourceId, $resourceName, $statusCode) {
-    
-    $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
-    isset($resourceId) ? $ResponseRegistration->resourceId = $resourceId : $ResponseRegistration->resourceId = '';
-    isset($resourceName) ? $ResponseRegistration->resourceName = $resourceName : $ResponseRegistration->resourceName = '';
-    isset($statusCode) ? $ResponseRegistration->statusCode = $statusCode : $ResponseRegistration->statusCode = 0;
-    
-    //
-    // Search database table [response] for a corresponding registration record.
-    //
-    $sql = __SQL()->          
-      select('responseClassName', 'docType', 'defaultHeaders', 'templateFullPath', 'lastModifiedTime')->
-      from('response')->
-      where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $ResponseRegistration->resourceId, $ResponseRegistration->statusCode));
-    $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
-    if ($CommandResult->success() && is_array($CommandResult->value())) {
-      $registrationInfo = $CommandResult->value();
-      if (isset($registrationInfo[0])) {
-        $ResponseRegistration->responseClassName = $registrationInfo[0]['responseClassName'];
-        isset($registrationInfo[0]['docType']) ? $ResponseRegistration->unserializeDocType($registrationInfo[0]['docType']) : NULL;
-        isset($registrationInfo[0]['defaultHeaders']) ? $ResponseRegistration->defaultHeaders = unserialize($registrationInfo[0]['defaultHeaders']) : NULL;
-        isset($registrationInfo[0]['templateFullPath']) ? $ResponseRegistration->templateFullPath = $registrationInfo[0]['templateFullPath'] : NULL;
-        isset($registrationInfo[0]['lastModifiedTime']) ? $ResponseRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
-      }
-    }
-    
-    //
-    // Update cache entry if response class and corresponding template files have been modified since last 
-    // response registry entry update.
-    //
-    $lastModifiedTime = $ResponseRegistration->lastModifiedTime;
-    if (isset($ResponseRegistration->responseClassName)) {
-      $responseClassRegistration = $this->getClassRegistry()->isLoadable($ResponseRegistration->responseClassName);
-      if ($responseClassRegistration && isset($responseClassRegistration->classLastModifiedTime)) {
-        if ($responseClassRegistration->classLastModifiedTime > $ResponseRegistration->lastModifiedTime) {
-          //
-          // Response class file has been modified since last response registry entry.
-          //
-          $lastModifiedTime = $responseClassRegistration->classLastModifiedTime;
-        }
-      }
-    }
-    if (isset($ResponseRegistration->templateFullPath)) {
-      $templateStat = stat($ResponseRegistration->templateFullPath);
-      if ($templateStat && isset($templateStat['mtime'])) {
-        if ($templateStat['mtime'] > $ResponseRegistration->lastModifiedTime) {
-          //
-          // Template file has been modified since last response registry entry.
-          //
-          $lastModifiedTime = $templateStat['mtime'];
-        }
-      }
-    }
-    
-    if ($lastModifiedTime != $ResponseRegistration->lastModifiedTime) {
-      $sql = __SQL()->          
-        update('response')->
-        set('lastModifiedTime')->
-        values($lastModifiedTime)->
-        where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $ResponseRegistration->resourceId, $ResponseRegistration->statusCode));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
-      if ($CommandResult->success()) {
-        $ResponseRegistration->lastModifiedTime = $lastModifiedTime;
-      }
-    }
-    
-    return $ResponseRegistration;
   }
   
   /**

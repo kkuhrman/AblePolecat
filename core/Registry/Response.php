@@ -101,6 +101,116 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
    ********************************************************************************/
   
   /**
+   * Return registration data for core response.
+   *
+   * @param string $resourceId
+   * @param int $statusCode
+   * 
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function getCoreResponseRegistration($resourceId, $statusCode) {
+    //
+    // No response registration record; use one of the core response classes.
+    //
+    $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
+    $ResponseRegistration->resourceId = $resourceId; 
+    $ResponseRegistration->statusCode = $statusCode;
+    
+    switch ($Resource->getName()) {
+      default:
+        $ResponseRegistration->id = AblePolecat_Message_Response_Xml::UUID;
+        $ResponseRegistration->name = 'AblePolecat_Message_Response_Xml';
+        $ResponseRegistration->classId = AblePolecat_Message_Response_Xml::UUID;
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_FORM:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+        $ResponseRegistration->id = AblePolecat_Message_Response_Xhtml::UUID;
+        $ResponseRegistration->name = 'AblePolecat_Message_Response_Xhtml';
+        $ResponseRegistration->classId = AblePolecat_Message_Response_Xhtml::UUID;
+        break;
+    }
+    return $ResponseRegistration;
+  }
+  
+  /**
+   * Return registration data for response to given resource and status code.
+   *
+   * @param string $resourceId
+   * @param int $statusCode
+   * 
+   * @return AblePolecat_Registry_EntryInterface.
+   */
+  public static function getRegisteredResponse($resourceId, $statusCode) {
+    
+    $ResponseRegistration = NULL;
+    
+    if (AblePolecat_Database_Pdo::ready()) {
+      //
+      // Get project database.
+      //
+      $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
+      
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'statusCode', 
+          'classId', 
+          'lastModifiedTime')->
+        from('response')->
+        where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
+      $QueryResult = $CoreDatabase->query($sql);
+      if (isset($QueryResult[0])) {
+        $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
+        isset($QueryResult[0]['id']) ? $ResponseRegistration->id = $QueryResult[0]['id'] : NULL;
+        isset($QueryResult[0]['name']) ? $ResponseRegistration->name = $QueryResult[0]['name'] : NULL;
+        isset($QueryResult[0]['resourceId']) ? $ResponseRegistration->resourceId = $QueryResult[0]['resourceId'] : NULL;
+        isset($QueryResult[0]['statusCode']) ? $ResponseRegistration->statusCode = $QueryResult[0]['statusCode'] : NULL;
+        isset($QueryResult[0]['classId']) ? $ResponseRegistration->classId = $QueryResult[0]['classId'] : NULL;
+        isset($QueryResult[0]['lastModifiedTime']) ? $ResponseRegistration->lastModifiedTime = $QueryResult[0]['lastModifiedTime'] : NULL;
+        
+        //
+        // Update cache entry if response class and corresponding template files have been modified since last 
+        // response registry entry update.
+        //
+        $ClassRegistration = AblePolecat_Registry_Entry_Class::fetch($ResponseRegistration->classId);
+        
+        //
+        // @todo: get template for given article id etc.
+        //
+        $TemplateRegistration = AblePolecat_Registry_Entry_Template::create();
+        
+        //
+        // Check if resource and/or response have been modified since last cache entry.
+        //
+        $lastModifiedTimes = array(
+          $ResponseRegistration->getLastModifiedTime(),
+          $ClassRegistration->getLastModifiedTime(),
+          $TemplateRegistration->getLastModifiedTime()
+        );
+        $mostRecentModifiedTime = AblePolecat_Data_Primitive_Scalar_Integer::max($lastModifiedTimes);
+        
+        if ($mostRecentModifiedTime != $CacheRegistration->getLastModifiedTime()) {
+          $sql = __SQL()->          
+            update('response')->
+            set('lastModifiedTime')->
+            values($mostRecentModifiedTime)->
+            where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
+          $CoreDatabase->execute($sql);
+          $ResponseRegistration->lastModifiedTime = $mostRecentModifiedTime;
+        }
+      }
+    }
+    if (!isset($ResponseRegistration)) {
+      $ResponseRegistration = self::getCoreResponseRegistration($resourceId, $statusCode);
+    }
+    return $ResponseRegistration;
+  }
+  
+  /**
    * Extends constructor.
    */
   protected function initialize() {

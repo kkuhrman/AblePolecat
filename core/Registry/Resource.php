@@ -237,22 +237,22 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
         isset($QueryResult[0]['hostName']) ? $ResourceRegistration->hostName = $QueryResult[0]['hostName'] : NULL;
         isset($QueryResult[0]['classId']) ? $ResourceRegistration->classId = $QueryResult[0]['classId'] : NULL;
         isset($QueryResult[0]['lastModifiedTime']) ? $ResourceRegistration->lastModifiedTime = $QueryResult[0]['lastModifiedTime'] : NULL;
-      }
         
-      //
-      // Update cache entry if resource class file has been modified since last resource registry entry update.
-      //
-      if (isset($ResourceRegistration->classId)) {
-        $ClassRegistration = AblePolecat_Registry_Entry_Class::fetch($ResourceRegistration->classId);
-        if ($ClassRegistration && isset($ClassRegistration->lastModifiedTime)) {
-          if ($ClassRegistration->lastModifiedTime > $ResourceRegistration->lastModifiedTime) {
-            $sql = __SQL()->          
-              update('resource')->
-              set('lastModifiedTime')->
-              values($ClassRegistration->lastModifiedTime)->
-              where(sprintf("id = '%s'", $ResourceRegistration->id));
-            $CoreDatabase->execute($sql);
-            $ResourceRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+        //
+        // Update cache entry if resource class file has been modified since last resource registry entry update.
+        //
+        if (isset($ResourceRegistration->classId)) {
+          $ClassRegistration = AblePolecat_Registry_Entry_Class::fetch($ResourceRegistration->classId);
+          if ($ClassRegistration && isset($ClassRegistration->lastModifiedTime)) {
+            if ($ClassRegistration->lastModifiedTime > $ResourceRegistration->lastModifiedTime) {
+              $sql = __SQL()->          
+                update('resource')->
+                set('lastModifiedTime')->
+                values($ClassRegistration->lastModifiedTime)->
+                where(sprintf("id = '%s'", $ResourceRegistration->id));
+              $CoreDatabase->execute($sql);
+              $ResourceRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+            }
           }
         }
       }

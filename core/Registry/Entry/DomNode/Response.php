@@ -89,7 +89,6 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
     $ResponseRegistration = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
-      $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
       isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       $sql = __SQL()->
@@ -106,6 +105,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
+          $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
           isset($registrationInfo[0]['id']) ? $ResponseRegistration->id = $registrationInfo[0]['id'] : NULL;
           isset($registrationInfo[0]['name']) ? $ResponseRegistration->name = $registrationInfo[0]['name'] : NULL;
           isset($registrationInfo[0]['resourceId']) ? $ResponseRegistration->resourceId = $registrationInfo[0]['resourceId'] : NULL;
