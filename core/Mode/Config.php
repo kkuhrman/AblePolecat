@@ -141,18 +141,14 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       //
       $configFileDirectory = AblePolecat_Server_Paths::getFullPath('conf');
       if (FALSE === AblePolecat_Server_Paths::verifyDirectory($configFileDirectory)) {
-        throw new AblePolecat_Mode_Exception('Boot sequence violation: Project configuration directory is not accessible.',
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
+        AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project configuration directory is not accessible.');
       }
       
       //
       // Initialize boot log.
       //
       if (FALSE === self::verifySystemFile(AblePolecat_Log_Boot::LOG_NAME_BOOTSEQ)) {
-        throw new AblePolecat_Mode_Exception('Boot sequence violation: Boot log file is not accessible.',
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
+        AblePolecat_Command_Chain::triggerError('Boot sequence violation: Boot log file is not accessible.');
       }
       
       //
@@ -186,17 +182,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             // Attempt to connect to database.
             //
             self::$ConfigMode->initializeCoreDatabase();
-            $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
-            if (count($dbErrors)) {
-              //
-              // @todo: Connection was not successful (server mode will take it from here).
-              //
-            }
           }
           else {
-            throw new AblePolecat_Mode_Exception('Boot sequence violation: Project configuration file is not accessible.',
-              AblePolecat_Error::BOOT_SEQ_VIOLATION
-            );
+            AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project configuration file is not accessible.');
           }
           break;
         case 'POST':
@@ -226,11 +214,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             // Attempt to connect to database.
             //
             self::$ConfigMode->initializeCoreDatabase();
-            $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
-            if (count($dbErrors)) {
-              throw new AblePolecat_Mode_Exception('Boot sequence violation: Failed to connect to project database.',
-                AblePolecat_Error::BOOT_SEQ_VIOLATION
-              );
+            if (!isset(self::$ConfigMode->CoreDatabase)) {
+              AblePolecat_Command_Chain::triggerError('Boot sequence violation: Failed to connect to project database.');
             }
             
             //
@@ -382,6 +367,11 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
           $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->CoreDatabaseConnectionSettings['dsn']);
           $this->CoreDatabaseConnectionSettings['connected'] = $this->CoreDatabase->open($this->getAgent(), $DbUrl);
+          $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
+          foreach($dbErrors as $errorNumber => $error) {
+            $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+            self::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+          }
         }
       }
       else {
@@ -627,6 +617,11 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   /**
    * Return full path of master project configuration file for given module.
    *
+   * Able Polecat allows users to override settings in the master project 
+   * configuration file(s) by creating a local copy in ./usr/etc. Polecat 
+   * will use any local configuration file if it exists; otherwise it will 
+   * use the corresponding master project configuration file.
+   *
    * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration
    * @param bool $asStr If FALSE, return path hierarchy as array, otherwise path as string.
    *
@@ -643,13 +638,37 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       }
       $id = $ClassLibraryRegistration->id;
       if (!isset($moduleConfFilepathParts[$id])) {
-        $moduleConfFilepathParts[$id] = array(
+        //
+        // First check for local configuration file.
+        //
+        $confPath = implode(DIRECTORY_SEPARATOR, array(
           $ClassLibraryRegistration->libFullPath,
+          'usr',
           'etc',
           'polecat',
           'conf',
           AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
-        );
+        ));
+        if (!AblePolecat_Server_Paths::verifyFile($confPath)) {
+          //
+          // Local file not found, use master.
+          //
+          $confPath = implode(DIRECTORY_SEPARATOR, array(
+            $ClassLibraryRegistration->libFullPath,
+            'etc',
+            'polecat',
+            'conf',
+            AblePolecat_Server_Paths::CONF_FILENAME_PROJECT
+          ));
+          if (!AblePolecat_Server_Paths::verifyFile($confPath)) {
+            AblePolecat_Command_Chain::triggerError(sprintf("Cannot access local or master project configuration file for %s (%s)",
+              $ClassLibraryRegistration->getName(),
+              $ClassLibraryRegistration->getId()
+            ));
+          }
+        }        
+        
+        $moduleConfFilepathParts[$id] = explode(DIRECTORY_SEPARATOR, $confPath);
       }
       if ($asStr) {
         if (isset(self::$ConfigMode)) {
@@ -671,6 +690,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   
   /**
    * Create a new project configuration file.
+   *
+   * DEPRECATED - user should copy master project configuration file to 
+   * ./usr/etc/polecat/conf/project.xml
    *
    * @return mixed The newly created project configuration file or FALSE.
    */

@@ -49,7 +49,25 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_ClassLibrary();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_ClassLibrary();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['libType']) ? $RegistryEntry->libType = $Record['libType'] : NULL;
+      isset($Record['libFullPath']) ? $RegistryEntry->libFullPath = $Record['libFullPath'] : NULL;
+      isset($Record['useLib']) ? $RegistryEntry->useLib = $Record['useLib'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -85,15 +103,15 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
    */
   public static function import(DOMNode $Node) {
     
-    $ClassLibraryRegistration = NULL;
+    $RegistryEntry = NULL;
     
     $useLib = $Node->getAttribute('use');
     if ($useLib === '1') {
-      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-      $ClassLibraryRegistration->id = $Node->getAttribute('id');
-      $ClassLibraryRegistration->name = $Node->getAttribute('name');
-      $ClassLibraryRegistration->libType = strtolower($Node->getAttribute('type'));
-      $ClassLibraryRegistration->useLib = $useLib;
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $RegistryEntry->id = $Node->getAttribute('id');
+      $RegistryEntry->name = $Node->getAttribute('name');
+      $RegistryEntry->libType = strtolower($Node->getAttribute('type'));
+      $RegistryEntry->useLib = $useLib;
       foreach($Node->childNodes as $key => $childNode) {
         switch ($childNode->nodeName) {
           default:
@@ -104,7 +122,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
             //
             $rawPath = implode(DIRECTORY_SEPARATOR, array(
               AblePolecat_Server_Paths::getFullPath('usr'),
-              $ClassLibraryRegistration->libType,
+              $RegistryEntry->libType,
               $childNode->nodeValue
             ));
             $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
@@ -115,18 +133,18 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
               $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($childNode->nodeValue);
               if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
                 $message = sprintf("Invalid path given for active class library %s (%s).",
-                  $ClassLibraryRegistration->name,
+                  $RegistryEntry->name,
                   $childNode->nodeValue
                 );
                 AblePolecat_Command_Chain::triggerError($message);
               }
             }
-            $ClassLibraryRegistration->libFullPath = $checkSanitizedPath;
+            $RegistryEntry->libFullPath = $checkSanitizedPath;
             break;
         }
       }
     }
-    return $ClassLibraryRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -152,14 +170,13 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
    */
   public static function fetch($primaryKey) {
     
-    $ClassLibraryRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
       //
       // Create registry object and initialize primary key.
       //
-      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-      isset($primaryKey['id']) ? $ClassLibraryRegistration->id = $primaryKey['id'] : $ClassLibraryRegistration->id = $primaryKey;
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       //
       // Generate and execute SELECT statement.
@@ -173,20 +190,16 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
           'useLib', 
           'lastModifiedTime')->
         from('lib')->
-        where(sprintf("`id` = '%s' AND `statusCode` = %d", $primaryKey));
+        where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          isset($registrationInfo[0]['name']) ? $ClassLibraryRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['libType']) ? $ClassLibraryRegistration->libType = $registrationInfo[0]['libType'] : NULL;
-          isset($registrationInfo[0]['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $registrationInfo[0]['libFullPath'] : NULL;
-          isset($registrationInfo[0]['useLib']) ? $ClassLibraryRegistration->useLib = $registrationInfo[0]['useLib'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create($registrationInfo[0]);
         }
       }
     }
-    return $ClassLibraryRegistration; 
+    return $RegistryEntry; 
   }
   
   /**
@@ -210,7 +223,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     $sql = __SQL()->          
-      insert(
+      replace(
         'id', 
         'name', 
         'libType', 

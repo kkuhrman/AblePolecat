@@ -72,7 +72,27 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_Template();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_Template();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['themeName']) ? $RegistryEntry->themeName = $Record['themeName'] : NULL;
+      isset($Record['templateScope']) ? $RegistryEntry->templateScope = $Record['templateScope'] : NULL;
+      isset($Record['articleId']) ? $RegistryEntry->articleId = $Record['articleId'] : NULL;
+      isset($Record['docType']) ? $RegistryEntry->docType = $Record['docType'] : NULL;
+      isset($Record['fullPath']) ? $RegistryEntry->fullPath = $Record['fullPath'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -88,24 +108,24 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
    */
   public static function import(DOMNode $Node) {
     
-    $TemplateRegistration = AblePolecat_Registry_Entry_Template::create();
-    $TemplateRegistration->id = $Node->getAttribute('id');
-    $TemplateRegistration->name = $Node->getAttribute('name');
+    $RegistryEntry = AblePolecat_Registry_Entry_Template::create();
+    $RegistryEntry->id = $Node->getAttribute('id');
+    $RegistryEntry->name = $Node->getAttribute('name');
     foreach($Node->childNodes as $key => $childNode) {
       switch ($childNode->nodeName) {
         default:
           break;
         case 'polecat:articleId':
-          $TemplateRegistration->resourceId = $childNode->nodeValue;
+          $RegistryEntry->articleId = $childNode->nodeValue;
           break;
         case 'polecat:docType':
-          $TemplateRegistration->classId = $childNode->nodeValue;
+          $RegistryEntry->docType = $childNode->nodeValue;
           break;
         case 'polecat:templateScope':
-          $TemplateRegistration->templateScope = $childNode->nodeValue;
+          $RegistryEntry->templateScope = $childNode->nodeValue;
           break;
         case 'polecat:themeName':
-          $TemplateRegistration->themeName = $childNode->nodeValue;
+          $RegistryEntry->themeName = $childNode->nodeValue;
           break;
         case 'polecat:path':
           //
@@ -113,13 +133,13 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
           //
           $sanitizePath = AblePolecat_Server_Paths::sanitizePath($childNode->nodeValue);
           if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
-            $TemplateRegistration->fullPath = $sanitizePath;
+            $RegistryEntry->fullPath = $sanitizePath;
           }
           break;
       }
     }
-    !isset($TemplateRegistration->themeName) ? $TemplateRegistration->themeName = 'default' : NULL;
-    return $TemplateRegistration;
+    !isset($RegistryEntry->themeName) ? $RegistryEntry->themeName = 'default' : NULL;
+    return $RegistryEntry;
   }
   
   /**
@@ -145,7 +165,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
    */
   public static function fetch($primaryKey) {
     
-    $TemplateRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
       //
@@ -172,19 +192,11 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          $TemplateRegistration = new AblePolecat_Registry_Entry_Template();
-          isset($registrationInfo[0]['id']) ? $TemplateRegistration->id = $registrationInfo[0]['id'] : NULL;
-          isset($registrationInfo[0]['name']) ? $TemplateRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['themeName']) ? $TemplateRegistration->themeName = $registrationInfo[0]['themeName'] : NULL;
-          isset($registrationInfo[0]['templateScope']) ? $TemplateRegistration->templateScope = $registrationInfo[0]['templateScope'] : NULL;
-          isset($registrationInfo[0]['articleId']) ? $TemplateRegistration->articleId = $registrationInfo[0]['articleId'] : NULL;
-          isset($registrationInfo[0]['docType']) ? $TemplateRegistration->docType = $registrationInfo[0]['docType'] : NULL;
-          isset($registrationInfo[0]['fullPath']) ? $TemplateRegistration->fullPath = $registrationInfo[0]['fullPath'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $TemplateRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_Template::create($registrationInfo[0]);
         }
       }
     }
-    return $TemplateRegistration;
+    return $RegistryEntry;
   }
   
   /**

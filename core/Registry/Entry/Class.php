@@ -72,7 +72,25 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_Class();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_Class();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['classLibraryId']) ? $RegistryEntry->classLibraryId = $Record['classLibraryId'] : NULL;
+      isset($Record['classFullPath']) ? $RegistryEntry->classFullPath = $Record['classFullPath'] : NULL;
+      isset($Record['classFactoryMethod']) ? $RegistryEntry->classFactoryMethod = $Record['classFactoryMethod'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -94,15 +112,15 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
     //
     // @todo: throw exception if Node does not comply with schema
     //
-    $classRegistration = AblePolecat_Registry_Entry_Class::create();
-    $classRegistration->id = $Node->getAttribute('id');
-    $classRegistration->name = $Node->getAttribute('name');
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = $Node->getAttribute('id');
+    $RegistryEntry->name = $Node->getAttribute('name');
     foreach($Node->childNodes as $key => $childNode) {
       switch ($childNode->nodeName) {
         default:
           break;
         case 'polecat:classFactoryMethod':
-          $classRegistration->classFactoryMethod = $childNode->nodeValue;
+          $RegistryEntry->classFactoryMethod = $childNode->nodeValue;
           break;
         case 'polecat:path':
           //
@@ -115,7 +133,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
           break;
       }
     }
-    return $classRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -141,7 +159,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    */
   public static function fetch($primaryKey) {
     
-    $classRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
       //
@@ -166,17 +184,11 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          $classRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-          isset($registrationInfo[0]['id']) ? $classRegistration->id = $registrationInfo[0]['id'] : NULL;
-          isset($registrationInfo[0]['name']) ? $classRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['classLibraryId']) ? $classRegistration->classLibraryId = $registrationInfo[0]['classLibraryId'] : NULL;
-          isset($registrationInfo[0]['classFullPath']) ? $classRegistration->classFullPath = $registrationInfo[0]['classFullPath'] : NULL;
-          isset($registrationInfo[0]['classFactoryMethod']) ? $classRegistration->classFactoryMethod = $registrationInfo[0]['classFactoryMethod'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $classRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create($registrationInfo[0]);
         }
       }
     }
-    return $classRegistration; 
+    return $RegistryEntry; 
   }
   
   /**
@@ -200,7 +212,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     $sql = __SQL()->          
-      insert(
+      replace(
         'id', 
         'name', 
         'classLibraryId', 

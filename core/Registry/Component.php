@@ -119,6 +119,44 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Get current registrations.
+    //
+    $Registry = AblePolecat_Registry_Component::wakeup();
+    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
+    
+    //
+    // Make a list of potential delete candidates.
+    //
+    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
+    
+    //
+    // Read registrations from master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
+    foreach($Nodes as $key => $Node) {
+      self::insertNode($Database, $Node);
+      
+      //
+      // Since entry is in master project conf file, remove it from delete list.
+      //
+      $id = $Node->getAttribute('id');
+      if (isset($CurrentRegistrationIds[$id])) {
+        unset($CurrentRegistrationIds[$id]);
+      }
+    }
+    
+    //
+    // Remove any registered classes not in master project conf file.
+    //
+    if (count($CurrentRegistrationIds)) {
+      $sql = __SQL()->
+        delete()->
+        from('component')->
+        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
+      $Database->execute($sql);
+    }
   }
   
   /********************************************************************************
@@ -161,7 +199,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     $RegistryEntry = parent::getRegistrationById($id);
     if (!isset($RegistryEntry)) {
       $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::fetch($id);
-      if (!isset($RegistryEntry)) {
+      if (isset($RegistryEntry)) {
         parent::addRegistration($RegistryEntry);
       }
     }
@@ -187,16 +225,10 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {
-          $Record = $Records[0];
-          $RegistryEntry = new AblePolecat_Registry_Entry_DomNode_Component();
-          $id = $Record['id'];
-          $RegistryEntry->id = $id;
-          $name = $Record['name'];
-          $RegistryEntry->name = $name;
-          isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component($Records[0]);
         }
       }
-      if (!isset($RegistryEntry)) {
+      if (isset($RegistryEntry)) {
         parent::addRegistration($RegistryEntry);
       }
     }
@@ -216,7 +248,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    *
    * @return Array[AblePolecat_Registry_EntryInterface].
    */
-  public function getRegistrations($key, $value = NULL) {
+  public function getRegistrations($registryKey, $value = NULL) {
     
     $Registrations = array();
     
@@ -235,17 +267,12 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
           from('component');
         $QueryResult = $CoreDatabase->query($sql);
         foreach($QueryResult as $key => $Record) {
-          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create();
-          $id = $Record['id'];
-          $RegistryEntry->id = $id;
-          $name = $Record['name'];
-          $RegistryEntry->name = $name;
-          isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
       }
     }
-    $Registrations = parent::getRegistrations($key, $value);
+    $Registrations = parent::getRegistrations($registryKey, $value);
     return $Registrations;
   }
   

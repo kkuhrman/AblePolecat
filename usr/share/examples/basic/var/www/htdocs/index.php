@@ -7,35 +7,9 @@
  */
  
 /**
- * Document root is the parent directory of this file (index.php).
- */
-if (!defined('ABLE_POLECAT_DOCROOT')) {
-  $ABLE_POLECAT_DOCROOT = __DIR__;
-  define('ABLE_POLECAT_DOCROOT', $ABLE_POLECAT_DOCROOT);
-}
-
-/**
- * Root directory of the entire Able Polecat core project.
- */
-if (!defined('ABLE_POLECAT_ROOT')) {
-  $ABLE_POLECAT_ROOT = dirname(dirname(dirname(__DIR__)));
-  define('ABLE_POLECAT_ROOT', $ABLE_POLECAT_ROOT);
-}
-
-/**
- * Host-specific system-wide configuration files directory.
- * This constant IS used to locate the server configuration file and must define 
- * the full path of the parent of the conf directory if other than ABLE_POLECAT_ROOT/etc/conf.
- */
-if (!defined('ABLE_POLECAT_ETC')) {
-  $ABLE_POLECAT_ETC = ABLE_POLECAT_ROOT . DIRECTORY_SEPARATOR . 'etc';
-  define('ABLE_POLECAT_ETC', $ABLE_POLECAT_ETC);
-}
-
-/**
  * Path settings.
  */
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_ETC, 'polecat', 'conf', 'path.config')));
+include_once('path.config');
 
 /**
  * Route HTTP request.

@@ -84,19 +84,19 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
           // Load [lib]
           //
           $sql = __SQL()->
-            select('id', 'name', 'libType', 'libFullPath', 'useLib', 'lastModifiedTime')->
+            select(
+              'id', 
+              'name', 
+              'libType', 
+              'libFullPath', 
+              'useLib', 
+              'lastModifiedTime')->
             from('lib')->
             where('`useLib` = 1');
           $QueryResult = $CoreDatabase->query($sql);
           foreach($QueryResult as $key => $Library) {
-            $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-            isset($Library['id']) ? $ClassLibraryRegistration->id = $Library['id'] : NULL;
-            isset($Library['name']) ? $ClassLibraryRegistration->name = $Library['name'] : NULL;
-            isset($Library['libFullPath']) ? $ClassLibraryRegistration->libFullPath = $Library['libFullPath'] : $ClassLibraryRegistration->libFullPath = NULL;
-            isset($Library['libType']) ? $ClassLibraryRegistration->libType = $Library['libType'] : NULL;
-            isset($Library['useLib']) ? $ClassLibraryRegistration->useLib = $Library['useLib'] : NULL;
-            isset($Library['lastModifiedTime']) ? $ClassLibraryRegistration->lastModifiedTime = $Library['lastModifiedTime'] : NULL;
-            self::$Registry->addRegistration($ClassLibraryRegistration);
+            $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create($Library);
+            self::$Registry->addRegistration($RegistryEntry);
           }
           AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
         }
@@ -133,14 +133,14 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     $corePackageNode = $Nodes->item(0);
     $coreClassLibraryId = $corePackageNode->getAttribute('id');
     if (isset($corePackageNode)) {
-      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-      $ClassLibraryRegistration->id = $corePackageNode->getAttribute('id');
-      $ClassLibraryRegistration->name = $corePackageNode->getAttribute('name');
-      $ClassLibraryRegistration->libType = strtolower($corePackageNode->getAttribute('type'));
-      $ClassLibraryRegistration->libFullPath = ABLE_POLECAT_CORE;
-      $ClassLibraryRegistration->useLib = '1';
-      $ClassLibraryRegistration->save($Database);
-      self::$Registry->addRegistration($ClassLibraryRegistration);
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $RegistryEntry->id = $corePackageNode->getAttribute('id');
+      $RegistryEntry->name = $corePackageNode->getAttribute('name');
+      $RegistryEntry->libType = strtolower($corePackageNode->getAttribute('type'));
+      $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
+      $RegistryEntry->useLib = '1';
+      $RegistryEntry->save($Database);
+      self::$Registry->addRegistration($RegistryEntry);
     }
     else {
       $message = 'core class library configuration file must contain a package node.';
@@ -158,14 +158,14 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (isset($applicationNode)) {
-      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::create();
-      $ClassLibraryRegistration->id = $applicationNode->getAttribute('id');
-      $ClassLibraryRegistration->name = $applicationNode->getAttribute('name');
-      $ClassLibraryRegistration->libType = strtolower($applicationNode->getAttribute('type'));
-      $ClassLibraryRegistration->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
-      $ClassLibraryRegistration->useLib = '1';
-      $ClassLibraryRegistration->save($Database);
-      self::$Registry->addRegistration($ClassLibraryRegistration);
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $RegistryEntry->id = $applicationNode->getAttribute('id');
+      $RegistryEntry->name = $applicationNode->getAttribute('name');
+      $RegistryEntry->libType = strtolower($applicationNode->getAttribute('type'));
+      $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
+      $RegistryEntry->useLib = '1';
+      $RegistryEntry->save($Database);
+      self::$Registry->addRegistration($RegistryEntry);
     }
     else {
       //
@@ -177,29 +177,29 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
 
     $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
     foreach($Nodes as $key => $Node) {
-      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
-      if (isset($ClassLibraryRegistration)) {
-        $ClassLibraryRegistration->save($Database);
-        self::$Registry->addRegistration($ClassLibraryRegistration);
-      }
-      
-      //
-      // If the class library is a module, load the corresponding project 
-      // configuration file and register any dependent class libraries.
-      //
-      $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
-      if (isset($modConfFile)) {
-        $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
-        foreach($modNodes as $key => $modNode) {
-          $modClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
-          if ($ClassLibraryRegistration->id === $modClassLibraryRegistration->id) {
-            AblePolecat_Command_Chain::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
-              $ClassLibraryRegistration->name
-            ));
-          }
-          if (isset($modClassLibraryRegistration)) {
-            $modClassLibraryRegistration->save($Database);
-            self::$Registry->addRegistration($modClassLibraryRegistration);
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
+      if (isset($RegistryEntry)) {
+        $RegistryEntry->save($Database);
+        self::$Registry->addRegistration($RegistryEntry);
+        
+        //
+        // If the class library is a module, load the corresponding project 
+        // configuration file and register any dependent class libraries.
+        //
+        $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($RegistryEntry);
+        if (isset($modConfFile)) {
+          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
+          foreach($modNodes as $key => $modNode) {
+            $modRegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
+            if ($RegistryEntry->id === $modRegistryEntry->id) {
+              AblePolecat_Command_Chain::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
+                $RegistryEntry->name
+              ));
+            }
+            if (isset($modRegistryEntry)) {
+              $modRegistryEntry->save($Database);
+              self::$Registry->addRegistration($modRegistryEntry);
+            }
           }
         }
       }
@@ -214,7 +214,143 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Get current registrations.
+    //
+    $Registry = AblePolecat_Registry_ClassLibrary::wakeup();
+    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
     
+    //
+    // Make a list of potential delete candidates.
+    //
+    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
+    
+    //
+    // Core class library conf file.
+    //
+    $coreFile = AblePolecat_Mode_Config::getCoreClassLibraryConfFile();
+    
+    //
+    // Get package (core class library) id.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
+    $corePackageNode = $Nodes->item(0);
+    $coreClassLibraryId = $corePackageNode->getAttribute('id');
+    if (isset($corePackageNode)) {
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $RegistryEntry->id = $corePackageNode->getAttribute('id');
+      $RegistryEntry->name = $corePackageNode->getAttribute('name');
+      $RegistryEntry->libType = strtolower($corePackageNode->getAttribute('type'));
+      $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
+      $RegistryEntry->useLib = '1';
+      $RegistryEntry->save($Database);
+      
+      //
+      // Unflag delete entry.
+      //
+      $id = $RegistryEntry->id;
+      if (isset($CurrentRegistrationIds[$id])) {
+        unset($CurrentRegistrationIds[$id]);
+      }
+    }
+    else {
+      $message = 'core class library configuration file must contain a package node.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    
+    //
+    // Load master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    
+    //
+    // Get package (class library) id.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $applicationNode = $Nodes->item(0);
+    if (isset($applicationNode)) {
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
+      $RegistryEntry->id = $applicationNode->getAttribute('id');
+      $RegistryEntry->name = $applicationNode->getAttribute('name');
+      $RegistryEntry->libType = strtolower($applicationNode->getAttribute('type'));
+      $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
+      $RegistryEntry->useLib = '1';
+      $RegistryEntry->save($Database);
+      
+      //
+      // Unflag delete entry.
+      //
+      $id = $RegistryEntry->id;
+      if (isset($CurrentRegistrationIds[$id])) {
+        unset($CurrentRegistrationIds[$id]);
+      }
+    }
+    else {
+      //
+      // @todo: this type of schema checking should be done by implementing an XML schema.
+      //
+      $message = 'project.xml must contain an package node.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
+    foreach($Nodes as $key => $Node) {
+      $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
+      if (isset($RegistryEntry)) {
+        $RegistryEntry->save($Database);
+        
+        //
+        // Unflag delete entry.
+        //
+        $id = $RegistryEntry->id;
+        if (isset($CurrentRegistrationIds[$id])) {
+          unset($CurrentRegistrationIds[$id]);
+        }
+        
+        //
+        // If the class library is a module, load the corresponding project 
+        // configuration file and register any dependent class libraries.
+        //
+        $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($RegistryEntry);
+        if (isset($modConfFile)) {
+          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'classLibrary');
+          foreach($modNodes as $key => $modNode) {
+            $modRegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($modNode);
+            if ($RegistryEntry->id === $modRegistryEntry->id) {
+              AblePolecat_Command_Chain::triggerError(sprintf("Error in project conf file for %s. Module cannot declare itself as a dependent class library.",
+                $RegistryEntry->name
+              ));
+            }
+            if (isset($modRegistryEntry)) {
+              $modRegistryEntry->save($Database);
+              
+              //
+              // Unflag delete entry.
+              //
+              $id = $modRegistryEntry->id;
+              if (isset($CurrentRegistrationIds[$id])) {
+                unset($CurrentRegistrationIds[$id]);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    //
+    // Remove any registered classes not in master project conf file.
+    //
+    if (count($CurrentRegistrationIds)) {
+      $sql = __SQL()->
+        delete()->
+        from('lib')->
+        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
+      $Database->execute($sql);
+    }
+    
+    //
+    // @todo: Refresh.
+    //
   }
   
   /********************************************************************************

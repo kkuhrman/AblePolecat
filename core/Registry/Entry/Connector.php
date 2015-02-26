@@ -71,7 +71,26 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_Connector();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_Connector();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['resourceId']) ? $RegistryEntry->resourceId = $Record['resourceId'] : NULL;
+      isset($Record['requestMethod']) ? $RegistryEntry->requestMethod = $Record['requestMethod'] : NULL;
+      isset($Record['accessDeniedCode']) ? $RegistryEntry->accessDeniedCode = $Record['accessDeniedCode'] : NULL;
+      isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -87,20 +106,20 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    */
   public static function import(DOMNode $Node) {
     
-    $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
-    $ConnectorRegistration->id = $Node->getAttribute('id');
-    $ConnectorRegistration->name = $Node->getAttribute('name');
-    $ConnectorRegistration->requestMethod = $Node->getAttribute('requestMethod');
-    $ConnectorRegistration->accessDeniedCode = $Node->getAttribute('accessDeniedCode');
+    $RegistryEntry = AblePolecat_Registry_Entry_Connector::create();
+    $RegistryEntry->id = $Node->getAttribute('id');
+    $RegistryEntry->name = $Node->getAttribute('name');
+    $RegistryEntry->requestMethod = $Node->getAttribute('requestMethod');
+    $RegistryEntry->accessDeniedCode = $Node->getAttribute('accessDeniedCode');
     foreach($Node->childNodes as $key => $childNode) {
       switch ($childNode->nodeName) {
         default:
           break;
         case 'polecat:resourceId':
-          $ConnectorRegistration->resourceId = $childNode->nodeValue;
+          $RegistryEntry->resourceId = $childNode->nodeValue;
           break;
         case 'polecat:classId':
-          $ConnectorRegistration->classId = $childNode->nodeValue;
+          $RegistryEntry->classId = $childNode->nodeValue;
           break;
       }
     }
@@ -109,20 +128,20 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
     // Verify class reference.
     //
     $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
-      getRegistrationById($ConnectorRegistration->getClassId());
+      getRegistrationById($RegistryEntry->getClassId());
     if (isset($ClassRegistration)) {
-      $ConnectorRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+      $RegistryEntry->lastModifiedTime = $ClassRegistration->lastModifiedTime;
     }
     else {
       $message = sprintf("connector %s (%s) references invalid class %s.",
-        $ConnectorRegistration->getName(),
-        $ConnectorRegistration->getId(),
-        $ConnectorRegistration->getClassId()
+        $RegistryEntry->getName(),
+        $RegistryEntry->getId(),
+        $RegistryEntry->getClassId()
       );
-      $ConnectorRegistration = NULL;
+      $RegistryEntry = NULL;
       AblePolecat_Command_Chain::triggerError($message);
     }
-    return $ConnectorRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -148,7 +167,7 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    */
   public static function fetch($primaryKey) {
     
-    $ConnectorRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
       isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
@@ -168,18 +187,11 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          $ConnectorRegistration = new AblePolecat_Registry_Entry_Connector();
-          isset($registrationInfo[0]['id']) ? $ConnectorRegistration->id = $registrationInfo[0]['id'] : NULL;
-          isset($registrationInfo[0]['name']) ? $ConnectorRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['resourceId']) ? $ConnectorRegistration->resourceId = $registrationInfo[0]['resourceId'] : NULL;
-          isset($registrationInfo[0]['requestMethod']) ? $ConnectorRegistration->requestMethod = $registrationInfo[0]['requestMethod'] : NULL;
-          isset($registrationInfo[0]['accessDeniedCode']) ? $ConnectorRegistration->accessDeniedCode = $registrationInfo[0]['accessDeniedCode'] : NULL;
-          isset($registrationInfo[0]['classId']) ? $ConnectorRegistration->classId = $registrationInfo[0]['classId'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $ConnectorRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_Connector::create($registrationInfo[0]);
         }
       }
     }
-    return $ConnectorRegistration;
+    return $RegistryEntry;
   }
   
   /**

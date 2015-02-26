@@ -45,7 +45,24 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_Resource();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_Resource();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['hostName']) ? $RegistryEntry->hostName = $Record['hostName'] : NULL;
+      isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -64,16 +81,16 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
     static $hostName;
     $hostName = AblePolecat_Host::getRequest()->getHostName();
     
-    $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
-    $ResourceRegistration->id = $Node->getAttribute('id');
-    $ResourceRegistration->name = $Node->getAttribute('name');
-    $ResourceRegistration->hostName = $hostName;
+    $RegistryEntry = AblePolecat_Registry_Entry_Resource::create();
+    $RegistryEntry->id = $Node->getAttribute('id');
+    $RegistryEntry->name = $Node->getAttribute('name');
+    $RegistryEntry->hostName = $hostName;
     foreach($Node->childNodes as $key => $childNode) {
       switch ($childNode->nodeName) {
         default:
           break;
         case 'polecat:classId':
-          $ResourceRegistration->classId = $childNode->nodeValue;
+          $RegistryEntry->classId = $childNode->nodeValue;
           break;
       }
     }
@@ -82,20 +99,20 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
     // Verify class reference.
     //
     $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
-      getRegistrationById($ResourceRegistration->getClassId());
+      getRegistrationById($RegistryEntry->getClassId());
     if (isset($ClassRegistration)) {
-      $ResourceRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+      $RegistryEntry->lastModifiedTime = $ClassRegistration->lastModifiedTime;
     }
     else {
       $message = sprintf("resource %s (%s) references invalid class %s.",
-        $ResourceRegistration->getName(),
-        $ResourceRegistration->getId(),
-        $ResourceRegistration->getClassId()
+        $RegistryEntry->getName(),
+        $RegistryEntry->getId(),
+        $RegistryEntry->getClassId()
       );
-      $ResourceRegistration = NULL;
+      $RegistryEntry = NULL;
       AblePolecat_Command_Chain::triggerError($message);
     }
-    return $ResourceRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -121,7 +138,7 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    */
   public static function fetch($primaryKey) {
     
-    $ResourceRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
       isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
@@ -137,18 +154,13 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
         where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
-        $classInfo = $CommandResult->value();
-        if (isset($classInfo[0])) {
-          $ResourceRegistration = new AblePolecat_Registry_Entry_Resource();
-          isset($registrationInfo[0]['id']) ? $ResourceRegistration->id = $registrationInfo[0]['id'] : NULL;
-          isset($registrationInfo[0]['name']) ? $ResourceRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['hostName']) ? $ResourceRegistration->hostName = $registrationInfo[0]['hostName'] : NULL;
-          isset($registrationInfo[0]['classId']) ? $ResourceRegistration->classId = $registrationInfo[0]['classId'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $ResourceRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+        $registrationInfo = $CommandResult->value();
+        if (isset($registrationInfo[0])) {
+          $RegistryEntry = AblePolecat_Registry_Entry_Resource::create($registrationInfo[0]);
         }
       }
     }
-    return $ResourceRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -172,7 +184,7 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    */
   public function save(AblePolecat_DatabaseInterface $Database = NULL) {
     $sql = __SQL()->          
-      insert(
+      replace(
         'id', 
         'name', 
         'hostName', 

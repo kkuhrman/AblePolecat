@@ -33,7 +33,23 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_DomNode_Component();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_DomNode_Component();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -48,17 +64,17 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
-    $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::create();
-    $ComponentRegistration->id = $Node->getAttribute('id');
-    $ComponentRegistration->name = $Node->getAttribute('name');
-    $ComponentRegistration->classId = $Node->getAttribute('id');
+    $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create();
+    $RegistryEntry->id = $Node->getAttribute('id');
+    $RegistryEntry->name = $Node->getAttribute('name');
+    $RegistryEntry->classId = $Node->getAttribute('id');
     // foreach($Node->childNodes as $key => $childNode) {
       // switch ($childNode->nodeName) {
         // default:
           // break;
       // }
     // }
-    return $ComponentRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -84,10 +100,9 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
    */
   public static function fetch($primaryKey) {
     
-    $ComponentRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
-      $ComponentRegistration = new AblePolecat_Registry_Entry_DomNode_Component();
       isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       $sql = __SQL()->
@@ -98,14 +113,11 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          isset($registrationInfo[0]['id']) ? $ComponentRegistration->id = $registrationInfo[0]['id'] : NULL;
-          isset($registrationInfo[0]['name']) ? $ComponentRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['classId']) ? $ComponentRegistration->classId = $registrationInfo[0]['classId'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $ComponentRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create($registrationInfo[0]);
         }
       }
     }
-    return $ComponentRegistration;
+    return $RegistryEntry;
   }
   
   /**

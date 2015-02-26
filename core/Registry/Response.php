@@ -104,6 +104,44 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if update fails.
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Get current registrations.
+    //
+    $Registry = AblePolecat_Registry_Response::wakeup();
+    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
+    
+    //
+    // Make a list of potential delete candidates.
+    //
+    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
+    
+    //
+    // Read registrations from master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'response');
+    foreach($Nodes as $key => $Node) {
+      self::insertNode($Database, $Node);
+      
+      //
+      // Since entry is in master project conf file, remove it from delete list.
+      //
+      $id = $Node->getAttribute('id');
+      if (isset($CurrentRegistrationIds[$id])) {
+        unset($CurrentRegistrationIds[$id]);
+      }
+    }
+    
+    //
+    // Remove any registered classes not in master project conf file.
+    //
+    if (count($CurrentRegistrationIds)) {
+      $sql = __SQL()->
+        delete()->
+        from('response')->
+        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
+      $Database->execute($sql);
+    }
   }
   
   /********************************************************************************
@@ -132,6 +170,109 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
         'AblePolecat_Registry_Entry_DomNodeInterface'
       ));
     }
+  }
+  
+  /**
+   * Retrieve registered object by given id.
+   *
+   * @param UUID $id Id of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationById($id) {
+    
+    $RegistryEntry = parent::getRegistrationById($id);
+    if (!isset($RegistryEntry)) {
+      $RegistryEntry = AblePolecat_Registry_Entry_Response::fetch($id);
+      if (!isset($RegistryEntry)) {
+        parent::addRegistration($RegistryEntry);
+      }
+    }
+    return $RegistryEntry;
+  }
+  
+  /**
+   * Retrieve registered object by given name.
+   *
+   * @param string $name Name of registered object.
+   *
+   * @return AblePolecat_Registry_EntryInterface or NULL.
+   */
+  public function getRegistrationByName($name) {
+    
+    $RegistryEntry = parent::getRegistrationByName($name);
+    if (!isset($RegistryEntry)) {
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'statusCode',
+          'defaultHeaders', 
+          'classId', 
+          'lastModifiedTime')->
+        from('response')->
+        where(sprintf("`name` = '%s'", $name));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $Records = $CommandResult->value();
+        if (isset($Records[0])) {
+          $RegistryEntry = AblePolecat_Registry_Entry_Response::create($Records[0]);
+        }
+      }
+      if (!isset($RegistryEntry)) {
+        parent::addRegistration($RegistryEntry);
+      }
+    }
+    return $RegistryEntry;
+  }
+  
+  /**
+   * Retrieve a list of registered objects corresponding to the given key name/value.
+   *
+   * Some registry classes (AblePolecat_Registry_ClassInterface, AblePolecat_Registry_ClassLibrary)
+   * load all registry entries at wakeup() as any number (if not all) are in demand at run time.
+   * Others will be queried for only one or a small number of entries, depending on HTTP request.
+   * This function is provided in those cases where all entries must be retrieved.
+   * 
+   * @param string $keyName The name of a registry key.
+   * @param string $keyValue Optional value of registry key.
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public function getRegistrations($registryKey, $value = NULL) {
+    
+    $Registrations = array();
+    
+    if (0 === $this->getRegistrationCount()) {
+      if (AblePolecat_Database_Pdo::ready()) {
+        //
+        // Get project database.
+        //
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
+        
+        //
+        // Load registry entries.
+        //
+        $sql = __SQL()->
+          select(
+            'id', 
+            'name', 
+            'resourceId', 
+            'statusCode',
+            'defaultHeaders', 
+            'classId', 
+            'lastModifiedTime')->
+          from('response');
+        $QueryResult = $CoreDatabase->query($sql);
+        foreach($QueryResult as $key => $Record) {
+          $RegistryEntry = AblePolecat_Registry_Entry_Response::create($Record);
+          self::$Registry->addRegistration($RegistryEntry);
+        }
+      }
+    }
+    $Registrations = parent::getRegistrations($registryKey, $value);
+    return $Registrations;
   }
   
   /********************************************************************************

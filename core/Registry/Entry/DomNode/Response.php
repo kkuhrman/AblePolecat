@@ -48,7 +48,26 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    * @return Concrete instance of class implementing AblePolecat_InProcObjectInterface.
    */
   public static function create() {
-    return new AblePolecat_Registry_Entry_DomNode_Response();
+    //
+    // Create instance of class.
+    //
+    $RegistryEntry = new AblePolecat_Registry_Entry_DomNode_Response();
+    
+    //
+    // Check method arguments for database record.
+    //
+    $args = func_get_args();
+    if (isset($args[0]) && is_array($args[0])) {
+      $Record = $args[0];
+      isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
+      isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
+      isset($Record['resourceId']) ? $RegistryEntry->resourceId = $Record['resourceId'] : NULL;
+      isset($Record['statusCode']) ? $RegistryEntry->statusCode = $Record['statusCode'] : NULL;
+      isset($Record['defaultHeaders']) ? $RegistryEntry->defaultHeaders = $Record['defaultHeaders'] : NULL;
+      isset($Record['classId']) ? $RegistryEntry->classId = $Record['classId'] : NULL;
+      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+    }
+    return $RegistryEntry;
   }
   
   /********************************************************************************
@@ -64,10 +83,10 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    */
   public static function import(DOMNode $Node) {
     
-    $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
-    $ResponseRegistration->id = $Node->getAttribute('id');
-    $ResponseRegistration->name = $Node->getAttribute('name');
-    $ResponseRegistration->statusCode = $Node->getAttribute('statusCode');
+    $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create();
+    $RegistryEntry->id = $Node->getAttribute('id');
+    $RegistryEntry->name = $Node->getAttribute('name');
+    $RegistryEntry->statusCode = $Node->getAttribute('statusCode');
     foreach($Node->childNodes as $key => $childNode) {
       //
       // @todo: add default headers to <polecat:response>
@@ -76,10 +95,10 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
         default:
           break;
         case 'polecat:resourceId':
-          $ResponseRegistration->resourceId = $childNode->nodeValue;
+          $RegistryEntry->resourceId = $childNode->nodeValue;
           break;
         case 'polecat:classId':
-          $ResponseRegistration->classId = $childNode->nodeValue;
+          $RegistryEntry->classId = $childNode->nodeValue;
           break;
       }
     }
@@ -88,20 +107,20 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
     // Verify class reference.
     //
     $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
-      getRegistrationById($ResponseRegistration->getClassId());
+      getRegistrationById($RegistryEntry->getClassId());
     if (isset($ClassRegistration)) {
-      $ResponseRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
+      $RegistryEntry->lastModifiedTime = $ClassRegistration->lastModifiedTime;
     }
     else {
       $message = sprintf("response %s (%s) references invalid class %s.",
-        $ResponseRegistration->getName(),
-        $ResponseRegistration->getId(),
-        $ResponseRegistration->getClassId()
+        $RegistryEntry->getName(),
+        $RegistryEntry->getId(),
+        $RegistryEntry->getClassId()
       );
-      $ResponseRegistration = NULL;
+      $RegistryEntry = NULL;
       AblePolecat_Command_Chain::triggerError($message);
     }
-    return $ResponseRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -127,7 +146,7 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
    */
   public static function fetch($primaryKey) {
     
-    $ResponseRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (self::validatePrimaryKey($primaryKey)) {
       isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
@@ -147,18 +166,11 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
-          $ResponseRegistration = new AblePolecat_Registry_Entry_DomNode_Response();
-          isset($registrationInfo[0]['id']) ? $ResponseRegistration->id = $registrationInfo[0]['id'] : NULL;
-          isset($registrationInfo[0]['name']) ? $ResponseRegistration->name = $registrationInfo[0]['name'] : NULL;
-          isset($registrationInfo[0]['resourceId']) ? $ResponseRegistration->resourceId = $registrationInfo[0]['resourceId'] : NULL;
-          isset($registrationInfo[0]['statusCode']) ? $ResponseRegistration->statusCode = $registrationInfo[0]['statusCode'] : NULL;
-          isset($registrationInfo[0]['defaultHeaders']) ? $ResponseRegistration->defaultHeaders = $registrationInfo[0]['defaultHeaders'] : NULL;
-          isset($registrationInfo[0]['classId']) ? $ResponseRegistration->classId = $registrationInfo[0]['classId'] : NULL;
-          isset($registrationInfo[0]['lastModifiedTime']) ? $ResponseRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create($registrationInfo[0]);
         }
       }
     }
-    return $ResponseRegistration;
+    return $RegistryEntry;
   }
   
   /**

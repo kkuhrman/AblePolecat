@@ -117,16 +117,8 @@ class AblePolecat_Registry_Class
           from('class');
         $QueryResult = $CoreDatabase->query($sql);
         foreach($QueryResult as $key => $Class) {
-          $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-          $id = $Class['id'];
-          $ClassRegistration->id = $id;
-          $name = $Class['name'];
-          $ClassRegistration->name = $name;
-          isset($Class['classLibraryId']) ? $ClassRegistration->classLibraryId = $Class['classLibraryId'] : NULL;
-          isset($Class['classFullPath']) ? $ClassRegistration->classFullPath = $Class['classFullPath'] : NULL;
-          isset($Class['classFactoryMethod']) ? $ClassRegistration->classFactoryMethod = $Class['classFactoryMethod'] : NULL;
-          isset($Class['lastModifiedTime']) ? $ClassRegistration->lastModifiedTime = $Class['lastModifiedTime'] : NULL;
-          self::$Registry->addRegistration($ClassRegistration);
+          $RegistryEntry = AblePolecat_Registry_Entry_Class::create($Class);
+          self::$Registry->addRegistration($RegistryEntry);
         }
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class registry initialized.');
       }
@@ -215,13 +207,17 @@ class AblePolecat_Registry_Class
     //
     $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup();
     
+    //
+    // Get current registrations.
+    //
     $Registry = AblePolecat_Registry_Class::wakeup();
+    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
     
     //
     // Make a list of potential delete candidates.
     //
-    $registeredClassIds = array_flip(array_keys($Registry->getRegistrations(self::KEY_ARTICLE_ID)));
-    
+    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
+        
     //
     // Core class library conf file.
     //
@@ -244,19 +240,15 @@ class AblePolecat_Registry_Class
     $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($coreClassLibraryId);
     $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'class');
     foreach($Nodes as $key => $Node) {
-      $id = $Node->getAttribute('id');
-      $ClassRegistration = $Registry->getRegistrationById($id);
-      if (!isset($ClassRegistration)) {
-        //
-        // Class is not registered.
-        //
-        self::insertNode($Database, $ClassLibraryRegistration, $Node);
-      }
+      self::insertNode($Database, ClassLibraryRegistration, $Node);
       
       //
-      // Since class is in master project conf file, remove it from delete list.
+      // Since entry is in master project conf file, remove it from delete list.
       //
-      unset($registeredClassIds[$id]);
+      $id = $Node->getAttribute('id');
+      if (isset($CurrentRegistrationIds[$id])) {
+        unset($CurrentRegistrationIds[$id]);
+      }
     }
     
     //
@@ -281,31 +273,31 @@ class AblePolecat_Registry_Class
     $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($applicationClassLibraryId);
     $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'class');
     foreach($Nodes as $key => $Node) {
-      $id = $Node->getAttribute('id');
-      $ClassRegistration = $Registry->getRegistrationById($id);
-      if (!isset($ClassRegistration)) {
-        //
-        // Class is not registered.
-        //
-        self::insertNode($Database, $ClassLibraryRegistration, $Node);
-      }
+      self::insertNode($Database, ClassLibraryRegistration, $Node);
       
       //
-      // Since class is in master project conf file, remove it from delete list.
+      // Since entry is in master project conf file, remove it from delete list.
       //
-      unset($registeredClassIds[$id]);
+      $id = $Node->getAttribute('id');
+      if (isset($CurrentRegistrationIds[$id])) {
+        unset($CurrentRegistrationIds[$id]);
+      }
     }
     
     //
     // Remove any registered classes not in master project conf file.
     //
-    foreach($registeredClassIds as $id => $index) {
+    if (count($CurrentRegistrationIds)) {
       $sql = __SQL()->
         delete()->
         from('class')->
-        where("`id` = '$id'");
+        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
       $Database->execute($sql);
     }
+    
+    //
+    // @todo: Refresh.
+    //
   }
   
   /********************************************************************************
@@ -438,21 +430,21 @@ class AblePolecat_Registry_Class
     //
     // Try registration by name.
     //
-    $ClassRegistration = $this->getRegistrationByName($className);
-    if (!isset($ClassRegistration)) {
+    $RegistryEntry = $this->getRegistrationByName($className);
+    if (!isset($RegistryEntry)) {
       //
       // By id?
       //
-      $ClassRegistration = $this->getRegistrationById($className);
+      $RegistryEntry = $this->getRegistrationById($className);
     }
-    if (isset($ClassRegistration)) {
+    if (isset($RegistryEntry)) {
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is registered.");
     }
     else {
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, "$className is not registered. Attempt to load as core class.");
-      $ClassRegistration = $this->getRegistrationByName($className);
+      $RegistryEntry = $this->getRegistrationByName($className);
     }
-    return $ClassRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -467,24 +459,24 @@ class AblePolecat_Registry_Class
     
     $Instance = NULL;
     $parameters = array();
-    $ClassRegistration = NULL;
+    $RegistryEntry = NULL;
     
     if (is_object($classInfo) && is_a($classInfo, 'AblePolecat_Registry_Entry_ClassInterface')) {
-      $ClassRegistration = $classInfo;
+      $RegistryEntry = $classInfo;
     }
     else {
       if (is_string('$classInfo')) {
-        $ClassRegistration = $this->isLoadable($classInfo);
+        $RegistryEntry = $this->isLoadable($classInfo);
       }
     }
     
     //
     // Boot log is used for troubleshooting faulty extension code.
     //
-    // $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($ClassRegistration));
+    // $message = sprintf("%s registration is %s.", $className, AblePolecat_Data::getDataTypeName($RegistryEntry));
     // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     
-    if ($ClassRegistration) {
+    if ($RegistryEntry) {
       //
       // Get any parameters passed.
       //
@@ -493,24 +485,24 @@ class AblePolecat_Registry_Class
         array_shift($args);
         $parameters = $args;
       }
-      switch ($ClassRegistration->getClassFactoryMethod()) {
+      switch ($RegistryEntry->getClassFactoryMethod()) {
         default:
           $Instance = call_user_func_array(
             array(
-              $ClassRegistration->getName(), 
-              $ClassRegistration->getClassFactoryMethod()
+              $RegistryEntry->getName(), 
+              $RegistryEntry->getClassFactoryMethod()
             ), 
             $parameters
           );
           break;
         case '__construct':
-          $Instance = new $ClassRegistration->getName();
+          $Instance = new $RegistryEntry->getName();
           break;
       }
     }
     
     if (!isset($Instance)) {
-      $message = sprintf("Could not load class %s with parameter set %s.", $ClassRegistration->getName(), serialize($parameters));
+      $message = sprintf("Could not load class %s with parameter set %s.", $RegistryEntry->getName(), serialize($parameters));
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $message);
     }
     return $Instance;
@@ -523,71 +515,71 @@ class AblePolecat_Registry_Class
     //
     // There are a few classes required to install database and registries.
     //
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Resource_Core_Ack::UUID;
-    $ClassRegistration->name = 'AblePolecat_Resource_Core_Ack';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Ack.php'));
-    $ClassRegistration->classFactoryMethod = 'wakeup';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Resource_Core_Ack::UUID;
+    $RegistryEntry->name = 'AblePolecat_Resource_Core_Ack';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Ack.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
-    $ClassRegistration->name = 'AblePolecat_Resource_Restricted_Install';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Install.php'));
-    $ClassRegistration->classFactoryMethod = 'wakeup';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Resource_Restricted_Install::UUID;
+    $RegistryEntry->name = 'AblePolecat_Resource_Restricted_Install';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Install.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Transaction_Restricted_Install::UUID;
-    $ClassRegistration->name = 'AblePolecat_Transaction_Restricted_Install';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Install.php'));
-    $ClassRegistration->classFactoryMethod = 'wakeup';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Transaction_Restricted_Install::UUID;
+    $RegistryEntry->name = 'AblePolecat_Transaction_Restricted_Install';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Install.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Resource_Restricted_Update::UUID;
-    $ClassRegistration->name = 'AblePolecat_Resource_Restricted_Update';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Update.php'));
-    $ClassRegistration->classFactoryMethod = 'wakeup';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Resource_Restricted_Update::UUID;
+    $RegistryEntry->name = 'AblePolecat_Resource_Restricted_Update';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Update.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Transaction_Restricted_Update::UUID;
-    $ClassRegistration->name = 'AblePolecat_Transaction_Restricted_Update';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php'));
-    $ClassRegistration->classFactoryMethod = 'wakeup';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Transaction_Restricted_Update::UUID;
+    $RegistryEntry->name = 'AblePolecat_Transaction_Restricted_Update';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Update.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Message_Response_Xml::UUID;
-    $ClassRegistration->name = 'AblePolecat_Message_Response_Xml';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php'));
-    $ClassRegistration->classFactoryMethod = 'create';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Message_Response_Xml::UUID;
+    $RegistryEntry->name = 'AblePolecat_Message_Response_Xml';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php'));
+    $RegistryEntry->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Message_Response_Xhtml::UUID;
-    $ClassRegistration->name = 'AblePolecat_Message_Response_Xhtml';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php'));
-    $ClassRegistration->classFactoryMethod = 'create';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Message_Response_Xhtml::UUID;
+    $RegistryEntry->name = 'AblePolecat_Message_Response_Xhtml';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml.php'));
+    $RegistryEntry->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($RegistryEntry);
     
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Message_Response_Xhtml_Tpl::UUID;
-    $ClassRegistration->name = 'AblePolecat_Message_Response_Xhtml_Tpl';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml', 'Tpl.php'));
-    $ClassRegistration->classFactoryMethod = 'create';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Message_Response_Xhtml_Tpl::UUID;
+    $RegistryEntry->name = 'AblePolecat_Message_Response_Xhtml_Tpl';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xhtml', 'Tpl.php'));
+    $RegistryEntry->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($RegistryEntry);
     
     //
     // @todo: not really needed, core anyway.
     //
-    $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-    $ClassRegistration->id = AblePolecat_Message_Response_Cached::UUID;
-    $ClassRegistration->name = 'AblePolecat_Message_Response_Cached';
-    $ClassRegistration->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php'));
-    $ClassRegistration->classFactoryMethod = 'create';
-    self::$Registry->addRegistration($ClassRegistration);
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Message_Response_Cached::UUID;
+    $RegistryEntry->name = 'AblePolecat_Message_Response_Cached';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Cached.php'));
+    $RegistryEntry->classFactoryMethod = 'create';
+    self::$Registry->addRegistration($RegistryEntry);
   }
   
   /**
@@ -609,7 +601,7 @@ class AblePolecat_Registry_Class
    */
   public function registerByConvention($className, $extension = 'php') {
     
-    $ClassRegistration = NULL;
+    $RegistryEntry = NULL;
     
       //
       // The relative path is contructed by trimming the file name (sans extension) from the end 
@@ -645,18 +637,18 @@ class AblePolecat_Registry_Class
                   }
                 }
               }
-              $ClassRegistration = AblePolecat_Registry_Entry_Class::create();
-              $ClassRegistration->id = $className::getId();
-              $ClassRegistration->name = $className;
-              // $ClassRegistration->classLibraryId;
-              $ClassRegistration->classFullPath = $include_path;
-              $ClassRegistration->classFactoryMethod = $method;
-              $this->addRegistration($ClassRegistration);
+              $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+              $RegistryEntry->id = $className::getId();
+              $RegistryEntry->name = $className;
+              // $RegistryEntry->classLibraryId;
+              $RegistryEntry->classFullPath = $include_path;
+              $RegistryEntry->classFactoryMethod = $method;
+              $this->addRegistration($RegistryEntry);
             }
           }
         }
       }
-    return $ClassRegistration;
+    return $RegistryEntry;
   }
   
   /**
@@ -696,22 +688,22 @@ class AblePolecat_Registry_Class
 
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
-      $ClassRegistration = AblePolecat_Registry_Entry_Class::import($Node);
-      $ClassRegistration->classLibraryId = $ClassLibraryRegistration->id;
-      if (!isset($ClassRegistration->classFullPath)) {
+      $RegistryEntry = AblePolecat_Registry_Entry_Class::import($Node);
+      $RegistryEntry->classLibraryId = $ClassLibraryRegistration->id;
+      if (!isset($RegistryEntry->classFullPath)) {
         foreach($Node->childNodes as $key => $childNode) {
           if ($childNode->nodeName == 'polecat:path') {
             $conventionalPath = $ClassLibraryRegistration->libFullPath . DIRECTORY_SEPARATOR . $childNode->nodeValue;
             $sanitizePath = AblePolecat_Server_Paths::sanitizePath($conventionalPath);
             if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
-              $ClassRegistration->classFullPath = $sanitizePath;
+              $RegistryEntry->classFullPath = $sanitizePath;
             }
             break;
           }
         }
       }
-      $ClassRegistration->save($Database);
-      self::$Registry->addRegistration($ClassRegistration);
+      $RegistryEntry->save($Database);
+      self::$Registry->addRegistration($RegistryEntry);
     }
   }
   
