@@ -25,6 +25,16 @@ interface AblePolecat_Registry_Entry_TemplateInterface extends AblePolecat_Regis
    * @return string.
    */
   public function getFullPath();
+  
+  /**
+   * @return string.
+   */
+  public function getTemplateScope();
+  
+  /**
+   * @return string.
+   */
+  public function getThemeName();
 }
 
 /**
@@ -77,9 +87,39 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
    * @return AblePolecat_Registry_EntryInterface.
    */
   public static function import(DOMNode $Node) {
-    //
-    // @todo: import [template] registry entry.
-    //
+    
+    $TemplateRegistration = AblePolecat_Registry_Entry_Template::create();
+    $TemplateRegistration->id = $Node->getAttribute('id');
+    $TemplateRegistration->name = $Node->getAttribute('name');
+    foreach($Node->childNodes as $key => $childNode) {
+      switch ($childNode->nodeName) {
+        default:
+          break;
+        case 'polecat:articleId':
+          $TemplateRegistration->resourceId = $childNode->nodeValue;
+          break;
+        case 'polecat:docType':
+          $TemplateRegistration->classId = $childNode->nodeValue;
+          break;
+        case 'polecat:templateScope':
+          $TemplateRegistration->templateScope = $childNode->nodeValue;
+          break;
+        case 'polecat:themeName':
+          $TemplateRegistration->themeName = $childNode->nodeValue;
+          break;
+        case 'polecat:path':
+          //
+          // NOTE: path is only set in case of non-standard path given (i.e. full path).
+          //
+          $sanitizePath = AblePolecat_Server_Paths::sanitizePath($childNode->nodeValue);
+          if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
+            $TemplateRegistration->fullPath = $sanitizePath;
+          }
+          break;
+      }
+    }
+    !isset($TemplateRegistration->themeName) ? $TemplateRegistration->themeName = 'default' : NULL;
+    return $TemplateRegistration;
   }
   
   /**
@@ -111,31 +151,34 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       //
       // Create registry object and initialize primary key.
       //
-      $TemplateRegistration = new AblePolecat_Registry_Entry_Template();
-      isset($primaryKey['id']) ? $TemplateRegistration->id = $primaryKey['id'] : $TemplateRegistration->id = $primaryKey;
+      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
       
       //
       // Generate and execute SELECT statement.
       //
       $sql = __SQL()->          
         select(
-          'id', 
-          'name', 
+          'id',
+          'name',
+          'themeName', 
+          'templateScope', 
           'articleId', 
           'docType', 
-          'defaultHeaders', 
           'fullPath', 
           'lastModifiedTime')->
         from('template')->
-        where(sprintf("`id` = '%s'", $TemplateRegistration->id));
+        where(sprintf("`id` = '%s'", $id));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
+          $TemplateRegistration = new AblePolecat_Registry_Entry_Template();
+          isset($registrationInfo[0]['id']) ? $TemplateRegistration->id = $registrationInfo[0]['id'] : NULL;
           isset($registrationInfo[0]['name']) ? $TemplateRegistration->name = $registrationInfo[0]['name'] : NULL;
+          isset($registrationInfo[0]['themeName']) ? $TemplateRegistration->themeName = $registrationInfo[0]['themeName'] : NULL;
+          isset($registrationInfo[0]['templateScope']) ? $TemplateRegistration->templateScope = $registrationInfo[0]['templateScope'] : NULL;
           isset($registrationInfo[0]['articleId']) ? $TemplateRegistration->articleId = $registrationInfo[0]['articleId'] : NULL;
           isset($registrationInfo[0]['docType']) ? $TemplateRegistration->docType = $registrationInfo[0]['docType'] : NULL;
-          isset($registrationInfo[0]['defaultHeaders']) ? $TemplateRegistration->defaultHeaders = $registrationInfo[0]['defaultHeaders'] : NULL;
           isset($registrationInfo[0]['fullPath']) ? $TemplateRegistration->fullPath = $registrationInfo[0]['fullPath'] : NULL;
           isset($registrationInfo[0]['lastModifiedTime']) ? $TemplateRegistration->lastModifiedTime = $registrationInfo[0]['lastModifiedTime'] : NULL;
         }
@@ -168,14 +211,18 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       replace(
         'id',
         'name',
-        'articleId',
+        'themeName', 
+        'templateScope', 
+        'articleId', 
         'docType', 
-        'fullPath',
+        'fullPath', 
         'lastModifiedTime')->
       into('template')->
       values(
         $this->getId(),
         $this->getName(),
+        $this->getThemeName(), 
+        $this->getTemplateScope(), 
         $this->getArticleId(), 
         $this->getDocType(), 
         $this->getFullPath(),
@@ -208,7 +255,21 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
   public function getFullPath() {
     return $this->getPropertyValue('fullPath');
   }
-      
+  
+  /**
+   * @return string.
+   */
+  public function getTemplateScope() {
+    return $this->getPropertyValue('templateScope');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getThemeName() {
+    return $this->getPropertyValue('themeName');
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/

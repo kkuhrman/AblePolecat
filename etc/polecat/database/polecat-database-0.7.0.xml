@@ -312,6 +312,12 @@
         <polecat:fields>
           <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="themeName" type="varchar" size="255" null="NOT">
+            <polecat:fieldValue>default</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="templateScope" type="varchar" size="72" null="NOT">
+            <polecat:fieldValue>document</polecat:fieldValue>
+          </polecat:field>
           <polecat:field name="articleId" type="char" size="36" null="NOT" />
           <polecat:field name="docType" type="varchar" size="1024" null="NOT">
             <polecat:fieldValue>a:4:{s:12:"namespaceUri";s:28:"http://www.w3.org/1999/xhtml";s:13:"qualifiedName";s:4:"html";s:8:"publicId";s:25:"-//W3C//DTD XHTML 1.1//EN";s:8:"systemId";s:44:"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";}</polecat:fieldValue>

@@ -700,10 +700,13 @@ class AblePolecat_Registry_Class
       $ClassRegistration->classLibraryId = $ClassLibraryRegistration->id;
       if (!isset($ClassRegistration->classFullPath)) {
         foreach($Node->childNodes as $key => $childNode) {
-          $conventionalPath = $ClassLibraryRegistration->libFullPath . DIRECTORY_SEPARATOR . $childNode->nodeValue;
-          $sanitizePath = AblePolecat_Server_Paths::sanitizePath($conventionalPath);
-          if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
-            $ClassRegistration->classFullPath = $sanitizePath;
+          if ($childNode->nodeName == 'polecat:path') {
+            $conventionalPath = $ClassLibraryRegistration->libFullPath . DIRECTORY_SEPARATOR . $childNode->nodeValue;
+            $sanitizePath = AblePolecat_Server_Paths::sanitizePath($conventionalPath);
+            if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
+              $ClassRegistration->classFullPath = $sanitizePath;
+            }
+            break;
           }
         }
       }

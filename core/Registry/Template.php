@@ -84,6 +84,16 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
    * @throw AblePolecat_Database_Exception if install fails.
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
+    //
+    // Load master project configuration file.
+    //
+    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    
+    //
+    // Get list of package templates.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'template');
+    self::insertList($Database, $Nodes);
   }
   
   /**
@@ -97,8 +107,96 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_RegistryInterface.
+   ********************************************************************************/
+   
+  /**
+   * Add a registry entry.
+   *
+   * @param AblePolecat_Registry_EntryInterface $RegistryEntry
+   *
+   * @throw AblePolecat_Registry_Exception If entry is incompatible.
+   */
+  public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
+    
+    if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_TemplateInterface')) {      
+      //
+      // Add to base registry class.
+      //
+      parent::addRegistration($RegistryEntry);
+    }
+    else {
+      throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",
+        __CLASS__,
+        AblePolecat_Data::getDataTypeName($RegistryEntry),
+        'AblePolecat_Registry_Entry_TemplateInterface'
+      ));
+    }
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Insert DOMNodeList into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
+   *
+   */
+  protected static function insertList(
+    AblePolecat_DatabaseInterface $Database, 
+    DOMNodeList $Nodes) {
+    foreach($Nodes as $key => $Node) {
+      self::insertNode($Database, $Node);
+    }
+  }
+  
+  /**
+   * Insert DOMNode into registry.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   * @param DOMNode $Node DOMNode containing registry entry.
+   *
+   */
+  protected static function insertNode(
+    AblePolecat_DatabaseInterface $Database, 
+    DOMNode $Node) {
+
+    if (!isset(self::$Registry)) {
+      $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+
+    $registerFlag = $Node->getAttribute('register');
+    if ($registerFlag != '0') {
+      $TemplateRegistration = AblePolecat_Registry_Entry_Template::import($Node);
+      if (!isset($TemplateRegistration->fullPath)) {
+        foreach($Node->childNodes as $key => $childNode) {
+          if ($childNode->nodeName == 'polecat:path') {
+            $conventionalPath = implode(DIRECTORY_SEPARATOR, 
+              array(
+                ABLE_POLECAT_VAR, 
+                'www', 
+                'htdocs', 
+                'theme', 
+                $TemplateRegistration->getThemeName(), 
+                $childNode->nodeValue,
+              )
+            );
+            $sanitizePath = AblePolecat_Server_Paths::sanitizePath($conventionalPath);
+            if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
+              $TemplateRegistration->fullPath = $sanitizePath;
+            }
+            break;
+          }
+        }
+      }
+      $TemplateRegistration->save($Database);
+      self::$Registry->addRegistration($TemplateRegistration);
+    }
+  }
   
   /**
    * Extends constructor.
