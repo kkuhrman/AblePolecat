@@ -218,8 +218,9 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     global $ABLE_POLECAT_BOOT_LOG;
     $this->filePath = $ABLE_POLECAT_BOOT_LOG;
     if ($this->filePath && !file_exists($this->filePath)) {
-      $pathParts = array_pop(explode(DIRECTORY_SEPARATOR, $this->filePath));
-      if ($pathParts && file_exists($pathParts) && !is_writeable($pathParts)) {
+      $pathParts = explode(DIRECTORY_SEPARATOR, $this->filePath);
+      is_array($pathParts) ? $parentDir = array_pop($pathParts) : $parentDir = FALSE;
+      if ($parentDir && file_exists($pathParts) && !is_writeable($parentDir)) {
         $this->filePath = FALSE;
       }
     }
