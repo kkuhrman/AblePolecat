@@ -18,7 +18,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   const UUID = '3599ce6f-ad72-11e4-976e-0050569e00a2';
   const NAME = 'AblePolecat_Mode_Config';
   
-  const ACTIVE_CORE_DATABASE_ID = 'active-core-db';
   const VAR_CONF_PATH_DBSCHEMA  = 'conf_path_dbschema';
   const VAR_CONF_PATH_CORE      = 'conf_path_core';
   
@@ -197,12 +196,19 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_PASS]) ? $password = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_PASS] : $password = 'password';
             self::$ConfigMode->localProjectConfFile = new DOMDocument();
             self::$ConfigMode->localProjectConfFile->load(self::$ConfigMode->localProjectConfFilepath);
-            $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->localProjectConfFile, self::ACTIVE_CORE_DATABASE_ID);
-            foreach($Node->childNodes as $key => $childNode) {
-              if($childNode->nodeName == 'dsn') {
-                $childNode->nodeValue = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
-                break;
+            $coreDatabaseElementId = self::getCoreDatabaseId();
+            $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->localProjectConfFile, $coreDatabaseElementId);
+            if (isset($Node)) {
+              foreach($Node->childNodes as $key => $childNode) {
+                if($childNode->nodeName == 'dsn') {
+                  $childNode->nodeValue = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
+                  break;
+                }
               }
+            }
+            else {
+              $msg = sprintf("Cannot find locater for core database in local project configuration file by id=\"%s\".", $coreDatabaseElementId);
+              AblePolecat_Command_Chain::triggerError($msg);
             }
             
             //
@@ -343,7 +349,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         $this->CoreDatabaseConnectionSettings = array();
         $this->CoreDatabaseConnectionSettings['connected'] = FALSE;
         foreach($DbNodes as $key => $Node) {
-          if (($Node->getAttribute('id') == self::ACTIVE_CORE_DATABASE_ID) &&
+          if (($Node->getAttribute('id') == self::getCoreDatabaseId()) &&
               ($Node->getAttribute('name') == 'polecat') && 
               ($Node->getAttribute('mode') == 'server') && 
               ($Node->getAttribute('use'))) 
@@ -481,6 +487,15 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     }
     
     return $coreClassLibraryConfFilepath;
+  }
+  
+  /**
+   * @return string.
+   */
+  public static function getCoreDatabaseId() {
+    static $coreDatabaseElementId;
+    !isset($coreDatabaseElementId) ? $coreDatabaseElementId = sprintf("polecat-database-%s", AblePolecat_Version::getDatabaseSchemaNumber()) : NULL;
+    return $coreDatabaseElementId;
   }
   
   /**
@@ -755,7 +770,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         // core database element
         //
         $databaseElement = self::$ConfigMode->localProjectConfFile->createElement('database');
-        $idAttr = $databaseElement->setAttribute('id', self::ACTIVE_CORE_DATABASE_ID);
+        $idAttr = $databaseElement->setAttribute('id', self::getCoreDatabaseId());
         $databaseElement->setIdAttribute('id', TRUE);
         $databaseElement->setAttribute('name', 'polecat');
         $databaseElement->setAttribute('mode', 'server');

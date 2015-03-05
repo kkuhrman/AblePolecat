@@ -220,7 +220,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     if ($this->filePath && !file_exists($this->filePath)) {
       $pathParts = explode(DIRECTORY_SEPARATOR, $this->filePath);
       is_array($pathParts) ? $parentDir = array_pop($pathParts) : $parentDir = FALSE;
-      if ($parentDir && file_exists($pathParts) && !is_writeable($parentDir)) {
+      if ($parentDir && file_exists($parentDir) && !is_writeable($parentDir)) {
         $this->filePath = FALSE;
       }
     }
