@@ -128,11 +128,16 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       //
       // Load core database configuration settings.
       //
-      self::$ServerMode->initializeCoreDatabase();
-      $dbErrors = self::$ServerMode->CoreDatabase->flushErrors();
-      foreach($dbErrors as $errorNumber => $error) {
-        $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-        self::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+      try {
+        self::$ServerMode->initializeCoreDatabase();
+      }
+      catch (AblePolecat_Mode_Exception $Exception) {
+        $dbErrors = self::$ServerMode->CoreDatabase->flushErrors();
+        foreach($dbErrors as $errorNumber => $error) {
+          $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+          self::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+        }
+        self::logBootMessage(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
       }
 
       //
