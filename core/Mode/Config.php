@@ -359,7 +359,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             }
           }
         }
-          
+        
         if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
           //
           // Attempt a connection.
@@ -370,7 +370,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
           foreach($dbErrors as $errorNumber => $error) {
             $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-            self::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
           }
         }
       }

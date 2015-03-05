@@ -124,7 +124,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       // Check critical configuration settings.
       //
       AblePolecat_Mode_Config::wakeup();
-
+      
       //
       // Load core database configuration settings.
       //
