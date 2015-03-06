@@ -439,6 +439,13 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
   }
   
   /**
+   * @return AblePolecat_Registry_Entry_DomNode_ResponseInterface.
+   */
+  protected function getResponseRegistration() {
+    return $this->ResponseRegistration;
+  }
+  
+  /**
    * @todo: smirk
    */
   protected function validateHeaderField($field) {

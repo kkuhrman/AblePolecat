@@ -282,6 +282,45 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
    ********************************************************************************/
   
   /**
+   * Fetch registration record given by article id.
+   *
+   * @param string $articleId.
+   *
+   * @return Array[AblePolecat_Registry_EntryInterface].
+   */
+  public static function getRegistrationsByArticleId($articleId) {
+    
+    $Registrations = array();
+    
+    //
+    // Generate and execute SELECT statement.
+    //
+    $sql = __SQL()->          
+      select(
+        'id',
+        'name',
+        'themeName', 
+        'templateScope', 
+        'articleId', 
+        'docType', 
+        'fullPath', 
+        'lastModifiedTime')->
+      from('template')->
+      where(sprintf("`articleId` = '%s'", $articleId));
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    if ($CommandResult->success() && is_array($CommandResult->value())) {
+      $registrationInfo = $CommandResult->value();
+      if (is_array($registrationInfo)) {
+        foreach($registrationInfo as $key => $Record) {
+          $RegistryEntry = AblePolecat_Registry_Entry_Template::create($Record);
+          $Registrations[] = $RegistryEntry;
+        }
+      }
+    }
+    return $Registrations;
+  }
+  
+  /**
    * Insert DOMNodeList into registry.
    *
    * @param AblePolecat_DatabaseInterface $Database Handle to existing database.

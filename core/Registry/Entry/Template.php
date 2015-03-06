@@ -90,7 +90,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       isset($Record['articleId']) ? $RegistryEntry->articleId = $Record['articleId'] : NULL;
       isset($Record['docType']) ? $RegistryEntry->docType = $Record['docType'] : NULL;
       isset($Record['fullPath']) ? $RegistryEntry->fullPath = $Record['fullPath'] : NULL;
-      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+      // isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
     }
     return $RegistryEntry;
   }

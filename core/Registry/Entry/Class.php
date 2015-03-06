@@ -88,7 +88,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
       isset($Record['classLibraryId']) ? $RegistryEntry->classLibraryId = $Record['classLibraryId'] : NULL;
       isset($Record['classFullPath']) ? $RegistryEntry->classFullPath = $Record['classFullPath'] : NULL;
       isset($Record['classFactoryMethod']) ? $RegistryEntry->classFactoryMethod = $Record['classFactoryMethod'] : NULL;
-      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+      // isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
     }
     return $RegistryEntry;
   }

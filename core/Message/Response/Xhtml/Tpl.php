@@ -76,7 +76,6 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
       throw new AblePolecat_Message_Exception(sprintf("Entity body for response [%s] has already been set.", $this->getName()));
     }
     catch(AblePolecat_Message_Exception $Exception) {
-      
       //
       // Treat all scalar Resource properties as potential substitution strings.
       //
@@ -88,11 +87,20 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
       $this->setResource($Resource);
       
       //
+      // Load template registration.
+      // @todo: multiple registrations for same article, theme, etc. why? should articleId be UNIQUE index?
+      //
+      $ResponseRegistration = $this->getResponseRegistration();
+      isset($ResponseRegistration) ? $articleId = $ResponseRegistration->getId() : $articleId = '';
+      $TemplateRegistrations = AblePolecat_Registry_Template::getRegistrationsByArticleId($articleId);
+      isset($TemplateRegistrations[0]) ? $TemplateRegistration = $TemplateRegistrations[0] : $TemplateRegistration = NULL;
+      
+      //
       // Create DOM document.
       //
       $Document = NULL;
-      $templateFullPath = $this->getTemplateFullPath();
-      if (isset($templateFullPath) && file_exists($templateFullPath)) {
+      isset($TemplateRegistration) ? $templateFullPath = $TemplateRegistration->getFullPath() : $templateFullPath = NULL;
+      if (isset($templateFullPath)) {
         $Document = AblePolecat_Dom::createDocumentFromTemplate($templateFullPath);
       }
       else {
