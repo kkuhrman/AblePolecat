@@ -167,12 +167,8 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
     
     $RegistryEntry = NULL;
     
-    if (self::validatePrimaryKey($primaryKey)) {
-      //
-      // Create registry object and initialize primary key.
-      //
-      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
-      
+    $primaryKey = self::validatePrimaryKey($primaryKey);
+    if ($primaryKey) {
       //
       // Generate and execute SELECT statement.
       //
@@ -187,7 +183,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
           'fullPath', 
           'lastModifiedTime')->
         from('template')->
-        where(sprintf("`id` = '%s'", $id));
+        where(sprintf("`id` = '%s'", $primaryKey));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();

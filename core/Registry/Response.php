@@ -355,7 +355,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
         // Update cache entry if response class and corresponding template files have been modified since last 
         // response registry entry update.
         //
-        $ClassRegistration = AblePolecat_Registry_Entry_Class::fetch($ResponseRegistration->classId);
+        $ClassRegistration = AblePolecat_Registry_Entry_Class::fetch($ResponseRegistration->getClassId());
         
         //
         // @todo: get template for given article id etc.
@@ -372,7 +372,13 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
         );
         $mostRecentModifiedTime = AblePolecat_Data_Primitive_Scalar_Integer::max($lastModifiedTimes);
         
-        if ($mostRecentModifiedTime != $CacheRegistration->getLastModifiedTime()) {
+        $CacheRegistration = AblePolecat_Registry_Entry_Cache::fetch(
+          array(
+            'resourceId' => $ResponseRegistration->getResourceId(),
+            'statusCode' => $ResponseRegistration->getStatusCode(),
+          )
+        );
+        if (isset($CacheRegistration) && ($mostRecentModifiedTime != $CacheRegistration->getLastModifiedTime())) {
           $sql = __SQL()->          
             update('response')->
             set('lastModifiedTime')->

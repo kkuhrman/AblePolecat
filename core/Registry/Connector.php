@@ -417,7 +417,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
       where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
       $QueryResult = $CoreDatabase->query($sql);
       if (isset($QueryResult[0])) {
-        $ConnectorRegistration = new AblePolecat_Registry_Entry_Connector();
+        $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
         isset($QueryResult[0]['id']) ? $ConnectorRegistration->id = $QueryResult[0]['id'] : NULL;
         isset($QueryResult[0]['name']) ? $ConnectorRegistration->name = $QueryResult[0]['name'] : NULL;
         isset($QueryResult[0]['resourceId']) ? $ConnectorRegistration->resourceId = $QueryResult[0]['resourceId'] : NULL;

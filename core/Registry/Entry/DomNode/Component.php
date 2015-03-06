@@ -102,13 +102,12 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
     
     $RegistryEntry = NULL;
     
-    if (self::validatePrimaryKey($primaryKey)) {
-      isset($primaryKey['id']) ? $id = $primaryKey['id'] : $id = $primaryKey;
-      
+    $primaryKey = self::validatePrimaryKey($primaryKey);
+    if ($primaryKey) {
       $sql = __SQL()->
         select('id', 'name', 'classId', 'lastModifiedTime')->
         from('component')->
-        where(sprintf("`id` = '%s'", $id));
+        where(sprintf("`id` = '%s'", $primaryKey));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();

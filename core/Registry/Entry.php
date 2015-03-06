@@ -71,7 +71,7 @@ interface AblePolecat_Registry_EntryInterface
    *
    * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
    *
-   * @return boolean TRUE if given value meets schema requirements for PK, otherwise FALSE.
+   * @return mixed Value of primary key if valid, otherwise FALSE.
    */
   public static function validatePrimaryKey($primaryKey = NULL);
 }
@@ -125,16 +125,26 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
    *
    * @param mixed $primaryKey Array[fieldName=>fieldValue] for compound key or value of PK.
    *
-   * @return boolean TRUE if given value meets schema requirements for PK, otherwise FALSE.
+   * @return mixed Value of primary key if valid, otherwise FALSE.
    */
   public static function validatePrimaryKey($primaryKey = NULL) {
     
     $validPrimaryKeyValue = FALSE;
-    if (isset($primaryKey) && is_array($primaryKey) && isset($primaryKey['id'])) {
-        $validPrimaryKeyValue = TRUE;
+    
+    if (isset($primaryKey) && is_array($primaryKey)) {
+        if (isset($primaryKey['id'])) {
+          $validPrimaryKeyValue = $primaryKey['id'];
+        }
+        else {
+          if (isset($primaryKey[0])) {
+            $validPrimaryKeyValue = $primaryKey[0];
+          }  
+        }
     }
-    else if (is_string($primaryKey) && (36 === strlen($primaryKey))) {
-      $validPrimaryKeyValue = TRUE;
+    else {
+      if (is_string($primaryKey)) {
+        $validPrimaryKeyValue = $primaryKey;
+      }
     }
     return $validPrimaryKeyValue;
   }
@@ -152,7 +162,7 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
    * @return Array Results/rowset.
    */
   protected function executeDml(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql,
-    AblePolecat_DatabaseInterface $Database) {
+    AblePolecat_DatabaseInterface $Database = NULL) {
     $Result = NULL;
     if (isset($Database)) {
       $Result = $Database->execute($sql);
