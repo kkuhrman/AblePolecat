@@ -200,7 +200,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->localProjectConfFile, $coreDatabaseElementId);
             if (isset($Node)) {
               foreach($Node->childNodes as $key => $childNode) {
-                if($childNode->nodeName == 'dsn') {
+                if($childNode->nodeName == 'polecat:dsn') {
                   $childNode->nodeValue = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
                   break;
                 }
@@ -343,48 +343,46 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private function initializeCoreDatabase() {
     
     if (!isset($this->CoreDatabase)) {
-      $localProjectConfFile = $this->getLocalProjectConfFile();
-      if (isset($localProjectConfFile)) {
-        $DbNodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'database');
-        $this->CoreDatabaseConnectionSettings = array();
-        $this->CoreDatabaseConnectionSettings['connected'] = FALSE;
-        foreach($DbNodes as $key => $Node) {
-          if (($Node->getAttribute('id') == self::getCoreDatabaseId()) &&
-              ($Node->getAttribute('name') == 'polecat') && 
-              ($Node->getAttribute('mode') == 'server') && 
-              ($Node->getAttribute('use'))) 
-          {
-            $this->CoreDatabaseConnectionSettings['name'] = $Node->getAttribute('name');
-            $this->CoreDatabaseConnectionSettings['mode'] = $Node->getAttribute('mode');
-            $this->CoreDatabaseConnectionSettings['use'] = $Node->getAttribute('use');
-            foreach($Node->childNodes as $key => $childNode) {
-              if($childNode->nodeName == 'dsn') {
-                $this->CoreDatabaseConnectionSettings['dsn'] = $childNode->nodeValue;
-                break;
-              }
-            }
-          }
-        }
-        
-        if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
-          //
-          // Attempt a connection.
-          //
-          $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
-          $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->CoreDatabaseConnectionSettings['dsn']);
-          $this->CoreDatabaseConnectionSettings['connected'] = $this->CoreDatabase->open($this->getAgent(), $DbUrl);
-          $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
-          foreach($dbErrors as $errorNumber => $error) {
-            $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+      //
+      // Core database connection settings.
+      //
+      $this->CoreDatabaseConnectionSettings = array();
+      $this->CoreDatabaseConnectionSettings['connected'] = FALSE;
+      
+      //
+      // Get DSN from local project configuration file.
+      //
+      $localProjectConfFile = self::getLocalProjectConfFile();
+      $coreDatabaseElementId = self::getCoreDatabaseId();
+      $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
+      if (isset($Node)) {
+        $this->CoreDatabaseConnectionSettings['name'] = $Node->getAttribute('name');
+        foreach($Node->childNodes as $key => $childNode) {
+          if($childNode->nodeName == 'polecat:dsn') {
+            $this->CoreDatabaseConnectionSettings['dsn'] = $childNode->nodeValue;
+            break;
           }
         }
       }
-      else {
-        throw new AblePolecat_Mode_Exception('Boot sequence violation: Cannot initialize core database. Project configuration file is missing.',
-          AblePolecat_Error::BOOT_SEQ_VIOLATION
-        );
+      
+      if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
+        //
+        // Attempt a connection.
+        //
+        $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
+        $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->CoreDatabaseConnectionSettings['dsn']);
+        $this->CoreDatabaseConnectionSettings['connected'] = $this->CoreDatabase->open($this->getAgent(), $DbUrl);
+        $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
+        foreach($dbErrors as $errorNumber => $error) {
+          $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+        }
       }
+    }
+    else {
+      throw new AblePolecat_Mode_Exception('Boot sequence violation: Cannot initialize core database. Project configuration file is missing.',
+        AblePolecat_Error::BOOT_SEQ_VIOLATION
+      );
     }
     return $this->CoreDatabase;
   }

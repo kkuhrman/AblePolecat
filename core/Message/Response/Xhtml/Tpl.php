@@ -18,12 +18,7 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
    */
   const UUID = '022ac5f8-b7af-11e4-a12d-0050569e00a2';
   const NAME = 'AblePolecat_Message_Response_Xhtml_Tpl';
-  
-  /**
-   * @var string.
-   */
-  private $templateFullPath;
-  
+    
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
    ********************************************************************************/
@@ -41,9 +36,6 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
     
     $ArgsList = parent::unmarshallArgsList($method_name, $args, $options);
     $Response = self::getConcreteInstance();
-    if (isset($Response) && isset($ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION})) {
-      $Response->templateFullPath = $ArgsList->{AblePolecat_Message_ResponseInterface::RESPONSE_REGISTRATION}->getTemplateFullPath();
-    }
     return $ArgsList;
   }
   
@@ -115,26 +107,6 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
         $Document = $this->preprocessEntityBody($Document);
         $this->setDocument($Document);
       }
-    }
-  }
-  
-  /**
-   * @return string Full path to file containing document template.
-   */
-  public function getTemplateFullPath() {
-    return $this->templateFullPath;
-  }
-  
-  /**
-   * @param string $templateFullPath Full path to file containing document template.
-   */
-  public function setTemplateFullPath($templateFullPath) {
-    try {
-      $Document = $this->getDocument();
-      throw new AblePolecat_Message_Exception(sprintf("Cannot set full path to template file [%s] after DOM document has been loaded.", $this->getName()));
-    }
-    catch(AblePolecat_Message_Exception $Exception) {
-      $this->templateFullPath = $templateFullPath;
     }
   }
   

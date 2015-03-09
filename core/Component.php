@@ -92,10 +92,24 @@ abstract class AblePolecat_ComponentAbstract
   protected function getTemplateElement() {
     if (!isset($this->DomElement)) {
       //
-      // @todo: Create DOMNode of component template stored in file.
+      // Component registration.
       //
       $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::fetch(array($this->getId()));
-      $this->DomElement = AblePolecat_Dom::getDocumentElementFromFile($ComponentRegistration->getTemplateFullPath());
+      
+      //
+      // Template registration.
+      //
+      isset($ComponentRegistration) ? $articleId = $ComponentRegistration->getId() : $articleId = '';
+      $TemplateRegistrations = AblePolecat_Registry_Template::getRegistrationsByArticleId($articleId);
+      isset($TemplateRegistrations[0]) ? $TemplateRegistration = $TemplateRegistrations[0] : $TemplateRegistration = NULL;
+      
+      //
+      // DOMElement.
+      //
+      isset($TemplateRegistration) ? $templateFullPath = $TemplateRegistration->getFullPath() : $templateFullPath = NULL;
+      if (isset($templateFullPath)) {
+        $this->DomElement = AblePolecat_Dom::getDocumentElementFromFile($templateFullPath);
+      }
     }
     return $this->DomElement;
   }

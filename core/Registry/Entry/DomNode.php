@@ -31,12 +31,7 @@ interface AblePolecat_Registry_Entry_DomNodeInterface extends AblePolecat_Regist
    * @return string.
    */
   public function getSystemId();
-  
-  /**
-   * @return string
-   */
-  public function getTemplateFullPath();
-  
+    
   /**
    * Serialize doctype properties as Array for storage in db TEXT field.
    *
@@ -88,14 +83,7 @@ abstract class AblePolecat_Registry_Entry_DomNodeAbstract extends AblePolecat_Re
   public function getSystemId() {
     return $this->getPropertyValue('systemId');
   }
-  
-  /**
-   * @return string
-   */
-  public function getTemplateFullPath() {
-    return $this->getPropertyValue('templateFullPath');
-  }
-  
+    
   /**
    * Serialize doctype properties as Array for storage in db TEXT field.
    *
