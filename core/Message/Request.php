@@ -276,13 +276,13 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     switch ($sanitizedResourceName) {
       default:
         $sql = __SQL()->
-          select('resourceName')->
+          select('name')->
           from('resource')->
-          where(sprintf("`resourceName` = '%s' AND `hostName` = '%s'", $sanitizedResourceName, $this->getHostName()));
+          where(sprintf("`name` = '%s' AND `hostName` = '%s'", $sanitizedResourceName, $this->getHostName()));
         $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
         if ($CommandResult->success() && count($CommandResult->value())) {
           $resourceName = $CommandResult->value();
-          $resolvedResourceName = $resourceName[0]['resourceName'];
+          $resolvedResourceName = $resourceName[0]['name'];
         }
         else {
           $message = sprintf("Request for unregistered resource %s/%s",
