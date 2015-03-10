@@ -323,7 +323,7 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
             $Request->getRequestPath(),
             $Request->getHostName()
           );
-          AblePolecat_Command_Log::invoke($this->getDefaultCommandInvoker(), $message, AblePolecat_LogInterface::STATUS);
+          AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $message, AblePolecat_LogInterface::STATUS);
           $ResourceRegistration->id = AblePolecat_Resource_Core_Error::UUID;
           $ResourceRegistration->classId = AblePolecat_Resource_Core_Error::UUID;
           break;
