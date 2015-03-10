@@ -148,14 +148,17 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     }
     
     //
-    // Load master project configuration file.
+    // Preferred class library registration is in local project configuration
+    // file. This allows developers to define non-standard paths.
     //
-    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+    // $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
     //
     // Get package (class library) id.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (isset($applicationNode)) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
@@ -174,8 +177,9 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $message = 'project.xml must contain an package node.';
       AblePolecat_Command_Chain::triggerError($message);
     }
-
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
+    
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
@@ -259,14 +263,17 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     }
     
     //
-    // Load master project configuration file.
+    // Preferred class library registration is in local project configuration
+    // file. This allows developers to define non-standard paths.
     //
-    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+    // $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
     //
     // Get package (class library) id.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (isset($applicationNode)) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
@@ -293,7 +300,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       AblePolecat_Command_Chain::triggerError($message);
     }
     
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {

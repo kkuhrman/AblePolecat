@@ -597,7 +597,10 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Return master project configuration file for given module.
+   * Return local or master project configuration file for given module.
+   *
+   * Preference is given to local project configuration file, allowing developers
+   * to store libraries and modules in non-standard directories.
    *
    * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration
    *
