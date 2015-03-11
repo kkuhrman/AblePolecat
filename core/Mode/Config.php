@@ -658,8 +658,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         // First check for local configuration file.
         //
         $confPath = implode(DIRECTORY_SEPARATOR, array(
-          $ClassLibraryRegistration->libFullPath,
-          'usr',
+          dirname($ClassLibraryRegistration->getClassLibraryFullPath()),
           'etc',
           'polecat',
           'conf',
@@ -670,7 +669,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           // Local file not found, use master.
           //
           $confPath = implode(DIRECTORY_SEPARATOR, array(
-            $ClassLibraryRegistration->libFullPath,
+            dirname(dirname($ClassLibraryRegistration->getClassLibraryFullPath())),
             'etc',
             'polecat',
             'conf',

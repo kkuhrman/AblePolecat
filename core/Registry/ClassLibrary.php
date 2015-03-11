@@ -392,11 +392,11 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         AblePolecat_Server_Paths::setFullPath($RegistryEntry->id, $RegistryEntry->libFullPath);
         
         //
-        // if there is a paths.config file, include that, too...
+        // if there is a local path.config file, include that, too...
         //
         $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
           array(
-            $RegistryEntry->libFullPath, 
+            dirname($RegistryEntry->libFullPath), 
             'etc', 
             'polecat', 
             'conf', 
@@ -405,6 +405,23 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         );
         if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
           include_once($pathConfFilePath);
+        }
+        else {
+          //
+          // Otherwise, try to include the master project path.config file.
+          //
+          $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
+          array(
+            dirname(dirname($RegistryEntry->libFullPath)), 
+            'etc', 
+            'polecat', 
+            'conf', 
+            'path.config'
+          )
+        );
+        if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
+          include_once($pathConfFilePath);
+        }
         }
       }
       else {

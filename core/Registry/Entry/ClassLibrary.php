@@ -65,7 +65,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
       isset($Record['libType']) ? $RegistryEntry->libType = $Record['libType'] : NULL;
       isset($Record['libFullPath']) ? $RegistryEntry->libFullPath = $Record['libFullPath'] : NULL;
       isset($Record['useLib']) ? $RegistryEntry->useLib = $Record['useLib'] : NULL;
-      isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
+      // isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
     }
     return $RegistryEntry;
   }
@@ -120,11 +120,20 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
             //
             // Check for path at usr\lib or usr\mod.
             //
-            $rawPath = implode(DIRECTORY_SEPARATOR, array(
-              AblePolecat_Server_Paths::getFullPath('usr'),
-              $RegistryEntry->libType,
-              $childNode->nodeValue
-            ));
+            $rawPath = '';
+            switch ($RegistryEntry->libType) {
+              default:
+                $rawPath = implode(DIRECTORY_SEPARATOR, array(
+                  AblePolecat_Server_Paths::getFullPath('usr'),
+                  $RegistryEntry->libType,
+                  $childNode->nodeValue
+                ));
+                break;
+              case 'app':
+                $rawPath = AblePolecat_Server_Paths::getFullPath('src');
+                break;
+            }
+            
             $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
             if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
               //
@@ -132,11 +141,23 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
               //
               $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($childNode->nodeValue);
               if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
-                $message = sprintf("Invalid path given for active class library %s (%s).",
+                $message = sprintf("Invalid path given for active class library %s (%s) - %s.",
                   $RegistryEntry->name,
-                  $childNode->nodeValue
+                  $childNode->nodeValue,
+                  $checkSanitizedPath
                 );
                 AblePolecat_Command_Chain::triggerError($message);
+              }
+              
+              switch($RegistryEntry->libType) {
+                default:
+                  break;
+                case 'mod':
+                  //
+                  // @todo: this forces developer to put code under ProjectRoot/usr/src.
+                  //
+                  $checkSanitizedPath = implode(DIRECTORY_SEPARATOR, array($checkSanitizedPath, 'usr', 'src'));
+                  break;
               }
             }
             $RegistryEntry->libFullPath = $checkSanitizedPath;

@@ -83,21 +83,18 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
    *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_DatabaseInterface $Database) {
+  public static function install(AblePolecat_DatabaseInterface $Database) {    
     //
-    // Load class library registry.
+    // Load local project configuration file.
     //
-    $ClassLibraryRegistry = AblePolecat_Registry_ClassLibrary::wakeup();
-    
-    //
-    // Load master project configuration file.
-    //
-    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+    // $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
     //
     // Get package (class library) id.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (!isset($applicationNode)) {
       //
@@ -107,8 +104,25 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
       AblePolecat_Command_Chain::triggerError($message);
     }
     
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'component');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
     self::insertList($Database, $Nodes);
+    
+    //
+    // Import classes in class libraries.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
+    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
+    foreach($Nodes as $key => $Node) {
+      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
+      if (isset($ClassLibraryRegistration)) {
+        $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
+        if (isset($modConfFile)) {
+          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
+          self::insertList($Database, $modNodes);
+        }
+      }
+    }
   }
   
   /**
