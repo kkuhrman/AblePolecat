@@ -135,6 +135,16 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
             }
             
             $checkSanitizedPath = AblePolecat_Server_Paths::sanitizePath($rawPath);
+            switch($RegistryEntry->libType) {
+              default:
+                break;
+              case 'mod':
+                //
+                // @todo: this forces developer to put code under ProjectRoot/usr/src.
+                //
+                $checkSanitizedPath = implode(DIRECTORY_SEPARATOR, array($checkSanitizedPath, 'usr', 'src'));
+                break;
+            }
             if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
               //
               // Check if this is a full path.
@@ -147,17 +157,6 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
                   $checkSanitizedPath
                 );
                 AblePolecat_Command_Chain::triggerError($message);
-              }
-              
-              switch($RegistryEntry->libType) {
-                default:
-                  break;
-                case 'mod':
-                  //
-                  // @todo: this forces developer to put code under ProjectRoot/usr/src.
-                  //
-                  $checkSanitizedPath = implode(DIRECTORY_SEPARATOR, array($checkSanitizedPath, 'usr', 'src'));
-                  break;
               }
             }
             $RegistryEntry->libFullPath = $checkSanitizedPath;
