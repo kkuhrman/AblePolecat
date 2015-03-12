@@ -240,7 +240,6 @@ class AblePolecat_Dom {
     AblePolecat_Data_StructureInterface $Data,
     $elementTemplateStr
   ) {
-    
     //
     // @todo: this cannot remain as a long-term solution to the problem of warnings and errors
     // triggered by loadHTML() (@see getDocumentElementFromString()).
@@ -667,6 +666,10 @@ class AblePolecat_Dom {
       //
       $templateElementStr = $parentElement->C14N();
       
+      //
+      // Remove encoded/unencoded, carriage returns and other junk.
+      //
+      $templateElementStr = trim(str_replace(array('&#xD;'), '', $templateElementStr));
       
       //
       // Get first child of type DOMElement
@@ -701,10 +704,9 @@ class AblePolecat_Dom {
       // Strip parent element tags from HTML text to produce repeatable element 'template'
       //
       $pos = strpos($parentElementStr, '>');
-      $startTag = substr($parentElementStr, 0, 1 + $pos);
-      $pos = strpos($parentElementStr, '<', 1 + $pos);
-      $endTag = substr($parentElementStr, $pos, strlen($parentElementStr) - $pos);
-      $templateElementStr = trim(str_replace(array($startTag, $endTag, '&#xD;'), '', $templateElementStr));
+      $templateElementStr = trim(substr($templateElementStr, 1 + $pos));
+      $pos = strrpos($templateElementStr, '<');
+      $templateElementStr = trim(substr($templateElementStr, 0, -1 * (strlen($templateElementStr) - $pos)));
     }
     
     return $templateElementStr;
