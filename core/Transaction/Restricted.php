@@ -115,30 +115,53 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
           case 401:
             //
             // 401 means user requires authentication before request will be granted.
+            // @todo: keep white list in a local configuration file.
             //
-            // $authorityClassName = $this-getConnectorRegistration()->getAuthorityClassName();
-            // if (isset($authorityClassName)) {
-              // $ChildTransaction = $this->enlistTransaction(
-                // $authorityClassName,
-                // $this->getRequest(),
-                // $this->getResourceRegistration()
-              // );
-              // $Resource = $ChildTransaction->run();
-            // }
-            $Referer = $this->getResourceRegistration()->getId();
-            $Resource = AblePolecat_Resource_Core_Factory::wakeup(
-              $this->getAgent(),
-              'AblePolecat_Resource_Core_Form'
-            );
-            $Resource->addText('Enter database name, user name and password for Able Polecat core database.');
-            $Resource->addControl('label', array('for' => 'databaseName'), 'Database: ');
-            $Resource->addControl('input', array('id' => 'databaseName', 'type' => 'text', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_DB));
-            $Resource->addControl('label', array('for' => 'userName'), 'Username: ');
-            $Resource->addControl('input', array('id' => 'userName', 'type' => 'text', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_USER));
-            $Resource->addControl('label', array('for' => 'passWord'), 'Password: ');
-            $Resource->addControl('input', array('id' => 'passWord', 'type' => 'password', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_PASS));
-            $Resource->addControl('input', array('type'=>'hidden', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_REDIRECT, 'value' => $this->getRedirectResourceId()));
-            $Resource->addControl('input', array('type'=>'hidden', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_REFERER, 'value' => $Referer));
+            global $ABLE_POLECAT_ADMIN_IP;
+            if (!is_array($ABLE_POLECAT_ADMIN_IP)) {
+              //
+              // Some badly behaved script tampered with the admin IP address white list.
+              //
+              $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                $this->getDefaultCommandInvoker(),
+                'AblePolecat_Resource_Core_Error',
+                'Access Denied',
+                'Administrator IP address white list appears to have been tampered with.'
+              );
+              $this->setStatusCode(403);
+              $this->setStatus(self::TX_STATE_COMPLETED);
+            }
+            else {
+              isset($_SERVER['REMOTE_ADDR']) ? $remoteIp = $_SERVER['REMOTE_ADDR'] : $remoteIp = '';
+              if (isset($ABLE_POLECAT_ADMIN_IP[$remoteIp]) && $ABLE_POLECAT_ADMIN_IP[$remoteIp]) {
+              // if ($remoteIp == '68.169.193.132') {
+              // if ($remoteIp == '127.0.0.1') {
+                $Referer = $this->getResourceRegistration()->getId();
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                  $this->getAgent(),
+                  'AblePolecat_Resource_Core_Form'
+                );
+                $Resource->addText('Enter database name, user name and password for Able Polecat core database.');
+                $Resource->addControl('label', array('for' => 'databaseName'), 'Database: ');
+                $Resource->addControl('input', array('id' => 'databaseName', 'type' => 'text', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_DB));
+                $Resource->addControl('label', array('for' => 'userName'), 'Username: ');
+                $Resource->addControl('input', array('id' => 'userName', 'type' => 'text', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_USER));
+                $Resource->addControl('label', array('for' => 'passWord'), 'Password: ');
+                $Resource->addControl('input', array('id' => 'passWord', 'type' => 'password', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_PASS));
+                $Resource->addControl('input', array('type'=>'hidden', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_REDIRECT, 'value' => $this->getRedirectResourceId()));
+                $Resource->addControl('input', array('type'=>'hidden', 'name' => AblePolecat_Transaction_RestrictedInterface::ARG_REFERER, 'value' => $Referer));
+              }
+              else {
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                  $this->getDefaultCommandInvoker(),
+                  'AblePolecat_Resource_Core_Error',
+                  'Access Denied',
+                  sprintf("IP address not permitted to access Able Polecat utilities. Your address is %s.", $remoteIp)
+                );
+                $this->setStatusCode(403);
+                $this->setStatus(self::TX_STATE_COMPLETED);
+              } 
+            }
         }
         if (!isset($Resource)) {
           //

@@ -159,32 +159,32 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               //
               // UPDATE [lib]
               //
-              // AblePolecat_Registry_ClassLibrary::update($CoreDatabase);
+              AblePolecat_Registry_ClassLibrary::update($CoreDatabase);
               
               //
               // UPDATE [class]
               //
-              // AblePolecat_Registry_Class::update($CoreDatabase);
+              AblePolecat_Registry_Class::update($CoreDatabase);
               
               //
               // UPDATE [connector]
               //
-              // AblePolecat_Registry_Connector::update($CoreDatabase);
+              AblePolecat_Registry_Connector::update($CoreDatabase);
               
               //
               // UPDATE [component]
               //
-              // AblePolecat_Registry_Component::update($CoreDatabase);
+              AblePolecat_Registry_Component::update($CoreDatabase);
               
               //
               // UPDATE [resource]
               //
-              // AblePolecat_Registry_Resource::update($CoreDatabase);
+              AblePolecat_Registry_Resource::update($CoreDatabase);
               
               //
               // UPDATE [response]
               //
-              // AblePolecat_Registry_Response::update($CoreDatabase);
+              AblePolecat_Registry_Response::update($CoreDatabase);
               
               //
               // UPDATE [template]
