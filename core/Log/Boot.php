@@ -215,15 +215,30 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     //
     // Everything is ignored if the boot log feature is disabled.
     //
-    global $ABLE_POLECAT_BOOT_LOG;
-    $this->filePath = $ABLE_POLECAT_BOOT_LOG;
-    if ($this->filePath && !file_exists($this->filePath)) {
-      $pathParts = explode(DIRECTORY_SEPARATOR, $this->filePath);
-      is_array($pathParts) ? $parentDir = array_pop($pathParts) : $parentDir = FALSE;
-      if ($parentDir && file_exists($parentDir) && !is_writeable($parentDir)) {
-        $this->filePath = FALSE;
+    isset($_REQUEST['display_errors']) ? $display_errors = $_REQUEST['display_errors'] : $display_errors = FALSE;
+    switch ($display_errors) {
+      default:
+        $display_errors = FALSE;
+        break;
+      case 'all':
+      case 'strict':
+        break;
+    }
+    if ($display_errors === FALSE) {
+      $this->filePath = FALSE;
+    }
+    else {
+      global $ABLE_POLECAT_BOOT_LOG;
+      $this->filePath = $ABLE_POLECAT_BOOT_LOG;
+      if ($this->filePath && !file_exists($this->filePath)) {
+        $pathParts = explode(DIRECTORY_SEPARATOR, $this->filePath);
+        is_array($pathParts) ? $parentDir = array_pop($pathParts) : $parentDir = FALSE;
+        if ($parentDir && file_exists($parentDir) && !is_writeable($parentDir)) {
+          $this->filePath = FALSE;
+        }
       }
     }
+    
     if ($this->filePath) {
       //
       // Start with no error condition.
