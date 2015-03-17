@@ -183,7 +183,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     
     $RegistryEntry = parent::getRegistrationById($id);
     if (!isset($RegistryEntry)) {
-      $RegistryEntry = AblePolecat_Registry_Entry_Response::fetch($id);
+      $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::fetch($id);
       if (!isset($RegistryEntry)) {
         parent::addRegistration($RegistryEntry);
       }
@@ -217,7 +217,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {
-          $RegistryEntry = AblePolecat_Registry_Entry_Response::create($Records[0]);
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create($Records[0]);
         }
       }
       if (!isset($RegistryEntry)) {
@@ -266,7 +266,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
           from('response');
         $QueryResult = $CoreDatabase->query($sql);
         foreach($QueryResult as $key => $Record) {
-          $RegistryEntry = AblePolecat_Registry_Entry_Response::create($Record);
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
       }

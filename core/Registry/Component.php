@@ -316,7 +316,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
           from('component');
         $QueryResult = $CoreDatabase->query($sql);
         foreach($QueryResult as $key => $Record) {
-          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component($Record);
+          $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
       }
