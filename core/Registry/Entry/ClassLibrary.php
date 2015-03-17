@@ -65,7 +65,6 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
       isset($Record['libType']) ? $RegistryEntry->libType = $Record['libType'] : NULL;
       isset($Record['libFullPath']) ? $RegistryEntry->libFullPath = $Record['libFullPath'] : NULL;
       isset($Record['useLib']) ? $RegistryEntry->useLib = $Record['useLib'] : NULL;
-      // isset($Record['lastModifiedTime']) ? $RegistryEntry->lastModifiedTime = $Record['lastModifiedTime'] : NULL;
     }
     return $RegistryEntry;
   }

@@ -91,14 +91,14 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
    */
   public static function install(AblePolecat_DatabaseInterface $Database) {
     //
-    // Load master project configuration file.
+    // Load local project configuration file.
     //
-    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
+    $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
     
     //
     // Get list of package connectors.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'connector');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'connector');
     self::insertList($Database, $Nodes);
   }
   
@@ -121,16 +121,15 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     //
     $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
     
+    // Load local project configuration file.
     //
-    // Read registrations from master project configuration file.
-    //
-    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'connector');
+    $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'connector');
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
       
       //
-      // Since entry is in master project conf file, remove it from delete list.
+      // Since entry is in local project conf file, remove it from delete list.
       //
       $id = $Node->getAttribute('id');
       if (isset($CurrentRegistrationIds[$id])) {
@@ -139,7 +138,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     }
     
     //
-    // Remove any registered classes not in master project conf file.
+    // Remove any registered classes not in local project conf file.
     //
     if (count($CurrentRegistrationIds)) {
       $sql = __SQL()->

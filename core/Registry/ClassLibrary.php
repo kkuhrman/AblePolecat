@@ -149,16 +149,14 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     
     //
     // Preferred class library registration is in local project configuration
-    // file. This allows developers to define non-standard paths.
+    // file. This allows developers to define non-standard paths etc.
     //
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-    // $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
     //
     // Get package (class library) id.
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (isset($applicationNode)) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
@@ -179,7 +177,6 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     }
     
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
@@ -267,13 +264,11 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     // file. This allows developers to define non-standard paths.
     //
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-    // $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
     //
     // Get package (class library) id.
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (isset($applicationNode)) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
@@ -301,7 +296,6 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     }
     
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
@@ -375,7 +369,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   public function addRegistration(AblePolecat_Registry_EntryInterface $RegistryEntry) {
     
     if (is_a($RegistryEntry, 'AblePolecat_Registry_Entry_ClassLibrary')) {
-      if (isset($RegistryEntry->libFullPath) && AblePolecat_Server_Paths::verifyDirectory($RegistryEntry->libFullPath)) {
+      $libFullPath = $RegistryEntry->getClassLibraryFullPath();
+      if (isset($libFullPath) && AblePolecat_Server_Paths::verifyDirectory($libFullPath)) {
         //
         // Add to base registry class.
         //
@@ -384,52 +379,67 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         //
         // Append class library path path to PHP INI paths
         //
-        set_include_path(get_include_path() . PATH_SEPARATOR . $RegistryEntry->libFullPath);
+        set_include_path(get_include_path() . PATH_SEPARATOR . $libFullPath);
         
         //
         // Add path to Able Polecat configurable paths.
         //
-        AblePolecat_Server_Paths::setFullPath($RegistryEntry->id, $RegistryEntry->libFullPath);
+        AblePolecat_Server_Paths::setFullPath($RegistryEntry->getId(), $libFullPath);
         
         //
-        // if there is a local path.config file, include that, too...
+        // If the library is an Able Polecat module, include the local or master
+        // path configuration file (if either exist in that order).
         //
-        $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
-          array(
-            dirname($RegistryEntry->libFullPath), 
-            'etc', 
-            'polecat', 
-            'conf', 
-            'path.config'
-          )
-        );
-        if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
-          include_once($pathConfFilePath);
-        }
-        else {
+        $libType = $RegistryEntry->getClassLibraryType();
+        if ($libType === 'mod') {
           //
-          // Otherwise, try to include the master project path.config file.
+          // Able Polecat module requirements define class library full path as
+          // ./project-root/usr/src
+          // First check for local path configuration file.
           //
-          $pathConfFilePath = implode(DIRECTORY_SEPARATOR, 
-          array(
-            dirname(dirname($RegistryEntry->libFullPath)), 
-            'etc', 
-            'polecat', 
-            'conf', 
+          $confPath = implode(DIRECTORY_SEPARATOR, array(
+            dirname($libFullPath),
+            'etc',
+            'polecat',
+            'conf',
             'path.config'
-          )
-        );
-        if (file_exists($pathConfFilePath) && (ABLE_POLECAT_ROOT_PATH_CONF_FILE_PATH != $pathConfFilePath)) {
-          include_once($pathConfFilePath);
+          ));
+          if (AblePolecat_Server_Paths::verifyFile($confPath)) {
+            include_once($confPath);
+          }
+          else {
+            //
+            // Local file not found, use master if it exists.
+            // NOTE: path.config is not required for modules.
+            //
+            $confPath = implode(DIRECTORY_SEPARATOR, array(
+              dirname(dirname($libFullPath)),
+              'etc',
+              'polecat',
+              'conf',
+              'path.config'
+            ));
+            if (AblePolecat_Server_Paths::verifyFile($confPath)) {
+              include_once($confPath);
+            }
+          }
         }
-        }
+        
+        // switch ($RegistryEntry->getId()) {
+            // default:
+              // AblePolecat_Debug::kill($RegistryEntry);
+              // break;
+            // case '0d0de7ee-b39c-11e4-976e-0050569e00a2':
+            // case '0e52b634-9b5d-11e4-ad44-0050569e00a2':
+            // case '7fbd5034-b7a1-11e4-a12d-0050569e00a2':
+              // break;
+          // }
       }
       else {
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, 
           sprintf("Invalid path provided for class library %s (%s).", $RegistryEntry->id, $RegistryEntry->name)
         );
       }
-      
     }
     else {
       throw new AblePolecat_Registry_Exception(sprintf("Cannot add registration to %s. %s does not implement %s.",

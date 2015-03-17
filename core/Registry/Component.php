@@ -88,13 +88,11 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     // Load local project configuration file.
     //
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-    // $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
     
     //
     // Get package (class library) id.
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'package');
     $applicationNode = $Nodes->item(0);
     if (!isset($applicationNode)) {
       //
@@ -105,14 +103,12 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     }
     
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'component');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
     self::insertList($Database, $Nodes);
     
     //
-    // Import classes in class libraries.
+    // Import components in class libraries.
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
-    // $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'classLibrary');
     foreach($Nodes as $key => $Node) {
       $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($ClassLibraryRegistration)) {
@@ -145,10 +141,24 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
     
     //
-    // Read registrations from master project configuration file.
+    // Load local project configuration file.
     //
-    $masterProjectConfFile = AblePolecat_Mode_Config::getMasterProjectConfFile();
-    $Nodes = AblePolecat_Dom::getElementsByTagName($masterProjectConfFile, 'component');
+    $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+    
+    //
+    // Get package (class library) id.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'package');
+    $applicationNode = $Nodes->item(0);
+    if (!isset($applicationNode)) {
+      //
+      // @todo: this type of schema checking should be done by implementing an XML schema.
+      //
+      $message = 'project.xml must contain an package node.';
+      AblePolecat_Command_Chain::triggerError($message);
+    }
+    
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'component');
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
       
@@ -158,6 +168,31 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
       $id = $Node->getAttribute('id');
       if (isset($CurrentRegistrationIds[$id])) {
         unset($CurrentRegistrationIds[$id]);
+      }
+    }
+    
+    //
+    // Import components in class libraries.
+    //
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'classLibrary');
+    foreach($Nodes as $key => $Node) {
+      $ClassLibraryRegistration = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
+      if (isset($ClassLibraryRegistration)) {
+        $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
+        if (isset($modConfFile)) {
+          $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
+          foreach($modNodes as $key => $Node) {
+            self::insertNode($Database, $Node);
+            
+            //
+            // Since entry is in master project conf file, remove it from delete list.
+            //
+            $id = $Node->getAttribute('id');
+            if (isset($CurrentRegistrationIds[$id])) {
+              unset($CurrentRegistrationIds[$id]);
+            }
+          }
+        }
       }
     }
     

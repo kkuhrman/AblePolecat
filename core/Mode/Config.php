@@ -648,11 +648,12 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     static $moduleConfFilepathParts;
     $moduleConfFilepath = NULL;
     
-    if ($ClassLibraryRegistration->libType === 'mod') {
+    $libType = $ClassLibraryRegistration->getClassLibraryType();
+    if ($libType === 'mod') {
       if (!isset($moduleConfFilepathParts)) {
         $moduleConfFilepathParts = array();
       }
-      $id = $ClassLibraryRegistration->id;
+      $id = $ClassLibraryRegistration->getId();
       if (!isset($moduleConfFilepathParts[$id])) {
         //
         // First check for local configuration file.
