@@ -114,7 +114,41 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
           }
           break;
         case 'POST':
-          $Resource = parent::run();
+          $referer = $this->getRequest()->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_REFERER);
+          if (isset($referer) && ($referer === AblePolecat_Resource_Restricted_Util::UUID)) {
+            if ($this->authenticate()) {
+              $requestPathInfo = $this->getRequest()->getRequestPathInfo();
+              $requestPathInfoParts = explode(AblePolecat_Message_RequestInterface::URI_SLASH, $requestPathInfo[AblePolecat_Message_RequestInterface::URI_PATH]);
+              isset($requestPathInfoParts[1]) ? $utilName = $requestPathInfoParts[1] : $utilName = NULL;
+              switch ($utilName) {
+                default:
+                  $errorReason = "Utility is not recognized: $utilName.";
+                  $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                    $this->getDefaultCommandInvoker(),
+                    'AblePolecat_Resource_Core_Error',
+                    'Resource not found',
+                    $errorReason
+                  );
+                  $this->setStatus(self::TX_STATE_COMPLETED);
+                  break;
+                case 'register':
+                  //
+                  // @todo: enlist child transaction?
+                  //
+                  
+                  //
+                  // @todo: status message of some kind?
+                  //
+                  $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                    $this->getDefaultCommandInvoker(),
+                    'AblePolecat_Resource_Core_Ack'
+                  );
+                  $this->setStatus(self::TX_STATE_COMPLETED);
+                  break;
+              }
+            }
+          }
+          // $Resource = parent::run();
           break;
       }
     }

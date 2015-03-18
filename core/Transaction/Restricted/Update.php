@@ -120,87 +120,166 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               //
               break;
             case AblePolecat_Resource_Restricted_Install::UUID:
-              //
-              // INSERT [lib]
-              //
-              AblePolecat_Registry_ClassLibrary::install($CoreDatabase);
+              if (FALSE === AblePolecat_Database_Pdo::ready()) {
+                //
+                // Get rid of db errors.
+                //
+                $dbErrors = $CoreDatabase->flushErrors();
+                
+                //
+                // First, establish connection to db and update local project 
+                // configuration file.
+                //
+                if ($this->authenticate()) {
+                  //
+                  // Connection established, update local project conf file.
+                  //
+                  $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+                  $coreDatabaseElementId = AblePolecat_Mode_Config::getCoreDatabaseId();
+                  $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
+                  if (isset($Node)) {
+                    foreach($Node->childNodes as $key => $childNode) {
+                      if($childNode->nodeName == 'polecat:dsn') {
+                        $childNode->nodeValue = $this->getSecurityToken();
+                        break;
+                      }
+                    }
+                  }
+                  $localProjectConfFilepath = AblePolecat_Mode_Config::getLocalProjectConfFilePath();
+                  $localProjectConfFile->save($localProjectConfFilepath);
+                }
+              }
               
-              //
-              // INSERT [class]
-              //
-              AblePolecat_Registry_Class::install($CoreDatabase);
-              
-              //
-              // INSERT [connector]
-              //
-              AblePolecat_Registry_Connector::install($CoreDatabase);
-              
-              //
-              // INSERT [component]
-              //
-              AblePolecat_Registry_Component::install($CoreDatabase);
-              
-              //
-              // INSERT [resource]
-              //
-              AblePolecat_Registry_Resource::install($CoreDatabase);
-              
-              //
-              // INSERT [response]
-              //
-              AblePolecat_Registry_Response::install($CoreDatabase);
-              
-              //
-              // INSERT [template]
-              //
-              AblePolecat_Registry_Template::install($CoreDatabase);
+              if (AblePolecat_Database_Pdo::ready()) {
+                //
+                // Install current database schema.
+                //
+                AblePolecat_Database_Schema::install($CoreDatabase);
+                
+                //
+                // INSERT [lib]
+                //
+                AblePolecat_Registry_ClassLibrary::install($CoreDatabase);
+                
+                //
+                // INSERT [class]
+                //
+                AblePolecat_Registry_Class::install($CoreDatabase);
+                
+                //
+                // INSERT [connector]
+                //
+                AblePolecat_Registry_Connector::install($CoreDatabase);
+                
+                //
+                // INSERT [component]
+                //
+                AblePolecat_Registry_Component::install($CoreDatabase);
+                
+                //
+                // INSERT [resource]
+                //
+                AblePolecat_Registry_Resource::install($CoreDatabase);
+                
+                //
+                // INSERT [response]
+                //
+                AblePolecat_Registry_Response::install($CoreDatabase);
+                
+                //
+                // INSERT [template]
+                //
+                AblePolecat_Registry_Template::install($CoreDatabase);
+                
+                //
+                // @todo: status message of some kind?
+                //
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                  $this->getDefaultCommandInvoker(),
+                  'AblePolecat_Resource_Core_Ack'
+                );
+                $this->setStatus(self::TX_STATE_COMPLETED);
+              }
+              else {
+                $dbErrors = $CoreDatabase->flushErrors();
+                $error = 'Database authentication failed';
+                foreach($dbErrors as $errorNumber => $error) {
+                  $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+                  AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+                }
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                  $this->getDefaultCommandInvoker(),
+                  'AblePolecat_Resource_Core_Error',
+                  'Access Denied',
+                  $error
+                );
+                $this->setStatus(self::TX_STATE_COMPLETED);
+              }
               break;
             case AblePolecat_Resource_Restricted_Update::UUID:
-              //
-              // UPDATE [lib]
-              //
-              AblePolecat_Registry_ClassLibrary::update($CoreDatabase);
-              
-              //
-              // UPDATE [class]
-              //
-              AblePolecat_Registry_Class::update($CoreDatabase);
-              
-              //
-              // UPDATE [connector]
-              //
-              AblePolecat_Registry_Connector::update($CoreDatabase);
-              
-              //
-              // UPDATE [component]
-              //
-              AblePolecat_Registry_Component::update($CoreDatabase);
-              
-              //
-              // UPDATE [resource]
-              //
-              AblePolecat_Registry_Resource::update($CoreDatabase);
-              
-              //
-              // UPDATE [response]
-              //
-              AblePolecat_Registry_Response::update($CoreDatabase);
-              
-              //
-              // UPDATE [template]
-              //
-              AblePolecat_Registry_Template::update($CoreDatabase);
+              if ($this->authenticate()) {
+                //
+                // UPDATE [lib]
+                //
+                AblePolecat_Registry_ClassLibrary::update($CoreDatabase);
+                
+                //
+                // UPDATE [class]
+                //
+                AblePolecat_Registry_Class::update($CoreDatabase);
+                
+                //
+                // UPDATE [connector]
+                //
+                AblePolecat_Registry_Connector::update($CoreDatabase);
+                
+                //
+                // UPDATE [component]
+                //
+                AblePolecat_Registry_Component::update($CoreDatabase);
+                
+                //
+                // UPDATE [resource]
+                //
+                AblePolecat_Registry_Resource::update($CoreDatabase);
+                
+                //
+                // UPDATE [response]
+                //
+                AblePolecat_Registry_Response::update($CoreDatabase);
+                
+                //
+                // UPDATE [template]
+                //
+                AblePolecat_Registry_Template::update($CoreDatabase);
+                
+                //
+                // @todo: status message of some kind?
+                //
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                  $this->getDefaultCommandInvoker(),
+                  'AblePolecat_Resource_Core_Ack'
+                );
+                $this->setStatus(self::TX_STATE_COMPLETED);
+              }
+              else {
+                $dbErrors = $CoreDatabase->flushErrors();
+                $error = 'Database authentication failed';
+                foreach($dbErrors as $errorNumber => $error) {
+                  $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+                  AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+                }
+                $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+                  $this->getDefaultCommandInvoker(),
+                  'AblePolecat_Resource_Core_Error',
+                  'Access Denied',
+                  $error
+                );
+                $this->setStatus(self::TX_STATE_COMPLETED);
+              }
               break;
           }
         }
-        //
-        // @todo: status message of some kind?
-        //
-        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
-          $this->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Core_Ack'
-        );
-        $this->setStatus(self::TX_STATE_COMPLETED);
         break;
     }
     return $Resource;

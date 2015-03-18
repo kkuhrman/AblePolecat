@@ -398,11 +398,11 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
           switch ($variableName) {
             default:
               break;
-            case self::POLECAT_INSTALL_TRX:
-            case self::POLECAT_INSTALL_SAVEPT:
-            case self::POLECAT_INSTALL_DBNAME:
-            case self::POLECAT_INSTALL_DBUSER:
-            case self::POLECAT_INSTALL_DBPASS:
+            case AblePolecat_Host::POLECAT_INSTALL_TRX:
+            case AblePolecat_Host::POLECAT_INSTALL_SAVEPT:
+            case AblePolecat_Host::POLECAT_INSTALL_DBNAME:
+            case AblePolecat_Host::POLECAT_INSTALL_DBUSER:
+            case AblePolecat_Host::POLECAT_INSTALL_DBPASS:
               self::$SessionMode->sessionGlobal[$className][$variableName] = $variableValue;
               break;
           }

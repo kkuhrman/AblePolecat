@@ -302,7 +302,7 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
     $resourceName  = NULL;
     
-    if (AblePolecat_Database_Pdo::ready()) {
+    // if (AblePolecat_Database_Pdo::ready()) {
       //
       // Resource is not registered. Use a system resource.      
       // Assign resource id and class name.
@@ -349,15 +349,15 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
           $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Update::UUID;
           break;
       }
-    }
-    else {
+    // }
+    // else {
       //
       // There is no active database connection, redirect to install resource.
       //
-      $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
-      $ResourceRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
-      $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Install::UUID;
-    }
+      // $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
+      // $ResourceRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
+      // $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Install::UUID;
+    // }
     return $ResourceRegistration;
   }
     

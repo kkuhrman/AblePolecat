@@ -269,38 +269,47 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     $resolvedResourceName = FALSE;
     $sanitizedResourceName = strtolower(preg_replace(array('/[^\/\a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
+    $uriPathParts = explode(URI_SLASH, $sanitizedResourceName);
     
     //
-    // Check sanitized resource names against registry.
+    // First, check for core resource request.
     //
-    switch ($sanitizedResourceName) {
-      default:
-        $sql = __SQL()->
-          select('name')->
-          from('resource')->
-          where(sprintf("`name` = '%s' AND `hostName` = '%s'", $sanitizedResourceName, $this->getHostName()));
-        $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
-        if ($CommandResult->success() && count($CommandResult->value())) {
-          $resourceName = $CommandResult->value();
-          $resolvedResourceName = $resourceName[0]['name'];
-        }
-        else {
-          $message = sprintf("Request for unregistered resource %s/%s",
-            $this->getHostName(),
-            $sanitizedResourceName
-          );
-          AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $message, AblePolecat_LogInterface::STATUS);
-        }
-        break;
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-      // case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
-      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-        $resolvedResourceName = $sanitizedResourceName;
-        break;
+    if (is_array($uriPathParts) && isset($uriPathParts[0])) {
+      switch($uriPathParts[0]) {
+        default:
+          break;
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+          $resolvedResourceName = $uriPathParts[0];
+          break;
+      }
+    }
+    
+    //
+    // Otherwise, check sanitized resource names against registry.
+    //
+    if ($resolvedResourceName === FALSE) {
+      $sql = __SQL()->
+        select('name')->
+        from('resource')->
+        where(sprintf("`name` = '%s' AND `hostName` = '%s'", $sanitizedResourceName, $this->getHostName()));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
+      if ($CommandResult->success() && count($CommandResult->value())) {
+        $resourceName = $CommandResult->value();
+        $resolvedResourceName = $resourceName[0]['name'];
+      }
+      else {
+        $message = sprintf("Request for unregistered resource %s/%s",
+          $this->getHostName(),
+          $sanitizedResourceName
+        );
+        AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $message, AblePolecat_LogInterface::STATUS);
+      }
     }
     return $resolvedResourceName;
   }
@@ -375,7 +384,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       // Is it a request for a recognized resource on the system?
       //
       $resourceName = $this->validateResourceName($this->request_path_info[self::URI_PATH]);
-      if (strcasecmp($this->request_path_info[self::URI_PATH], $resourceName) == 0) {
+      if ($resourceName) {
         //
         // Yes, a valid resource name was given.
         //

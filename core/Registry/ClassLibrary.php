@@ -424,16 +424,6 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
             }
           }
         }
-        
-        // switch ($RegistryEntry->getId()) {
-            // default:
-              // AblePolecat_Debug::kill($RegistryEntry);
-              // break;
-            // case '0d0de7ee-b39c-11e4-976e-0050569e00a2':
-            // case '0e52b634-9b5d-11e4-ad44-0050569e00a2':
-            // case '7fbd5034-b7a1-11e4-a12d-0050569e00a2':
-              // break;
-          // }
       }
       else {
         AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::WARNING, 

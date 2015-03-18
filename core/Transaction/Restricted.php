@@ -22,12 +22,28 @@ interface AblePolecat_Transaction_RestrictedInterface extends AblePolecat_Transa
   const ARG_REFERER   = 'referer';
   
   /**
+   * @return boolean TRUE if internal authentication is valid, otherwise FALSE.
+   */
+  public function authenticate();
+  
+  /**
    * @return UUID Id of redirect resource on authentication.
    */
   public function getRedirectResourceId();
+  
+  /**
+   * @return mixed Whatever was used to authenticate access.
+   */
+  public function getSecurityToken();
 }
 
 abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_TransactionAbstract {
+  
+  /**
+   * @var string DSN (default security token).
+   */
+  private $dsn;
+  
   /********************************************************************************
    * Implementation of AblePolecat_TransactionInterface.
    ********************************************************************************/
@@ -134,8 +150,6 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
             else {
               isset($_SERVER['REMOTE_ADDR']) ? $remoteIp = $_SERVER['REMOTE_ADDR'] : $remoteIp = '';
               if (isset($ABLE_POLECAT_ADMIN_IP[$remoteIp]) && $ABLE_POLECAT_ADMIN_IP[$remoteIp]) {
-              // if ($remoteIp == '68.169.193.132') {
-              // if ($remoteIp == '127.0.0.1') {
                 $Referer = $this->getResourceRegistration()->getId();
                 $Resource = AblePolecat_Resource_Core_Factory::wakeup(
                   $this->getAgent(),
@@ -184,6 +198,86 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_Transaction_RestrictedInterface.
+   ********************************************************************************/
+   
+  /**
+   * Default authentication is against project database.
+   *
+   * @return boolean TRUE if internal authentication is valid, otherwise FALSE.
+   */
+  public function authenticate() {
+    
+    $authenticated = FALSE;
+    
+    switch ($this->getRequest()->getMethod()) {
+      default:
+        break;
+      case 'GET':
+      case 'POST':
+        //
+        // Construct DSN from query string parameters or POST entity body.
+        //
+        $databaseName = $this->getRequest()->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_DB);
+        $userName = $this->getRequest()->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_USER);
+        $password = $this->getRequest()->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_PASS);
+        $this->dsn = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
+        
+        //
+        // Check for existing project database connection.
+        //
+        $SystemAgent = AblePolecat_AccessControl_Agent_System::wakeup();
+        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($SystemAgent);
+        if($CoreDatabase->ready()) {
+          //
+          // If database connection already exists, check authentication against
+          // dsn in local project configuration file.
+          //
+          $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+          $coreDatabaseElementId = AblePolecat_Mode_Config::getCoreDatabaseId();
+          $localProjectConfFileDsn = NULL;
+          $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
+          if (isset($Node)) {
+            foreach($Node->childNodes as $key => $childNode) {
+              if($childNode->nodeName == 'polecat:dsn') {
+                $localProjectConfFileDsn = $childNode->nodeValue;
+                break;
+              }
+            }
+          }
+          if (isset($localProjectConfFileDsn) && ($localProjectConfFileDsn == $this->dsn)) {
+            $authenticated = TRUE;
+          }
+          else {
+            $this->dsn = NULL;
+          }
+        }
+        else {
+          //
+          // If database connection is not already established, attempt one.
+          //
+          $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->dsn);
+          $CoreDatabase->open($SystemAgent, $DbUrl);
+          if($CoreDatabase->ready()) {
+            $authenticated = TRUE;
+          }
+          else {
+            $this->dsn = NULL;
+          } 
+        }
+        break;
+    }
+    return $authenticated;
+  }
+  
+  /**
+   * @return mixed Whatever was used to authenticate access.
+   */
+  public function getSecurityToken() {
+    return $this->dsn;
+  }
+  
+  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
   
@@ -192,5 +286,6 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
    */
   protected function initialize() {
     parent::initialize();
+    $this->dsn = NULL;
   }
 }

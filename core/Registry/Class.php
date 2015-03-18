@@ -595,6 +595,20 @@ class AblePolecat_Registry_Class
     self::$Registry->addRegistration($RegistryEntry);
     
     $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Resource_Restricted_Util::UUID;
+    $RegistryEntry->name = 'AblePolecat_Resource_Restricted_Util';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Util.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
+    
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Transaction_Restricted_Util::UUID;
+    $RegistryEntry->name = 'AblePolecat_Transaction_Restricted_Util';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Restricted', 'Util.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
+    
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
     $RegistryEntry->id = AblePolecat_Message_Response_Xml::UUID;
     $RegistryEntry->name = 'AblePolecat_Message_Response_Xml';
     $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Message', 'Response', 'Xml.php'));

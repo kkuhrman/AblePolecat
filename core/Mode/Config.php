@@ -162,80 +162,53 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       //
       self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = self::getCoreClassLibraryConfFilepath();
       
-      //
-      // Peek at HTTP request.
-      //
-      isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
-      switch ($method) {
-        default:
-          break;
-        case 'GET':
-          if (self::verifySystemFile(AblePolecat_Server_Paths::CONF_FILENAME_PROJECT)) {
-            //
-            // Project configuration file exists, get core database connection string. 
-            //
-            self::$ConfigMode->localProjectConfFile = new DOMDocument();
-            self::$ConfigMode->localProjectConfFile->load(self::$ConfigMode->localProjectConfFilepath);
-            
-            //
-            // Attempt to connect to database.
-            //
-            self::$ConfigMode->initializeCoreDatabase();
-          }
-          else {
-            AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project configuration file is not accessible.');
-          }
-          break;
-        case 'POST':
-          if (self::verifySystemFile(AblePolecat_Server_Paths::CONF_FILENAME_PROJECT)) {
-            //
-            // Project configuration file exists, get core database connection string. 
-            //
-            isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_DB]) ? $databaseName = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_DB] : $databaseName = 'databasename';
-            isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_USER]) ? $userName = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_USER] : $userName = 'username';
-            isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_PASS]) ? $password = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_PASS] : $password = 'password';
-            self::$ConfigMode->localProjectConfFile = new DOMDocument();
-            self::$ConfigMode->localProjectConfFile->load(self::$ConfigMode->localProjectConfFilepath);
-            $coreDatabaseElementId = self::getCoreDatabaseId();
-            $Node = AblePolecat_Dom::getElementById(self::$ConfigMode->localProjectConfFile, $coreDatabaseElementId);
-            if (isset($Node)) {
-              foreach($Node->childNodes as $key => $childNode) {
-                if($childNode->nodeName == 'polecat:dsn') {
-                  $childNode->nodeValue = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
-                  break;
+      if (self::getLocalProjectConfFile()) {
+        //
+        // Project configuration file exists, attempt to connect to database.
+        //
+        self::$ConfigMode->initializeCoreDatabase();
+        
+        if (isset(self::$ConfigMode->CoreDatabase) && self::$ConfigMode->CoreDatabase->ready()) {
+          //
+          // Project database is initialized and ready.
+          //
+          self::reportBootState(self::BOOT_STATE_CONFIG, 'Host configuration initialized.');
+        }
+        else {
+          //
+          // Project database is not ready. Trigger error if not install mode.
+          // Peek at HTTP request.
+          //
+          $installMode = FALSE;
+          isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
+          switch ($method) {
+            default:
+              break;
+            case 'GET':
+              //
+              // Verify that the local project configuration file is writeable.
+              //
+              $localProjectConfFilePath = self::getLocalProjectConfFilePath();
+              $installMode = is_writeable($localProjectConfFilePath);
+              break;
+            case 'POST':
+              if (isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_REFERER])) {
+                $referer = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_REFERER];
+                if ($referer === AblePolecat_Resource_Restricted_Install::UUID) {
+                  $installMode = TRUE;
                 }
               }
-            }
-            else {
-              $msg = sprintf("Cannot find locater for core database in local project configuration file by id=\"%s\".", $coreDatabaseElementId);
-              AblePolecat_Command_Chain::triggerError($msg);
-            }
-            
-            //
-            // Save file.
-            //
-            self::$ConfigMode->localProjectConfFile->save(self::$ConfigMode->localProjectConfFilepath);
-            
-            //
-            // Attempt to connect to database.
-            //
-            self::$ConfigMode->initializeCoreDatabase();
-            if (!isset(self::$ConfigMode->CoreDatabase)) {
-              AblePolecat_Command_Chain::triggerError('Boot sequence violation: Failed to connect to project database.');
-            }
-            
-            //
-            // Otherwise, install current schema.
-            //
-            AblePolecat_Database_Schema::install(self::$ConfigMode->CoreDatabase);            
+              break;
           }
-          break;
-        case 'PUT':
-        case 'DELETE':
-          break;
+          if ($installMode === FALSE) {
+            AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project database is not ready.');
+          }
+        }
+      }
+      else {
+        AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project configuration file is not accessible.');
       }
     }
-    self::reportBootState(self::BOOT_STATE_CONFIG, 'Host configuration initialized.');
     return self::$ConfigMode;
   }
   
@@ -502,12 +475,18 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   public static function getLocalProjectConfFile() {
     
     $localProjectConfFile = NULL;
+    
     if (isset(self::$ConfigMode)) {
-      if (!isset(self::$ConfigMode->localProjectConfFile)) {
-        $localProjectConfFile = self::createProjectConfFile();
+      if (isset(self::$ConfigMode->localProjectConfFile)) {
+        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
       }
       else {
-        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
+        if (self::verifySystemFile(AblePolecat_Server_Paths::CONF_FILENAME_PROJECT)) {
+          $localProjectConfFilepath = self::getLocalProjectConfFilepath();
+          self::$ConfigMode->localProjectConfFile = new DOMDocument();
+          self::$ConfigMode->localProjectConfFile->load($localProjectConfFilepath);
+          $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
+        }
       }
     }
     return $localProjectConfFile;
@@ -705,12 +684,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * Create a new project configuration file.
+   * Attempts to create a local project configuration file by copying master.
    *
-   * DEPRECATED - user should copy master project configuration file to 
-   * ./usr/etc/polecat/conf/project.xml
-   *
-   * @return mixed The newly created project configuration file or FALSE.
+   * @return boolean TRUE if file was created, otherwise FALSE.
    */
   protected static function createProjectConfFile() {
     
@@ -718,125 +694,12 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     
     if (isset(self::$ConfigMode)) {
       if (isset(self::$ConfigMode->localProjectConfFile)) {
-        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
+        $localProjectConfFile = TRUE;
       }
       else {
-        //
-        // Create the project configuration file itself.
-        //
-        self::$ConfigMode->localProjectConfFile = AblePolecat_Dom::createXmlDocument('polecat');
-        self::$ConfigMode->localProjectConfFile->formatOutput = TRUE;
-        
-        //
-        // project element.
-        //
-        $projectElement = self::$ConfigMode->localProjectConfFile->createElement('project');
-        $projectElement = AblePolecat_Dom::appendChildToParent(
-          $projectElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          self::$ConfigMode->localProjectConfFile->firstChild
-        );
-        
-        //
-        // application element
-        //
-        $applicationElement = self::$ConfigMode->localProjectConfFile->createElement('application');
-        $applicationElement = AblePolecat_Dom::appendChildToParent(
-          $applicationElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          $projectElement
-        );
-        
-        //
-        // locaters element
-        //
-        $locatersElement = self::$ConfigMode->localProjectConfFile->createElement('locaters');
-        $locatersElement = AblePolecat_Dom::appendChildToParent(
-          $locatersElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          $applicationElement
-        );
-        
-        //
-        // databases element
-        //
-        $databasesElement = self::$ConfigMode->localProjectConfFile->createElement('databases');
-        $databasesElement = AblePolecat_Dom::appendChildToParent(
-          $databasesElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          $locatersElement
-        );
-        
-        //
-        // core database element
-        //
-        $databaseElement = self::$ConfigMode->localProjectConfFile->createElement('database');
-        $idAttr = $databaseElement->setAttribute('id', self::getCoreDatabaseId());
-        $databaseElement->setIdAttribute('id', TRUE);
-        $databaseElement->setAttribute('name', 'polecat');
-        $databaseElement->setAttribute('mode', 'server');
-        $databaseElement->setAttribute('use', '1');
-        $databaseElement = AblePolecat_Dom::appendChildToParent(
-          $databaseElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          $databasesElement
-        );
-        
-        //
-        // dsn element
-        //
-        $dsnElement = self::$ConfigMode->localProjectConfFile->createElement('dsn', 'mysql://username:password@localhost/databasename');
-        $dsnElement = AblePolecat_Dom::appendChildToParent(
-          $dsnElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          $databaseElement
-        );
-        
-        //
-        // Database schema element.
-        //
-        $dbSchemaElement = self::$ConfigMode->localProjectConfFile->createElement('schema', AblePolecat_Database_Schema::getName());
-        $dbSchemaElement->setAttribute('id', AblePolecat_Database_Schema::getId());
-        $dbSchemaElement = AblePolecat_Dom::appendChildToParent(
-          $dbSchemaElement, 
-          self::$ConfigMode->localProjectConfFile, 
-          $databaseElement
-        );
-        
-        //
-        // @todo: [class]
-        //
-        
-        //
-        // @todo: [component]
-        //
-        
-        //
-        // @todo: [connector]
-        //
-        
-        //
-        // @todo: [resource]
-        //
-        
-        //
-        // @todo: [response]
-        //
-        
-        //
-        // @todo: [template]
-        //
-        
-        //
-        // @todo: class libraries
-        //
-        
-        //
-        // Save file.
-        //
+        $masterProjectConfFilepath = self::getMasterProjectConfFilepath();
         $localProjectConfFilepath = self::getLocalProjectConfFilepath();
-        self::$ConfigMode->localProjectConfFile->save($localProjectConfFilepath);
-        $localProjectConfFile = self::$ConfigMode->localProjectConfFile;
+        $localProjectConfFile = copy($masterProjectConfFilepath, $localProjectConfFilepath);
       }
     }
     return $localProjectConfFile;
