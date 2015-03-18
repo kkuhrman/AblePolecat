@@ -397,6 +397,10 @@
         <polecat:path>Transaction/Restricted/Util.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
+      <polecat:class id="aa94260f-cd9c-11e4-a12d-0050569e00a2" name="AblePolecat_Transaction_Restricted_Util_Register">
+        <polecat:path>Transaction/Restricted/Util/Register.php</polecat:path>
+        <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
+      </polecat:class>
     </polecat:classes>
   </polecat:package>
 </polecat_core>
