@@ -17,11 +17,6 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
    */
   const UUID = '19f03e3b-b6c5-11e4-a12d-0050569e00a2';
   const NAME = 'AblePolecat_Transaction_Restricted_Util';
-
-  const ARG_DB   = 'database-name';
-  const ARG_USER = 'username';
-  const ARG_PASS = 'password';
-  const ARG_AUTH = 'authority';
   
   /**
    * @var AblePolecat_AccessControl_Agent_User Instance of singleton.
@@ -122,11 +117,18 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
               $this->setStatus(self::TX_STATE_COMPLETED);
               break;
             case AblePolecat_Resource_Restricted_Util::UUID:
+              //
+              // Sub-transaction class name.
+              //
+              $childTrxName = NULL;
+              
+              //
+              // Check authentication.
+              //
               if ($this->authenticate()) {
                 $requestPathInfo = $this->getRequest()->getRequestPathInfo();
                 $requestPathInfoParts = explode(AblePolecat_Message_RequestInterface::URI_SLASH, $requestPathInfo[AblePolecat_Message_RequestInterface::URI_PATH]);
                 isset($requestPathInfoParts[1]) ? $utilName = $requestPathInfoParts[1] : $utilName = NULL;
-                $childTrxName = NULL;
                 switch ($utilName) {
                   default:
                     break;
@@ -135,6 +137,10 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
                     break;
                 }
               }
+              
+              //
+              // Return resource.
+              //
               if (isset($childTrxName)) {
                 $ChildTransaction = $this->enlistTransaction(
                   $childTrxName,

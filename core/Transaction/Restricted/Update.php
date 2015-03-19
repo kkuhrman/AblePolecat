@@ -17,11 +17,6 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
    */
   const UUID = 'fb2a9ab0-b6b4-11e4-a12d-0050569e00a2';
   const NAME = 'AblePolecat_Transaction_Restricted_Update';
-
-  const ARG_DB   = 'database-name';
-  const ARG_USER = 'username';
-  const ARG_PASS = 'password';
-  const ARG_AUTH = 'authority';
   
   /**
    * @var AblePolecat_AccessControl_Agent_User Instance of singleton.

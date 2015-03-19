@@ -57,6 +57,7 @@ class AblePolecat_Transaction_Restricted_Util_Register extends AblePolecat_Trans
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    
     if (!isset(self::$Transaction)) {
       //
       // Unmarshall (from numeric keyed index to named properties) variable args list.
