@@ -42,7 +42,6 @@ class AblePolecat_Transaction_Get_Resource_TestClass implements AblePolecat_Unit
       $ResourceRegistration->resourceId = AblePolecat_Resource_Core_Ack::UUID;
       $ResourceRegistration->resourceClassName = 'AblePolecat_Resource_Core_Ack';
       // $ResourceRegistration->transactionClassName = NULL;
-      // $ResourceRegistration->authorityClassName = NULL;
       // $ResourceRegistration->resourceDenyCode = 200;
       
       $parameters = array(

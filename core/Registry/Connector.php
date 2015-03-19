@@ -316,19 +316,16 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
         AblePolecat_Resource_Restricted_Install::UUID => array(
           'resourceId' => AblePolecat_Resource_Restricted_Install::UUID, 
           'classId' => AblePolecat_Transaction_Restricted_Install::UUID,
-          'authorityClassName' => 'AblePolecat_Transaction_AccessControl_Authority',
           'accessDeniedCode' => 401,
         ),
         AblePolecat_Resource_Restricted_Update::UUID => array(
           'resourceId' => AblePolecat_Resource_Restricted_Update::UUID,
           'classId' => AblePolecat_Transaction_Restricted_Update::UUID,
-          'authorityClassName' => 'AblePolecat_Transaction_AccessControl_Authority',
           'accessDeniedCode' => 401,
         ),
         AblePolecat_Resource_Restricted_Util::UUID => array(
           'resourceId' => AblePolecat_Resource_Restricted_Util::UUID,
           'classId' => AblePolecat_Transaction_Restricted_Util::UUID,
-          'authorityClassName' => 'AblePolecat_Transaction_AccessControl_Authority',
           'accessDeniedCode' => 401,
         ),
       );
@@ -378,7 +375,6 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
       if (isset($connectorData)) {
         $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
         isset($connectorData['classId']) ? $ConnectorRegistration->classId = $connectorData['classId'] : $ConnectorRegistration->classId = NULL;
-        isset($connectorData['authorityClassName']) ? $ConnectorRegistration->authorityClassName = $connectorData['authorityClassName'] : $ConnectorRegistration->authorityClassName = NULL;
         isset($connectorData['accessDeniedCode']) ? $ConnectorRegistration->accessDeniedCode = $connectorData['accessDeniedCode'] : $ConnectorRegistration->accessDeniedCode = NULL;
       }
       else {

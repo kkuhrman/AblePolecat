@@ -1,7 +1,7 @@
 <?php
 /**
  * @file      polecat/core/Transaction/Get/Resource.php
- * @brief     Encapsulates a GET request for a web resource as a transaction.
+ * @brief     Encapsulates GET request for unrestricted resource as transaction.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -123,40 +123,18 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
       }
       catch(AblePolecat_AccessControl_Exception $Exception) {
         //
-        // @todo: handle different accessDeniedCode
+        // Return access denied notification.
+        // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+        // 403 means server will refuses to fulfil request regardless of authentication.
         //
-        switch ($this->getConnectorRegistration()->getAccessDeniedCode()) {
-          default:
-            break;
-          case 401:
-            //
-            // 401 means user requires authentication before request will be granted.
-            //
-            $authorityClassName = $this->getConnectorRegistration()->getAuthorityClassName();
-            if (isset($authorityClassName)) {
-              $ChildTransaction = $this->enlistTransaction(
-                $authorityClassName,
-                $this->getRequest(),
-                $this->getResourceRegistration()
-              );
-              $Resource = $ChildTransaction->run();
-            }
-        }
-        if (!isset($Resource)) {
-          //
-          // Return access denied notification.
-          // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-          // 403 means server will refuses to fulfil request regardless of authentication.
-          //
-          $Resource = AblePolecat_Resource_Core_Factory::wakeup(
-            $this->getDefaultCommandInvoker(),
-            'AblePolecat_Resource_Core_Error',
-            'Access Denied',
-            $Exception->getMessage()
-          );
-          $this->setStatusCode(403);
-          $this->setStatus(self::TX_STATE_COMPLETED);
-        }
+        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+          $this->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Core_Error',
+          'Access Denied',
+          $Exception->getMessage()
+        );
+        $this->setStatusCode(403);
+        $this->setStatus(self::TX_STATE_COMPLETED);
       }
     }
     else {
