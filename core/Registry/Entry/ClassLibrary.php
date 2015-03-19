@@ -141,7 +141,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
                 //
                 // @todo: this forces developer to put code under ProjectRoot/usr/src.
                 //
-                $checkSanitizedPath = implode(DIRECTORY_SEPARATOR, array($checkSanitizedPath, 'usr', 'src'));
+                $checkSanitizedPath = implode(DIRECTORY_SEPARATOR, array($checkSanitizedPath));
                 break;
             }
             if (!AblePolecat_Server_Paths::verifyDirectory($checkSanitizedPath)) {
