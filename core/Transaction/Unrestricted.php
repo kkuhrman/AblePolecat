@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Transaction/Get/Resource.php
+ * @file      polecat/core/Transaction/Unrestricted.php
  * @brief     Encapsulates GET request for unrestricted resource as transaction.
  *
  * @author    Karl Kuhrman
@@ -8,42 +8,15 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction', 'Get.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
 
-class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetAbstract {
+class AblePolecat_Transaction_Unrestricted extends  AblePolecat_TransactionAbstract {
   
   /**
-   * Constants.
+   * Registry article constants.
    */
   const UUID = '7bf12d40-23df-11e4-8c21-0800200c9a66';
-  const NAME = 'GET resource transaction';
-  
-  /**
-   * @var AblePolecat_AccessControl_Agent_User Instance of singleton.
-   */
-  private static $Transaction;
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Transaction identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Transaction name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
+  const NAME = 'AblePolecat_Transaction_Unrestricted';
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
@@ -57,20 +30,30 @@ class AblePolecat_Transaction_Get_Resource extends  AblePolecat_Transaction_GetA
    * @return AblePolecat_CacheObjectInterface Initialized server resource ready for business or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (!isset(self::$Transaction)) {
-      //
-      // Unmarshall (from numeric keyed index to named properties) variable args list.
-      //
-      $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-      self::$Transaction = new AblePolecat_Transaction_Get_Resource($ArgsList->getArgumentValue(self::TX_ARG_SUBJECT));
-      self::prepare(self::$Transaction, $ArgsList, __FUNCTION__);
-    }
-    return self::$Transaction;
+    //
+    // Unmarshall (from numeric keyed index to named properties) variable args list.
+    //
+    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
+    $Transaction = new AblePolecat_Transaction_Unrestricted($ArgsList->getArgumentValue(self::TX_ARG_SUBJECT));
+    self::prepare($Transaction, $ArgsList, __FUNCTION__);
+    return $Transaction;
   }
   
   /********************************************************************************
    * Implementation of AblePolecat_TransactionInterface.
    ********************************************************************************/
+  
+  /**
+   * Commit
+   *
+   * For GET transactions, there is nothing to persist other than the transaction status.
+   */
+  public function commit() {
+    //
+    // Parent updates transaction in database.
+    //
+    parent::commit();
+  }
   
   /**
    * Rollback

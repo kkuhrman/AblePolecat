@@ -219,31 +219,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
           // No cached response was available, generate a new response.
           //
           AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Cached response not available or outdated.');
-          //
-          // Check for open transactions matching request for given method/resource by same agent.
-          //
-          $transactionId = NULL;
-          $savepointId = NULL;
-          $parentTransactionId = NULL;
-          $sql = __SQL()->
-            select(
-              'transactionId', 'savepointId', 'parentTransactionId')->
-            from('transaction')->
-            where(sprintf("`sessionNumber` = %s AND `resourceId` = '%s' AND `status` != '%s'", 
-              AblePolecat_Mode_Session::getSessionNumber(),
-              $ResourceRegistration->getId(), 
-              AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
-            );
-          $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
-          if ($CommandResult->success() && count($CommandResult->value())) {
-            //
-            // Resume existing transaction.
-            //
-            $Records = $CommandResult->value();
-            $transactionId = $Records[0]['transactionId'];
-            $savepointId = $Records[0]['savepointId'];
-            isset($Records[0]['parentTransactionId']) ? $parentTransactionId = $Records[0]['parentTransactionId'] : NULL;
-          }
           
           try {
             //
@@ -269,8 +244,8 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               $Message,
               $ResourceRegistration,
               $ConnectorRegistration,
-              $transactionId,
-              $savepointId,
+              // $transactionId,
+              // $savepointId,
               NULL
             );
             $Resource = $Transaction->start();

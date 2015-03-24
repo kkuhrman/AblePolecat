@@ -18,33 +18,6 @@ class AblePolecat_Transaction_Restricted_Util_Register extends AblePolecat_Trans
   const UUID = 'aa94260f-cd9c-11e4-a12d-0050569e00a2';
   const NAME = 'AblePolecat_Transaction_Restricted_Util_Register';
   
-  /**
-   * @var AblePolecat_AccessControl_Agent_User Instance of singleton.
-   */
-  private static $Transaction;
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return unique, system-wide identifier for agent.
-   *
-   * @return string Transaction identifier.
-   */
-  public static function getId() {
-    return self::UUID;
-  }
-  
-  /**
-   * Return common name for agent.
-   *
-   * @return string Transaction name.
-   */
-  public static function getName() {
-    return self::NAME;
-  }
-  
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
    ********************************************************************************/
@@ -58,15 +31,13 @@ class AblePolecat_Transaction_Restricted_Util_Register extends AblePolecat_Trans
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
-    if (!isset(self::$Transaction)) {
-      //
-      // Unmarshall (from numeric keyed index to named properties) variable args list.
-      //
-      $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
-      self::$Transaction = new AblePolecat_Transaction_Restricted_Util_Register($ArgsList->getArgumentValue(self::TX_ARG_SUBJECT));
-      self::prepare(self::$Transaction, $ArgsList, __FUNCTION__);
-    }
-    return self::$Transaction;
+    //
+    // Unmarshall (from numeric keyed index to named properties) variable args list.
+    //
+    $ArgsList = self::unmarshallArgsList(__FUNCTION__, func_get_args());
+    $Transaction = new AblePolecat_Transaction_Restricted_Util_Register($ArgsList->getArgumentValue(self::TX_ARG_SUBJECT));
+    self::prepare($Transaction, $ArgsList, __FUNCTION__);
+    return $Transaction;
   }
   
   /********************************************************************************

@@ -374,12 +374,8 @@
         <polecat:path>Session.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
-      <polecat:class id="736735cc-44b6-11e4-b353-0050569e00a2" name="AblePolecat_Transaction_AccessControl_Authority">
-        <polecat:path>Transaction/AccessControl/Authority.php</polecat:path>
-        <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
-      </polecat:class>
-      <polecat:class id="7bf12d40-23df-11e4-8c21-0800200c9a66" name="AblePolecat_Transaction_Get_Resource">
-        <polecat:path>Transaction/Get/Resource.php</polecat:path>
+      <polecat:class id="7bf12d40-23df-11e4-8c21-0800200c9a66" name="AblePolecat_Transaction_Unrestricted">
+        <polecat:path>Transaction/Unrestricted.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
       <polecat:class id="9e0398f2-604b-11e4-8bab-0050569e00a2" name="AblePolecat_Transaction_Restricted_Install">

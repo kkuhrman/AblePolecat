@@ -14,14 +14,14 @@
  * @version   0.6.3
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Dynamic.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Transaction.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Overloadable.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry', 'Resource.php')));
 
 interface AblePolecat_TransactionInterface 
-  extends AblePolecat_AccessControl_Article_StaticInterface,
+  extends AblePolecat_AccessControl_Article_DynamicInterface,
           AblePolecat_CacheObjectInterface, 
           AblePolecat_OverloadableInterface {
   
@@ -39,12 +39,10 @@ interface AblePolecat_TransactionInterface
    */
   const TX_ARG_SUBJECT          = 'Subject';
   const TX_ARG_AGENT            = 'Agent';
-  const TX_ARG_TRANSACTION_ID   = 'transactionId';
-  const TX_ARG_SAVEPOINT_ID     = 'savepointId';
   const TX_ARG_REQUEST          = 'Request';
   const TX_ARG_RESOURCE_REG     = 'ResourceRegistration';
   const TX_ARG_CONNECTOR_REG    = 'ConnectorRegistration';
-  const TX_ARG_PARENT           = 'Parent';
+  const TX_ARG_PARENT           = 'parentTransactionId';
   
   /**
    * Save point at the very beginning of transaction.
@@ -69,7 +67,7 @@ interface AblePolecat_TransactionInterface
   /**
    * @return AblePolecat_TransactionInterface.
    */
-  public function getParent();
+  public function getParentTransactionId();
   
   /**
    * @return AblePolecat_Message_RequestInterface.
@@ -130,7 +128,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   /**
    * @var AblePolecat_TransactionInterface.
    */
-  private $Parent;
+  private $parentTransactionId;
   
   /**
    * @var AblePolecat_Message_RequestInterface.
@@ -176,6 +174,28 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
+   ********************************************************************************/
+  
+  /**
+   * Return unique, system-wide identifier for agent.
+   *
+   * @return string Transaction identifier.
+   */
+  public function getId() {
+    return $this->getTransactionId();
+  }
+  
+  /**
+   * Return common name for agent.
+   *
+   * @return string Transaction name.
+   */
+  public function getName() {
+    return AblePolecat_Data::getDataTypeName($this);
+  }
+  
+  /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
    ********************************************************************************/
   
@@ -209,14 +229,14 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   public static function unmarshallArgsList($method_name, $args, $options = NULL) {
     
     $ArgsList = AblePolecat_ArgsList::create();
-    foreach($args as $key => $value) {
-      switch ($method_name) {
-        default:
-          break;
-        case 'wakeup':
-          isset($args[0]) ? $Subject = $args[0] : $Subject = NULL;
-          if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_System')) {
-            $ArgsList->{self::TX_ARG_SUBJECT} = $Subject;
+    isset($args[0]) ? $Subject = $args[0] : $Subject = NULL;
+    if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_System')) {
+      $ArgsList->{self::TX_ARG_SUBJECT} = $Subject;
+      foreach($args as $key => $value) {
+        switch ($method_name) {
+          default:
+            break;
+          case 'wakeup':
             switch($key) {
               default:
                 break;
@@ -233,22 +253,16 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
                 $ArgsList->{self::TX_ARG_CONNECTOR_REG} = $value;
                 break;
               case 5:
-                $ArgsList->{self::TX_ARG_TRANSACTION_ID} = $value;
-                break;
-              case 6:
-                $ArgsList->{self::TX_ARG_SAVEPOINT_ID} = $value;
-                break;
-              case 7:
                 $ArgsList->{self::TX_ARG_PARENT} = $value;
                 break;
             }
-          }
-          else {
-            $error_msg = sprintf("%s is not permitted to start or resume a transaction.", AblePolecat_Data::getDataTypeName($Subject));
-            throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
-          }          
-          break;
+            break;
+        }
       }
+    }
+    else {
+      $error_msg = sprintf("%s is not permitted to start or resume a transaction.", AblePolecat_Data::getDataTypeName($Subject));
+      throw new AblePolecat_AccessControl_Exception($error_msg, AblePolecat_Error::ACCESS_DENIED);
     }
     return $ArgsList;
   }
@@ -314,16 +328,16 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   /**
    * @return AblePolecat_TransactionInterface.
    */
-  public function getParent() {
+  public function getParentTransactionId() {
     
-    $Parent = NULL;
-    if (isset($this->Parent)) {
-      $Parent = $this->Parent;
+    $parentTransactionId = NULL;
+    if (isset($this->parentTransactionId)) {
+      $parentTransactionId = $this->parentTransactionId;
     }
     else {
       throw new AblePolecat_Transaction_Exception(sprintf("Transaction [ID:%s] has no parent transaction.", $this->getTransactionId()));
     }
-    return $Parent;
+    return $parentTransactionId;
   }
   
   /**
@@ -460,10 +474,10 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
-   * @param AblePolecat_TransactionInterface $Parent.
+   * @param AblePolecat_TransactionInterface $parentTransactionId.
    */
-  protected function setParent(AblePolecat_TransactionInterface $Parent = NULL) {
-    $this->Parent = $Parent;
+  protected function setParentTransactionId(AblePolecat_TransactionInterface $parentTransactionId = NULL) {
+    $this->parentTransactionId = $parentTransactionId;
   }
   
   /**
@@ -534,7 +548,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     //
     $parentTransactionId = NULL;
     try {
-      $parentTransactionId = $this->getParent()->getTransactionId();
+      $parentTransactionId = $this->getParentTransactionId();
     }
     catch (AblePolecat_Transaction_Exception $Exception) {
       //
@@ -668,19 +682,17 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
           )
         );
       }
-              
+             
       //
       // Start or resume the transaction
       //
       $Transaction = $this->getClassRegistry()->loadClass(
-        $transactionClassName,
+        $ClassRegistration,
         $this->getAgent(),
         $this->getAgent(),
         $Message,
         $ResourceRegistration,
-        NULL,
-        NULL,
-        $this
+        $this->getTransactionId()
       );
     }
     else {
@@ -712,20 +724,60 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       // Unpack rest of arguments list.
       //
       if (isset($ArgsList)) {
+        //
+        // Agent (user).
+        //
         $Transaction->setAgent($ArgsList->getArgumentValue(self::TX_ARG_AGENT));
+        
+        //
+        // HTTP Request.
+        //
         $Request = $ArgsList->getArgumentValue(self::TX_ARG_REQUEST);
-        isset($Request) ? $Transaction->setRequest($Request) : NULL;
-        $ResourceRegistration = $ArgsList->getArgumentValue(self::TX_ARG_RESOURCE_REG);
-        isset($ResourceRegistration) ? $Transaction->setResourceRegistration($ResourceRegistration) : NULL;
-        $ConnectorRegistration = $ArgsList->getArgumentValue(self::TX_ARG_CONNECTOR_REG);
-        isset($ConnectorRegistration) ? $Transaction->setConnectorRegistration($ConnectorRegistration) : NULL;
-        $Transaction->setTransactionId($ArgsList->getArgumentValue(self::TX_ARG_TRANSACTION_ID));
-        $Transaction->setSavepointId($ArgsList->getArgumentValue(self::TX_ARG_SAVEPOINT_ID));
-        $parent = $ArgsList->getArgumentValue(self::TX_ARG_PARENT);
-        if ($parent == '') {
-          $parent = NULL;
+        if (isset($Request)) {
+          $Transaction->setRequest($Request);
         }
-        $Transaction->setParent($parent);
+        
+        //
+        // Resource registry entry.
+        //
+        $ResourceRegistration = $ArgsList->getArgumentValue(self::TX_ARG_RESOURCE_REG);
+        if (isset($ResourceRegistration)) {
+          $Transaction->setResourceRegistration($ResourceRegistration);
+          
+          //
+          // Check for open transactions matching request for given method/resource by same agent.
+          //
+          $parentTransactionId = NULL;
+          $sql = __SQL()->
+            select(
+              'transactionId', 'savepointId', 'parentTransactionId')->
+            from('transaction')->
+            where(sprintf("`sessionNumber` = %s AND `resourceId` = '%s' AND `status` != '%s'", 
+              AblePolecat_Mode_Session::getSessionNumber(),
+              $ResourceRegistration->getId(), 
+              AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
+            );
+          $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
+          if ($CommandResult->success() && count($CommandResult->value())) {
+            //
+            // Resume existing transaction.
+            //
+            $Records = $CommandResult->value();
+            $Transaction->setTransactionId($Records[0]['transactionId']);
+            $Transaction->setSavepointId($Records[0]['savepointId']);
+            if(isset($Records[0]['parentTransactionId'])) {
+              $Transaction->setParentTransactionId($Records[0]['parentTransactionId']);
+            }
+          }
+        }
+        
+        //
+        // Connector registry entry.
+        //
+        $ConnectorRegistration = $ArgsList->getArgumentValue(self::TX_ARG_CONNECTOR_REG);
+        if (isset($ConnectorRegistration)) {
+          $Transaction->setConnectorRegistration($ConnectorRegistration);
+        }
       }
       else {
         throw new AblePolecat_Transaction_Exception("Failed to prepare transaction because constructor arguments are invalid.");
@@ -761,7 +813,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   protected function initialize() {
     $this->Agent = NULL;
     $this->ClassRegistry = NULL;
-    $this->Parent = NULL;
+    $this->parentTransactionId = NULL;
     $this->Request = NULL;
     $this->transactionId = NULL;
     $this->ResourceRegistration = NULL;

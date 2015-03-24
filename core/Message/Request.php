@@ -655,7 +655,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       //
       // Initialize full resource URI from incoming request.
       //
-      $this->resourceUri = $this->getBaseUrl() . $this->getRequestPath(TRUE);
+      $this->resourceUri = $this->getBaseUrl() . self::URI_SLASH . $this->getRequestPath(TRUE);
     }
     else {
       //
