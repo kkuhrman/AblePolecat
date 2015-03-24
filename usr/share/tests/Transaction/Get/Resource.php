@@ -1,7 +1,7 @@
 <?php
 /**
  * @file      polecat/usr/ut/Transaction/Get/Resource.php
- * @brief     Unit tests for AblePolecat_Transaction_Get_Resource.
+ * @brief     Unit tests for AblePolecat_Transaction_Unrestricted.
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
@@ -14,9 +14,9 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', '
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Factory.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'UnitTest.php')));
 
-class AblePolecat_Transaction_Get_Resource_TestClass implements AblePolecat_UnitTestInterface {
+class AblePolecat_Transaction_Unrestricted_TestClass implements AblePolecat_UnitTestInterface {
   
-  const TEST_SUBJECT = 'AblePolecat_Transaction_Get_Resource';
+  const TEST_SUBJECT = 'AblePolecat_Transaction_Unrestricted';
   
   /**
    * Run all the tests in the class.
@@ -32,7 +32,7 @@ class AblePolecat_Transaction_Get_Resource_TestClass implements AblePolecat_Unit
     $pass = TRUE;
     
     try {
-      $className = 'AblePolecat_Transaction_Get_Resource';
+      $className = 'AblePolecat_Transaction_Unrestricted';
       $classFactoryMethod = 'wakeup';
       // $ServerMode = AblePolecat_Mode_Server::wakeup();
       $Agent = AblePolecat_AccessControl_Agent_System::wakeup();

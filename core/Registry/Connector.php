@@ -300,17 +300,17 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
       self::$coreResourceRegistryEntries = array(
         AblePolecat_Resource_Core_Ack::UUID => array(
           'resourceId' => AblePolecat_Resource_Core_Ack::UUID,
-          'classId' => AblePolecat_Transaction_Get_Resource::UUID,
+          'classId' => AblePolecat_Transaction_Unrestricted::UUID,
           'accessDeniedCode' => 200
         ),
         AblePolecat_Resource_Core_Error::UUID => array(
           'resourceId' => AblePolecat_Resource_Core_Error::UUID, 
-          'classId' => AblePolecat_Transaction_Get_Resource::UUID,
+          'classId' => AblePolecat_Transaction_Unrestricted::UUID,
           'accessDeniedCode' => 200,
         ),
         AblePolecat_Resource_Core_Form::UUID => array(
           'resourceId' => AblePolecat_Resource_Core_Form::UUID, 
-          'classId' => AblePolecat_Transaction_Get_Resource::UUID,
+          'classId' => AblePolecat_Transaction_Unrestricted::UUID,
           'accessDeniedCode' => 200,
         ),
         AblePolecat_Resource_Restricted_Install::UUID => array(

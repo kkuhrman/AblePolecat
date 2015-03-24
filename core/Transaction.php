@@ -747,7 +747,6 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
           //
           // Check for open transactions matching request for given method/resource by same agent.
           //
-          $parentTransactionId = NULL;
           $sql = __SQL()->
             select(
               'transactionId', 'savepointId', 'parentTransactionId')->
@@ -757,7 +756,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
               $ResourceRegistration->getId(), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );
-          $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getDefaultCommandInvoker(), $sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
           if ($CommandResult->success() && count($CommandResult->value())) {
             //
             // Resume existing transaction.
