@@ -3,6 +3,13 @@
  * @file      polecat/core/Registry/Connector.php
  * @brief     Manages registry of transaction classes.
  *
+ * An Able Polecat connector maps HTTP request resource and method to a class 
+ * implementing AblePolecat_TransactionInterface. Each unique resource/method 
+ * combination is registered given a UUID.
+ *
+ * @see AblePolecat_Registry_Resource for notes on how connector registrations 
+ * reference resource ids in project configuration files.
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
@@ -98,7 +105,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     //
     // Get list of package connectors.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'connector');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'transactionClass');
     self::insertList($Database, $Nodes);
   }
   
@@ -124,7 +131,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     // Load local project configuration file.
     //
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'connector');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'transactionClass');
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
       
@@ -454,6 +461,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
   protected static function insertList(
     AblePolecat_DatabaseInterface $Database, 
     DOMNodeList $Nodes) {
+    
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
     }
@@ -477,9 +485,11 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
 
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
-      $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::import($Node);
-      $ConnectorRegistration->save($Database);
-      self::$Registry->addRegistration($ConnectorRegistration);
+      $ConnectorRegistrations = AblePolecat_Registry_Entry_Connector::import($Node);
+      foreach($ConnectorRegistrations as $key => $ConnectorRegistration) {
+        $ConnectorRegistration->save($Database);
+        self::$Registry->addRegistration($ConnectorRegistration);
+      }
     }
   }
   

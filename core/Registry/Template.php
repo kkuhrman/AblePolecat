@@ -3,6 +3,11 @@
  * @file      polecat/core/Registry/Template.php
  * @brief     Manages registry of HTTP response document templates.
  *
+ * An Able Polecat template provides content and representation instructions 
+ * for one or more components or responses. In the database, the field articleId 
+ * references a response id or a component id. In the configuration file, this 
+ * field references the respective response or component class id.
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
@@ -353,30 +358,11 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
 
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
-      $TemplateRegistration = AblePolecat_Registry_Entry_Template::import($Node);
-      if (!isset($TemplateRegistration->fullPath)) {
-        foreach($Node->childNodes as $key => $childNode) {
-          if ($childNode->nodeName == 'polecat:path') {
-            $conventionalPath = implode(DIRECTORY_SEPARATOR, 
-              array(
-                ABLE_POLECAT_VAR, 
-                'www', 
-                'htdocs', 
-                'theme', 
-                $TemplateRegistration->getThemeName(), 
-                $childNode->nodeValue,
-              )
-            );
-            $sanitizePath = AblePolecat_Server_Paths::sanitizePath($conventionalPath);
-            if (AblePolecat_Server_Paths::verifyFile($sanitizePath)) {
-              $TemplateRegistration->fullPath = $sanitizePath;
-            }
-            break;
-          }
-        }
+      $TemplateRegistrations = AblePolecat_Registry_Entry_Template::import($Node);
+      foreach($TemplateRegistrations as $key => $TemplateRegistration) {
+        $TemplateRegistration->save($Database);
+        self::$Registry->addRegistration($TemplateRegistration);
       }
-      $TemplateRegistration->save($Database);
-      self::$Registry->addRegistration($TemplateRegistration);
     }
   }
   

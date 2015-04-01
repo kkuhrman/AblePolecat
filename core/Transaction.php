@@ -415,24 +415,39 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       values($this->getTransactionId())->
       where(sprintf("`requestId` = %d", $this->getRequest()->getRawRequestLogRecordId()));
     $CommandResult = AblePolecat_Command_Database_Query::invoke($this->getAgent(), $sql);
-    
-    //
-    // check save point
-    //
-    $savepointId = $this->getSavepointId();
-    
-    //
-    // If save point does not exist, create new save point at start and begin there.
-    //
-    if (!isset($savepointId)) {
-      $this->save(self::SAVEPOINT_NAME_START);
+    if($CommandResult->success()) {
+      //
+      // check save point
+      //
+      $savepointId = $this->getSavepointId();
+      
+      //
+      // If save point does not exist, create new save point at start and begin there.
+      //
+      if (!isset($savepointId)) {
+        $this->save(self::SAVEPOINT_NAME_START);
+      }
+      
+      //
+      // Otherwise begin at existing save point
+      //
+      $Resource = $this->run();
     }
-    
-    //
-    // Otherwise begin at existing save point
-    //
-    $Resource = $this->run();
-    
+    else {
+      //
+      // Database connection not established. Indicate status.
+      //
+      $redirect = AblePolecat_Host::getRequest()->getBaseUrl() .
+        AblePolecat_Message_RequestInterface::URI_SLASH . 
+        AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
+      $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+        $this->getDefaultCommandInvoker(),
+        'AblePolecat_Resource_Core_Error',
+        'Could not connect to project database',
+        sprintf("Verify database connection string in local project configuration file or run install utility (%s).", 
+          $redirect)
+      );
+    }
     return $Resource;
   }
   
@@ -474,9 +489,9 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
   }
   
   /**
-   * @param AblePolecat_TransactionInterface $parentTransactionId.
+   * @param string $parentTransactionId.
    */
-  protected function setParentTransactionId(AblePolecat_TransactionInterface $parentTransactionId = NULL) {
+  protected function setParentTransactionId($parentTransactionId = NULL) {
     $this->parentTransactionId = $parentTransactionId;
   }
   

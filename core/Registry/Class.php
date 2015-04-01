@@ -567,6 +567,13 @@ class AblePolecat_Registry_Class
     self::$Registry->addRegistration($RegistryEntry);
     
     $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Transaction_Unrestricted::UUID;
+    $RegistryEntry->name = 'AblePolecat_Transaction_Unrestricted';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Unrestricted.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
+    
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
     $RegistryEntry->id = AblePolecat_Resource_Restricted_Install::UUID;
     $RegistryEntry->name = 'AblePolecat_Resource_Restricted_Install';
     $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Install.php'));

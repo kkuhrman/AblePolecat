@@ -98,50 +98,67 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
    ********************************************************************************/
   
   /**
-   * Create the registry entry object and populate with given DOMNode data.
+   * Generate registry entry data from project configuration file element(s).
    *
-   * @param DOMNode $Node DOMNode encapsulating registry entry.
+   * @param DOMNode $Node Registry entry data from project configuration file.
    *
-   * @return AblePolecat_Registry_EntryInterface.
+   * @return Array[AblePolecat_Registry_EntryInterface].
    */
   public static function import(DOMNode $Node) {
     
-    $RegistryEntry = AblePolecat_Registry_Entry_Connector::create();
-    $RegistryEntry->id = $Node->getAttribute('id');
-    $RegistryEntry->name = $Node->getAttribute('name');
-    $RegistryEntry->requestMethod = $Node->getAttribute('requestMethod');
-    $RegistryEntry->accessDeniedCode = $Node->getAttribute('accessDeniedCode');
-    foreach($Node->childNodes as $key => $childNode) {
-      switch ($childNode->nodeName) {
-        default:
-          break;
-        case 'polecat:resourceId':
-          $RegistryEntry->resourceId = $childNode->nodeValue;
-          break;
-        case 'polecat:classId':
-          $RegistryEntry->classId = $childNode->nodeValue;
-          break;
+    $RegistryEntries = array();
+    
+    if (is_a($Node, 'DOMElement') && ($Node->tagName == 'polecat:transactionClass') && $Node->hasChildNodes()) {
+      //
+      // Verify class reference.
+      //
+      $classId = $Node->getAttribute('id');
+      $className = $Node->getAttribute('name');
+      $lastModifiedTime = 0;
+      $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
+        getRegistrationById($classId);
+      if (isset($ClassRegistration)) {
+        $lastModifiedTime = $ClassRegistration->lastModifiedTime;
+      }
+      else {
+        $message = sprintf("Transaction class %s references invalid class id %s.",
+          $className,
+          $classId
+        );
+        AblePolecat_Command_Chain::triggerError($message);
+      }
+      
+      foreach($Node->childNodes as $key => $childNode) {
+        switch ($childNode->nodeName) {
+          default:
+            break;
+          case 'polecat:resourceGroups':
+            $resourceGroups = self::importResourceGroups($childNode);
+            foreach($resourceGroups as $resourceGroupKey => $resourceGroup) {
+              $requestMethod = '';
+              $accessDeniedCode = 0;
+              if(isset($resourceGroup['attributes'])) {
+                $requestMethod = $resourceGroup['attributes']->getNamedItem('requestMethod')->value;
+                $accessDeniedCode = intval($resourceGroup['attributes']->getNamedItem('accessDeniedCode')->value);
+              }
+              foreach($resourceGroup['resources'] as $resourceId => $ResourceNode) {
+                $RegistryEntry = AblePolecat_Registry_Entry_Connector::create();
+                $RegistryEntry->id = self::generateUUID();
+                $resourceName = $ResourceNode->getAttribute('name');
+                $RegistryEntry->name = "$requestMethod $resourceName";
+                $RegistryEntry->requestMethod = $requestMethod;
+                $RegistryEntry->resourceId = $resourceId;
+                $RegistryEntry->accessDeniedCode = $accessDeniedCode;
+                $RegistryEntry->classId = $classId;
+                $RegistryEntry->lastModifiedTime = $lastModifiedTime;
+                $RegistryEntries[] = $RegistryEntry;
+              }
+            }
+            break;
+        }
       }
     }
-    
-    //
-    // Verify class reference.
-    //
-    $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
-      getRegistrationById($RegistryEntry->getClassId());
-    if (isset($ClassRegistration)) {
-      $RegistryEntry->lastModifiedTime = $ClassRegistration->lastModifiedTime;
-    }
-    else {
-      $message = sprintf("connector %s (%s) references invalid class %s.",
-        $RegistryEntry->getName(),
-        $RegistryEntry->getId(),
-        $RegistryEntry->getClassId()
-      );
-      $RegistryEntry = NULL;
-      AblePolecat_Command_Chain::triggerError($message);
-    }
-    return $RegistryEntry;
+    return $RegistryEntries;
   }
   
   /**

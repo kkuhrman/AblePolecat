@@ -142,7 +142,7 @@ class AblePolecat_Server_Paths {
     // First assume full path passed as first parameter.
     //
     $search_path = $file_name;
-    if (file_exists($search_path)) {
+    if (self::verifyFile($search_path)) {
       $once ? include_once($search_path) : include($search_path);
       $ret = $search_path;
     }
@@ -151,7 +151,7 @@ class AblePolecat_Server_Paths {
       // Search for file using hints provided by other parameters.
       //
       $search_path = $default_directory_name . DIRECTORY_SEPARATOR . $file_name;
-      if (file_exists($search_path)) {
+      if (self::verifyFile($search_path)) {
         $once ? include_once($search_path) : include($search_path);
         $ret = $search_path;
       }

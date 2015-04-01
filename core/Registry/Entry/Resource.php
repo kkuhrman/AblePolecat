@@ -70,49 +70,67 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
    ********************************************************************************/
   
   /**
-   * Create the registry entry object and populate with given DOMNode data.
+   * Generate registry entry data from project configuration file element(s).
    *
-   * @param DOMNode $Node DOMNode encapsulating registry entry.
+   * @param DOMNode $Node Registry entry data from project configuration file.
    *
-   * @return AblePolecat_Registry_EntryInterface.
+   * @return Array[AblePolecat_Registry_EntryInterface].
    */
   public static function import(DOMNode $Node) {
     
-    static $hostName;
-    $hostName = AblePolecat_Host::getRequest()->getHostName();
+    $RegistryEntries = array();
     
-    $RegistryEntry = AblePolecat_Registry_Entry_Resource::create();
-    $RegistryEntry->id = $Node->getAttribute('id');
-    $RegistryEntry->name = $Node->getAttribute('name');
-    $RegistryEntry->hostName = $hostName;
-    foreach($Node->childNodes as $key => $childNode) {
-      switch ($childNode->nodeName) {
-        default:
-          break;
-        case 'polecat:classId':
-          $RegistryEntry->classId = $childNode->nodeValue;
-          break;
+    if (is_a($Node, 'DOMElement') && ($Node->tagName == 'polecat:resourceClass') && $Node->hasChildNodes()) {
+      //
+      // host name
+      //
+      static $hostName;
+      $hostName = AblePolecat_Host::getRequest()->getHostName();
+      
+      //
+      // Verify class reference.
+      //
+      $className = $Node->getAttribute('name');
+      $classId = $Node->getAttribute('id');
+      $lastModifiedTime = 0;
+      $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
+        getRegistrationById($classId);
+      if (isset($ClassRegistration)) {
+        $lastModifiedTime = $ClassRegistration->lastModifiedTime;
+      }
+      else {
+        $message = sprintf("resource class %s references invalid class id %s.",
+          $className,
+          $classId
+        );
+        $RegistryEntry = NULL;
+        AblePolecat_Command_Chain::triggerError($message);
+      }
+      
+      foreach($Node->childNodes as $key => $ResourceNode) {
+        switch ($ResourceNode->nodeName) {
+          default:
+            break;
+          case 'polecat:resource':
+            $registerFlag = $ResourceNode->getAttribute('register');
+            if ($registerFlag != '0') {
+              //
+              // NOTE: the resource URI path is in the 'id' attribute for 
+              // resource elements encapsulated by the resourceClass element.
+              //
+              $RegistryEntry = AblePolecat_Registry_Entry_Resource::create();
+              $RegistryEntry->id = self::generateUUID();
+              $RegistryEntry->name = $ResourceNode->getAttribute('id');
+              $RegistryEntry->hostName = $hostName;
+              $RegistryEntry->classId = $classId;
+              $RegistryEntry->lastModifiedTime = $lastModifiedTime;
+              $RegistryEntries[] = $RegistryEntry;
+            }
+            break;
+        }
       }
     }
-    
-    //
-    // Verify class reference.
-    //
-    $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
-      getRegistrationById($RegistryEntry->getClassId());
-    if (isset($ClassRegistration)) {
-      $RegistryEntry->lastModifiedTime = $ClassRegistration->lastModifiedTime;
-    }
-    else {
-      $message = sprintf("resource %s (%s) references invalid class %s.",
-        $RegistryEntry->getName(),
-        $RegistryEntry->getId(),
-        $RegistryEntry->getClassId()
-      );
-      $RegistryEntry = NULL;
-      AblePolecat_Command_Chain::triggerError($message);
-    }
-    return $RegistryEntry;
+    return $RegistryEntries;
   }
   
   /**

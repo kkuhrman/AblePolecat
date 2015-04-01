@@ -18,6 +18,19 @@
  * really only fulfils the first part of the resource request and delegates the rest to
  * the 'resource' itself.
  *
+ * An Able Polecat resource maps AblePolecat_ResourceInterface to HTTP request 
+ * resource (URI) on the host machine. Polecat will generate UUID for each 
+ * resource in each group. Some registry objects - notably transactionClass and 
+ * responseClass ([connector] and [response], respectively, in the polecat 
+ * database) - reference the id of a resource. Since resource ids are generated 
+ * at install time, they are referenced in the configuration file by resourceGroup 
+ * attribute 'id', which then corresponds to the id attribute encapsulating the 
+ * resources within a resourceClass element in the configuration file. In the 
+ * configuration file, the URI path is used as the id attribute of the resource 
+ * within the resourceClass element; the URI path may be assigned to the name 
+ * attribute within the resourceGroup elements, but not the id as this would 
+ * render the XML invalid.
+ * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
@@ -107,7 +120,7 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     //
     // Get list of package resources.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'resource');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'resourceClass');
     self::insertList($Database, $Nodes);
   }
   
@@ -465,9 +478,11 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
 
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
-      $ResourceRegistration = AblePolecat_Registry_Entry_Resource::import($Node);
-      $ResourceRegistration->save($Database);
-      self::$Registry->addRegistration($ResourceRegistration);
+      $ResourceRegistrations = AblePolecat_Registry_Entry_Resource::import($Node);
+      foreach($ResourceRegistrations as $key => $ResourceRegistration) {
+        $ResourceRegistration->save($Database);
+        self::$Registry->addRegistration($ResourceRegistration);
+      }
     }
   }
   

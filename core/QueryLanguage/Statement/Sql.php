@@ -633,7 +633,14 @@ abstract class AblePolecat_QueryLanguage_Statement_SqlAbstract extends AblePolec
  * A vanialla-type SQL wrapper with several helper methods.
  */
 function __SQL() {
+  
+  $args = func_get_args();
+  $options = array();
+  if (isset($args[0]) && is_array($args[0])) {
+    $options = $args[0];
+  }
   $Query = AblePolecat_Sql::create();
+  isset($options['encloseObjectNames']) ? $Query->setEncloseObjectNames($options['encloseObjectNames']) : NULL;
   return $Query;
 }
 

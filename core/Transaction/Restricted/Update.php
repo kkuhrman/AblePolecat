@@ -116,44 +116,62 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 }
               }
               
+              //
+              // Order is important. FK UUIDs are generated first by classes, 
+              // which reference them second.
+              //
               if (AblePolecat_Database_Pdo::ready()) {
                 //
-                // Install current database schema.
+                // Step 1. Install current database schema.
                 //
                 AblePolecat_Database_Schema::install($CoreDatabase);
                 
                 //
-                // INSERT [lib]
+                // Step 2. Register class libraries ([lib]).
+                // FK references to [lib].[id]:
+                // [class].[classLibraryId]
                 //
                 AblePolecat_Registry_ClassLibrary::install($CoreDatabase);
                 
                 //
-                // INSERT [class]
+                // Step 3. Register classes ([class]).
+                // FK references to [class].[id]:
+                // [resource].[classId]
+                // [response].[classId]
+                // [connector].[classId]
+                // [component].[classId]
                 //
                 AblePolecat_Registry_Class::install($CoreDatabase);
                 
                 //
-                // INSERT [connector]
-                //
-                AblePolecat_Registry_Connector::install($CoreDatabase);
-                
-                //
-                // INSERT [component]
-                //
-                AblePolecat_Registry_Component::install($CoreDatabase);
-                
-                //
-                // INSERT [resource]
+                // Step 4. Register resources ([resource]).
+                // FK references to [resource].[id]:
+                // [connector].[resourceId]
+                // [response].[resourceId]
                 //
                 AblePolecat_Registry_Resource::install($CoreDatabase);
                 
                 //
-                // INSERT [response]
+                // Step 5. Register connectors ([connector]).
+                //
+                AblePolecat_Registry_Connector::install($CoreDatabase);
+                
+                //
+                // Step 6. Register responses ([response]).
+                // FK references to [response].[id]:
+                // [template].[articleId]
                 //
                 AblePolecat_Registry_Response::install($CoreDatabase);
                 
                 //
-                // INSERT [template]
+                // Step 7. Register components ([component]).
+                // FK references to [component].[id]:
+                // [template].[articleId]
+                //
+                AblePolecat_Registry_Component::install($CoreDatabase);
+                
+                //
+                // Step 8. Register templates ([template]).
                 //
                 AblePolecat_Registry_Template::install($CoreDatabase);
                 
@@ -183,39 +201,57 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               }
               break;
             case AblePolecat_Resource_Restricted_Update::UUID:
+              //
+              // Order is important. FK UUIDs are generated first by classes, 
+              // which reference them second.
+              //
               if ($this->authenticate()) {
                 //
-                // UPDATE [lib]
+                // Step 1. Update class libraries ([lib]).
+                // FK references to [lib].[id]:
+                // [class].[classLibraryId]
                 //
                 AblePolecat_Registry_ClassLibrary::update($CoreDatabase);
                 
                 //
-                // UPDATE [class]
+                // Step 2. Update classes ([class]).
+                // FK references to [class].[id]:
+                // [resource].[classId]
+                // [response].[classId]
+                // [connector].[classId]
+                // [component].[classId]
                 //
                 AblePolecat_Registry_Class::update($CoreDatabase);
                 
                 //
-                // UPDATE [connector]
-                //
-                AblePolecat_Registry_Connector::update($CoreDatabase);
-                
-                //
-                // UPDATE [component]
-                //
-                AblePolecat_Registry_Component::update($CoreDatabase);
-                
-                //
-                // UPDATE [resource]
+                // Step 3. Update resources ([resource]).
+                // FK references to [resource].[id]:
+                // [connector].[resourceId]
+                // [response].[resourceId]
                 //
                 AblePolecat_Registry_Resource::update($CoreDatabase);
                 
                 //
-                // UPDATE [response]
+                // Step 4. Update connectors ([connector]).
+                //
+                AblePolecat_Registry_Connector::update($CoreDatabase);
+                
+                //
+                // Step 5. Update responses ([response]).
+                // FK references to [response].[id]:
+                // [template].[articleId]
                 //
                 AblePolecat_Registry_Response::update($CoreDatabase);
                 
                 //
-                // UPDATE [template]
+                // Step 6. Update components ([component]).
+                // FK references to [component].[id]:
+                // [template].[articleId]
+                //
+                AblePolecat_Registry_Component::update($CoreDatabase);
+                
+                //
+                // Step 7. Update templates ([template]).
                 //
                 AblePolecat_Registry_Template::update($CoreDatabase);
                 

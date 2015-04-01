@@ -644,7 +644,7 @@ abstract class AblePolecat_QueryLanguage_StatementAbstract
   /**
    * @param bool $encloseObjectNames TRUE if objects (table, field names etc.) should be enclosed by tick (`).
    */
-  protected function setEncloseObjectNames($encloseObjectNames) {
+  public function setEncloseObjectNames($encloseObjectNames) {
     $this->encloseObjectNames = $encloseObjectNames;
   }
   

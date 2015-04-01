@@ -3,6 +3,12 @@
  * @file      polecat/core/Registry/Response.php
  * @brief     Manages registry of HTTP response classes.
  *
+ * An Able Polecat response maps AblePolecat_Message_ResponseInterface to HTTP 
+ * request resource and HTTP response status code.
+ *
+ * @see AblePolecat_Registry_Resource for notes on how response registrations 
+ * reference resource ids in project configuration files.
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.6.3
@@ -92,7 +98,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     //
     // Get list of package resources.
     //
-    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'response');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'responseClass');
     self::insertList($Database, $Nodes);
   }
   
@@ -428,9 +434,11 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
 
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
-      $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::import($Node);
-      $ResponseRegistration->save($Database);
-      self::$Registry->addRegistration($ResponseRegistration);
+      $ResponseRegistrations = AblePolecat_Registry_Entry_DomNode_Response::import($Node);
+      foreach($ResponseRegistrations as $key => $ResponseRegistration) {
+        $ResponseRegistration->save($Database);
+        self::$Registry->addRegistration($ResponseRegistration);
+      }
     }
   }
   

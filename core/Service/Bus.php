@@ -160,6 +160,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
     try {
       if (is_a($Message, 'AblePolecat_Message_RequestInterface')) {
         $requestMethod = $Message->getMethod();
+        $requestResource = $Message->getResource();
         $message = sprintf("%s request dispatched to service bus by %s agent.", 
           $requestMethod,
           $Agent->getName()
@@ -179,7 +180,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
         // If method is GET and resource is not restricted, check cache first.
         //
         $recache = $Message->getQueryStringFieldValue('recache');
-        if (($requestMethod == 'GET') && 
+        if (isset($ConnectorRegistration) && ($requestMethod == 'GET') && 
             (200 == $ConnectorRegistration->getAccessDeniedCode()) &&
             !isset($recache)) {
           //
@@ -213,6 +214,17 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
             }
           }
         }
+        else {
+          if (!isset($ConnectorRegistration)) {
+            $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+              $this->getDefaultCommandInvoker(),
+              'AblePolecat_Resource_Core_Error',
+              'Invalid connector registration',
+              sprintf("There is no [connector] registry entry for %s method on resource %s.", $requestMethod, $requestResource)
+            );
+            $Response = $this->getResponse($Resource, 200);
+          }
+        }
         
         if (!isset($Response)) {
           //
@@ -244,8 +256,6 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
               $Message,
               $ResourceRegistration,
               $ConnectorRegistration,
-              // $transactionId,
-              // $savepointId,
               NULL
             );
             $Resource = $Transaction->start();
