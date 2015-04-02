@@ -22,9 +22,7 @@
       </polecat:table>
       <polecat:table name="class" engine="InnoDB" charset="latin1">
         <polecat:fields>
-          <polecat:field name="id" type="char" size="36" null="NOT">
-            <polecat:fieldValue>UUID()</polecat:fieldValue>
-          </polecat:field>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
           <polecat:field name="classLibraryId" type="varchar" size="255" null="NOT" />
           <polecat:field name="classFullPath" type="varchar" size="255" null="NOT" />
@@ -66,9 +64,7 @@
       </polecat:table>
       <polecat:table name="connector" engine="InnoDB" charset="latin1">
         <polecat:fields>
-          <polecat:field name="id" type="char" size="36" null="NOT">
-            <polecat:fieldValue>UUID()</polecat:fieldValue>
-          </polecat:field>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
           <polecat:field name="resourceId" type="char" size="36" null="NOT" />
           <polecat:field name="requestMethod" type="char" size="16" null="NOT">
@@ -215,9 +211,7 @@
       </polecat:table>
       <polecat:table name="resource" engine="InnoDB" charset="latin1">
         <polecat:fields>
-          <polecat:field name="id" type="char" size="36" null="NOT">
-            <polecat:fieldValue>UUID()</polecat:fieldValue>
-          </polecat:field>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
           <polecat:field name="hostName" type="varchar" size="255" null="NOT" />
           <polecat:field name="classId" type="char" size="36" null="NOT" />
