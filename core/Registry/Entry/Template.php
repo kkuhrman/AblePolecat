@@ -213,7 +213,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       }
       else {
         $message = sprintf("Invalid article id (%s) given for template %s. %s does not implement AblePolecat_Message_ResponseInterface or AblePolecat_ComponentInterface.",
-          $articleId,
+          $articleType,
           $templateId,
           $className
         );

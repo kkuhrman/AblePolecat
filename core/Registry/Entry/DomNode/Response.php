@@ -121,7 +121,8 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
               //
               $statusCode = 0;
               if(isset($resourceGroup['attributes'])) {
-                $statusCode = intval($resourceGroup['attributes']->getNamedItem('statusCode')->value);
+                $attribute = $resourceGroup['attributes']->getNamedItem('statusCode');
+                isset($attribute) ? $statusCode = intval($attribute->value) : NULL;
               }
               foreach($resourceGroup['resources'] as $resourceId => $ResourceNode) {
                 $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create();
