@@ -620,6 +620,13 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
             $QueryResult = $this->CoreDatabase->query($sql);
             break;
         }
+        if (0 == count($QueryResult)) {
+          $dbErrors = $this->CoreDatabase->flushErrors();
+          foreach($dbErrors as $errorNumber => $error) {
+            $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+          }
+        }
       }
     }
     return $QueryResult;
