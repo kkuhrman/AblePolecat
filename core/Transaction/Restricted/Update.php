@@ -78,7 +78,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
       case 'POST':
         $referer = $this->getRequest()->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_REFERER);
         if (isset($referer)) {
-          $CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
+          $CoreDatabase = AblePolecat_Mode_Config::wakeup()->getCoreDatabase();
           switch($referer) {
             default:
               //
@@ -86,7 +86,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               //
               break;
             case AblePolecat_Resource_Restricted_Install::UUID:
-              if (FALSE === AblePolecat_Database_Pdo::ready()) {
+              if (FALSE === AblePolecat_Mode_Config::coreDatabaseIsReady()) {
                 //
                 // Get rid of db errors.
                 //
@@ -120,11 +120,24 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               // Order is important. FK UUIDs are generated first by classes, 
               // which reference them second.
               //
-              if (AblePolecat_Database_Pdo::ready()) {
+              if ($CoreDatabase->ready()) {
                 //
                 // Step 1. Install current database schema.
                 //
                 AblePolecat_Database_Schema::install($CoreDatabase);
+                $dbErrors = $CoreDatabase->flushErrors();
+                foreach($dbErrors as $errorNumber => $error) {
+                  $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+                  AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
+                }
+                
+                //
+                // @todo: this hack works around an error, which causes install
+                // procedure to fail because 'SELECT UUID()' returns NULL on 
+                // first call for some reason.
+                // 
+                // $uuid = AblePolecat_Registry_Entry_Resource::generateUUID();
+                // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $uuid);
                 
                 //
                 // Step 2. Register class libraries ([lib]).

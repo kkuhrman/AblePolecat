@@ -302,20 +302,16 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     $Registrations = array();
     
     if (0 === $this->getRegistrationCount()) {
-      if (AblePolecat_Database_Pdo::ready()) {
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-        
-        //
-        // Load [lib]
-        //
-        $sql = __SQL()->
-          select('id', 'name', 'classId')->
-          from('component');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Record) {
+      //
+      // Load [component]
+      //
+      $sql = __SQL()->
+        select('id', 'name', 'classId')->
+        from('component');
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Record) {
           $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
@@ -360,8 +356,8 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     if ($registerFlag != '0') {
       $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::import($Node);
       if (isset($ComponentRegistration)) {
-        $ComponentRegistration->save($Database);
         self::$Registry->addRegistration($ComponentRegistration);
+        $ComponentRegistration->save($Database);
       }
     }
   }

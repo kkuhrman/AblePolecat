@@ -166,7 +166,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         //
         // Project configuration file exists, attempt to connect to database.
         //
-        self::$ConfigMode->initializeCoreDatabase();
+        self::$ConfigMode->getCoreDatabase();
         
         if (isset(self::$ConfigMode->CoreDatabase) && self::$ConfigMode->CoreDatabase->ready()) {
           //
@@ -294,6 +294,17 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
    ********************************************************************************/
   
   /**
+   * @return boolean TRUE if core database connection is established, otherwise FALSE.
+   */
+  public static function coreDatabaseIsReady() {
+    
+    $dbReady = FALSE;
+    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->CoreDatabase)) {
+      $dbReady = self::$ConfigMode->CoreDatabase->ready();
+    }
+    return $dbReady;
+  }
+  /**
    * Initialize connection to core database.
    *
    * More than one application database can be defined in server conf file. 
@@ -313,7 +324,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
    * Otherwise, Able Polecat stops boot and throws exception.
    *
    */
-  private function initializeCoreDatabase() {
+  public function getCoreDatabase() {
     
     if (!isset($this->CoreDatabase)) {
       //
@@ -351,11 +362,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
         }
       }
-    }
-    else {
-      throw new AblePolecat_Mode_Exception('Boot sequence violation: Cannot initialize core database. Project configuration file is missing.',
-        AblePolecat_Error::BOOT_SEQ_VIOLATION
-      );
     }
     return $this->CoreDatabase;
   }

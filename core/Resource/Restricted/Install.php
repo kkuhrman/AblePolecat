@@ -41,33 +41,6 @@ class AblePolecat_Resource_Restricted_Install extends AblePolecat_Resource_Restr
       self::$Resource->setWakeupAccessRequest(AblePolecat_AccessControl_Constraint_Execute::getId());
     }
     return parent::wakeup($Subject);
-    /*
-    if (!isset(self::$Resource)) {
-      //
-      // Create resource.
-      //
-      self::$Resource = new AblePolecat_Resource_Restricted_Install($Subject);
-      self::$Resource->Head = 'Able Polecat | Install';
-      
-      //
-      // Check if Able Polecat database exists.
-      //
-      $activeCoreDatabase = AblePolecat_Mode_Server::getActiveCoreDatabaseName();
-      if ($activeCoreDatabase) {
-        $version = AblePolecat_Version::getVersion(TRUE, 'HTML');
-        self::$Resource->Body = sprintf("<p>Able Polecat %s is installed. Active database is [%s].</p>",
-          $version,
-          $activeCoreDatabase
-        );
-      }
-      else {
-        throw new AblePolecat_AccessControl_Exception('Able Polecat is not installed. Server database is not active.');
-        // self::$Resource->Body = "<p>Detailed installation instructions are at <a href=\"https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started\" target=\"new\">
-          // https://github.com/kkuhrman/AblePolecat/wiki/Getting-Started</a></p>";
-      }
-    }
-    return self::$Resource;
-    */
   }
   
   /********************************************************************************

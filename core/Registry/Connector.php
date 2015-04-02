@@ -257,27 +257,23 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     $Registrations = array();
     
     if (0 === $this->getRegistrationCount()) {
-      if (AblePolecat_Database_Pdo::ready()) {
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-        
-        //
-        // Load registry entries.
-        //
-        $sql = __SQL()->
-          select(
-            'id', 
-            'name', 
-            'resourceId', 
-            'requestMethod',
-            'accessDeniedCode', 
-            'classId', 
-            'lastModifiedTime')->
-          from('connector');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Record) {
+      //
+      // Load [connector]
+      //
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'requestMethod',
+          'accessDeniedCode', 
+          'classId', 
+          'lastModifiedTime')->
+        from('connector');
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Record) {
           $RegistryEntry = AblePolecat_Registry_Entry_Connector::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
@@ -407,27 +403,23 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     
     $ConnectorRegistration = NULL;
     
-    if (AblePolecat_Database_Pdo::ready()) {
-      //
-      // Get project database.
-      //
-      $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-      
-      //
-      // Load [lib]
-      //
-      $sql = __SQL()->
-      select(
-        'id', 
-        'name', 
-        'resourceId', 
-        'requestMethod',
-        'accessDeniedCode', 
-        'classId', 
-        'lastModifiedTime')->
-      from('connector')->
-      where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
-      $QueryResult = $CoreDatabase->query($sql);
+    //
+    // Load [connector]
+    //
+    $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'requestMethod',
+          'accessDeniedCode', 
+          'classId', 
+          'lastModifiedTime')->
+        from('connector')->
+        where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    if ($CommandResult->success()) {
+      $QueryResult = $CommandResult->value();
       if (isset($QueryResult[0])) {
         $ConnectorRegistration = AblePolecat_Registry_Entry_Connector::create();
         isset($QueryResult[0]['id']) ? $ConnectorRegistration->id = $QueryResult[0]['id'] : NULL;
@@ -442,6 +434,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
         }
       }
     }
+    
     if (!isset($ConnectorRegistration)) {
       //
       // Handle built-in resources in the event database connection is not active.
@@ -487,8 +480,8 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     if ($registerFlag != '0') {
       $ConnectorRegistrations = AblePolecat_Registry_Entry_Connector::import($Node);
       foreach($ConnectorRegistrations as $key => $ConnectorRegistration) {
-        $ConnectorRegistration->save($Database);
         self::$Registry->addRegistration($ConnectorRegistration);
+        $ConnectorRegistration->save($Database);
       }
     }
   }

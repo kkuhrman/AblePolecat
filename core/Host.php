@@ -276,7 +276,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       // Check connection to core database.
       //
       $requestId = NULL;
-      if (AblePolecat_Mode_Server::getActiveCoreDatabaseName()) {
+      if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
         //
         // Log raw request.
         //

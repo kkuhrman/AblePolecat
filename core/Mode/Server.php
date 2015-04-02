@@ -45,22 +45,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * AblePolecat_Mode_Server Instance of singleton.
    */
   private static $ServerMode;
-  
-  /**
-   * @var AblePolecat_Registry_Interface
-   */
-  // private $InterfaceRegistry;
-  
-  /**
-   * @var AblePolecat_Database_Pdo
-   */
-  private $CoreDatabase;
-  
-  /**
-   * @var Array Information about state of the server database.
-   */
-  private $db_state;
-  
+    
   /**
    * @var AblePolecat_EnvironmentInterface.
    */
@@ -123,22 +108,13 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       //
       // Check critical configuration settings.
       //
-      AblePolecat_Mode_Config::wakeup();
+      $ConfigMode = AblePolecat_Mode_Config::wakeup();
       
       //
-      // Load core database configuration settings.
+      // Establish config mode as reverse command target.
       //
-      try {
-        self::$ServerMode->initializeCoreDatabase();
-      }
-      catch (AblePolecat_Mode_Exception $Exception) {
-        $dbErrors = self::$ServerMode->CoreDatabase->flushErrors();
-        foreach($dbErrors as $errorNumber => $error) {
-          $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-          self::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
-        }
-        self::logBootMessage(AblePolecat_LogInterface::ERROR, $Exception->getMessage());
-      }
+      $CommandChain = AblePolecat_Command_Chain::wakeup();
+      $CommandChain->setCommandLink($ConfigMode, self::$ServerMode);
 
       //
       // Load environment/configuration
@@ -184,12 +160,15 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         //
         // Authenticate user.
         //
-        $Result = new AblePolecat_Command_Result("Core database is not available.", AblePolecat_Command_Result::RESULT_RETURN_FAIL);
-        if (isset($this->CoreDatabase)) {
-          $grants = $this->CoreDatabase->showGrants($Command->getUserName(), $Command->getPassword(), 'polecat');
+        $CoreDatabase = AblePolecat_Mode_Config::wakeup()->getCoreDatabase();
+        if (isset($CoreDatabase)) {
+          $grants = $CoreDatabase->showGrants($Command->getUserName(), $Command->getPassword(), 'polecat');
           if (isset($grants)) {
             $Result = new AblePolecat_Command_Result($grants, AblePolecat_Command_Result::RESULT_RETURN_SUCCESS);
           }
+        }
+        else {
+          $Result = new AblePolecat_Command_Result("Core database is not available.", AblePolecat_Command_Result::RESULT_RETURN_FAIL);
         }
         break;
       case AblePolecat_Command_GetAccessToken::UUID:
@@ -357,7 +336,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Log to database if connected.
     //
-    if (self::getActiveCoreDatabaseName()) {
+    if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
       $sql = __SQL()->          
         insert(
           'errorType',
@@ -433,7 +412,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Log to database if connected.
     //
-    if (self::getActiveCoreDatabaseName()) {
+    if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
       $sql = __SQL()->          
         insert(
           'errorType',
@@ -477,98 +456,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    ********************************************************************************/
   
   /**
-   * Initialize connection to core database.
-   */
-  private function initializeCoreDatabase() {
-    
-    $this->db_state = AblePolecat_Mode_Config::getCoreDatabaseConnectionSettings();
-    $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
-    if (isset($this->db_state['connected']) && isset($this->db_state['dsn'])) {
-      if (FALSE === $this->db_state['connected']) {
-        //
-        // Attempt a connection.
-        //
-        $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->db_state['dsn']);
-        $this->db_state['connected'] = $this->CoreDatabase->open($this->getAgent(), $DbUrl);
-      }
-      if ($this->db_state['connected']) {
-        //
-        // Start logging to database.
-        //
-        $this->Log = AblePolecat_Log_Pdo::wakeup($this->getAgent());
-        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Connection to core database established.');
-      }
-      else {
-        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Connection to core database is not established.');
-      }
-    }
-    else {
-      throw new AblePolecat_Mode_Exception('Core database connection settings in project configuration file appear to be corrupted.');
-    }
-  }
-  
-  /**
-   * @return mixed Name of core database or FALSE if no connection exists.
-   */
-  public static function getActiveCoreDatabaseName() {
-    
-    $activeCoreDatabaseName = FALSE;
-    
-    if (isset(self::$ServerMode) && isset(self::$ServerMode->db_state['connected']) && self::$ServerMode->db_state['connected']) {
-      $activeCoreDatabaseName = self::$ServerMode->db_state['name'];
-    }
-    return $activeCoreDatabaseName;
-  }
-  
-  /**
-   * Get information about state of application database at boot time.
-   *
-   * @param AblePolecat_Command_TargetInterface $Subject
-   * @param mixed $param If set, a particular parameter.
-   *
-   * @return mixed Array containing all state data, or value of given parameter or FALSE.
-   */
-  public function getDatabaseState(AblePolecat_Command_TargetInterface $Subject = NULL, $param = NULL) {
-    
-    $state = NULL;
-    
-    if (isset($Subject)) {
-      if ($Subject === $this) {
-        if (isset($this->db_state)) {
-          if (isset($param) && isset($this->db_state[$param])) {
-            $state = $this->db_state[$param];
-          }
-          else {
-            $state = $this->db_state;
-          }
-        }
-      }
-      else {
-        if (isset($this->db_state)) {
-          if (isset($param) && isset($this->db_state[$param])) {
-            switch($param) {
-              default:
-                break;
-              case 'name':
-              case 'connected':
-                isset($this->db_state[$param]) ? $state = $this->db_state[$param] : NULL;
-                break;
-            }
-          }
-          else {
-            $state = array(
-              'name' => $this->db_state['name'],
-              'connected' => $this->db_state['connected']
-            );
-          }
-        }
-      }
-    }
-    
-    return $state;
-  }
-  
-  /**
    * Write information to the boot log if it is open.
    *
    * @param string $type STATUS | WARNING | ERROR.
@@ -600,28 +487,30 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     $QueryResult = array();
     
+    $CoreDatabase = AblePolecat_Mode_Config::wakeup()->getCoreDatabase();
+    
     //
     // Server mode can only execute query against core database.
     //
-    if (isset($this->db_state['connected']) && $this->db_state['connected']) {
-      $databaseName = $sql->getDatabaseName();
-      isset($this->db_state['name']) ? $coreDatabaseName = $this->db_state['name'] : $coreDatabaseName = NULL;
-      if (isset($databaseName) && ($databaseName != $coreDatabaseName)) {
-        $message = "Server mode can only execute query against core database. [$databaseName] given.";
+    if (isset($CoreDatabase) && $CoreDatabase->ready()) {
+      $coreDatabaseName = trim($CoreDatabase->getLocater()->getPathname(), AblePolecat_Message_RequestInterface::URI_SLASH);
+      $queryDatabaseName = $sql->getDatabaseName();
+      if (isset($queryDatabaseName) && ($queryDatabaseName != $coreDatabaseName)) {
+        $message = "Server mode can only execute query against core database ([$coreDatabaseName]). [$queryDatabaseName] given.";
         throw new AblePolecat_Database_Exception($message);
       }
       
-      if (isset($this->CoreDatabase)) {
+      if (isset($CoreDatabase)) {
         switch ($sql->getDmlOp()) {
           default:
-            $QueryResult = $this->CoreDatabase->execute($sql);
+            $QueryResult = $CoreDatabase->execute($sql);
             break;
           case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
-            $QueryResult = $this->CoreDatabase->query($sql);
+            $QueryResult = $CoreDatabase->query($sql);
             break;
         }
         if (0 == count($QueryResult)) {
-          $dbErrors = $this->CoreDatabase->flushErrors();
+          $dbErrors = $CoreDatabase->flushErrors();
           foreach($dbErrors as $errorNumber => $error) {
             $error = AblePolecat_Database_Pdo::getErrorMessage($error);
             AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
@@ -665,9 +554,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         // $validLink = is_a($Target, 'AblePolecat_Host');
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-        //
-        // Server must always be the end of the CoR.
-        //
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Config');
         break;
     }
     return $ValidLink;

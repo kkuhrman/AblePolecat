@@ -86,8 +86,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
         //
         // Check if Able Polecat database exists.
         //
-        $activeCoreDatabase = AblePolecat_Mode_Server::getActiveCoreDatabaseName();
-        if ($activeCoreDatabase) {
+        if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
           //
           // Database is active. Allow parent to handle from here.
           //
@@ -226,8 +225,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
         //
         // Check for existing project database connection.
         //
-        $SystemAgent = AblePolecat_AccessControl_Agent_System::wakeup();
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($SystemAgent);
+        $CoreDatabase = AblePolecat_Mode_Config::wakeup()->getCoreDatabase();
         if($CoreDatabase->ready()) {
           //
           // If database connection already exists, check authentication against
@@ -256,6 +254,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
           //
           // If database connection is not already established, attempt one.
           //
+          $SystemAgent = AblePolecat_AccessControl_Agent_System::wakeup();
           $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->dsn);
           $CoreDatabase->open($SystemAgent, $DbUrl);
           if($CoreDatabase->ready()) {

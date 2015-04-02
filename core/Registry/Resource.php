@@ -271,16 +271,10 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     $Registrations = array();
     
     if (0 === $this->getRegistrationCount()) {
-      if (AblePolecat_Database_Pdo::ready()) {
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-        
-        //
-        // Load registry entries.
-        //
-        $sql = __SQL()->
+      //
+      // Load [resource]
+      //
+      $sql = __SQL()->
           select(
             'id', 
             'name', 
@@ -288,8 +282,10 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
             'classId', 
             'lastModifiedTime')->
           from('resource');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Record) {
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Record) {
           $RegistryEntry = AblePolecat_Registry_Entry_Resource::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
@@ -315,62 +311,52 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
     $resourceName  = NULL;
     
-    // if (AblePolecat_Database_Pdo::ready()) {
-      //
-      // Resource is not registered. Use a system resource.      
-      // Assign resource id and class name.
-      // Extract the part of the URI, which defines the resource.
-      //
-      $requestPathInfo = $Request->getRequestPathInfo();
-      if (isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME])) {
-        $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME];
-      }
-      switch ($resourceName) {
-        default:
-          //
-          // Request did not resolve to a registered or system resource class.
-          // Log status and return error resource.
-          //
-          $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
-            $resourceName, 
-            $Request->getRequestPath(),
-            $Request->getHostName()
-          );
-          AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $message, AblePolecat_LogInterface::STATUS);
-          $ResourceRegistration->id = AblePolecat_Resource_Core_Error::UUID;
-          $ResourceRegistration->classId = AblePolecat_Resource_Core_Error::UUID;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
-          $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME;
-          $ResourceRegistration->id = AblePolecat_Resource_Core_Ack::UUID;
-          $ResourceRegistration->classId = AblePolecat_Resource_Core_Ack::UUID;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
-          $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL;
-          $ResourceRegistration->id = AblePolecat_Resource_Restricted_Util::UUID;
-          $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Util::UUID;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
-          $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
-          $ResourceRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
-          $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Install::UUID;
-          break;
-        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
-          $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE;
-          $ResourceRegistration->id = AblePolecat_Resource_Restricted_Update::UUID;
-          $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Update::UUID;
-          break;
-      }
-    // }
-    // else {
-      //
-      // There is no active database connection, redirect to install resource.
-      //
-      // $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
-      // $ResourceRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
-      // $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Install::UUID;
-    // }
+    //
+    // Resource is not registered. Use a system resource.      
+    // Assign resource id and class name.
+    // Extract the part of the URI, which defines the resource.
+    //
+    $requestPathInfo = $Request->getRequestPathInfo();
+    if (isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME])) {
+      $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME];
+    }
+    switch ($resourceName) {
+      default:
+        //
+        // Request did not resolve to a registered or system resource class.
+        // Log status and return error resource.
+        //
+        $message = sprintf("Request did not resolve to a registered resource (resource=%s; path=%s; host=%s).",
+          $resourceName, 
+          $Request->getRequestPath(),
+          $Request->getHostName()
+        );
+        AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $message, AblePolecat_LogInterface::STATUS);
+        $ResourceRegistration->id = AblePolecat_Resource_Core_Error::UUID;
+        $ResourceRegistration->classId = AblePolecat_Resource_Core_Error::UUID;
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ACK:
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME:
+        $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_HOME;
+        $ResourceRegistration->id = AblePolecat_Resource_Core_Ack::UUID;
+        $ResourceRegistration->classId = AblePolecat_Resource_Core_Ack::UUID;
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
+        $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL;
+        $ResourceRegistration->id = AblePolecat_Resource_Restricted_Util::UUID;
+        $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Util::UUID;
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
+        $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
+        $ResourceRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
+        $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Install::UUID;
+        break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
+        $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE;
+        $ResourceRegistration->id = AblePolecat_Resource_Restricted_Update::UUID;
+        $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Update::UUID;
+        break;
+    }
     return $ResourceRegistration;
   }
     
@@ -388,30 +374,26 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     $ResourceRegistration = NULL;
     $resourceName  = NULL;
     
-    if (AblePolecat_Database_Pdo::ready()) {
-      //
-      // Get project database.
-      //
-      $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-      
-      //
-      // Look up resource registration in [resource]
-      // Extract the part of the URI, which defines the resource.
-      //
-      $requestPathInfo = $Request->getRequestPathInfo();
-      if (isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME])) {
-        $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME];
-      }
-      $sql = __SQL()->          
-        select(
-          'id', 
-          'name', 
-          'hostName', 
-          'classId', 
-          'lastModifiedTime')->
-        from('resource')->
-        where(sprintf("`name` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
-      $QueryResult = $CoreDatabase->query($sql);
+    //
+    // Look up resource registration in [resource]
+    // Extract the part of the URI, which defines the resource.
+    //
+    $requestPathInfo = $Request->getRequestPathInfo();
+    if (isset($requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME])) {
+      $resourceName = $requestPathInfo[AblePolecat_Message_RequestInterface::URI_RESOURCE_NAME];
+    }
+    $sql = __SQL()->          
+      select(
+        'id', 
+        'name', 
+        'hostName', 
+        'classId', 
+        'lastModifiedTime')->
+      from('resource')->
+      where(sprintf("`name` = '%s' AND `hostName` = '%s'", $resourceName, $Request->getHostName()));
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    if ($CommandResult->success()) {
+      $QueryResult = $CommandResult->value();
       if (isset($QueryResult[0])) {
         $ResourceRegistration = AblePolecat_Registry_Entry_Resource::create();
         isset($QueryResult[0]['id']) ? $ResourceRegistration->id = $QueryResult[0]['id'] : NULL;
@@ -432,7 +414,7 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
                 set('lastModifiedTime')->
                 values($ClassRegistration->lastModifiedTime)->
                 where(sprintf("id = '%s'", $ResourceRegistration->id));
-              $CoreDatabase->execute($sql);
+              $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
               $ResourceRegistration->lastModifiedTime = $ClassRegistration->lastModifiedTime;
             }
           }
@@ -480,8 +462,8 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     if ($registerFlag != '0') {
       $ResourceRegistrations = AblePolecat_Registry_Entry_Resource::import($Node);
       foreach($ResourceRegistrations as $key => $ResourceRegistration) {
-        $ResourceRegistration->save($Database);
         self::$Registry->addRegistration($ResourceRegistration);
+        $ResourceRegistration->save($Database);
       }
     }
   }

@@ -251,27 +251,23 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     $Registrations = array();
     
     if (0 === $this->getRegistrationCount()) {
-      if (AblePolecat_Database_Pdo::ready()) {
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-        
-        //
-        // Load registry entries.
-        //
-        $sql = __SQL()->
-          select(
-            'id', 
-            'name', 
-            'resourceId', 
-            'statusCode',
-            'defaultHeaders', 
-            'classId', 
-            'lastModifiedTime')->
-          from('response');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Record) {
+      //
+      // Load [response]
+      //
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'statusCode',
+          'defaultHeaders', 
+          'classId', 
+          'lastModifiedTime')->
+        from('response');
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Record) {
           $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
@@ -331,23 +327,22 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     
     $ResponseRegistration = NULL;
     
-    if (AblePolecat_Database_Pdo::ready()) {
-      //
-      // Get project database.
-      //
-      $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-      
-      $sql = __SQL()->
-        select(
-          'id', 
-          'name', 
-          'resourceId', 
-          'statusCode', 
-          'classId', 
-          'lastModifiedTime')->
-        from('response')->
-        where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
-      $QueryResult = $CoreDatabase->query($sql);
+    //
+    // Fetch [response]
+    //
+    $sql = __SQL()->
+      select(
+        'id', 
+        'name', 
+        'resourceId', 
+        'statusCode', 
+        'classId', 
+        'lastModifiedTime')->
+      from('response')->
+      where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    if ($CommandResult->success()) {
+      $QueryResult = $CommandResult->value();
       if (isset($QueryResult[0])) {
         $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
         isset($QueryResult[0]['id']) ? $ResponseRegistration->id = $QueryResult[0]['id'] : NULL;
@@ -390,7 +385,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
             set('lastModifiedTime')->
             values($mostRecentModifiedTime)->
             where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
-          $CoreDatabase->execute($sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
           $ResponseRegistration->lastModifiedTime = $mostRecentModifiedTime;
         }
       }
@@ -436,8 +431,8 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     if ($registerFlag != '0') {
       $ResponseRegistrations = AblePolecat_Registry_Entry_DomNode_Response::import($Node);
       foreach($ResponseRegistrations as $key => $ResponseRegistration) {
-        $ResponseRegistration->save($Database);
         self::$Registry->addRegistration($ResponseRegistration);
+        $ResponseRegistration->save($Database);
       }
     }
   }

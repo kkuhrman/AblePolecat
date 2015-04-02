@@ -68,42 +68,32 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
     if (!isset(self::$Registry)) {
-      try {
-        //
-        // Create instance of singleton.
-        //
-        self::$Registry = new AblePolecat_Registry_ClassLibrary($Subject);
+      //
+      // Create instance of singleton.
+      //
+      self::$Registry = new AblePolecat_Registry_ClassLibrary($Subject);
         
-        if (AblePolecat_Database_Pdo::ready()) {
-          //
-          // Get project database.
-          //
-          $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
-          
-          //
-          // Load [lib]
-          //
-          $sql = __SQL()->
-            select(
-              'id', 
-              'name', 
-              'libType', 
-              'libFullPath', 
-              'useLib', 
-              'lastModifiedTime')->
-            from('lib')->
-            where('`useLib` = 1');
-          $QueryResult = $CoreDatabase->query($sql);
-          foreach($QueryResult as $key => $Library) {
-            $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create($Library);
-            self::$Registry->addRegistration($RegistryEntry);
-          }
-          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
+      //
+      // Load [lib]
+      //
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'libType', 
+          'libFullPath', 
+          'useLib', 
+          'lastModifiedTime')->
+        from('lib')->
+        where('`useLib` = 1');
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Library) {
+          $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create($Library);
+          self::$Registry->addRegistration($RegistryEntry);
         }
-      }
-      catch (Exception $Exception) {
-        self::$Registry = NULL;
-        throw new AblePolecat_Registry_Exception($Exception->getMessage(), AblePolecat_Error::WAKEUP_FAIL);
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Class library registry initialized.');
       }
     }
     return self::$Registry;
@@ -139,8 +129,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->libType = strtolower($corePackageNode->getAttribute('type'));
       $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
       $RegistryEntry->useLib = '1';
-      $RegistryEntry->save($Database);
       self::$Registry->addRegistration($RegistryEntry);
+      $RegistryEntry->save($Database);
     }
     else {
       $message = 'core class library configuration file must contain a package node.';
@@ -165,8 +155,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->libType = strtolower($applicationNode->getAttribute('type'));
       $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
       $RegistryEntry->useLib = '1';
-      $RegistryEntry->save($Database);
       self::$Registry->addRegistration($RegistryEntry);
+      $RegistryEntry->save($Database);
     }
     else {
       //
@@ -180,8 +170,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
-        $RegistryEntry->save($Database);
         self::$Registry->addRegistration($RegistryEntry);
+        $RegistryEntry->save($Database);
         
         //
         // If the class library is a module, load the corresponding project 
@@ -198,8 +188,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
               ));
             }
             if (isset($modRegistryEntry)) {
-              $modRegistryEntry->save($Database);
               self::$Registry->addRegistration($modRegistryEntry);
+              $modRegistryEntry->save($Database);
             }
           }
         }

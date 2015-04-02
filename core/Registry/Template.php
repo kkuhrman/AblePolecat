@@ -251,16 +251,10 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
     $Registrations = array();
     
     if (0 === $this->getRegistrationCount()) {
-      if (AblePolecat_Database_Pdo::ready()) {
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup();
-        
-        //
-        // Load registry entries.
-        //
-        $sql = __SQL()->
+      //
+      // Load [template]
+      //
+      $sql = __SQL()->
           select(
             'id',
             'name',
@@ -271,8 +265,10 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
             'fullPath', 
             'lastModifiedTime')->
           from('template');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Record) {
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Record) {
           $RegistryEntry = AblePolecat_Registry_Entry_Template::create($Record);
           self::$Registry->addRegistration($RegistryEntry);
         }
@@ -360,8 +356,8 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
     if ($registerFlag != '0') {
       $TemplateRegistrations = AblePolecat_Registry_Entry_Template::import($Node);
       foreach($TemplateRegistrations as $key => $TemplateRegistration) {
-        $TemplateRegistration->save($Database);
         self::$Registry->addRegistration($TemplateRegistration);
+        $TemplateRegistration->save($Database);
       }
     }
   }

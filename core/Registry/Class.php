@@ -103,20 +103,16 @@ class AblePolecat_Registry_Class
       self::$Registry = new AblePolecat_Registry_Class($Subject);
       self::$Registry->registerCoreClasses();
       
-      if (AblePolecat_Database_Pdo::ready()) {
-        //
-        // Get project database.
-        //
-        $CoreDatabase = AblePolecat_Database_Pdo::wakeup($Subject);
-        
-        //
-        // Load [lib]
-        //
-        $sql = __SQL()->
-          select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
-          from('class');
-        $QueryResult = $CoreDatabase->query($sql);
-        foreach($QueryResult as $key => $Class) {
+      //
+      // Load [class]
+      //
+      $sql = __SQL()->
+        select('id', 'name', 'classLibraryId', 'classFullPath', 'classFactoryMethod', 'lastModifiedTime')->
+        from('class');
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success()) {
+        $Result = $CommandResult->value();        
+        foreach($Result as $key => $Class) {
           $RegistryEntry = AblePolecat_Registry_Entry_Class::create($Class);
           self::$Registry->addRegistration($RegistryEntry);
         }
@@ -768,8 +764,8 @@ class AblePolecat_Registry_Class
           }
         }
       }
-      $RegistryEntry->save($Database);
       self::$Registry->addRegistration($RegistryEntry);
+      $RegistryEntry->save($Database);
     }
   }
   
