@@ -11,7 +11,7 @@
             <polecat:fieldComment>deprecated</polecat:fieldComment>
           </polecat:field>
           <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
-          <polecat:field name="cacheData" type="blob" null="NOT" />
+          <polecat:field name="cacheData" type="longblob" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
           <polecat:index type="UNIQUE KEY" name="cacheEntryKey">
