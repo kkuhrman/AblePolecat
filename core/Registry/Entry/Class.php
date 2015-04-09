@@ -225,7 +225,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
         $this->getClassFactoryMethod(), 
         $this->getLastModifiedTime()
       );
-    $this->executeDml($sql, $Database);
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************

@@ -30,6 +30,8 @@ interface AblePolecat_RegistryInterface
    */
   const KEY_ARTICLE_ID            = 'id';
   const KEY_CLASS_NAME            = 'name';
+  const KEY_NOT_UPDATED           = 'not-updated';
+  const KEY_UPDATED               = 'updated';
   
   /**
    * Add a registry entry.
@@ -72,6 +74,44 @@ interface AblePolecat_RegistryInterface
    * @return Array[AblePolecat_Registry_EntryInterface].
    */
   public function getRegistrations($key, $value = NULL);
+  
+  /**
+   * Initialize update lists.
+   *
+   * @throw AblePolecat_Registry_Exception If update cannot begin.
+   */
+  public function beginUpdate();
+  
+  /**
+   * Finalize update procedure and reset update lists.
+   *
+   * @throw AblePolecat_Registry_Exception.
+   */
+  public function completeUpdate();
+  
+  /**
+   * Load list of ids for registry entries eligible for update.
+   *
+   * @return Array.
+   */
+  public function resetUpdateLists();
+  
+  /**
+   * Mark registry entry corresponding to given id as updated.
+   *
+   * @param string $id.
+   * @param boolean $status TRUE if update was successful otherwise FALSE.
+   */
+  public function markUpdated($id, $status = FALSE);
+  
+  /**
+   * Return lists of ids for registry entries updated and not updated.
+   *
+   * @param boolean $status TRUE if update was successful otherwise FALSE.
+   *
+   * @return Array.
+   */
+  public function getUpdateList($status = FALSE);
 }
 
 abstract class AblePolecat_RegistryAbstract 
@@ -82,6 +122,11 @@ abstract class AblePolecat_RegistryAbstract
    * @var Array Registry of classes which can be loaded.
    */
   private $Registrations;
+  
+  /**
+   * @var Array Job list for update procedure.
+   */
+  private $updateLists;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -198,6 +243,91 @@ abstract class AblePolecat_RegistryAbstract
     return $Registrations;
   }
   
+  /**
+   * Initialize update lists.
+   *
+   * @throw AblePolecat_Registry_Exception If update cannot begin.
+   */
+  public function beginUpdate() {
+    //
+    // Reset update lists.
+    //
+    $this->resetUpdateLists();
+    
+    //
+    // Assign current registrations to the not updated list.
+    //
+    $CurrentRegistrations = $this->getRegistrations(self::KEY_ARTICLE_ID);
+    foreach($CurrentRegistrations as $id => $RegistryEntry) {
+      $this->markUpdated($id);
+    }
+  }
+  
+  /**
+   * Finalize update procedure and reset update lists.
+   *
+   * @throw AblePolecat_Registry_Exception.
+   */
+  public function completeUpdate() {
+    //
+    // Reset update lists.
+    //
+    $this->resetUpdateLists();
+  }
+  
+  /**
+   * Load list of ids for registry entries eligible for update.
+   *
+   * @return Array.
+   */
+  public function resetUpdateLists() {
+    $this->updateLists = array(
+      self::KEY_NOT_UPDATED => array(),
+      self::KEY_UPDATED => array(),
+    );
+  }
+  
+  /**
+   * Mark registry entry corresponding to given id as updated.
+   *
+   * @param string $id.
+   * @param boolean $status TRUE if update was successful otherwise FALSE.
+   */
+  public function markUpdated($id, $status = FALSE) {
+    if ($status) {
+      $this->updateLists[self::KEY_UPDATED][$id] = $id;
+      if (isset($this->updateLists[self::KEY_NOT_UPDATED][$id])) {
+        unset($this->updateLists[self::KEY_NOT_UPDATED][$id]);
+      }
+    }
+    else {
+      $this->updateLists[self::KEY_NOT_UPDATED][$id] = $id;
+      if (isset($this->updateLists[self::KEY_UPDATED][$id])) {
+        unset($this->updateLists[self::KEY_UPDATED][$id]);
+      }
+    }
+  }
+  
+  /**
+   * Return lists of ids for registry entries updated and not updated.
+   *
+   * @param boolean $status TRUE if update was successful otherwise FALSE.
+   *
+   * @return Array.
+   */
+  public function getUpdateList($status = FALSE) {
+    
+    $updateList = NULL;
+    
+    if ($status) {
+      $updateList = $this->updateLists[self::KEY_UPDATED];
+    }
+    else {
+      $updateList = $this->updateLists[self::KEY_NOT_UPDATED];
+    }
+    return $updateList;
+  }
+  
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
@@ -213,5 +343,10 @@ abstract class AblePolecat_RegistryAbstract
       self::KEY_ARTICLE_ID => array(),
       self::KEY_CLASS_NAME => array(),
     );
+    
+    //
+    // Update list.
+    //
+    $this->resetUpdateLists();
   }
 }

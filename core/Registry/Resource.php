@@ -133,43 +133,24 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
     //
-    // Get current registrations.
+    // Initialize update procedure.
     //
     $Registry = AblePolecat_Registry_Resource::wakeup();
-    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
-    
-    //
-    // Make a list of potential delete candidates.
-    //
-    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
-    
+    $Registry->beginUpdate();
+        
     //
     // Read registrations from local project configuration file.
     //
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'resource');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'resourceClass');
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
-      
-      //
-      // Since entry is in local project conf file, remove it from delete list.
-      //
-      $id = $Node->getAttribute('id');
-      if (isset($CurrentRegistrationIds[$id])) {
-        unset($CurrentRegistrationIds[$id]);
-      }
     }
     
     //
-    // Remove any registered resources not in local project conf file.
+    // Complete update and clean up obsolete entries.
     //
-    if (count($CurrentRegistrationIds)) {
-      $sql = __SQL()->
-        delete()->
-        from('resource')->
-        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
-      $Database->execute($sql);
-    }
+    $Registry->completeUpdate();
   }
   
   /********************************************************************************
@@ -293,6 +274,30 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     }
     $Registrations = parent::getRegistrations($registryKey, $value);
     return $Registrations;
+  }
+  
+  /**
+   * Finalize update procedure and reset update lists.
+   *
+   * @throw AblePolecat_Registry_Exception.
+   */
+  public function completeUpdate() {
+    //
+    // Get list of ids not effected by update.
+    //
+    $notUpdatedIds = $this->getUpdateList(FALSE);
+    
+    //
+    // Remove any registered resources not in local project conf file.
+    //
+    if (count($notUpdatedIds)) {
+      $sql = __SQL()->
+        delete()->
+        from('resource')->
+        where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    }
+    return parent::completeUpdate();
   }
   
   /********************************************************************************
@@ -448,11 +453,14 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
    * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param DOMNode $Node DOMNode containing registry entry.
    *
+   * @return Array[AblePolecat_Registry_Entry_Resource].
    */
   protected static function insertNode(
     AblePolecat_DatabaseInterface $Database, 
     DOMNode $Node) {
-
+    
+    $ResourceRegistrations = array();
+    
     if (!isset(self::$Registry)) {
       $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
       AblePolecat_Command_Chain::triggerError($message);
@@ -461,11 +469,14 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
     $registerFlag = $Node->getAttribute('register');
     if ($registerFlag != '0') {
       $ResourceRegistrations = AblePolecat_Registry_Entry_Resource::import($Node);
-      foreach($ResourceRegistrations as $key => $ResourceRegistration) {
-        self::$Registry->addRegistration($ResourceRegistration);
-        $ResourceRegistration->save($Database);
+      foreach($ResourceRegistrations as $key => $RegistryEntry) {
+        self::$Registry->addRegistration($RegistryEntry);
+        if($RegistryEntry->save($Database)) {
+          self::$Registry->markUpdated($RegistryEntry->id, TRUE);
+        }
       }
     }
+    return $ResourceRegistrations;
   }
   
   /**

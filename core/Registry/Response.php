@@ -111,43 +111,24 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
     //
-    // Get current registrations.
+    // Initialize update procedure.
     //
     $Registry = AblePolecat_Registry_Response::wakeup();
-    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
-    
-    //
-    // Make a list of potential delete candidates.
-    //
-    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
+    $Registry->beginUpdate();
     
     //
     // Load local project configuration file.
     //
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'response');
+    $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'responseClass');
     foreach($Nodes as $key => $Node) {
       self::insertNode($Database, $Node);
-      
-      //
-      // Since entry is in local project conf file, remove it from delete list.
-      //
-      $id = $Node->getAttribute('id');
-      if (isset($CurrentRegistrationIds[$id])) {
-        unset($CurrentRegistrationIds[$id]);
-      }
     }
     
     //
-    // Remove any registered responses not in local project conf file.
+    // Complete update and clean up obsolete entries.
     //
-    if (count($CurrentRegistrationIds)) {
-      $sql = __SQL()->
-        delete()->
-        from('response')->
-        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
-      $Database->execute($sql);
-    }
+    $Registry->completeUpdate();
   }
   
   /********************************************************************************
@@ -275,6 +256,30 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
     }
     $Registrations = parent::getRegistrations($registryKey, $value);
     return $Registrations;
+  }
+  
+  /**
+   * Finalize update procedure and reset update lists.
+   *
+   * @throw AblePolecat_Registry_Exception.
+   */
+  public function completeUpdate() {
+    //
+    // Get list of ids not effected by update.
+    //
+    $notUpdatedIds = $this->getUpdateList(FALSE);
+    
+    //
+    // Remove any registered resources not in local project conf file.
+    //
+    if (count($notUpdatedIds)) {
+      $sql = __SQL()->
+        delete()->
+        from('response')->
+        where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    }
+    return parent::completeUpdate();
   }
   
   /********************************************************************************
@@ -432,7 +437,9 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
       $ResponseRegistrations = AblePolecat_Registry_Entry_DomNode_Response::import($Node);
       foreach($ResponseRegistrations as $key => $ResponseRegistration) {
         self::$Registry->addRegistration($ResponseRegistration);
-        $ResponseRegistration->save($Database);
+        if($ResponseRegistration->save($Database)) {
+          self::$Registry->markUpdated($ResponseRegistration->id, TRUE);
+        }
       }
     }
   }

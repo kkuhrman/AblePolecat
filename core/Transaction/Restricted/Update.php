@@ -42,7 +42,26 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
   /********************************************************************************
    * Implementation of AblePolecat_TransactionInterface.
    ********************************************************************************/
-   
+  
+  /**
+   * Commit
+   */
+  public function commit() {
+    //
+    // Parent updates transaction in database.
+    //
+    parent::commit();
+  }
+  
+  /**
+   * Rollback
+   */
+  public function rollback() {
+    //
+    // @todo
+    //
+  }
+  
   /**
    * Run the install procedures.
    *

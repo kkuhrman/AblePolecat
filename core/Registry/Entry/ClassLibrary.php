@@ -254,7 +254,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
         $this->getClassLibraryUseFlag(), 
         $this->getLastModifiedTime()
       );
-    $this->executeDml($sql, $Database);
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************

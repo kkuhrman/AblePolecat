@@ -206,15 +206,10 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
     //
-    // Get current registrations.
+    // Initialize update procedure.
     //
     $Registry = AblePolecat_Registry_ClassLibrary::wakeup();
-    $CurrentRegistrations = $Registry->getRegistrations(self::KEY_ARTICLE_ID);
-    
-    //
-    // Make a list of potential delete candidates.
-    //
-    $CurrentRegistrationIds = array_flip(array_keys($CurrentRegistrations));
+    $Registry->beginUpdate();
     
     //
     // Core class library conf file.
@@ -234,14 +229,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->libType = strtolower($corePackageNode->getAttribute('type'));
       $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
       $RegistryEntry->useLib = '1';
-      $RegistryEntry->save($Database);
-      
-      //
-      // Unflag delete entry.
-      //
-      $id = $RegistryEntry->id;
-      if (isset($CurrentRegistrationIds[$id])) {
-        unset($CurrentRegistrationIds[$id]);
+      if ($RegistryEntry->save($Database)) {
+        $Registry->markUpdated($RegistryEntry->id, TRUE);
       }
     }
     else {
@@ -267,14 +256,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->libType = strtolower($applicationNode->getAttribute('type'));
       $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
       $RegistryEntry->useLib = '1';
-      $RegistryEntry->save($Database);
-      
-      //
-      // Unflag delete entry.
-      //
-      $id = $RegistryEntry->id;
-      if (isset($CurrentRegistrationIds[$id])) {
-        unset($CurrentRegistrationIds[$id]);
+      if ($RegistryEntry->save($Database)) {
+        $Registry->markUpdated($RegistryEntry->id, TRUE);
       }
     }
     else {
@@ -289,14 +272,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
-        $RegistryEntry->save($Database);
-        
-        //
-        // Unflag delete entry.
-        //
-        $id = $RegistryEntry->id;
-        if (isset($CurrentRegistrationIds[$id])) {
-          unset($CurrentRegistrationIds[$id]);
+        if ($RegistryEntry->save($Database)) {
+          $Registry->markUpdated($RegistryEntry->id, TRUE);
         }
         
         //
@@ -314,14 +291,8 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
               ));
             }
             if (isset($modRegistryEntry)) {
-              $modRegistryEntry->save($Database);
-              
-              //
-              // Unflag delete entry.
-              //
-              $id = $modRegistryEntry->id;
-              if (isset($CurrentRegistrationIds[$id])) {
-                unset($CurrentRegistrationIds[$id]);
+              if ($modRegistryEntry->save($Database)) {
+                $Registry->markUpdated($modRegistryEntry->id, TRUE);
               }
             }
           }
@@ -330,19 +301,9 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     }
     
     //
-    // Remove any registered classes not in master project conf file.
+    // Complete update and clean up obsolete entries.
     //
-    if (count($CurrentRegistrationIds)) {
-      $sql = __SQL()->
-        delete()->
-        from('lib')->
-        where(sprintf("`id` IN ('%s')", implode("','", array_flip($CurrentRegistrationIds))));
-      $Database->execute($sql);
-    }
-    
-    //
-    // @todo: Refresh.
-    //
+    $Registry->completeUpdate();
   }
   
   /********************************************************************************
@@ -428,6 +389,30 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         'AblePolecat_Registry_Entry_ClassLibrary'
       ));
     }
+  }
+  
+  /**
+   * Finalize update procedure and reset update lists.
+   *
+   * @throw AblePolecat_Registry_Exception.
+   */
+  public function completeUpdate() {
+    //
+    // Get list of ids not effected by update.
+    //
+    $notUpdatedIds = $this->getUpdateList(FALSE);
+    
+    //
+    // Remove any registered resources not in local project conf file.
+    //
+    if (count($notUpdatedIds)) {
+      $sql = __SQL()->
+        delete()->
+        from('lib')->
+        where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    }
+    return parent::completeUpdate();
   }
   
   /********************************************************************************

@@ -106,6 +106,33 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
         AblePolecat_Command_Chain::triggerError($message);
       }
       
+      //
+      // Check for responses already registered.
+      // Unique key is resourceId + statusCode
+      //
+      $registeredResponses = array();
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'statusCode',
+          'defaultHeaders', 
+          'classId', 
+          'lastModifiedTime')->
+        from('response')->
+        where(sprintf("`classId` = '%s'", $classId));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        foreach ($registrationInfo as $key => $Record) {
+          $resourceId = $Record['resourceId'];
+          $statusCode = $Record['statusCode'];
+          !isset($registeredResponses[$resourceId]) ? $registeredResponses[$resourceId] = array() : NULL;
+          $registeredResponses[$resourceId][$statusCode] = AblePolecat_Registry_Entry_DomNode_Response::create($Record);
+        }
+      }
+      
       foreach($Node->childNodes as $key => $childNode) {
         //
         // @todo: add default headers to <polecat:response>
@@ -125,12 +152,21 @@ class AblePolecat_Registry_Entry_DomNode_Response extends AblePolecat_Registry_E
                 isset($attribute) ? $statusCode = intval($attribute->value) : NULL;
               }
               foreach($resourceGroup['resources'] as $resourceId => $ResourceNode) {
-                $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create();
-                $RegistryEntry->id = self::generateUUID();
+                //
+                // Check if response is already registered.
+                //
+                $RegistryEntry = NULL;
+                if (isset($registeredResponses[$resourceId][$statusCode])) {
+                  $RegistryEntry = $registeredResponses[$resourceId][$statusCode];
+                }
+                else {
+                  $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Response::create();
+                  $RegistryEntry->id = self::generateUUID();
+                  $RegistryEntry->resourceId = $resourceId;
+                  $RegistryEntry->statusCode = $statusCode;
+                  $RegistryEntry->classId = $classId;
+                }                
                 $RegistryEntry->name = $ResourceNode->getAttribute('name');
-                $RegistryEntry->resourceId = $resourceId;
-                $RegistryEntry->statusCode = $statusCode;
-                $RegistryEntry->classId = $classId;
                 $RegistryEntry->lastModifiedTime = $lastModifiedTime;
                 $RegistryEntries[] = $RegistryEntry;
               }

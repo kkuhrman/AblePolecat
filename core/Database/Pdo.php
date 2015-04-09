@@ -209,7 +209,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         $Results = $this->executeStatement($sql->__toString(), $sql->getDmlOp());
         break;
       case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
-        $message = 'query() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
+        $message = 'execute() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
         $Results['errorInfo'] = $message;
         $this->error_info[] = $message;
         throw new AblePolecat_Database_Exception($message);

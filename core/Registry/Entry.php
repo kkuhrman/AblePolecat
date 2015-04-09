@@ -285,7 +285,7 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
    * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
    * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    *
-   * @return Array Results/rowset.
+   * @return int Number of records effected.
    */
   protected function executeDml(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql,
     AblePolecat_DatabaseInterface $Database = NULL) {
@@ -298,6 +298,9 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
       if ($CommandResult->success()) {
         $Result = $CommandResult->value();
       }
+    }
+    if (isset($Result) && isset($Result['recordsEffected'])) {
+      $Result = $Result['recordsEffected'];
     }
     return $Result;
   }

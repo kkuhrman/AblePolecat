@@ -251,47 +251,51 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       }
       
       //
-      // Generate registry entry/entries.
+      // Check for templates already registered.
+      // Unique key is themeName + articleId
       //
-      switch ($articleType) {
-        default:
-          break;
-        case 'AblePolecat_Message_ResponseInterface':
-          $sql = __SQL()->          
-            select(
-              'id')->
-            from('response')->
-            where(sprintf("`classId` = '%s'", $classId));
-          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
-          if ($CommandResult->success()) {
-            $responses = $CommandResult->value();
-            foreach($responses as $key => $response) {
-              if(isset($response['id'])) {
-                $RegistryEntry = AblePolecat_Registry_Entry_Template::create();
-                $RegistryEntry->id = self::generateUUID();
-                $RegistryEntry->name = $Node->getAttribute('name');
-                $RegistryEntry->themeName = $themeName;
-                $RegistryEntry->templateScope = $templateScope;
-                $RegistryEntry->articleId = $response['id'];
-                $RegistryEntry->docType = $docType;
-                $RegistryEntry->fullPath = $fullPath;
-                $RegistryEntries[] = $RegistryEntry;
-              }
-            }
-          }
-          break;
-        case 'AblePolecat_ComponentInterface':
-          $RegistryEntry = AblePolecat_Registry_Entry_Template::create();
-          $RegistryEntry->id = self::generateUUID();
-          $RegistryEntry->name = $Node->getAttribute('name');
-          $RegistryEntry->themeName = $themeName;
-          $RegistryEntry->templateScope = $templateScope;
-          $RegistryEntry->articleId = $classId;
-          $RegistryEntry->docType = $docType;
-          $RegistryEntry->fullPath = $fullPath;
-          $RegistryEntries[] = $RegistryEntry;
-          break;
+      $registeredTemplates = array();
+      $sql = __SQL()->          
+        select(
+          'id',
+          'name',
+          'themeName', 
+          'templateScope', 
+          'articleId', 
+          'docType', 
+          'fullPath', 
+          'lastModifiedTime')->
+        from('template')->
+        where(sprintf("`articleId` = '%s' AND `themeName` = '%s'", $classId, $themeName));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        foreach ($registrationInfo as $key => $Record) {
+          $themeNameTemp = $Record['themeName'];
+          $articleId = $Record['articleId'];
+          !isset($registeredTemplates[$themeNameTemp]) ? $registeredTemplates[$themeNameTemp] = array() : NULL;
+          $registeredTemplates[$themeNameTemp][$articleId] = AblePolecat_Registry_Entry_Template::create($Record);
+        }
       }
+      
+      //
+      // Check if template is already registered.
+      //
+      $RegistryEntry = NULL;
+      if (isset($registeredTemplates[$themeName][$classId])) {
+        $RegistryEntry = $registeredTemplates[$themeName][$classId];
+      }
+      else {
+        $RegistryEntry = AblePolecat_Registry_Entry_Template::create();
+        $RegistryEntry->id = self::generateUUID();
+        $RegistryEntry->themeName = $themeName;
+        $RegistryEntry->articleId = $classId;
+      }
+      $RegistryEntry->name = $Node->getAttribute('name');
+      $RegistryEntry->templateScope = $templateScope;          
+      $RegistryEntry->docType = $docType;
+      $RegistryEntry->fullPath = $fullPath;
+      $RegistryEntries[] = $RegistryEntry;
     }
     return $RegistryEntries;
   }

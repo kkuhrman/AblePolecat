@@ -83,7 +83,7 @@ class AblePolecat_Message_Response_Xhtml_Tpl extends AblePolecat_Message_Respons
       // @todo: multiple registrations for same article, theme, etc. why? should articleId be UNIQUE index?
       //
       $ResponseRegistration = $this->getResponseRegistration();
-      isset($ResponseRegistration) ? $articleId = $ResponseRegistration->getId() : $articleId = '';
+      isset($ResponseRegistration) ? $articleId = $ResponseRegistration->getClassId() : $articleId = '';
       $TemplateRegistrations = AblePolecat_Registry_Template::getRegistrationsByArticleId($articleId);
       isset($TemplateRegistrations[0]) ? $TemplateRegistration = $TemplateRegistrations[0] : $TemplateRegistration = NULL;
       

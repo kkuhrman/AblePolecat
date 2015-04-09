@@ -107,6 +107,31 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
         AblePolecat_Command_Chain::triggerError($message);
       }
       
+      //
+      // Check for resources already registered.
+      // Unique key is name + hostName.
+      //
+      $registeredResources = array($hostName => array());
+      $sql = __SQL()->          
+        select(
+          'id', 
+          'name', 
+          'hostName', 
+          'classId', 
+          'lastModifiedTime')->
+        from('resource')->
+        where(sprintf("`classId` = '%s'", $classId));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        foreach ($registrationInfo as $key => $Record) {
+          if ($hostName == $Record['hostName']) {
+            $name = $Record['name'];
+            $registeredResources[$hostName][$name] = AblePolecat_Registry_Entry_Resource::create($Record);
+          }
+        }
+      }
+      
       foreach($Node->childNodes as $key => $ResourceNode) {
         switch ($ResourceNode->nodeName) {
           default:
@@ -115,14 +140,25 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
             $registerFlag = $ResourceNode->getAttribute('register');
             if ($registerFlag != '0') {
               //
+              // Check if resource is already registered.
+              //
+              $RegistryEntry = NULL;
+              $name = $ResourceNode->getAttribute('id');
+              if (isset($registeredResources[$hostName][$name])) {
+                $RegistryEntry = $registeredResources[$hostName][$name];
+              }
+              else {
+                $RegistryEntry = AblePolecat_Registry_Entry_Resource::create();
+                $RegistryEntry->id = self::generateUUID();
+                $RegistryEntry->name = $name;
+                $RegistryEntry->hostName = $hostName;
+                $RegistryEntry->classId = $classId;
+              }
+              
+              //
               // NOTE: the resource URI path is in the 'id' attribute for 
               // resource elements encapsulated by the resourceClass element.
               //
-              $RegistryEntry = AblePolecat_Registry_Entry_Resource::create();
-              $RegistryEntry->id = self::generateUUID();
-              $RegistryEntry->name = $ResourceNode->getAttribute('id');
-              $RegistryEntry->hostName = $hostName;
-              $RegistryEntry->classId = $classId;
               $RegistryEntry->lastModifiedTime = $lastModifiedTime;
               $RegistryEntries[] = $RegistryEntry;
             }
@@ -215,7 +251,7 @@ class AblePolecat_Registry_Entry_Resource extends AblePolecat_Registry_EntryAbst
         $this->getClassId(), 
         $this->getLastModifiedTime()
       );
-    $this->executeDml($sql, $Database);
+    return $this->executeDml($sql, $Database);
   }
   
   /********************************************************************************

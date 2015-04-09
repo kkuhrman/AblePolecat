@@ -128,6 +128,33 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
         AblePolecat_Command_Chain::triggerError($message);
       }
       
+      //
+      // Check for connectors already registered.
+      // Unique key is resourceId + requestMethod.
+      //
+      $registeredConnectors = array();
+      $sql = __SQL()->
+        select(
+          'id', 
+          'name', 
+          'resourceId', 
+          'requestMethod',
+          'accessDeniedCode', 
+          'classId', 
+          'lastModifiedTime')->
+        from('connector')->
+        where(sprintf("`classId` = '%s'", $classId));
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      if ($CommandResult->success() && is_array($CommandResult->value())) {
+        $registrationInfo = $CommandResult->value();
+        foreach ($registrationInfo as $key => $Record) {
+          $resourceId = $Record['resourceId'];
+          $requestMethod = $Record['requestMethod'];
+          !isset($registeredConnectors[$resourceId]) ? $registeredConnectors[$resourceId] = array() : NULL;
+          $registeredConnectors[$resourceId][$requestMethod] = AblePolecat_Registry_Entry_Connector::create($Record);
+        }
+      }
+      
       foreach($Node->childNodes as $key => $childNode) {
         switch ($childNode->nodeName) {
           default:
@@ -142,12 +169,21 @@ class AblePolecat_Registry_Entry_Connector extends AblePolecat_Registry_EntryAbs
                 $accessDeniedCode = intval($resourceGroup['attributes']->getNamedItem('accessDeniedCode')->value);
               }
               foreach($resourceGroup['resources'] as $resourceId => $ResourceNode) {
-                $RegistryEntry = AblePolecat_Registry_Entry_Connector::create();
-                $RegistryEntry->id = self::generateUUID();
+                //
+                // Check if connector is already registered.
+                //
+                $RegistryEntry = NULL;
+                if (isset($registeredConnectors[$resourceId][$requestMethod])) {
+                  $RegistryEntry = $registeredConnectors[$resourceId][$requestMethod];
+                }
+                else {
+                  $RegistryEntry = AblePolecat_Registry_Entry_Connector::create();
+                  $RegistryEntry->id = self::generateUUID();
+                  $RegistryEntry->requestMethod = $requestMethod;
+                  $RegistryEntry->resourceId = $resourceId;
+                }
                 $resourceName = $ResourceNode->getAttribute('name');
                 $RegistryEntry->name = "$requestMethod $resourceName";
-                $RegistryEntry->requestMethod = $requestMethod;
-                $RegistryEntry->resourceId = $resourceId;
                 $RegistryEntry->accessDeniedCode = $accessDeniedCode;
                 $RegistryEntry->classId = $classId;
                 $RegistryEntry->lastModifiedTime = $lastModifiedTime;
