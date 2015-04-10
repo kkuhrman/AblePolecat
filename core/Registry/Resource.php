@@ -356,6 +356,11 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
         $ResourceRegistration->id = AblePolecat_Resource_Restricted_Install::UUID;
         $ResourceRegistration->classId = AblePolecat_Resource_Restricted_Install::UUID;
         break;
+      case AblePolecat_Message_RequestInterface::RESOURCE_NAME_TEST:
+        $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_TEST;
+        $ResourceRegistration->id = AblePolecat_Resource_Core_Test::UUID;
+        $ResourceRegistration->classId = AblePolecat_Resource_Core_Test::UUID;
+        break;
       case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
         $ResourceRegistration->name = AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE;
         $ResourceRegistration->id = AblePolecat_Resource_Restricted_Update::UUID;

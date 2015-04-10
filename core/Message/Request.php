@@ -30,6 +30,7 @@ interface AblePolecat_Message_RequestInterface extends AblePolecat_MessageInterf
   const RESOURCE_NAME_FORM      = 'form'; // basic, built-in UI form
   const RESOURCE_NAME_INSTALL   = 'install'; // interactive install
   const RESOURCE_NAME_SEARCH    = 'search'; // list view of search results
+  const RESOURCE_NAME_TEST      = 'test'; // run local unit tests
   const RESOURCE_NAME_UPDATE    = 'update'; // update project configuration
   const RESOURCE_NAME_UTIL      = 'util'; // Project utilities
   
@@ -283,6 +284,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_ERROR:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_SEARCH:
+        case AblePolecat_Message_RequestInterface::RESOURCE_NAME_TEST:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UPDATE:
         case AblePolecat_Message_RequestInterface::RESOURCE_NAME_UTIL:
           $resolvedResourceName = $uriPathParts[0];

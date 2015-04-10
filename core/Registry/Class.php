@@ -569,6 +569,20 @@ class AblePolecat_Registry_Class
     self::$Registry->addRegistration($RegistryEntry);
     
     $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Resource_Core_Test::UUID;
+    $RegistryEntry->name = 'AblePolecat_Resource_Core_Test';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Test.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
+    
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
+    $RegistryEntry->id = AblePolecat_Transaction_Test::UUID;
+    $RegistryEntry->name = 'AblePolecat_Transaction_Test';
+    $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Transaction', 'Test.php'));
+    $RegistryEntry->classFactoryMethod = 'wakeup';
+    self::$Registry->addRegistration($RegistryEntry);
+    
+    $RegistryEntry = AblePolecat_Registry_Entry_Class::create();
     $RegistryEntry->id = AblePolecat_Resource_Restricted_Update::UUID;
     $RegistryEntry->name = 'AblePolecat_Resource_Restricted_Update';
     $RegistryEntry->classFullPath = implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Update.php'));

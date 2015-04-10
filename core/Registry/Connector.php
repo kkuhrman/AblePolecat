@@ -326,6 +326,11 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
           'classId' => AblePolecat_Transaction_Restricted_Install::UUID,
           'accessDeniedCode' => 401,
         ),
+        AblePolecat_Resource_Core_Test::UUID => array(
+          'resourceId' => AblePolecat_Resource_Core_Test::UUID,
+          'classId' => AblePolecat_Transaction_Test::UUID,
+          'accessDeniedCode' => 403,
+        ),
         AblePolecat_Resource_Restricted_Update::UUID => array(
           'resourceId' => AblePolecat_Resource_Restricted_Update::UUID,
           'classId' => AblePolecat_Transaction_Restricted_Update::UUID,

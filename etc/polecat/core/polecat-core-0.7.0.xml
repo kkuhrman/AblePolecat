@@ -355,6 +355,10 @@
         <polecat:path>Resource/Restricted/Install.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
+      <polecat:class id="912f21ea-df92-11e4-b585-0050569e00a2" name="AblePolecat_Resource_Core_Test">
+        <polecat:path>Resource/Core/Test.php</polecat:path>
+        <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
+      </polecat:class>
       <polecat:class id="e152865f-b6b3-11e4-a12d-0050569e00a2" name="AblePolecat_Resource_Restricted_Update">
         <polecat:path>Resource/Restricted/Update.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
@@ -380,6 +384,10 @@
       </polecat:class>
       <polecat:class id="9e0398f2-604b-11e4-8bab-0050569e00a2" name="AblePolecat_Transaction_Restricted_Install">
         <polecat:path>Transaction/Restricted/Install.php</polecat:path>
+        <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
+      </polecat:class>
+      <polecat:class id="3c421fbe-df90-11e4-b585-0050569e00a2" name="AblePolecat_Transaction_Test">
+        <polecat:path>Transaction/Test.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
       <polecat:class id="fb2a9ab0-b6b4-11e4-a12d-0050569e00a2" name="AblePolecat_Transaction_Restricted_Update">

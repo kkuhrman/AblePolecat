@@ -14,6 +14,7 @@
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Ack.php')));
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Error.php')));
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Form.php')));
+require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Test.php')));
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Install.php')));
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Update.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Restricted', 'Util.php')));
@@ -60,6 +61,9 @@ class AblePolecat_Resource_Core_Factory extends AblePolecat_Resource_CoreAbstrac
           break;
         case 'AblePolecat_Resource_Restricted_Install':
           self::$Resource = AblePolecat_Resource_Restricted_Install::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
+          break;
+        case 'AblePolecat_Resource_Core_Test':
+          self::$Resource = AblePolecat_Resource_Core_Test::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
           break;
         case 'AblePolecat_Resource_Restricted_Update':
           self::$Resource = AblePolecat_Resource_Restricted_Update::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
