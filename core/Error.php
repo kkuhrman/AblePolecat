@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.3
+ * @version   0.7.0
  */
  
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'Debug.php');
