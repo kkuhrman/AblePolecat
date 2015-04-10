@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.6.3
+ * @version   0.7.0
  */
 
 /**
@@ -249,16 +249,13 @@ class AblePolecat_Server_Paths {
         case 'core':
           $path = self::core;
           break;
-        case 'libs':
-          // $path = self::usr . DIRECTORY_SEPARATOR . 'libs';
-          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'libs'));
+        case 'lib':
+          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'lib'));
           break;
         case 'conf':
-          // $path = self::etc . DIRECTORY_SEPARATOR . 'conf';
           $path = implode(DIRECTORY_SEPARATOR, array(self::etc, 'polecat', 'conf'));
           break;
         case 'log':
-          // $path = self::files . DIRECTORY_SEPARATOR . 'log';
           $path = implode(DIRECTORY_SEPARATOR, array(self::files, 'log'));
           break;
         case 'files':
@@ -271,9 +268,14 @@ class AblePolecat_Server_Paths {
         case 'src':
           $path = self::src;
           break;
-        case 'mods':
-          // $path = self::usr . DIRECTORY_SEPARATOR . 'mods';
-          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'mods'));
+        case 'mod':
+          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'mod'));
+          break;
+        case 'test':
+          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'share', 'test'));
+          break;
+        case 'doc':
+          $path = implode(DIRECTORY_SEPARATOR, array(self::usr, 'share', 'documentation'));
           break;
       }
     }
@@ -302,12 +304,14 @@ class AblePolecat_Server_Paths {
       case 'core':
       case 'conf';
       case 'log':
-      case 'libs':
+      case 'lib':
       case 'usr':
       case 'src':
       case 'files':
       case 'var':
-      case 'mods':
+      case 'mod':
+      case 'test':
+      case 'doc':
         break;
     }
     return $reserved;
