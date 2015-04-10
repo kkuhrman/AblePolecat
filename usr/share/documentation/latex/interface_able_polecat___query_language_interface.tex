@@ -1,0 +1,61 @@
+\hypertarget{interface_able_polecat___query_language_interface}{}\section{Able\+Polecat\+\_\+\+Query\+Language\+Interface Interface Reference}
+\label{interface_able_polecat___query_language_interface}\index{Able\+Polecat\+\_\+\+Query\+Language\+Interface@{Able\+Polecat\+\_\+\+Query\+Language\+Interface}}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{interface_able_polecat___query_language_interface_a1af373ca7830ba7bc0cddbf920db0dd8}{prepare\+Request} (\$query)
+\item 
+static \hyperlink{interface_able_polecat___query_language_interface_a27d05e8a83ab2cea3193d948a228310e}{prepare\+Statement} (\hyperlink{interface_able_polecat___message___request_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface} \$Request)
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___query_language_interface_a1af373ca7830ba7bc0cddbf920db0dd8}{}\index{Able\+Polecat\+\_\+\+Query\+Language\+Interface@{Able\+Polecat\+\_\+\+Query\+Language\+Interface}!prepare\+Request@{prepare\+Request}}
+\index{prepare\+Request@{prepare\+Request}!Able\+Polecat\+\_\+\+Query\+Language\+Interface@{Able\+Polecat\+\_\+\+Query\+Language\+Interface}}
+\subsubsection[{prepare\+Request}]{\setlength{\rightskip}{0pt plus 5cm}static prepare\+Request (
+\begin{DoxyParamCaption}
+\item[{}]{\$query}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___query_language_interface_a1af373ca7830ba7bc0cddbf920db0dd8}
+Prepare request object from query language statement.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$query} & Query language statement.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___message___request_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___query_language___exception}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Exception}} & if query is invalid. \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{interface_able_polecat___query_language_interface_a27d05e8a83ab2cea3193d948a228310e}{}\index{Able\+Polecat\+\_\+\+Query\+Language\+Interface@{Able\+Polecat\+\_\+\+Query\+Language\+Interface}!prepare\+Statement@{prepare\+Statement}}
+\index{prepare\+Statement@{prepare\+Statement}!Able\+Polecat\+\_\+\+Query\+Language\+Interface@{Able\+Polecat\+\_\+\+Query\+Language\+Interface}}
+\subsubsection[{prepare\+Statement}]{\setlength{\rightskip}{0pt plus 5cm}static prepare\+Statement (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}}]{\$\+Request}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___query_language_interface_a27d05e8a83ab2cea3193d948a228310e}
+Prepare \hyperlink{interface_able_polecat___query_language___statement_interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+Interface} object from \hyperlink{interface_able_polecat___message___request_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface} object.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___message___request_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface} & {\em \$\+Request,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___query_language___statement_interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___query_language___exception}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Exception}} & if query is invalid. \\
+\hline
+\end{DoxyExceptions}
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Query\+Language.\+php\end{DoxyCompactItemize}

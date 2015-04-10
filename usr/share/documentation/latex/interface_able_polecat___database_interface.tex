@@ -1,0 +1,137 @@
+\hypertarget{interface_able_polecat___database_interface}{}\section{Able\+Polecat\+\_\+\+Database\+Interface Interface Reference}
+\label{interface_able_polecat___database_interface}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Database\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5.121951cm]{interface_able_polecat___database_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___database_interface_a66e49cc03d1511ec4c0290ffaa688079}{get\+Locater} ()
+\item 
+\hyperlink{interface_able_polecat___database_interface_aba618d13fc7fc2ddca23db57614cd14d}{install} (\hyperlink{interface_able_polecat___database___schema_interface}{Able\+Polecat\+\_\+\+Database\+\_\+\+Schema\+Interface} \$Schema)
+\item 
+\hyperlink{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}{execute} (\hyperlink{interface_able_polecat___query_language___statement___sql___interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface} \$sql)
+\item 
+\hyperlink{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}{query} (\hyperlink{interface_able_polecat___query_language___statement___sql___interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface} \$sql)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{interface_able_polecat___database_interface_a4becbc3a94a0b9220b452ccddc1c03ac}{ready} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!execute@{execute}}
+\index{execute@{execute}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}execute (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface}}]{\$sql}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}
+Execute S\+Q\+L D\+M\+L and return number of rows effected.
+
+N\+O\+T\+E\+: U\+S\+E \hyperlink{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}{execute()} for I\+N\+S\+E\+R\+T, D\+E\+L\+E\+T\+E, U\+P\+D\+A\+T\+E, R\+E\+P\+L\+A\+C\+E. U\+S\+E \hyperlink{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}{query()} for S\+E\+L\+E\+C\+T.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___query_language___statement___sql___interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface} & {\em \$sql,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Array Results/rowset. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}{query()} 
+\end{DoxySeeAlso}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_a2446b764608f23c472255a8e07076aff}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database_interface_a66e49cc03d1511ec4c0290ffaa688079}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!get\+Locater@{get\+Locater}}
+\index{get\+Locater@{get\+Locater}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+\subsubsection[{get\+Locater}]{\setlength{\rightskip}{0pt plus 5cm}get\+Locater (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database_interface_a66e49cc03d1511ec4c0290ffaa688079}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___access_control___resource___locater___dsn_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+\_\+\+Dsn\+Interface} U\+R\+L used to open resource or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database_abstract_a66e49cc03d1511ec4c0290ffaa688079}{Able\+Polecat\+\_\+\+Database\+Abstract}.
+
+\hypertarget{interface_able_polecat___database_interface_aba618d13fc7fc2ddca23db57614cd14d}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!install@{install}}
+\index{install@{install}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+\subsubsection[{install}]{\setlength{\rightskip}{0pt plus 5cm}install (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Database\+\_\+\+Schema\+Interface}}]{\$\+Schema}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database_interface_aba618d13fc7fc2ddca23db57614cd14d}
+Install database objects for given schema.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___database___schema_interface}{Able\+Polecat\+\_\+\+Database\+\_\+\+Schema\+Interface} & {\em \$\+Schema} & \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___database___exception}{Able\+Polecat\+\_\+\+Database\+\_\+\+Exception}} & if install fails. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_aba618d13fc7fc2ddca23db57614cd14d}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!query@{query}}
+\index{query@{query}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+\subsubsection[{query}]{\setlength{\rightskip}{0pt plus 5cm}query (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface}}]{\$sql}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}
+Execute S\+Q\+L D\+M\+L and return results as an array.
+
+N\+O\+T\+E\+: U\+S\+E \hyperlink{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}{query()} for S\+E\+L\+E\+C\+T. U\+S\+E \hyperlink{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}{execute()} for I\+N\+S\+E\+R\+T, D\+E\+L\+E\+T\+E, U\+P\+D\+A\+T\+E, R\+E\+P\+L\+A\+C\+E.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___query_language___statement___sql___interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface} & {\em \$sql,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Array Results/rowset. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}{execute()} 
+\end{DoxySeeAlso}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_a036b9fde55003e5c63dd6345b0f2a805}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database_interface_a4becbc3a94a0b9220b452ccddc1c03ac}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!ready@{ready}}
+\index{ready@{ready}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+\subsubsection[{ready}]{\setlength{\rightskip}{0pt plus 5cm}static ready (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___database_interface_a4becbc3a94a0b9220b452ccddc1c03ac}
+Indicates whether database connection is established and accessible.
+
+\begin{DoxyReturn}{Returns}
+boolean T\+R\+U\+E if database connection is functional, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_a4becbc3a94a0b9220b452ccddc1c03ac}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Database.\+php\end{DoxyCompactItemize}

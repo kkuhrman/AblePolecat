@@ -1,0 +1,361 @@
+\hypertarget{class_able_polecat___clock}{}\section{Able\+Polecat\+\_\+\+Clock Class Reference}
+\label{class_able_polecat___clock}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___clock_a4a20559544fdf4dcb457e258dc976cf8}{reset} ()
+\item 
+\hyperlink{class_able_polecat___clock_a7f4f85e0b6d6280aa31b9ef55f5ff2c5}{get\+Elapsed\+Time} (\$time\+Segment=self\+::\+E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+A\+C\+T\+I\+V\+E, \$as\+String=false, \$bench\+Mark=self\+::\+E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N, \$given\+Time=null)
+\item 
+\hyperlink{class_able_polecat___clock_a941f1c4e39fe6a576ec8a5fe0b6e00dd}{get\+Remaining\+Time} (\$as\+String=false)
+\item 
+\hyperlink{class_able_polecat___clock_aa56a17bc66c1081fad1cca3a488224c3}{is\+Active} ()
+\item 
+\hyperlink{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{start} (\$mode=self\+::\+C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O, \$countdown\+Time=0, \$\hyperlink{class_able_polecat___clock_a4a20559544fdf4dcb457e258dc976cf8}{reset}=false)
+\item 
+\hyperlink{class_able_polecat___clock_a6c0c41e7a45a3c1899074b89c235114c}{split} ()
+\item 
+\hyperlink{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}{stop} ()
+\item 
+\hyperlink{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}{countdown} (\$countdown\+Time, \$mode=self\+::\+C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P, \$function\+Name=null, \$parameters=null)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___clock_a61e1e95fb26ff54d8ef966e5bce183dd}{get\+Micro\+Time} (\$as\+String=false)
+\item 
+static \hyperlink{class_able_polecat___clock_a610771125599af0a8822c5618eeced9b}{get\+Microtime\+String} (\$microtime)
+\end{DoxyCompactItemize}
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{class_able_polecat___clock_aa04a01c008eabae54e6d664fe47de8a0}{C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E} = \textquotesingle{}clock \hyperlink{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{start} time\textquotesingle{}
+\item 
+\hypertarget{class_able_polecat___clock_a14062a362fa72279a8dc01f9f8e59720}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+S\+T\+O\+P\+\_\+\+T\+I\+M\+E} = \textquotesingle{}clock \hyperlink{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}{stop} time\textquotesingle{}\label{class_able_polecat___clock_a14062a362fa72279a8dc01f9f8e59720}
+
+\item 
+\hypertarget{class_able_polecat___clock_a4b295353e3c3f49019addbd92064df28}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+S\+P\+L\+I\+T\+\_\+\+T\+I\+M\+E} = \textquotesingle{}clock \hyperlink{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{start} \hyperlink{class_able_polecat___clock_a6c0c41e7a45a3c1899074b89c235114c}{split} time\textquotesingle{}\label{class_able_polecat___clock_a4b295353e3c3f49019addbd92064df28}
+
+\item 
+\hypertarget{class_able_polecat___clock_abc28951694c8f0946bed5f32be7e72d0}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+S\+T\+O\+P\+\_\+\+S\+P\+L\+I\+T\+\_\+\+T\+I\+M\+E} = \textquotesingle{}clock \hyperlink{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}{stop} \hyperlink{class_able_polecat___clock_a6c0c41e7a45a3c1899074b89c235114c}{split} time\textquotesingle{}\label{class_able_polecat___clock_abc28951694c8f0946bed5f32be7e72d0}
+
+\item 
+\hypertarget{class_able_polecat___clock_aabe31eab70b88f293f93d58f11f336ca}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+T\+I\+M\+E} = \textquotesingle{}clock \hyperlink{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}{countdown} time\textquotesingle{}\label{class_able_polecat___clock_aabe31eab70b88f293f93d58f11f336ca}
+
+\item 
+\hypertarget{class_able_polecat___clock_a90bdf45efb424f441df38a4ba71b1324}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+S\+P\+L\+I\+T\+\_\+\+T\+I\+M\+E\+S} = \textquotesingle{}clock \hyperlink{class_able_polecat___clock_a6c0c41e7a45a3c1899074b89c235114c}{split} times\textquotesingle{}\label{class_able_polecat___clock_a90bdf45efb424f441df38a4ba71b1324}
+
+\item 
+\hypertarget{class_able_polecat___clock_a315fc72b235a24a43763a2f8bd1e0a1a}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+W\+A\+I\+T\+\_\+\+I\+N\+T\+E\+R\+V\+A\+L\+\_\+\+T\+I\+M\+E\+S} = \textquotesingle{}clock wait interval times\textquotesingle{}\label{class_able_polecat___clock_a315fc72b235a24a43763a2f8bd1e0a1a}
+
+\item 
+const \hyperlink{class_able_polecat___clock_a19b46c939051c0d478556151883c9783}{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N} = 0x0001
+\item 
+const \hyperlink{class_able_polecat___clock_a88569a59df69a0777e5206c28facbf63}{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D} = 0x0001
+\item 
+\hypertarget{class_able_polecat___clock_ae1ddc1e08552e4babf26d0fba6a433ec}{}const {\bfseries E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+A\+C\+T\+I\+V\+E} = 0x0002\label{class_able_polecat___clock_ae1ddc1e08552e4babf26d0fba6a433ec}
+
+\item 
+\hypertarget{class_able_polecat___clock_ab478cbb4b392f7330eb26aac13cadc54}{}const {\bfseries E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+W\+A\+I\+T} = 0x0004\label{class_able_polecat___clock_ab478cbb4b392f7330eb26aac13cadc54}
+
+\item 
+const \hyperlink{class_able_polecat___clock_af2923c94381ca4cb1e50aad421497de9}{C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O} = 0x0100
+\item 
+\hypertarget{class_able_polecat___clock_ade4a71fd3ecbf441fec195afa2ed2bd3}{}const {\bfseries C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+O\+U\+N\+T\+D\+O\+W\+N} = 0x0200\label{class_able_polecat___clock_ade4a71fd3ecbf441fec195afa2ed2bd3}
+
+\item 
+const \hyperlink{class_able_polecat___clock_a9860c0c8627b07dd82aa030f18413a73}{C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P} = 0x0010
+\item 
+\hypertarget{class_able_polecat___clock_ab953a1082ac7e5f5cde1953ebbfb4062}{}const {\bfseries C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+P\+O\+L\+L} = 0x0020\label{class_able_polecat___clock_ab953a1082ac7e5f5cde1953ebbfb4062}
+
+\item 
+\hypertarget{class_able_polecat___clock_a19457dc78278c09fb133c9f312527879}{}const {\bfseries C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+I\+N\+T\+E\+R\+R\+U\+P\+T} = 0x0030\label{class_able_polecat___clock_a19457dc78278c09fb133c9f312527879}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___clock_aa9f35fe5fc8e8c4597b18a7b4c9d5222}{\+\_\+restart} ()
+\item 
+\hyperlink{class_able_polecat___clock_a1eb8ecab043c4ee4eb5cacb21f77b5c9}{\+\_\+set\+Countdown\+Callback} (\$function\+Name, \$parameters)
+\item 
+\hyperlink{class_able_polecat___clock_aca838fd7b45e2507cdc6cc21d372a261}{\+\_\+countdown\+Callback} ()
+\item 
+\hyperlink{class_able_polecat___clock_a2e188a9f13c5f98caf0475e53cd711fa}{\+\_\+adjust\+Times\+On\+Countdown\+Completion} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_able_polecat___clock_a0ecb7e25a147582d75cd44013e515bac}{}{\bfseries \$\+\_\+create\+Time}\label{class_able_polecat___clock_a0ecb7e25a147582d75cd44013e515bac}
+
+\item 
+\hypertarget{class_able_polecat___clock_aeb317fe3fd08d88ddf95de6318398f23}{}{\bfseries \$\+\_\+times}\label{class_able_polecat___clock_aeb317fe3fd08d88ddf95de6318398f23}
+
+\item 
+\hypertarget{class_able_polecat___clock_a591b2fac857402b7049ebb2ca47cdd34}{}{\bfseries \$\+\_\+mode}\label{class_able_polecat___clock_a591b2fac857402b7049ebb2ca47cdd34}
+
+\item 
+\hypertarget{class_able_polecat___clock_ad6afe7599d5c63851f3a57c1b37a4c98}{}{\bfseries \$\+\_\+countdown\+Callback\+Funtion\+Name}\label{class_able_polecat___clock_ad6afe7599d5c63851f3a57c1b37a4c98}
+
+\item 
+\hypertarget{class_able_polecat___clock_a7c2cf4f7718c08480a6b27834ba7c3b5}{}{\bfseries \$\+\_\+countdown\+Callback\+Funtion\+Name\+Callable}\label{class_able_polecat___clock_a7c2cf4f7718c08480a6b27834ba7c3b5}
+
+\item 
+\hypertarget{class_able_polecat___clock_afc220dca3bc4cd6ad4c6583e3892b184}{}{\bfseries \$\+\_\+countdown\+Callback\+Funtion\+Parameters}\label{class_able_polecat___clock_afc220dca3bc4cd6ad4c6583e3892b184}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___clock_a2e188a9f13c5f98caf0475e53cd711fa}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!\+\_\+adjust\+Times\+On\+Countdown\+Completion@{\+\_\+adjust\+Times\+On\+Countdown\+Completion}}
+\index{\+\_\+adjust\+Times\+On\+Countdown\+Completion@{\+\_\+adjust\+Times\+On\+Countdown\+Completion}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{\+\_\+adjust\+Times\+On\+Countdown\+Completion}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+adjust\+Times\+On\+Countdown\+Completion (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___clock_a2e188a9f13c5f98caf0475e53cd711fa}
+\+\_\+adjust\+Times\+On\+Countdown\+Completion
+
+When countdown timer is started in polling mode, it is likely that time will run out prior to countdown being stopped explicitly, by call to \hyperlink{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}{stop()}, or implicitly, by call to \hyperlink{class_able_polecat___clock_a941f1c4e39fe6a576ec8a5fe0b6e00dd}{get\+Remaining\+Time()}. This function adjusts the logged times so that only specified countdown period is counted as active and any elapsed time thereafter is wait time. \hypertarget{class_able_polecat___clock_aca838fd7b45e2507cdc6cc21d372a261}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!\+\_\+countdown\+Callback@{\+\_\+countdown\+Callback}}
+\index{\+\_\+countdown\+Callback@{\+\_\+countdown\+Callback}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{\+\_\+countdown\+Callback}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+countdown\+Callback (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___clock_aca838fd7b45e2507cdc6cc21d372a261}
+\+\_\+countdown\+Callback
+
+Helper function executes countdown callback and returns the result \hypertarget{class_able_polecat___clock_aa9f35fe5fc8e8c4597b18a7b4c9d5222}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!\+\_\+restart@{\+\_\+restart}}
+\index{\+\_\+restart@{\+\_\+restart}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{\+\_\+restart}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+restart (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___clock_aa9f35fe5fc8e8c4597b18a7b4c9d5222}
+\+\_\+restart
+
+checks if a start/stop has occured w/o reset and continues time keeping accordingly \hypertarget{class_able_polecat___clock_a1eb8ecab043c4ee4eb5cacb21f77b5c9}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!\+\_\+set\+Countdown\+Callback@{\+\_\+set\+Countdown\+Callback}}
+\index{\+\_\+set\+Countdown\+Callback@{\+\_\+set\+Countdown\+Callback}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{\+\_\+set\+Countdown\+Callback}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+set\+Countdown\+Callback (
+\begin{DoxyParamCaption}
+\item[{}]{\$function\+Name, }
+\item[{}]{\$parameters}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___clock_a1eb8ecab043c4ee4eb5cacb21f77b5c9}
+\+\_\+set\+Countdown\+Callback
+
+Helper function to manage callback funtion for countdown timer feature \hypertarget{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!countdown@{countdown}}
+\index{countdown@{countdown}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{countdown}]{\setlength{\rightskip}{0pt plus 5cm}countdown (
+\begin{DoxyParamCaption}
+\item[{}]{\$countdown\+Time, }
+\item[{}]{\$mode = {\ttfamily self\+:\+:COUNTDOWN\+\_\+MODE\+\_\+SLEEP}, }
+\item[{}]{\$function\+Name = {\ttfamily null}, }
+\item[{}]{\$parameters = {\ttfamily null}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}
+countdown
+
+starts clock in countdown mode
+
+Clock can be put into countdown mode in one of two ways (1) call to \hyperlink{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}{countdown()} (2) call to \hyperlink{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{start()} specifying countdown as mode
+
+Countdown works in one of two ways\+: (1) Sleep -\/ puts script in sleep mode for countdown time and then executes callback if given (2) Poll -\/ caller starts countdown clock, continues script and is responsible for checking if countdown is complete. Callback can still be given but will not be invoked when countdown is complete, rather when countdown is complete A\+N\+D caller issues follow up call to function. T\+O\+D\+O\+: how to do interrupt???
+
+If clock is put into countdown mode by a call to \hyperlink{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{start()}, countdown mode defaults to poll and no callback function can be given. \hyperlink{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}{countdown()} allows caller to choose between available countdown modes A\+N\+D specify a callback function.
+
+If clock is running, successive calls to \hyperlink{class_able_polecat___clock_a40b2ead9e71a4258814b01d3f9d9298b}{countdown()} will be ignored.
+
+To check countdown time remaining in poll mode call \hyperlink{class_able_polecat___clock_a941f1c4e39fe6a576ec8a5fe0b6e00dd}{get\+Remaining\+Time()}
+
+
+\begin{DoxyParams}[1]{Parameters}
+int & {\em \$countdown\+Time} & time to count down in seconds \\
+\hline
+int & {\em \$mode} & sleep, poll, interrupt(?) \\
+\hline
+callback & {\em \$function\+Name} & name of function to call when countdown is complete or N\+U\+L\+L \\
+\hline
+array & {\em \$parameters} & name-\/value pairs of callback function paramters/values or N\+U\+L\+L\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed return value of callback function if mode is sleep or T\+R\+U\+E if mode is poll and countdown started successfully otherwise F\+A\+L\+S\+E 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_a7f4f85e0b6d6280aa31b9ef55f5ff2c5}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!get\+Elapsed\+Time@{get\+Elapsed\+Time}}
+\index{get\+Elapsed\+Time@{get\+Elapsed\+Time}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{get\+Elapsed\+Time}]{\setlength{\rightskip}{0pt plus 5cm}get\+Elapsed\+Time (
+\begin{DoxyParamCaption}
+\item[{}]{\$time\+Segment = {\ttfamily self\+:\+:ELAPSED\+\_\+TIME\+\_\+TOTAL\+\_\+ACTIVE}, }
+\item[{}]{\$as\+String = {\ttfamily false}, }
+\item[{}]{\$bench\+Mark = {\ttfamily self\+:\+:ELAPSED\+\_\+TIME\+\_\+SINCE\+\_\+CREATION}, }
+\item[{}]{\$given\+Time = {\ttfamily null}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a7f4f85e0b6d6280aa31b9ef55f5ff2c5}
+get\+Elapsed\+Time
+
+Returns the total time elapsed in microseconds since the given benchmark time N\+O\+T\+E\+: calling get\+Elapsed\+Time while clock is running will create a split but will not stop the clock
+
+
+\begin{DoxyParams}[1]{Parameters}
+int & {\em \$time\+Segment} & return total for active, wait or both times \\
+\hline
+bool & {\em \$as\+String} & if T\+R\+U\+E returns time as a formatted string \\
+\hline
+int & {\em \$bench\+Mark} & time to use as the basis for calculating total time elapsed \\
+\hline
+float & {\em \$given\+Time} & R\+E\+S\+E\+R\+V\+E\+D -\/ T\+O\+D\+O allow user to specifiy benchmark time\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed the specified time total in microseconds as float or string or F\+A\+L\+S\+E 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_a61e1e95fb26ff54d8ef966e5bce183dd}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!get\+Micro\+Time@{get\+Micro\+Time}}
+\index{get\+Micro\+Time@{get\+Micro\+Time}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{get\+Micro\+Time}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Micro\+Time (
+\begin{DoxyParamCaption}
+\item[{}]{\$as\+String = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___clock_a61e1e95fb26ff54d8ef966e5bce183dd}
+get\+Micro\+Time
+
+
+\begin{DoxyParams}[1]{Parameters}
+bool & {\em \$as\+String} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed returns the current Unix timestamp in microseconds 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_a610771125599af0a8822c5618eeced9b}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!get\+Microtime\+String@{get\+Microtime\+String}}
+\index{get\+Microtime\+String@{get\+Microtime\+String}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{get\+Microtime\+String}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Microtime\+String (
+\begin{DoxyParamCaption}
+\item[{}]{\$microtime}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___clock_a610771125599af0a8822c5618eeced9b}
+get\+Microtime\+String
+
+
+\begin{DoxyParams}{Parameters}
+{\em float} & microtime\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the time as a formatted string 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_a941f1c4e39fe6a576ec8a5fe0b6e00dd}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!get\+Remaining\+Time@{get\+Remaining\+Time}}
+\index{get\+Remaining\+Time@{get\+Remaining\+Time}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{get\+Remaining\+Time}]{\setlength{\rightskip}{0pt plus 5cm}get\+Remaining\+Time (
+\begin{DoxyParamCaption}
+\item[{}]{\$as\+String = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a941f1c4e39fe6a576ec8a5fe0b6e00dd}
+get\+Remaining\+Time
+
+If the clock is running in countdown mode A\+N\+D the countdown mode is \textquotesingle{}polling\textquotesingle{} call to get\+Remaining\+Time will return time left until countdown is complete, otherwise it will return 0.
+
+
+\begin{DoxyParams}[1]{Parameters}
+bool & {\em \$as\+String} & if T\+R\+U\+E returns time as a formatted string\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed time remaining until countdown is complete or 0 as float or string 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_aa56a17bc66c1081fad1cca3a488224c3}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!is\+Active@{is\+Active}}
+\index{is\+Active@{is\+Active}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{is\+Active}]{\setlength{\rightskip}{0pt plus 5cm}is\+Active (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_aa56a17bc66c1081fad1cca3a488224c3}
+is\+Active
+
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if the clock is \textquotesingle{}running\textquotesingle{} (keeping time) otherwise F\+A\+L\+S\+E 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_a4a20559544fdf4dcb457e258dc976cf8}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!reset@{reset}}
+\index{reset@{reset}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}reset (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a4a20559544fdf4dcb457e258dc976cf8}
+reset
+
+Sets clock times to zero and re-\/initializes all presets \hypertarget{class_able_polecat___clock_a6c0c41e7a45a3c1899074b89c235114c}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!split@{split}}
+\index{split@{split}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{split}]{\setlength{\rightskip}{0pt plus 5cm}split (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a6c0c41e7a45a3c1899074b89c235114c}
+split
+
+logs a split (aka \textquotesingle{}lap\textquotesingle{}) time w/o stopping the clock \hypertarget{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!start@{start}}
+\index{start@{start}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}start (
+\begin{DoxyParamCaption}
+\item[{}]{\$mode = {\ttfamily self\+:\+:CLOCK\+\_\+MODE\+\_\+CHRONO}, }
+\item[{}]{\$countdown\+Time = {\ttfamily 0}, }
+\item[{}]{\$reset = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}
+start
+
+sets the clock in motion (keeping time)
+
+in either mode (chrono or countdown) \hyperlink{class_able_polecat___clock_a858036aeb7d29d5d0e314454045b1684}{start()} doubles as a \textquotesingle{}resume\textquotesingle{} function if the specified mode matches the internal mode, otherwise if modes do not match call to start will be considered \textquotesingle{}reset and start over\textquotesingle{} (same behavior is achieved by setting \$reset to T\+R\+U\+E).
+
+
+\begin{DoxyParams}[1]{Parameters}
+int & {\em \$mode} & -\/ the mode to start clock in (chrono or countdown) \\
+\hline
+int & {\em \$countdown\+Time} & countdown time in seconds (ignored if mode is chrono) \\
+\hline
+bool & {\em \$reset} & reset clock and start over\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed the current microtime or F\+A\+L\+S\+E if the clock is already running or could not be started 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!stop@{stop}}
+\index{stop@{stop}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}stop (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}
+stop
+
+stops the clock from \textquotesingle{}\textquotesingle{}running\textquotesingle{} (keeping time)
+
+Call to \hyperlink{class_able_polecat___clock_a8b6fc76a620d7557d06e9a11a9ffb509}{stop()} is ignored if clock is not running
+
+\begin{DoxyReturn}{Returns}
+mixed the current microtime or F\+A\+L\+S\+E if the clock is already stopped or could not be stopped 
+\end{DoxyReturn}
+
+
+\subsection{Field Documentation}
+\hypertarget{class_able_polecat___clock_af2923c94381ca4cb1e50aad421497de9}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O@{C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O}}
+\index{C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O@{C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O}]{\setlength{\rightskip}{0pt plus 5cm}const C\+L\+O\+C\+K\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+R\+O\+N\+O = 0x0100}\label{class_able_polecat___clock_af2923c94381ca4cb1e50aad421497de9}
+clock mode constants \hypertarget{class_able_polecat___clock_aa04a01c008eabae54e6d664fe47de8a0}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E@{C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E}}
+\index{C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E@{C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E}]{\setlength{\rightskip}{0pt plus 5cm}const C\+L\+O\+C\+K\+\_\+\+S\+T\+A\+R\+T\+\_\+\+T\+I\+M\+E = \textquotesingle{}clock {\bf start} time\textquotesingle{}}\label{class_able_polecat___clock_aa04a01c008eabae54e6d664fe47de8a0}
+array key constants for times \hypertarget{class_able_polecat___clock_a9860c0c8627b07dd82aa030f18413a73}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P@{C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P}}
+\index{C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P@{C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P}]{\setlength{\rightskip}{0pt plus 5cm}const C\+O\+U\+N\+T\+D\+O\+W\+N\+\_\+\+M\+O\+D\+E\+\_\+\+S\+L\+E\+E\+P = 0x0010}\label{class_able_polecat___clock_a9860c0c8627b07dd82aa030f18413a73}
+countdown timer modes \hypertarget{class_able_polecat___clock_a19b46c939051c0d478556151883c9783}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N@{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N}}
+\index{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N@{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N}]{\setlength{\rightskip}{0pt plus 5cm}const E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+S\+I\+N\+C\+E\+\_\+\+C\+R\+E\+A\+T\+I\+O\+N = 0x0001}\label{class_able_polecat___clock_a19b46c939051c0d478556151883c9783}
+elapsed time benchmark constants \hypertarget{class_able_polecat___clock_a88569a59df69a0777e5206c28facbf63}{}\index{Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}!E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D@{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D}}
+\index{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D@{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D}!Able\+Polecat\+\_\+\+Clock@{Able\+Polecat\+\_\+\+Clock}}
+\subsubsection[{E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D}]{\setlength{\rightskip}{0pt plus 5cm}const E\+L\+A\+P\+S\+E\+D\+\_\+\+T\+I\+M\+E\+\_\+\+T\+O\+T\+A\+L\+\_\+\+C\+O\+M\+B\+I\+N\+E\+D = 0x0001}\label{class_able_polecat___clock_a88569a59df69a0777e5206c28facbf63}
+elpased time calculator constants 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Clock.\+php\end{DoxyCompactItemize}

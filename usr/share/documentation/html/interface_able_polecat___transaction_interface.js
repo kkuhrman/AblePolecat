@@ -1,0 +1,26 @@
+var interface_able_polecat___transaction_interface =
+[
+    [ "commit", "interface_able_polecat___transaction_interface.html#af5674c27d4a92f6228565010eacbb9cb", null ],
+    [ "getAgent", "interface_able_polecat___transaction_interface.html#a14f9546bbf5895db0fe37673bab21850", null ],
+    [ "getConnectorRegistration", "interface_able_polecat___transaction_interface.html#a3e5ea27c16b5306b60f4b105076ca501", null ],
+    [ "getParentTransactionId", "interface_able_polecat___transaction_interface.html#a780c17f0187ec8dba7d8b35b3325d44c", null ],
+    [ "getRequest", "interface_able_polecat___transaction_interface.html#adf1a35ad20e475c59cc0967d5764aa22", null ],
+    [ "getResourceRegistration", "interface_able_polecat___transaction_interface.html#a8876f6810e05036d8c4007394576f53a", null ],
+    [ "getSavepointId", "interface_able_polecat___transaction_interface.html#aaaa36c40332d95e879b5072aba995d27", null ],
+    [ "getStatus", "interface_able_polecat___transaction_interface.html#a9d21636071f529e2154051d3ea6e5921", null ],
+    [ "getStatusCode", "interface_able_polecat___transaction_interface.html#a094778dd1c04fe44626000b47ea0c0bb", null ],
+    [ "getTransactionId", "interface_able_polecat___transaction_interface.html#a83a4c2954e4da6dad24e596265e33d0a", null ],
+    [ "rollback", "interface_able_polecat___transaction_interface.html#afa549adf79e3f8c09fe8f903dd5fbfa7", null ],
+    [ "start", "interface_able_polecat___transaction_interface.html#af8fa59992209e36dccb3eefb0f75531f", null ],
+    [ "SAVEPOINT_NAME_START", "interface_able_polecat___transaction_interface.html#a04ed49890eb8b5b01df737c511037773", null ],
+    [ "TX_ARG_AGENT", "interface_able_polecat___transaction_interface.html#a196bbb97fa59a5c67c37d8e349ab8d96", null ],
+    [ "TX_ARG_CONNECTOR_REG", "interface_able_polecat___transaction_interface.html#a05678007c58fb594f246f226651f1ea6", null ],
+    [ "TX_ARG_PARENT", "interface_able_polecat___transaction_interface.html#a8a5269d8c44e3463b18bada5f06c357e", null ],
+    [ "TX_ARG_REQUEST", "interface_able_polecat___transaction_interface.html#a200d8f7a611c9d158d57272cef3b13e9", null ],
+    [ "TX_ARG_RESOURCE_REG", "interface_able_polecat___transaction_interface.html#a696fd54de3f3de684585e659821b4c3e", null ],
+    [ "TX_ARG_SUBJECT", "interface_able_polecat___transaction_interface.html#a726c4c2c8870ed3d97a4a758df3486fe", null ],
+    [ "TX_STATE_ABORTED", "interface_able_polecat___transaction_interface.html#a7ec530c142b0dd6ccf71745d8c973f7f", null ],
+    [ "TX_STATE_COMMITTED", "interface_able_polecat___transaction_interface.html#aca2244692649f9180894defc66a5e3b2", null ],
+    [ "TX_STATE_COMPLETED", "interface_able_polecat___transaction_interface.html#abcfd87c8ccec5768bde1a9c8452d9c7f", null ],
+    [ "TX_STATE_PENDING", "interface_able_polecat___transaction_interface.html#a2c72fc1bd7fab2d31e6622f1f3f9f025", null ]
+];

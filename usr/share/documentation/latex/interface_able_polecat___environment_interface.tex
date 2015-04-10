@@ -1,0 +1,75 @@
+\hypertarget{interface_able_polecat___environment_interface}{}\section{Able\+Polecat\+\_\+\+Environment\+Interface Interface Reference}
+\label{interface_able_polecat___environment_interface}\index{Able\+Polecat\+\_\+\+Environment\+Interface@{Able\+Polecat\+\_\+\+Environment\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Environment\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.010753cm]{interface_able_polecat___environment_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___environment_interface_a43e9b59dc23869d178f5cb5ba03624cb}{get\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name)
+\item 
+\hyperlink{interface_able_polecat___environment_interface_ad27dfd656f899086322b7c16059dcc40}{set\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name, \$value)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___environment_interface_a43e9b59dc23869d178f5cb5ba03624cb}{}\index{Able\+Polecat\+\_\+\+Environment\+Interface@{Able\+Polecat\+\_\+\+Environment\+Interface}!get\+Variable@{get\+Variable}}
+\index{get\+Variable@{get\+Variable}!Able\+Polecat\+\_\+\+Environment\+Interface@{Able\+Polecat\+\_\+\+Environment\+Interface}}
+\subsubsection[{get\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}get\+Variable (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{}]{\$name}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___environment_interface_a43e9b59dc23869d178f5cb5ba03624cb}
+Returns assigned value of given environment variable.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent} & Agent seeking access. \\
+\hline
+string & {\em \$name} & Name of requested environment variable.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Assigned value of given variable or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___environment_abstract_a43e9b59dc23869d178f5cb5ba03624cb}{Able\+Polecat\+\_\+\+Environment\+Abstract}.
+
+\hypertarget{interface_able_polecat___environment_interface_ad27dfd656f899086322b7c16059dcc40}{}\index{Able\+Polecat\+\_\+\+Environment\+Interface@{Able\+Polecat\+\_\+\+Environment\+Interface}!set\+Variable@{set\+Variable}}
+\index{set\+Variable@{set\+Variable}!Able\+Polecat\+\_\+\+Environment\+Interface@{Able\+Polecat\+\_\+\+Environment\+Interface}}
+\subsubsection[{set\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}set\+Variable (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{}]{\$name, }
+\item[{}]{\$value}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___environment_interface_ad27dfd656f899086322b7c16059dcc40}
+Assign value of given environment variable.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent} & Agent seeking access. \\
+\hline
+string & {\em \$name} & Name of requested environment variable. \\
+\hline
+mixed & {\em \$value} & Value of variable.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if variable is set, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___environment_abstract_ad27dfd656f899086322b7c16059dcc40}{Able\+Polecat\+\_\+\+Environment\+Abstract}.
+
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Environment.\+php\end{DoxyCompactItemize}

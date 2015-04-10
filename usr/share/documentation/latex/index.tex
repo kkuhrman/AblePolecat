@@ -1,0 +1,51 @@
+\hypertarget{index_introduction}{}\section{Introduction}\label{index_introduction}
+Able Polecat is designed from the ground up to integrate business information systems by exposing end points in a Resource Oriented Architecture (R\+O\+A).
+
+Since applications on the web are inherently stateless, and this quality is a cornerstone of any good R\+E\+S\+Tful design, several of the classes in the core library are closely related to the components of the Model-\/\+View-\/\+Controller (M\+V\+C) architecture common to many web application frameworks
+
+In its simplest form, the design of a web service implemented in Able Polecat is similar to any other\+:
+\begin{DoxyEnumerate}
+\item Agent (e.\+g. user) requests resource.
+\item Server interprets request as a representation of requested resource.
+\item Server returns a response to agent.
+\end{DoxyEnumerate}\hypertarget{index_request}{}\section{H\+T\+T\+P Request}\label{index_request}
+Classes implementing \hyperlink{interface_able_polecat___message___request_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface} are used to marshal the U\+R\+I and entity body of the H\+T\+T\+P request.\hypertarget{index_resource}{}\section{Resources}\label{index_resource}
+Closely related to the \textquotesingle{}Model\textquotesingle{} component in M\+V\+C architecture, a resource is encapsulated by a class implementing \hyperlink{interface_able_polecat___resource_interface}{Able\+Polecat\+\_\+\+Resource\+Interface}.\hypertarget{index_representation}{}\section{Representation of Resources}\label{index_representation}
+Closely related to the \textquotesingle{}View\textquotesingle{} component in M\+V\+C architecture, a representation of a resource is encapsulated by a class implementing \hyperlink{interface_able_polecat___message___response_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Response\+Interface}.\hypertarget{index_front_controller}{}\section{Front Controller}\label{index_front_controller}
+\hyperlink{class_able_polecat___host}{Able\+Polecat\+\_\+\+Host} and \hyperlink{class_able_polecat___service___bus}{Able\+Polecat\+\_\+\+Service\+\_\+\+Bus} together serve the same purpose as the front controller in an M\+V\+C architecture.\hypertarget{index_host}{}\subsection{Host}\label{index_host}
+Host has the following duties\+:
+\begin{DoxyEnumerate}
+\item Marshall web server R\+E\+Q\+U\+E\+S\+T
+\item Initiate upstream chain of responsibility (C\+O\+R -\/ session, user, application, etc).
+\item Dispatch marshalled request object
+\item Unmarshall R\+E\+S\+P\+O\+N\+S\+E, send H\+T\+T\+P response head/body
+\end{DoxyEnumerate}\hypertarget{index_bus}{}\subsection{Service Bus}\label{index_bus}
+Service bus has the following duties\+:
+\begin{DoxyEnumerate}
+\item Route messages between services implemented in Able Polecat.
+\item Resolve contention between services.
+\item Control data transformation and exchange (D\+T\+X) between services.
+\item Marshal redundant resources (e.\+g. web service client connections).
+\item Handle messaging, exceptions, logging etc.
+\end{DoxyEnumerate}\hypertarget{index_action_controller}{}\section{Action Controllers}\label{index_action_controller}
+Classes implementing \hyperlink{interface_able_polecat___transaction_interface}{Able\+Polecat\+\_\+\+Transaction\+Interface} serve the same purpose as action controllers in an M\+V\+C architecture.
+
+A Connector binds a unique combination of request U\+R\+I and request method to a transaction class, which acts on and/or returns the resultant resource.\hypertarget{index_auto_install}{}\section{Auto Install}\label{index_auto_install}
+Version 0.\+6.\+4 introduces the automatic install feature for projects and modules.
+
+
+\begin{DoxyEnumerate}
+\item When server mode initializes, it first looks for a project configuration file ./usr/etc/polecat/conf/project.xml.
+\item If the file exists, it will look for the locater for the project database and if this is found and a connection to the database is made all further environment configuration settings are retrieved from the project database, with the exception of locater(s) to other restricted resources.
+\item If the file does not exist, Able Polecat will attempt to create it and if that fails, server mode will exit and return an error message.
+\end{DoxyEnumerate}
+
+\begin{DoxyAuthor}{Author}
+Karl Kuhrman 
+\end{DoxyAuthor}
+\begin{DoxyCopyright}{Copyright}
+\mbox{[}B\+D\+S I\+I License\mbox{]} https\+://github.com/kkuhrman/\+Able\+Polecat/blob/master/\+L\+I\+C\+E\+N\+S\+E.\+md 
+\end{DoxyCopyright}
+\begin{DoxyVersion}{Version}
+0.\+7.\+0 
+\end{DoxyVersion}

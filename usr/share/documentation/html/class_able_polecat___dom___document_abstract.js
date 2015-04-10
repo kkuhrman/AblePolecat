@@ -1,0 +1,26 @@
+var class_able_polecat___dom___document_abstract =
+[
+    [ "createAttribute", "class_able_polecat___dom___document_abstract.html#a95a8661ef9b03ce670a3b193d459a667", null ],
+    [ "createAttributeNS", "class_able_polecat___dom___document_abstract.html#afc214fc8e5911368cc8e0377a1b2b20e", null ],
+    [ "createCDATASection", "class_able_polecat___dom___document_abstract.html#a8ee1b077d525d42ff433620320ffa43e", null ],
+    [ "createComment", "class_able_polecat___dom___document_abstract.html#a5d7473192c918a49f87139678a9c0698", null ],
+    [ "createDocumentFragment", "class_able_polecat___dom___document_abstract.html#adee16a21cd2255f11de0a686d058be87", null ],
+    [ "createElement", "class_able_polecat___dom___document_abstract.html#ade971bbc47ebf69388e18953164b2e7b", null ],
+    [ "createElementNS", "class_able_polecat___dom___document_abstract.html#a603176eca3dd9fe0144195dd929d5084", null ],
+    [ "createEntityReference", "class_able_polecat___dom___document_abstract.html#a9ebf6ac8ffb82d039f1bcd6c2e0c4ff6", null ],
+    [ "createProcessingInstruction", "class_able_polecat___dom___document_abstract.html#ad3fb9fe5a4f1d33bc246334d84cb83b4", null ],
+    [ "createTextNode", "class_able_polecat___dom___document_abstract.html#a9b040c658a1284d7b1931ea9f7cb57aa", null ],
+    [ "getDomNode", "class_able_polecat___dom___document_abstract.html#a3241c66cb1cbb7b720be191808876012", null ],
+    [ "getElementById", "class_able_polecat___dom___document_abstract.html#a9248e8c174d03acd54cb8e7fc7b966fb", null ],
+    [ "getElementsByTagName", "class_able_polecat___dom___document_abstract.html#a79196ad8273cd289455fc6781944d1f3", null ],
+    [ "getElementsByTagNameNS", "class_able_polecat___dom___document_abstract.html#af20c7be087245f946ac72533fdd31501", null ],
+    [ "importNode", "class_able_polecat___dom___document_abstract.html#a9d4357accf2f59eb78c36f7d2cfc254b", null ],
+    [ "normalizeDocument", "class_able_polecat___dom___document_abstract.html#a74423abfbd25dfd20d7d2278e5ddae40", null ],
+    [ "relaxNGValidate", "class_able_polecat___dom___document_abstract.html#ab9ad7a19d83b5bda1418a3c5eabe1bc2", null ],
+    [ "relaxNGValidateSource", "class_able_polecat___dom___document_abstract.html#a230832c86e1d5646515b7c1565477bac", null ],
+    [ "schemaValidate", "class_able_polecat___dom___document_abstract.html#a86f7eb82d725a553ab5c51b6116a1752", null ],
+    [ "schemaValidateSource", "class_able_polecat___dom___document_abstract.html#af62111546c069afb59029ab0fe522607", null ],
+    [ "validate", "class_able_polecat___dom___document_abstract.html#a184909dab34698899937d810a9f5d393", null ],
+    [ "xinclude", "class_able_polecat___dom___document_abstract.html#a3d0818bb6eda112a1b359cc41b40b2a9", null ],
+    [ "$Document", "class_able_polecat___dom___document_abstract.html#a2a66d0352e4aaafcdfdb9c6560bcc334", null ]
+];

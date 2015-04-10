@@ -1,0 +1,131 @@
+\hypertarget{interface_able_polecat___command___chain_interface}{}\section{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface Interface Reference}
+\label{interface_able_polecat___command___chain_interface}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.612903cm]{interface_able_polecat___command___chain_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___command___chain_interface_af7a918af43e7bf03f9b815c0d9cb4ff4}{get\+Bottom\+Command\+Target} ()
+\item 
+\hyperlink{interface_able_polecat___command___chain_interface_ae62d6679a43700f22fda4d1613a3c2ce}{get\+Top\+Command\+Target} ()
+\item 
+\hyperlink{interface_able_polecat___command___chain_interface_acb3b9b68b805ffd1619966a5ed7c0a39}{set\+Command\+Link} (\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Superior, \hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Subordinate)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{interface_able_polecat___command___chain_interface_a8c95906f06450a060c5c9f0dc5b64fb5}{dispatch} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command)
+\item 
+static \hyperlink{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}{trigger\+Error} (\$message)
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___command___chain_interface_a8c95906f06450a060c5c9f0dc5b64fb5}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!dispatch@{dispatch}}
+\index{dispatch@{dispatch}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
+\subsubsection[{dispatch}]{\setlength{\rightskip}{0pt plus 5cm}static dispatch (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+Interface}}]{\$\+Command}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___command___chain_interface_a8c95906f06450a060c5c9f0dc5b64fb5}
+Route command to appropriate starting point in Co\+R.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} & {\em \$\+Command} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result} 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command___chain_a8c95906f06450a060c5c9f0dc5b64fb5}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
+
+\hypertarget{interface_able_polecat___command___chain_interface_af7a918af43e7bf03f9b815c0d9cb4ff4}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!get\+Bottom\+Command\+Target@{get\+Bottom\+Command\+Target}}
+\index{get\+Bottom\+Command\+Target@{get\+Bottom\+Command\+Target}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
+\subsubsection[{get\+Bottom\+Command\+Target}]{\setlength{\rightskip}{0pt plus 5cm}get\+Bottom\+Command\+Target (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___command___chain_interface_af7a918af43e7bf03f9b815c0d9cb4ff4}
+Get command target at the bottom of the stack (most \textquotesingle{}superior\textquotesingle{}).
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command___chain_af7a918af43e7bf03f9b815c0d9cb4ff4}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
+
+\hypertarget{interface_able_polecat___command___chain_interface_ae62d6679a43700f22fda4d1613a3c2ce}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!get\+Top\+Command\+Target@{get\+Top\+Command\+Target}}
+\index{get\+Top\+Command\+Target@{get\+Top\+Command\+Target}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
+\subsubsection[{get\+Top\+Command\+Target}]{\setlength{\rightskip}{0pt plus 5cm}get\+Top\+Command\+Target (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___command___chain_interface_ae62d6679a43700f22fda4d1613a3c2ce}
+Get command target at the top of the stack (most \textquotesingle{}subordinate\textquotesingle{}).
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command___chain_ae62d6679a43700f22fda4d1613a3c2ce}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
+
+\hypertarget{interface_able_polecat___command___chain_interface_acb3b9b68b805ffd1619966a5ed7c0a39}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!set\+Command\+Link@{set\+Command\+Link}}
+\index{set\+Command\+Link@{set\+Command\+Link}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
+\subsubsection[{set\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}set\+Command\+Link (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}}]{\$\+Superior, }
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}}]{\$\+Subordinate}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___command___chain_interface_acb3b9b68b805ffd1619966a5ed7c0a39}
+Establish superior-\/subordinate relationship between two command targets.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} & {\em \$\+Superior} & Intended superior target. \\
+\hline
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} & {\em \$\+Subordinate} & Intended subordinate target. \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___command___exception}{Able\+Polecat\+\_\+\+Command\+\_\+\+Exception}} & If link is refused. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \hyperlink{class_able_polecat___command___chain_acb3b9b68b805ffd1619966a5ed7c0a39}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
+
+\hypertarget{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!trigger\+Error@{trigger\+Error}}
+\index{trigger\+Error@{trigger\+Error}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
+\subsubsection[{trigger\+Error}]{\setlength{\rightskip}{0pt plus 5cm}static trigger\+Error (
+\begin{DoxyParamCaption}
+\item[{}]{\$message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}
+Write a message to boot log and trigger P\+H\+P error.
+
+Most errors in registry entry classes will result in a fatal application error. But most will also likely occur before standard error handling and logging are operational. This method provides a means to catch these.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$message,.} & \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \hyperlink{class_able_polecat___command___chain_ae121fc73d26ff0d391d4cd120f88a820}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
+
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Command/Chain.\+php\end{DoxyCompactItemize}

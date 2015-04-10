@@ -1,0 +1,55 @@
+
+\begin{DoxyRefList}
+\item[\label{todo__todo000002}%
+\hypertarget{todo__todo000002}{}%
+Global \hyperlink{class_able_polecat___data___primitive___scalar___integer_ab0ca104ebb3288467244dbfaeaa474ed}{Able\+Polecat\+\_\+\+Data\+\_\+\+Primitive\+\_\+\+Scalar\+\_\+\+Integer\+:\+:max} (\$numbers)]\+: based on \href{http://php.net/manual/en/array.sorting.php}{\tt http\+://php.\+net/manual/en/array.\+sorting.\+php} there is some disagreement as to which native P\+H\+P sorting algorithm is fastest, most efficient etc. We are sticking with a home-\/grown algorithm so as to use type\+Cast for excluding not-\/scalar values. 
+\item[\label{todo__todo000004}%
+\hypertarget{todo__todo000004}{}%
+Global \hyperlink{class_able_polecat___dom_af8f857ffafb0c1e59d752b7b430a95a0}{Able\+Polecat\+\_\+\+Dom\+:\+:load\+Template\+Fragment} (D\+O\+M\+Document \$\+Document, \$template\+Search\+Paths, \$dom\+Directives=N\+U\+L\+L)]\+: probably pass class registration as parameter so we know what to update with file modified time 
+\item[\label{todo__todo000003}%
+\hypertarget{todo__todo000003}{}%
+Global \hyperlink{class_able_polecat___dom_a9687e5f2a0ad8e40fbf6de213dc8e077}{Able\+Polecat\+\_\+\+Dom\+:\+:X\+H\+T\+M\+L\+\_\+1\+\_\+1\+\_\+\+Q\+U\+A\+L\+I\+F\+I\+E\+D\+\_\+\+N\+A\+M\+E} ]\+: X\+H\+T\+M\+L 1.\+1 hard-\/coded here; should extend to allow for other doc types.  
+\item[\label{todo__todo000006}%
+\hypertarget{todo__todo000006}{}%
+Global \hyperlink{class_able_polecat___message___response_abstract_a1211a3dcd44d6bfe7f0205151465a677}{Able\+Polecat\+\_\+\+Message\+\_\+\+Response\+Abstract\+:\+:validate\+Header\+Field} (\$field)]\+: smirk  
+\item[\label{todo__todo000007}%
+\hypertarget{todo__todo000007}{}%
+Global \hyperlink{class_able_polecat___mode___server_a7e7be427ff1899a7386be4019db2d59d}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server\+:\+:handle\+Exception} (Exception \$\+Exception)]\+: hand control back to the server or otherwise fail gracefully. no W\+S\+O\+D  
+\item[\label{todo__todo000009}%
+\hypertarget{todo__todo000009}{}%
+Global \hyperlink{class_able_polecat___query_language___statement_abstract_a7e8b7ade103075378490c24d61b098bd}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+Abstract\+:\+:get\+Literal\+Expression} (\$literal, \$type=N\+U\+L\+L)]\+: lots on this one, more of a placeholder for now. 
+
+\+: something like \$\+Database-\/$>$quote(\$this-\/$>$rvalue()) Used to express literal values in D\+M\+L (for example quotes around strings etc). 
+\item[\label{todo__todo000008}%
+\hypertarget{todo__todo000008}{}%
+Global \hyperlink{interface_able_polecat___query_language___statement_interface_a7e8b7ade103075378490c24d61b098bd}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+Interface\+:\+:get\+Literal\+Expression} (\$literal, \$type=N\+U\+L\+L)]\+: lots on this one, more of a placeholder for now. 
+
+\+: something like \$\+Database-\/$>$quote(\$this-\/$>$rvalue()) Used to express literal values in D\+M\+L (for example quotes around strings etc). 
+\item[\label{todo__todo000012}%
+\hypertarget{todo__todo000012}{}%
+Global \hyperlink{class_able_polecat___service___bus_aae046bbb8c846e4d0a266db8991fa7a7}{Able\+Polecat\+\_\+\+Service\+\_\+\+Bus\+:\+:\$Messages} ]\+: message queue  
+\item[\label{todo__todo000013}%
+\hypertarget{todo__todo000013}{}%
+Global \hyperlink{class_able_polecat___service___bus_a01219e75781fce23cab2d8ff3ad781be}{Able\+Polecat\+\_\+\+Service\+\_\+\+Bus\+:\+:get\+Response} (\hyperlink{interface_able_polecat___resource_interface}{Able\+Polecat\+\_\+\+Resource\+Interface} \$\+Resource, \$status\+Code)]\+: auto update modified times in resource/response registration records if\+:
+\begin{DoxyItemize}
+\item P\+H\+P class file modified time is newer than registry entry modified time
+\item .tpl file modified time is newer than registry entry modified time 
+\end{DoxyItemize}
+\item[\label{todo__todo000017}%
+\hypertarget{todo__todo000017}{}%
+Global \hyperlink{class_able_polecat___service___dtx_abstract_a4ecaa0a2c1ecb9a47f85b357d65a8dd4}{Able\+Polecat\+\_\+\+Service\+\_\+\+Dtx\+Abstract\+:\+:set\+Group\+By\+Expression} (\$group\+\_\+by\+\_\+expression)]\+: check proper syntax of G\+R\+O\+U\+P B\+Y expression  
+\item[\label{todo__todo000018}%
+\hypertarget{todo__todo000018}{}%
+Global \hyperlink{class_able_polecat___service___dtx_abstract_a861af4015034dbff8963261a7d22237d}{Able\+Polecat\+\_\+\+Service\+\_\+\+Dtx\+Abstract\+:\+:set\+Order\+By\+Expression} (\$order\+\_\+by\+\_\+expression)]\+: check proper syntax of O\+R\+D\+E\+R B\+Y expression  
+\item[\label{todo__todo000015}%
+\hypertarget{todo__todo000015}{}%
+Global \hyperlink{class_able_polecat___service___dtx_abstract_aaf145251ff829dc64ee23ba36eba9a94}{Able\+Polecat\+\_\+\+Service\+\_\+\+Dtx\+Abstract\+:\+:set\+Select\+Columns} (\$select\+\_\+columns)]\+: check proper formating/escaping of column name(s) 
+
+\+: check syntax of sub queries  
+\item[\label{todo__todo000014}%
+\hypertarget{todo__todo000014}{}%
+Global \hyperlink{class_able_polecat___service___dtx_abstract_aca5a5c1f3b4b4d4b90d46796d98510db}{Able\+Polecat\+\_\+\+Service\+\_\+\+Dtx\+Abstract\+:\+:set\+Table\+Name} (\$table\+\_\+name)]\+: check proper formatting/escaping of table name  
+\item[\label{todo__todo000016}%
+\hypertarget{todo__todo000016}{}%
+Global \hyperlink{class_able_polecat___service___dtx_abstract_ab41e2a612cda6276d37ad1afd264e3df}{Able\+Polecat\+\_\+\+Service\+\_\+\+Dtx\+Abstract\+:\+:set\+Where\+Condition} (\$where\+\_\+condition)]\+: check proper syntax of W\+H\+E\+R\+E condition 
+\end{DoxyRefList}

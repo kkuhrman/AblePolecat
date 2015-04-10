@@ -1,0 +1,166 @@
+\hypertarget{class_able_polecat___command___target_abstract}{}\section{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract Class Reference}
+\label{class_able_polecat___command___target_abstract}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.167742cm]{class_able_polecat___command___target_abstract}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___command___target_abstract_aaff1150e0dda06868b9ae7b2a3b9b095}{set\+Forward\+Command\+Link} (\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Target)
+\item 
+\hyperlink{class_able_polecat___command___target_abstract_af3c33319c9af5cebf6598ce57dfcaf49}{set\+Reverse\+Command\+Link} (\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Target)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___command___target_abstract_ad9ade868bd136d32967059d1cccb3e92}{get\+Scope} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___command___target_abstract_a37906da60d0165610266b97b07bc5267}{validate\+Command\+Link} (\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Target, \$direction)
+\item 
+\hyperlink{class_able_polecat___command___target_abstract_a9d7e99b62ff0a032e070d1aab2fd9a9d}{delegate\+Command} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command, \hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result} \$Result=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___command___target_abstract_aa89435150495eccb0e81c94e6eb2800e}{get\+Forward\+Command\+Link} ()
+\item 
+\hyperlink{class_able_polecat___command___target_abstract_aaa0e6dea78d59c8fe32a5f13fb11b1a5}{get\+Reverse\+Command\+Link} ()
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___command___target_abstract_a9d7e99b62ff0a032e070d1aab2fd9a9d}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!delegate\+Command@{delegate\+Command}}
+\index{delegate\+Command@{delegate\+Command}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{delegate\+Command}]{\setlength{\rightskip}{0pt plus 5cm}delegate\+Command (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+Interface}}]{\$\+Command, }
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Result}}]{\$\+Result = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___command___target_abstract_a9d7e99b62ff0a032e070d1aab2fd9a9d}
+Send command or forward or back the chain of responsibility.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} & {\em \$\+Command} & \\
+\hline
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result} & {\em \$\+Result} & Optional, do delegate if set.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result} 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___command___target_abstract_aa89435150495eccb0e81c94e6eb2800e}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!get\+Forward\+Command\+Link@{get\+Forward\+Command\+Link}}
+\index{get\+Forward\+Command\+Link@{get\+Forward\+Command\+Link}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{get\+Forward\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}get\+Forward\+Command\+Link (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___command___target_abstract_aa89435150495eccb0e81c94e6eb2800e}
+Get forward (subordinate) link in command-\/processing Chain of Responsibility.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$\+Target 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___command___target_abstract_aaa0e6dea78d59c8fe32a5f13fb11b1a5}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!get\+Reverse\+Command\+Link@{get\+Reverse\+Command\+Link}}
+\index{get\+Reverse\+Command\+Link@{get\+Reverse\+Command\+Link}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{get\+Reverse\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}get\+Reverse\+Command\+Link (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___command___target_abstract_aaa0e6dea78d59c8fe32a5f13fb11b1a5}
+Get reverse (superior) link in command-\/processing Chain of Responsibility.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$\+Target 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___command___target_abstract_ad9ade868bd136d32967059d1cccb3e92}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!get\+Scope@{get\+Scope}}
+\index{get\+Scope@{get\+Scope}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{get\+Scope}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Scope (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___command___target_abstract_ad9ade868bd136d32967059d1cccb3e92}
+General purpose of object implementing this interface.
+
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article_interface_ad9ade868bd136d32967059d1cccb3e92}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}.
+
+\hypertarget{class_able_polecat___command___target_abstract_aaff1150e0dda06868b9ae7b2a3b9b095}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!set\+Forward\+Command\+Link@{set\+Forward\+Command\+Link}}
+\index{set\+Forward\+Command\+Link@{set\+Forward\+Command\+Link}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{set\+Forward\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}set\+Forward\+Command\+Link (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}}]{\$\+Target}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___command___target_abstract_aaff1150e0dda06868b9ae7b2a3b9b095}
+Allow given subject to serve as direct subordinate in Chain of Responsibility.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} & {\em \$\+Target} & Intended subordinate target.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___command___exception}{Able\+Polecat\+\_\+\+Command\+\_\+\+Exception}} & If link is refused. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implements \hyperlink{interface_able_polecat___command___target_interface_aaff1150e0dda06868b9ae7b2a3b9b095}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}.
+
+\hypertarget{class_able_polecat___command___target_abstract_af3c33319c9af5cebf6598ce57dfcaf49}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!set\+Reverse\+Command\+Link@{set\+Reverse\+Command\+Link}}
+\index{set\+Reverse\+Command\+Link@{set\+Reverse\+Command\+Link}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{set\+Reverse\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}set\+Reverse\+Command\+Link (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}}]{\$\+Target}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___command___target_abstract_af3c33319c9af5cebf6598ce57dfcaf49}
+Allow given subject to serve as direct superior in Chain of Responsibility.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} & {\em \$\+Target} & Intended superior target.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___command___exception}{Able\+Polecat\+\_\+\+Command\+\_\+\+Exception}} & If link is refused. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implements \hyperlink{interface_able_polecat___command___target_interface_af3c33319c9af5cebf6598ce57dfcaf49}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}.
+
+\hypertarget{class_able_polecat___command___target_abstract_a37906da60d0165610266b97b07bc5267}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}!validate\+Command\+Link@{validate\+Command\+Link}}
+\index{validate\+Command\+Link@{validate\+Command\+Link}!Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract@{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}}
+\subsubsection[{validate\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}validate\+Command\+Link (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}}]{\$\+Target, }
+\item[{}]{\$direction}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___command___target_abstract_a37906da60d0165610266b97b07bc5267}
+Validates given command target as a forward or reverse C\+O\+R link.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} & {\em \$\+Target,.} & \\
+\hline
+string & {\em \$direction} & \textquotesingle{}forward\textquotesingle{} $\vert$ \textquotesingle{}reverse\textquotesingle{}\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if proposed C\+O\+R link is acceptable, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Command/Target.\+php\end{DoxyCompactItemize}

@@ -1,0 +1,102 @@
+\hypertarget{interface_able_polecat___command_interface}{}\section{Able\+Polecat\+\_\+\+Command\+Interface Interface Reference}
+\label{interface_able_polecat___command_interface}\index{Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Command\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.649842cm]{interface_able_polecat___command_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___command_interface_a059205d72a39460f114b68e5fa2b23b6}{get\+Invoker} ()
+\item 
+\hyperlink{interface_able_polecat___command_interface_a1d4c324c5a088be98d99d3efbf3502e1}{get\+Arguments} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{interface_able_polecat___command_interface_a0f38ef3cd761210f2a667c669393498f}{direction} ()
+\item 
+static \hyperlink{interface_able_polecat___command_interface_a6821480fe527af0afdf3691d7cffad5f}{invoke} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Invoker, \$Arguments=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___command_interface_a0f38ef3cd761210f2a667c669393498f}{}\index{Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}!direction@{direction}}
+\index{direction@{direction}!Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}}
+\subsubsection[{direction}]{\setlength{\rightskip}{0pt plus 5cm}static direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___command_interface_a0f38ef3cd761210f2a667c669393498f}
+Indicates which direction to pass command along Co\+R.
+
+\begin{DoxyReturn}{Returns}
+string both $\vert$ forward $\vert$ reverse. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command___server_abstract_a0f38ef3cd761210f2a667c669393498f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Server\+Abstract}, \hyperlink{class_able_polecat___command___forward_abstract_a0f38ef3cd761210f2a667c669393498f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Forward\+Abstract}, and \hyperlink{class_able_polecat___command___reverse_abstract_a0f38ef3cd761210f2a667c669393498f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Reverse\+Abstract}.
+
+\hypertarget{interface_able_polecat___command_interface_a1d4c324c5a088be98d99d3efbf3502e1}{}\index{Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}!get\+Arguments@{get\+Arguments}}
+\index{get\+Arguments@{get\+Arguments}!Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}}
+\subsubsection[{get\+Arguments}]{\setlength{\rightskip}{0pt plus 5cm}get\+Arguments (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___command_interface_a1d4c324c5a088be98d99d3efbf3502e1}
+Return command arguments.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___args_list_interface}{Able\+Polecat\+\_\+\+Args\+List\+Interface}. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command_abstract_a1d4c324c5a088be98d99d3efbf3502e1}{Able\+Polecat\+\_\+\+Command\+Abstract}.
+
+\hypertarget{interface_able_polecat___command_interface_a059205d72a39460f114b68e5fa2b23b6}{}\index{Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}!get\+Invoker@{get\+Invoker}}
+\index{get\+Invoker@{get\+Invoker}!Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}}
+\subsubsection[{get\+Invoker}]{\setlength{\rightskip}{0pt plus 5cm}get\+Invoker (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___command_interface_a059205d72a39460f114b68e5fa2b23b6}
+Return reference to object which invoked command.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} Object which invoked command. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command_abstract_a059205d72a39460f114b68e5fa2b23b6}{Able\+Polecat\+\_\+\+Command\+Abstract}.
+
+\hypertarget{interface_able_polecat___command_interface_a6821480fe527af0afdf3691d7cffad5f}{}\index{Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}!invoke@{invoke}}
+\index{invoke@{invoke}!Able\+Polecat\+\_\+\+Command\+Interface@{Able\+Polecat\+\_\+\+Command\+Interface}}
+\subsubsection[{invoke}]{\setlength{\rightskip}{0pt plus 5cm}static invoke (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Invoker, }
+\item[{}]{\$\+Arguments = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___command_interface_a6821480fe527af0afdf3691d7cffad5f}
+Invoke the command and return response from target.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Invoker} & Agent or role invoking command. \\
+\hline
+mixed & {\em \$\+Arguments} & Command arguments.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result}. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___command___access_control___authenticate_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Access\+Control\+\_\+\+Authenticate}, \hyperlink{class_able_polecat___command___log_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Log}, \hyperlink{class_able_polecat___command___get_access_token_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Get\+Access\+Token}, \hyperlink{class_able_polecat___command___shutdown_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Shutdown}, \hyperlink{class_able_polecat___command___database___query_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Database\+\_\+\+Query}, \hyperlink{class_able_polecat___command___get_registry_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Get\+Registry}, \hyperlink{class_able_polecat___command___get_agent_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Get\+Agent}, and \hyperlink{class_able_polecat___command___server___version_a6821480fe527af0afdf3691d7cffad5f}{Able\+Polecat\+\_\+\+Command\+\_\+\+Server\+\_\+\+Version}.
+
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Command.\+php\end{DoxyCompactItemize}

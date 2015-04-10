@@ -1,0 +1,280 @@
+\hypertarget{class_able_polecat___resource_abstract}{}\section{Able\+Polecat\+\_\+\+Resource\+Abstract Class Reference}
+\label{class_able_polecat___resource_abstract}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Resource\+Abstract\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.756098cm]{class_able_polecat___resource_abstract}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a12251d0c022e9e21c137a105ff683f13}{get\+Id} ()
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a3d0963e68bb313b163a73f2803c64600}{get\+Name} ()
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a365e24d7b066205cafa2a5cce3a4f224}{sleep} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___resource_abstract_aaba20e74dced7f11f018a5a86ead176e}{open} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \hyperlink{interface_able_polecat___access_control___resource___locater_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+Interface} \$Url=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a2ac86cae38fbe15a019d075d485ab702}{get\+Uri} ()
+\item 
+\hyperlink{class_able_polecat___resource_abstract_aea086c97a20cf305b4a73485fd11763b}{set\+Id} (\$resource\+Id)
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a396944828c457deecbba6acb9bee6abf}{set\+Name} (\$resource\+Name)
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a421831a265621325e1fdd19aace0c758}{\+\_\+\+\_\+destruct} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___resource_abstract_ad9ade868bd136d32967059d1cccb3e92}{get\+Scope} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a285e624ef8874265991ea3478a7cd301}{validate\+Request\+Path} ()
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a60be366090fa500d8062c7dfc40bfaf6}{get\+Default\+Command\+Invoker} ()
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a8af7037413ce56303d66df3b83c9f6d3}{set\+Default\+Command\+Invoker} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Invoker)
+\item 
+\hyperlink{class_able_polecat___resource_abstract_ad259dd848ddd1f85513d77f16684564e}{set\+Uri} (\$uri)
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\item 
+\hyperlink{class_able_polecat___resource_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_able_polecat___resource_abstract_a095c5d389db211932136b53f25f39685}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}}
+\index{\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{\+\_\+\+\_\+construct}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+\+\_\+construct (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [final]}, {\ttfamily [protected]}}\label{class_able_polecat___resource_abstract_a095c5d389db211932136b53f25f39685}
+Cached objects must be created by \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup()}. Initialization of sub-\/classes should take place in \hyperlink{class_able_polecat___resource_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize()}. \begin{DoxySeeAlso}{See also}
+\hyperlink{class_able_polecat___resource_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize()}, \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup()}. 
+\end{DoxySeeAlso}
+\hypertarget{class_able_polecat___resource_abstract_a421831a265621325e1fdd19aace0c758}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!\+\_\+\+\_\+destruct@{\+\_\+\+\_\+destruct}}
+\index{\+\_\+\+\_\+destruct@{\+\_\+\+\_\+destruct}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{\+\_\+\+\_\+destruct}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+\+\_\+destruct (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [final]}}\label{class_able_polecat___resource_abstract_a421831a265621325e1fdd19aace0c758}
+Serialization prior to going out of scope in \hyperlink{class_able_polecat___resource_abstract_a365e24d7b066205cafa2a5cce3a4f224}{sleep()}. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___resource_abstract_a60be366090fa500d8062c7dfc40bfaf6}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!get\+Default\+Command\+Invoker@{get\+Default\+Command\+Invoker}}
+\index{get\+Default\+Command\+Invoker@{get\+Default\+Command\+Invoker}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{get\+Default\+Command\+Invoker}]{\setlength{\rightskip}{0pt plus 5cm}get\+Default\+Command\+Invoker (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource_abstract_a60be366090fa500d8062c7dfc40bfaf6}
+Default command invoker.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___resource_abstract_a12251d0c022e9e21c137a105ff683f13}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!get\+Id@{get\+Id}}
+\index{get\+Id@{get\+Id}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{get\+Id}]{\setlength{\rightskip}{0pt plus 5cm}get\+Id (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_a12251d0c022e9e21c137a105ff683f13}
+System unique I\+D.
+
+\begin{DoxyReturn}{Returns}
+scalar Subject unique identifier. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article___dynamic_interface_a12251d0c022e9e21c137a105ff683f13}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+\_\+\+Dynamic\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_a3d0963e68bb313b163a73f2803c64600}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!get\+Name@{get\+Name}}
+\index{get\+Name@{get\+Name}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{get\+Name}]{\setlength{\rightskip}{0pt plus 5cm}get\+Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_a3d0963e68bb313b163a73f2803c64600}
+Common name, need not be unique.
+
+\begin{DoxyReturn}{Returns}
+string Common name. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article___dynamic_interface_a3d0963e68bb313b163a73f2803c64600}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+\_\+\+Dynamic\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_ad9ade868bd136d32967059d1cccb3e92}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!get\+Scope@{get\+Scope}}
+\index{get\+Scope@{get\+Scope}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{get\+Scope}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Scope (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___resource_abstract_ad9ade868bd136d32967059d1cccb3e92}
+General purpose of object implementing this interface.
+
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article_interface_ad9ade868bd136d32967059d1cccb3e92}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_a2ac86cae38fbe15a019d075d485ab702}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!get\+Uri@{get\+Uri}}
+\index{get\+Uri@{get\+Uri}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{get\+Uri}]{\setlength{\rightskip}{0pt plus 5cm}get\+Uri (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_a2ac86cae38fbe15a019d075d485ab702}
+Returns resource U\+R\+I.
+
+\begin{DoxyReturn}{Returns}
+string U\+R\+I or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___resource_interface_a2ac86cae38fbe15a019d075d485ab702}{Able\+Polecat\+\_\+\+Resource\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource_abstract_a91098fa7d1917ce4833f284bbef12627}
+Extends \hyperlink{class_able_polecat___resource_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct()}. \hypertarget{class_able_polecat___resource_abstract_aaba20e74dced7f11f018a5a86ead176e}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!open@{open}}
+\index{open@{open}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{open}]{\setlength{\rightskip}{0pt plus 5cm}open (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+Interface}}]{\$\+Url = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_aaba20e74dced7f11f018a5a86ead176e}
+Opens an existing resource or makes an empty one accessible depending on permissions.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$agent} & Agent seeking access. \\
+\hline
+\hyperlink{interface_able_polecat___access_control___resource___locater_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+Interface} & {\em \$\+Url} & Existing or new resource. \\
+\hline
+string & {\em \$name} & Optional common name for new resources.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if access to resource is granted, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___resource_interface_aaba20e74dced7f11f018a5a86ead176e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_a8af7037413ce56303d66df3b83c9f6d3}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!set\+Default\+Command\+Invoker@{set\+Default\+Command\+Invoker}}
+\index{set\+Default\+Command\+Invoker@{set\+Default\+Command\+Invoker}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{set\+Default\+Command\+Invoker}]{\setlength{\rightskip}{0pt plus 5cm}set\+Default\+Command\+Invoker (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Invoker}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource_abstract_a8af7037413ce56303d66df3b83c9f6d3}
+Sets the default command handlers (invoker/target).
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Invoker} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___resource_abstract_aea086c97a20cf305b4a73485fd11763b}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!set\+Id@{set\+Id}}
+\index{set\+Id@{set\+Id}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{set\+Id}]{\setlength{\rightskip}{0pt plus 5cm}set\+Id (
+\begin{DoxyParamCaption}
+\item[{}]{\$resource\+Id}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_aea086c97a20cf305b4a73485fd11763b}
+Set unique resource I\+D.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$resource\+Id,.} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___resource_interface_aea086c97a20cf305b4a73485fd11763b}{Able\+Polecat\+\_\+\+Resource\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_a396944828c457deecbba6acb9bee6abf}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!set\+Name@{set\+Name}}
+\index{set\+Name@{set\+Name}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{set\+Name}]{\setlength{\rightskip}{0pt plus 5cm}set\+Name (
+\begin{DoxyParamCaption}
+\item[{}]{\$resource\+Name}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_a396944828c457deecbba6acb9bee6abf}
+Set resource name.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$resource\+Name,.} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___resource_interface_a396944828c457deecbba6acb9bee6abf}{Able\+Polecat\+\_\+\+Resource\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_ad259dd848ddd1f85513d77f16684564e}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!set\+Uri@{set\+Uri}}
+\index{set\+Uri@{set\+Uri}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{set\+Uri}]{\setlength{\rightskip}{0pt plus 5cm}set\+Uri (
+\begin{DoxyParamCaption}
+\item[{}]{\$uri}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource_abstract_ad259dd848ddd1f85513d77f16684564e}
+Set resource U\+R\+I.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$uri} & U\+R\+I or N\+U\+L\+L. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___resource_abstract_a365e24d7b066205cafa2a5cce3a4f224}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!sleep@{sleep}}
+\index{sleep@{sleep}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{sleep}]{\setlength{\rightskip}{0pt plus 5cm}sleep (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource_abstract_a365e24d7b066205cafa2a5cce3a4f224}
+Serialize object to cache.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
+\hypertarget{class_able_polecat___resource_abstract_a285e624ef8874265991ea3478a7cd301}{}\index{Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}!validate\+Request\+Path@{validate\+Request\+Path}}
+\index{validate\+Request\+Path@{validate\+Request\+Path}!Able\+Polecat\+\_\+\+Resource\+Abstract@{Able\+Polecat\+\_\+\+Resource\+Abstract}}
+\subsubsection[{validate\+Request\+Path}]{\setlength{\rightskip}{0pt plus 5cm}validate\+Request\+Path (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [abstract]}, {\ttfamily [protected]}}\label{class_able_polecat___resource_abstract_a285e624ef8874265991ea3478a7cd301}
+Validates request U\+R\+I path to ensure resource request can be fulfilled.
+
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___resource___exception}{Able\+Polecat\+\_\+\+Resource\+\_\+\+Exception}} & If request U\+R\+I path is not validated. \\
+\hline
+\end{DoxyExceptions}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Resource.\+php\end{DoxyCompactItemize}

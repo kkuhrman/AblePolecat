@@ -1,0 +1,110 @@
+\hypertarget{interface_able_polecat___access_control___authority_interface}{}\section{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface Interface Reference}
+\label{interface_able_polecat___access_control___authority_interface}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{interface_able_polecat___access_control___authority_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___access_control___authority_interface_ae19e2629918d2aadb8ee4a483a2900d0}{agent\+Authorized\+For\+Role} (\$agent\+Id, \$role\+Id)
+\item 
+\hyperlink{interface_able_polecat___access_control___authority_interface_a249d9e05ed9e93505c5ec720a5f392a7}{assign\+Role} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} \$Role)
+\item 
+\hyperlink{interface_able_polecat___access_control___authority_interface_a97daec0bf34b2b3e201a15b84152d2d2}{authorize\+Role} (\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} \$Role, \hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent)
+\item 
+\hyperlink{interface_able_polecat___access_control___authority_interface_af10c6f88824fd201988c5ea92c743490}{grant\+Permission} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject, \hyperlink{interface_able_polecat___access_control___constraint_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface} \$Constraint)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___access_control___authority_interface_ae19e2629918d2aadb8ee4a483a2900d0}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}!agent\+Authorized\+For\+Role@{agent\+Authorized\+For\+Role}}
+\index{agent\+Authorized\+For\+Role@{agent\+Authorized\+For\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}}
+\subsubsection[{agent\+Authorized\+For\+Role}]{\setlength{\rightskip}{0pt plus 5cm}agent\+Authorized\+For\+Role (
+\begin{DoxyParamCaption}
+\item[{}]{\$agent\+Id, }
+\item[{}]{\$role\+Id}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___authority_interface_ae19e2629918d2aadb8ee4a483a2900d0}
+Verify that agent is authorized to assume given role.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$agent\+Id} & I\+D of agent. \\
+\hline
+string & {\em \$role\+Id} & I\+D of role.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if role is authorized for agent, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+\hypertarget{interface_able_polecat___access_control___authority_interface_a249d9e05ed9e93505c5ec720a5f392a7}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}!assign\+Role@{assign\+Role}}
+\index{assign\+Role@{assign\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}}
+\subsubsection[{assign\+Role}]{\setlength{\rightskip}{0pt plus 5cm}assign\+Role (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}}]{\$\+Role}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___authority_interface_a249d9e05ed9e93505c5ec720a5f392a7}
+Assign agent to given role.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent} & \\
+\hline
+\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} & {\em \$\+Role} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if agent is assigned to role, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+\hypertarget{interface_able_polecat___access_control___authority_interface_a97daec0bf34b2b3e201a15b84152d2d2}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}!authorize\+Role@{authorize\+Role}}
+\index{authorize\+Role@{authorize\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}}
+\subsubsection[{authorize\+Role}]{\setlength{\rightskip}{0pt plus 5cm}authorize\+Role (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}}]{\$\+Role, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___authority_interface_a97daec0bf34b2b3e201a15b84152d2d2}
+Authorize role for given agent.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} & {\em \$\+Role} & \\
+\hline
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if role is authorized for agent, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+\hypertarget{interface_able_polecat___access_control___authority_interface_af10c6f88824fd201988c5ea92c743490}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}!grant\+Permission@{grant\+Permission}}
+\index{grant\+Permission@{grant\+Permission}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Authority\+Interface}}
+\subsubsection[{grant\+Permission}]{\setlength{\rightskip}{0pt plus 5cm}grant\+Permission (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface}}]{\$\+Constraint}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___authority_interface_af10c6f88824fd201988c5ea92c743490}
+Grants permission (removes constraint) to given agent or role.
+
+In actuality, unless a constraint is set on the resource, all agents and roles have permission for corresponding action. If constraint is set, grant() simply exempts agent or role from that constraint (i.\+e. \textquotesingle{}unblocks\textquotesingle{} them).
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & Agent or role. \\
+\hline
+\hyperlink{interface_able_polecat___access_control___constraint_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface} & {\em \$\+Constraint,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if permission is granted, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Access\+Control/Authority.\+php\end{DoxyCompactItemize}

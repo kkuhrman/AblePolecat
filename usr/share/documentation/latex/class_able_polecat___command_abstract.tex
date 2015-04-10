@@ -1,0 +1,151 @@
+\hypertarget{class_able_polecat___command_abstract}{}\section{Able\+Polecat\+\_\+\+Command\+Abstract Class Reference}
+\label{class_able_polecat___command_abstract}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Command\+Abstract\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5.299685cm]{class_able_polecat___command_abstract}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___command_abstract_a059205d72a39460f114b68e5fa2b23b6}{get\+Invoker} ()
+\item 
+\hyperlink{class_able_polecat___command_abstract_a1d4c324c5a088be98d99d3efbf3502e1}{get\+Arguments} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___command_abstract_ad9ade868bd136d32967059d1cccb3e92}{get\+Scope} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___command_abstract_ac9b4976d41cd6b50add18c46b165c03d}{dispatch} ()
+\item 
+\hyperlink{class_able_polecat___command_abstract_aec46ffdcdc47cd345c45fade177821b2}{\+\_\+\+\_\+construct} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Invoker, \$Arguments=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+\subsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___command_abstract_a9116375da1a8e0bda8751f7e081aa461}{check\+Argument} (\$name, \$Var\+Args, \$Arg\+Number, \$expected\+Type, \$expected\+Class\+Name=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_able_polecat___command_abstract_aec46ffdcdc47cd345c45fade177821b2}{}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}!\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}}
+\index{\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}!Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+\subsubsection[{\+\_\+\+\_\+construct}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+\+\_\+construct (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Invoker, }
+\item[{}]{\$\+Arguments = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [final]}, {\ttfamily [protected]}}\label{class_able_polecat___command_abstract_aec46ffdcdc47cd345c45fade177821b2}
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Invoker} & \\
+\hline
+mixed & {\em \$\+Arguments} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{interface_able_polecat___command_interface_a6821480fe527af0afdf3691d7cffad5f}{invoke()}. 
+\end{DoxySeeAlso}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___command_abstract_a9116375da1a8e0bda8751f7e081aa461}{}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}!check\+Argument@{check\+Argument}}
+\index{check\+Argument@{check\+Argument}!Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+\subsubsection[{check\+Argument}]{\setlength{\rightskip}{0pt plus 5cm}static check\+Argument (
+\begin{DoxyParamCaption}
+\item[{}]{\$name, }
+\item[{}]{\$\+Var\+Args, }
+\item[{}]{\$\+Arg\+Number, }
+\item[{}]{\$expected\+Type, }
+\item[{}]{\$expected\+Class\+Name = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___command_abstract_a9116375da1a8e0bda8751f7e081aa461}
+Commands accept variable args list -\/ this helper will throw exception on type violation.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$name} & Name of command. \\
+\hline
+mixed & {\em \$\+Var\+Args} & Variable arguments list. \\
+\hline
+int & {\em \$\+Arg\+Number} & Ordinal in the argument list.  mixed \$expected\+Type Expected type.  string \$class\+Name Provided if expected type is object.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Value of argument if exception is not thrown. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___command___exception}{Able\+Polecat\+\_\+\+Command\+\_\+\+Exception}} & on type violation. \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{class_able_polecat___command_abstract_ac9b4976d41cd6b50add18c46b165c03d}{}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}!dispatch@{dispatch}}
+\index{dispatch@{dispatch}!Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+\subsubsection[{dispatch}]{\setlength{\rightskip}{0pt plus 5cm}dispatch (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___command_abstract_ac9b4976d41cd6b50add18c46b165c03d}
+Dispatch command to a suitable target.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result}. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___command_abstract_a1d4c324c5a088be98d99d3efbf3502e1}{}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}!get\+Arguments@{get\+Arguments}}
+\index{get\+Arguments@{get\+Arguments}!Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+\subsubsection[{get\+Arguments}]{\setlength{\rightskip}{0pt plus 5cm}get\+Arguments (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___command_abstract_a1d4c324c5a088be98d99d3efbf3502e1}
+Return command arguments.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___args_list_interface}{Able\+Polecat\+\_\+\+Args\+List\+Interface}. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___command_interface_a1d4c324c5a088be98d99d3efbf3502e1}{Able\+Polecat\+\_\+\+Command\+Interface}.
+
+\hypertarget{class_able_polecat___command_abstract_a059205d72a39460f114b68e5fa2b23b6}{}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}!get\+Invoker@{get\+Invoker}}
+\index{get\+Invoker@{get\+Invoker}!Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+\subsubsection[{get\+Invoker}]{\setlength{\rightskip}{0pt plus 5cm}get\+Invoker (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___command_abstract_a059205d72a39460f114b68e5fa2b23b6}
+Return reference to object which invoked command.
+
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} Object which invoked command. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___command_interface_a059205d72a39460f114b68e5fa2b23b6}{Able\+Polecat\+\_\+\+Command\+Interface}.
+
+\hypertarget{class_able_polecat___command_abstract_ad9ade868bd136d32967059d1cccb3e92}{}\index{Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}!get\+Scope@{get\+Scope}}
+\index{get\+Scope@{get\+Scope}!Able\+Polecat\+\_\+\+Command\+Abstract@{Able\+Polecat\+\_\+\+Command\+Abstract}}
+\subsubsection[{get\+Scope}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Scope (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___command_abstract_ad9ade868bd136d32967059d1cccb3e92}
+General purpose of object implementing this interface.
+
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article_interface_ad9ade868bd136d32967059d1cccb3e92}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Command.\+php\end{DoxyCompactItemize}

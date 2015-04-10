@@ -1,0 +1,69 @@
+\hypertarget{class_able_polecat___access_control___exception}{}\section{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception Class Reference}
+\label{class_able_polecat___access_control___exception}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_able_polecat___access_control___exception}
+\end{center}
+\end{figure}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___access_control___exception_afe9c26ecd42f5dbb6deaa4ab9c7483b5}{on\+Violation} (\$Resource, \$Constraint=N\+U\+L\+L, \$Subject=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___access_control___exception_a35289e9f228b7d101bc6e287224202c7}{format\+Deny\+Access\+Message} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L, \hyperlink{interface_able_polecat___access_control___article_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface} \$Object=N\+U\+L\+L, \hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Authority=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___access_control___exception_a35289e9f228b7d101bc6e287224202c7}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}!format\+Deny\+Access\+Message@{format\+Deny\+Access\+Message}}
+\index{format\+Deny\+Access\+Message@{format\+Deny\+Access\+Message}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}}
+\subsubsection[{format\+Deny\+Access\+Message}]{\setlength{\rightskip}{0pt plus 5cm}static format\+Deny\+Access\+Message (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}}]{\$\+Object = {\ttfamily NULL}, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Authority = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___access_control___exception_a35289e9f228b7d101bc6e287224202c7}
+Helper function formats exception message in event of access control violation.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$\+Subject} & Subject attempting to access restricted object. \\
+\hline
+mixed & {\em \$\+Object} & Object subject is attempting to access. \\
+\hline
+mixed & {\em \$\+Authority} & Access control authority attempting to grant acccess.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em string} & formatted message. \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{class_able_polecat___access_control___exception_afe9c26ecd42f5dbb6deaa4ab9c7483b5}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}!on\+Violation@{on\+Violation}}
+\index{on\+Violation@{on\+Violation}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}}
+\subsubsection[{on\+Violation}]{\setlength{\rightskip}{0pt plus 5cm}static on\+Violation (
+\begin{DoxyParamCaption}
+\item[{}]{\$\+Resource, }
+\item[{}]{\$\+Constraint = {\ttfamily NULL}, }
+\item[{}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___access_control___exception_afe9c26ecd42f5dbb6deaa4ab9c7483b5}
+Subject (or Agent) does not have given permission to access Resource.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$\+Resource} & \\
+\hline
+mixed & {\em \$\+Constraint} & \\
+\hline
+mixed & {\em \$\+Subject} & \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Exception/Access\+Control.\+php\end{DoxyCompactItemize}

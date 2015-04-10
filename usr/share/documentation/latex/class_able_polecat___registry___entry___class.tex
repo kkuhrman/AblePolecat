@@ -1,0 +1,255 @@
+\hypertarget{class_able_polecat___registry___entry___class}{}\section{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class Class Reference}
+\label{class_able_polecat___registry___entry___class}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.707317cm]{class_able_polecat___registry___entry___class}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a83c2703c91959192f759992ad5640b67}{\+\_\+\+\_\+set} (\$name, \$value)
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a0a05b2e4b3a44390eeb042064e427b1a}{export} (D\+O\+M\+Document \$Document, D\+O\+M\+Element \$Parent)
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a999eef977eb899167ae02f83dd26a4ae}{save} (\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} \$Database=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a51ab292213d530e6ec65ef6c1a59b244}{get\+Class\+Library\+Id} ()
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a007ade3aa1414f464fe5670e2ee3b3e5}{get\+Class\+Full\+Path} ()
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a1234be8925a14bd9f504ebd18a16b4ed}{get\+Class\+Factory\+Method} ()
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a360f67f13d61bf6813ff78d869d9fca6}{dump\+State} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___registry___entry___class_a239b1c70258014a86569483c2d009de6}{create} ()
+\item 
+static \hyperlink{class_able_polecat___registry___entry___class_aa44a46592f08e874ef793aee209ada30}{import} (D\+O\+M\+Node \$Node)
+\item 
+static \hyperlink{class_able_polecat___registry___entry___class_a363352ee6a773e5aae4ea3efbc0fa753}{fetch} (\$primary\+Key)
+\item 
+static \hyperlink{class_able_polecat___registry___entry___class_a421b5f1cf6301568ecc2f572537f0b90}{get\+Primary\+Key\+Field\+Names} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Standard argument list. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___registry___entry___class_a83c2703c91959192f759992ad5640b67}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!\+\_\+\+\_\+set@{\+\_\+\+\_\+set}}
+\index{\+\_\+\+\_\+set@{\+\_\+\+\_\+set}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{\+\_\+\+\_\+set}]{\setlength{\rightskip}{0pt plus 5cm}\+\_\+\+\_\+set (
+\begin{DoxyParamCaption}
+\item[{}]{\$name, }
+\item[{}]{\$value}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a83c2703c91959192f759992ad5640b67}
+P\+H\+P magic method is run when writing data to inaccessible properties.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$name} & Name of property to set. \\
+\hline
+mixed & {\em \$value} & Value to assign to given property. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___std_object_interface_a83c2703c91959192f759992ad5640b67}{Able\+Polecat\+\_\+\+Std\+Object\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a239b1c70258014a86569483c2d009de6}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!create@{create}}
+\index{create@{create}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{create}]{\setlength{\rightskip}{0pt plus 5cm}static create (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___entry___class_a239b1c70258014a86569483c2d009de6}
+Creational method.
+
+\begin{DoxyReturn}{Returns}
+Concrete instance of class implementing Able\+Polecat\+\_\+\+In\+Proc\+Object\+Interface. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___dynamic_object_interface_a239b1c70258014a86569483c2d009de6}{Able\+Polecat\+\_\+\+Dynamic\+Object\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a360f67f13d61bf6813ff78d869d9fca6}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!dump\+State@{dump\+State}}
+\index{dump\+State@{dump\+State}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{dump\+State}]{\setlength{\rightskip}{0pt plus 5cm}dump\+State (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a360f67f13d61bf6813ff78d869d9fca6}
+Output class state to debug log. \hypertarget{class_able_polecat___registry___entry___class_a0a05b2e4b3a44390eeb042064e427b1a}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!export@{export}}
+\index{export@{export}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{export}]{\setlength{\rightskip}{0pt plus 5cm}export (
+\begin{DoxyParamCaption}
+\item[{D\+O\+M\+Document}]{\$\+Document, }
+\item[{D\+O\+M\+Element}]{\$\+Parent}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a0a05b2e4b3a44390eeb042064e427b1a}
+Create D\+O\+M\+Node and populate with registry entry data .
+
+
+\begin{DoxyParams}[1]{Parameters}
+D\+O\+M\+Document & {\em \$\+Document} & Registry entry will be exported to this D\+O\+M Document. \\
+\hline
+D\+O\+M\+Element & {\em \$\+Parent} & Registry entry will be appended to this D\+O\+M Element.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+D\+O\+M\+Element Exported element or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry_interface_a0a05b2e4b3a44390eeb042064e427b1a}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a363352ee6a773e5aae4ea3efbc0fa753}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!fetch@{fetch}}
+\index{fetch@{fetch}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{fetch}]{\setlength{\rightskip}{0pt plus 5cm}static fetch (
+\begin{DoxyParamCaption}
+\item[{}]{\$primary\+Key}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___entry___class_a363352ee6a773e5aae4ea3efbc0fa753}
+Fetch registration record given by id.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$primary\+Key} & Array\mbox{[}field\+Name=$>$field\+Value\mbox{]} for compound key or value of P\+K.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} O\+R N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry_interface_a363352ee6a773e5aae4ea3efbc0fa753}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a1234be8925a14bd9f504ebd18a16b4ed}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!get\+Class\+Factory\+Method@{get\+Class\+Factory\+Method}}
+\index{get\+Class\+Factory\+Method@{get\+Class\+Factory\+Method}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{get\+Class\+Factory\+Method}]{\setlength{\rightskip}{0pt plus 5cm}get\+Class\+Factory\+Method (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a1234be8925a14bd9f504ebd18a16b4ed}
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry___class_interface_a1234be8925a14bd9f504ebd18a16b4ed}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a007ade3aa1414f464fe5670e2ee3b3e5}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!get\+Class\+Full\+Path@{get\+Class\+Full\+Path}}
+\index{get\+Class\+Full\+Path@{get\+Class\+Full\+Path}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{get\+Class\+Full\+Path}]{\setlength{\rightskip}{0pt plus 5cm}get\+Class\+Full\+Path (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a007ade3aa1414f464fe5670e2ee3b3e5}
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry___class_interface_a007ade3aa1414f464fe5670e2ee3b3e5}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a51ab292213d530e6ec65ef6c1a59b244}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!get\+Class\+Library\+Id@{get\+Class\+Library\+Id}}
+\index{get\+Class\+Library\+Id@{get\+Class\+Library\+Id}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{get\+Class\+Library\+Id}]{\setlength{\rightskip}{0pt plus 5cm}get\+Class\+Library\+Id (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a51ab292213d530e6ec65ef6c1a59b244}
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry___class_interface_a51ab292213d530e6ec65ef6c1a59b244}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a421b5f1cf6301568ecc2f572537f0b90}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!get\+Primary\+Key\+Field\+Names@{get\+Primary\+Key\+Field\+Names}}
+\index{get\+Primary\+Key\+Field\+Names@{get\+Primary\+Key\+Field\+Names}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{get\+Primary\+Key\+Field\+Names}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Primary\+Key\+Field\+Names (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___entry___class_a421b5f1cf6301568ecc2f572537f0b90}
+Returns name(s) of field(s) uniquely identifying records for encapsulated table.
+
+\begin{DoxyReturn}{Returns}
+Array\mbox{[}string\mbox{]}. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry_interface_a421b5f1cf6301568ecc2f572537f0b90}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_aa44a46592f08e874ef793aee209ada30}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!import@{import}}
+\index{import@{import}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{import}]{\setlength{\rightskip}{0pt plus 5cm}static import (
+\begin{DoxyParamCaption}
+\item[{D\+O\+M\+Node}]{\$\+Node}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___entry___class_aa44a46592f08e874ef793aee209ada30}
+Create the registry entry object and populate with given D\+O\+M\+Node data.
+
+Some properties, notably class\+Library\+Id and class\+Full\+Path, are dependent on the parent node and are not set herein.
+
+
+\begin{DoxyParams}[1]{Parameters}
+D\+O\+M\+Node & {\em \$\+Node} & D\+O\+M\+Node encapsulating registry entry.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry_interface_aa44a46592f08e874ef793aee209ada30}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
+
+\hypertarget{class_able_polecat___registry___entry___class_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___registry___entry___class_a91098fa7d1917ce4833f284bbef12627}
+Extends \+\_\+\+\_\+construct().
+
+Sub-\/classes should override to initialize arguments. \hypertarget{class_able_polecat___registry___entry___class_a999eef977eb899167ae02f83dd26a4ae}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}!save@{save}}
+\index{save@{save}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class}}
+\subsubsection[{save}]{\setlength{\rightskip}{0pt plus 5cm}save (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Database\+Interface}}]{\$\+Database = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_a999eef977eb899167ae02f83dd26a4ae}
+Update or insert registration record.
+
+If the encapsulated registration exists, based on id property, it will be updated to reflect object state. Otherwise, a new registration record will be created.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} & {\em \$\+Database} & Handle to existing database.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry_interface_a999eef977eb899167ae02f83dd26a4ae}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Registry/\+Entry/Class.\+php\end{DoxyCompactItemize}

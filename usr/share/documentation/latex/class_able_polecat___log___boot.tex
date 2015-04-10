@@ -1,0 +1,153 @@
+\hypertarget{class_able_polecat___log___boot}{}\section{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot Class Reference}
+\label{class_able_polecat___log___boot}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Log\+\_\+\+Boot\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_able_polecat___log___boot}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___log___boot_a952026c3d234eb84a9f211b17f33a110}{put\+Message} (\$type, \$msg)
+\item 
+\hyperlink{class_able_polecat___log___boot_a7ff663c06389cd07f8da470eb5a0fbeb}{dump\+Raw\+Request} ()
+\item 
+\hyperlink{class_able_polecat___log___boot_a365e24d7b066205cafa2a5cce3a4f224}{sleep} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___log___boot_a14ff5571692e0aa15198dcf433727839}{dump\+Backtrace} (\$msg=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___log___boot_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{class_able_polecat___log___boot_a645cd359836227fd9f770339a3147e7b}{L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q} = \textquotesingle{}bootseq.\+csv\textquotesingle{}
+\item 
+\hypertarget{class_able_polecat___log___boot_a8c1a873a64d5363a2b99ac48796d7788}{}const {\bfseries L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+R\+E\+Q\+U\+E\+S\+T} = \textquotesingle{}request.\+txt\textquotesingle{}\label{class_able_polecat___log___boot_a8c1a873a64d5363a2b99ac48796d7788}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___log___boot_aefad4c11248b7c6fa6581c25d82bf9c6}{get\+Output} ()
+\item 
+\hyperlink{class_able_polecat___log___boot_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___log___boot_a14ff5571692e0aa15198dcf433727839}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!dump\+Backtrace@{dump\+Backtrace}}
+\index{dump\+Backtrace@{dump\+Backtrace}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{dump\+Backtrace}]{\setlength{\rightskip}{0pt plus 5cm}static dump\+Backtrace (
+\begin{DoxyParamCaption}
+\item[{}]{\$msg = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___log___boot_a14ff5571692e0aa15198dcf433727839}
+Dump backtrace to logger with message.
+
+Typically only called in a \textquotesingle{}panic\textquotesingle{} situation during testing or development.
+
+
+\begin{DoxyParams}[1]{Parameters}
+variable & {\em \$msg} & Variable list of arguments comprising message. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___log___boot_a7ff663c06389cd07f8da470eb5a0fbeb}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!dump\+Raw\+Request@{dump\+Raw\+Request}}
+\index{dump\+Raw\+Request@{dump\+Raw\+Request}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{dump\+Raw\+Request}]{\setlength{\rightskip}{0pt plus 5cm}dump\+Raw\+Request (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___log___boot_a7ff663c06389cd07f8da470eb5a0fbeb}
+Dump raw request data to a file. \hypertarget{class_able_polecat___log___boot_aefad4c11248b7c6fa6581c25d82bf9c6}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!get\+Output@{get\+Output}}
+\index{get\+Output@{get\+Output}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{get\+Output}]{\setlength{\rightskip}{0pt plus 5cm}get\+Output (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___log___boot_aefad4c11248b7c6fa6581c25d82bf9c6}
+\begin{DoxyReturn}{Returns}
+mixed Resource (file) or N\+U\+L\+L. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___log___boot_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___log___boot_a91098fa7d1917ce4833f284bbef12627}
+Extends \hyperlink{class_able_polecat___cache_object_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct()}. \hypertarget{class_able_polecat___log___boot_a952026c3d234eb84a9f211b17f33a110}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!put\+Message@{put\+Message}}
+\index{put\+Message@{put\+Message}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{put\+Message}]{\setlength{\rightskip}{0pt plus 5cm}put\+Message (
+\begin{DoxyParamCaption}
+\item[{}]{\$type, }
+\item[{}]{\$msg}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___log___boot_a952026c3d234eb84a9f211b17f33a110}
+Helper function. Queue messages.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$type} & S\+T\+A\+T\+U\+S $\vert$ W\+A\+R\+N\+I\+N\+G $\vert$ E\+R\+R\+O\+R. \\
+\hline
+string & {\em \$msg} & Body of message. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___log_interface_a952026c3d234eb84a9f211b17f33a110}{Able\+Polecat\+\_\+\+Log\+Interface}.
+
+\hypertarget{class_able_polecat___log___boot_a365e24d7b066205cafa2a5cce3a4f224}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!sleep@{sleep}}
+\index{sleep@{sleep}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{sleep}]{\setlength{\rightskip}{0pt plus 5cm}sleep (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___log___boot_a365e24d7b066205cafa2a5cce3a4f224}
+Serialize object to cache.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject,.} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
+\hypertarget{class_able_polecat___log___boot_a3f2135f6ad45f51d075657f6d20db2cd}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!wakeup@{wakeup}}
+\index{wakeup@{wakeup}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{wakeup}]{\setlength{\rightskip}{0pt plus 5cm}static wakeup (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___log___boot_a3f2135f6ad45f51d075657f6d20db2cd}
+Create a new instance of object or restore cached object to previous state.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}} & Session status helps determine if connection is new or established.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___log___boot}{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot} or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6ad45f51d075657f6d20db2cd}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
+
+
+\subsection{Field Documentation}
+\hypertarget{class_able_polecat___log___boot_a645cd359836227fd9f770339a3147e7b}{}\index{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}!L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q@{L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q}}
+\index{L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q@{L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q}!Able\+Polecat\+\_\+\+Log\+\_\+\+Boot@{Able\+Polecat\+\_\+\+Log\+\_\+\+Boot}}
+\subsubsection[{L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q}]{\setlength{\rightskip}{0pt plus 5cm}const L\+O\+G\+\_\+\+N\+A\+M\+E\+\_\+\+B\+O\+O\+T\+S\+E\+Q = \textquotesingle{}bootseq.\+csv\textquotesingle{}}\label{class_able_polecat___log___boot_a645cd359836227fd9f770339a3147e7b}
+log file names. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Log/Boot.\+php\end{DoxyCompactItemize}

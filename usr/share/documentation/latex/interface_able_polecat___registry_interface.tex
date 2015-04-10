@@ -1,0 +1,257 @@
+\hypertarget{interface_able_polecat___registry_interface}{}\section{Able\+Polecat\+\_\+\+Registry\+Interface Interface Reference}
+\label{interface_able_polecat___registry_interface}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Registry\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7.225806cm]{interface_able_polecat___registry_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___registry_interface_a22d8ddb551ccf544f1d2615db68ca9b1}{add\+Registration} (\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} \$Registry\+Entry)
+\item 
+\hyperlink{interface_able_polecat___registry_interface_a06a999816a4143bb407c09628018a874}{get\+Registration\+By\+Id} (\$id)
+\item 
+\hyperlink{interface_able_polecat___registry_interface_a11594a43c95ab62b4841717c17cf0e54}{get\+Registration\+By\+Name} (\$name)
+\item 
+\hyperlink{interface_able_polecat___registry_interface_a4f5b90c7731c81b66bf67d79dad5dfc7}{get\+Registration\+Count} ()
+\item 
+\hyperlink{interface_able_polecat___registry_interface_a6f24c4ddef3e1c5dde4933e817fc5b4b}{get\+Registrations} (\$key, \$value=N\+U\+L\+L)
+\item 
+\hyperlink{interface_able_polecat___registry_interface_aa8c0a38f257c8ebb59f24f38bdb12419}{begin\+Update} ()
+\item 
+\hyperlink{interface_able_polecat___registry_interface_a363ee22699ad46520333ef24f64798bb}{complete\+Update} ()
+\item 
+\hyperlink{interface_able_polecat___registry_interface_ac91aa5a1d02834beeb440a94d33c6072}{reset\+Update\+Lists} ()
+\item 
+\hyperlink{interface_able_polecat___registry_interface_ab2683892f307a0f42eb0d869edfe5349}{mark\+Updated} (\$id, \$status=F\+A\+L\+S\+E)
+\item 
+\hyperlink{interface_able_polecat___registry_interface_aae89a4ca38c78f2001b1b80de35b8f50}{get\+Update\+List} (\$status=F\+A\+L\+S\+E)
+\end{DoxyCompactItemize}
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{interface_able_polecat___registry_interface_ab35f60dabadc5a0003b72790aa298df2}{K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D} = \textquotesingle{}id\textquotesingle{}
+\item 
+\hypertarget{interface_able_polecat___registry_interface_a6227902f7bed9fcaa0f37b9f0a677408}{}const {\bfseries K\+E\+Y\+\_\+\+C\+L\+A\+S\+S\+\_\+\+N\+A\+M\+E} = \textquotesingle{}name\textquotesingle{}\label{interface_able_polecat___registry_interface_a6227902f7bed9fcaa0f37b9f0a677408}
+
+\item 
+\hypertarget{interface_able_polecat___registry_interface_ad4803772d861b77b852d5fcc8febb586}{}const {\bfseries K\+E\+Y\+\_\+\+N\+O\+T\+\_\+\+U\+P\+D\+A\+T\+E\+D} = \textquotesingle{}not-\/updated\textquotesingle{}\label{interface_able_polecat___registry_interface_ad4803772d861b77b852d5fcc8febb586}
+
+\item 
+\hypertarget{interface_able_polecat___registry_interface_a0bcff0a9989973655e6cd2fbf675f4d0}{}const {\bfseries K\+E\+Y\+\_\+\+U\+P\+D\+A\+T\+E\+D} = \textquotesingle{}updated\textquotesingle{}\label{interface_able_polecat___registry_interface_a0bcff0a9989973655e6cd2fbf675f4d0}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___registry_interface_a22d8ddb551ccf544f1d2615db68ca9b1}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!add\+Registration@{add\+Registration}}
+\index{add\+Registration@{add\+Registration}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{add\+Registration}]{\setlength{\rightskip}{0pt plus 5cm}add\+Registration (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}}]{\$\+Registry\+Entry}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_a22d8ddb551ccf544f1d2615db68ca9b1}
+Add a registry entry.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} & {\em \$\+Registry\+Entry} & \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___registry___exception}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Exception}} & If entry is incompatible. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \hyperlink{class_able_polecat___registry___class_library_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Class\+Library}, \hyperlink{class_able_polecat___registry___class_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Class}, \hyperlink{class_able_polecat___registry___component_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Component}, \hyperlink{class_able_polecat___registry___resource_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Resource}, \hyperlink{class_able_polecat___registry_abstract_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+Abstract}, \hyperlink{class_able_polecat___registry___connector_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}, \hyperlink{class_able_polecat___registry___response_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Response}, and \hyperlink{class_able_polecat___registry___template_a22d8ddb551ccf544f1d2615db68ca9b1}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Template}.
+
+\hypertarget{interface_able_polecat___registry_interface_aa8c0a38f257c8ebb59f24f38bdb12419}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!begin\+Update@{begin\+Update}}
+\index{begin\+Update@{begin\+Update}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{begin\+Update}]{\setlength{\rightskip}{0pt plus 5cm}begin\+Update (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_aa8c0a38f257c8ebb59f24f38bdb12419}
+Initialize update lists.
+
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___registry___exception}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Exception}} & If update cannot begin. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \hyperlink{class_able_polecat___registry_abstract_aa8c0a38f257c8ebb59f24f38bdb12419}{Able\+Polecat\+\_\+\+Registry\+Abstract}.
+
+\hypertarget{interface_able_polecat___registry_interface_a363ee22699ad46520333ef24f64798bb}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!complete\+Update@{complete\+Update}}
+\index{complete\+Update@{complete\+Update}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{complete\+Update}]{\setlength{\rightskip}{0pt plus 5cm}complete\+Update (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_a363ee22699ad46520333ef24f64798bb}
+Finalize update procedure and reset update lists.
+
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Able\+Polecat\+\_\+\+Registry\+\_\+\+Exception.} & \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \hyperlink{class_able_polecat___registry___class_library_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Class\+Library}, \hyperlink{class_able_polecat___registry___class_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Class}, \hyperlink{class_able_polecat___registry___component_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Component}, \hyperlink{class_able_polecat___registry___resource_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Resource}, \hyperlink{class_able_polecat___registry___connector_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}, \hyperlink{class_able_polecat___registry_abstract_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+Abstract}, \hyperlink{class_able_polecat___registry___template_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Template}, and \hyperlink{class_able_polecat___registry___response_a363ee22699ad46520333ef24f64798bb}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Response}.
+
+\hypertarget{interface_able_polecat___registry_interface_a06a999816a4143bb407c09628018a874}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!get\+Registration\+By\+Id@{get\+Registration\+By\+Id}}
+\index{get\+Registration\+By\+Id@{get\+Registration\+By\+Id}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{get\+Registration\+By\+Id}]{\setlength{\rightskip}{0pt plus 5cm}get\+Registration\+By\+Id (
+\begin{DoxyParamCaption}
+\item[{}]{\$id}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_a06a999816a4143bb407c09628018a874}
+Retrieve registered object by given id.
+
+
+\begin{DoxyParams}[1]{Parameters}
+U\+U\+I\+D & {\em \$id} & Id of registered object.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___registry___component_a06a999816a4143bb407c09628018a874}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Component}, \hyperlink{class_able_polecat___registry___resource_a06a999816a4143bb407c09628018a874}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Resource}, \hyperlink{class_able_polecat___registry_abstract_a06a999816a4143bb407c09628018a874}{Able\+Polecat\+\_\+\+Registry\+Abstract}, \hyperlink{class_able_polecat___registry___connector_a06a999816a4143bb407c09628018a874}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}, \hyperlink{class_able_polecat___registry___response_a06a999816a4143bb407c09628018a874}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Response}, and \hyperlink{class_able_polecat___registry___template_a06a999816a4143bb407c09628018a874}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Template}.
+
+\hypertarget{interface_able_polecat___registry_interface_a11594a43c95ab62b4841717c17cf0e54}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!get\+Registration\+By\+Name@{get\+Registration\+By\+Name}}
+\index{get\+Registration\+By\+Name@{get\+Registration\+By\+Name}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{get\+Registration\+By\+Name}]{\setlength{\rightskip}{0pt plus 5cm}get\+Registration\+By\+Name (
+\begin{DoxyParamCaption}
+\item[{}]{\$name}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_a11594a43c95ab62b4841717c17cf0e54}
+Retrieve registered object by given name.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$name} & Name of registered object.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___registry___component_a11594a43c95ab62b4841717c17cf0e54}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Component}, \hyperlink{class_able_polecat___registry___resource_a11594a43c95ab62b4841717c17cf0e54}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Resource}, \hyperlink{class_able_polecat___registry_abstract_a11594a43c95ab62b4841717c17cf0e54}{Able\+Polecat\+\_\+\+Registry\+Abstract}, \hyperlink{class_able_polecat___registry___connector_a11594a43c95ab62b4841717c17cf0e54}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}, \hyperlink{class_able_polecat___registry___response_a11594a43c95ab62b4841717c17cf0e54}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Response}, and \hyperlink{class_able_polecat___registry___template_a11594a43c95ab62b4841717c17cf0e54}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Template}.
+
+\hypertarget{interface_able_polecat___registry_interface_a4f5b90c7731c81b66bf67d79dad5dfc7}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!get\+Registration\+Count@{get\+Registration\+Count}}
+\index{get\+Registration\+Count@{get\+Registration\+Count}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{get\+Registration\+Count}]{\setlength{\rightskip}{0pt plus 5cm}get\+Registration\+Count (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_a4f5b90c7731c81b66bf67d79dad5dfc7}
+\begin{DoxyReturn}{Returns}
+int Count of registry entries. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___registry_abstract_a4f5b90c7731c81b66bf67d79dad5dfc7}{Able\+Polecat\+\_\+\+Registry\+Abstract}.
+
+\hypertarget{interface_able_polecat___registry_interface_a6f24c4ddef3e1c5dde4933e817fc5b4b}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!get\+Registrations@{get\+Registrations}}
+\index{get\+Registrations@{get\+Registrations}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{get\+Registrations}]{\setlength{\rightskip}{0pt plus 5cm}get\+Registrations (
+\begin{DoxyParamCaption}
+\item[{}]{\$key, }
+\item[{}]{\$value = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_a6f24c4ddef3e1c5dde4933e817fc5b4b}
+Retrieve a list of registered objects corresponding to the given key name/value.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$key\+Name} & The name of a registry key. \\
+\hline
+string & {\em \$key\+Value} & Optional value of registry key.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Array\mbox{[}\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}\mbox{]}. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___registry___class_a6f24c4ddef3e1c5dde4933e817fc5b4b}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Class}, \hyperlink{class_able_polecat___registry___component_a8ed45a29bdb30603896e12d7bbf208b5}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Component}, \hyperlink{class_able_polecat___registry___resource_a8ed45a29bdb30603896e12d7bbf208b5}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Resource}, \hyperlink{class_able_polecat___registry___connector_a8ed45a29bdb30603896e12d7bbf208b5}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}, \hyperlink{class_able_polecat___registry___response_a8ed45a29bdb30603896e12d7bbf208b5}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Response}, \hyperlink{class_able_polecat___registry___template_a8ed45a29bdb30603896e12d7bbf208b5}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Template}, and \hyperlink{class_able_polecat___registry_abstract_a6f24c4ddef3e1c5dde4933e817fc5b4b}{Able\+Polecat\+\_\+\+Registry\+Abstract}.
+
+\hypertarget{interface_able_polecat___registry_interface_aae89a4ca38c78f2001b1b80de35b8f50}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!get\+Update\+List@{get\+Update\+List}}
+\index{get\+Update\+List@{get\+Update\+List}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{get\+Update\+List}]{\setlength{\rightskip}{0pt plus 5cm}get\+Update\+List (
+\begin{DoxyParamCaption}
+\item[{}]{\$status = {\ttfamily FALSE}}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_aae89a4ca38c78f2001b1b80de35b8f50}
+Return lists of ids for registry entries updated and not updated.
+
+
+\begin{DoxyParams}[1]{Parameters}
+boolean & {\em \$status} & T\+R\+U\+E if update was successful otherwise F\+A\+L\+S\+E.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___registry_abstract_aae89a4ca38c78f2001b1b80de35b8f50}{Able\+Polecat\+\_\+\+Registry\+Abstract}.
+
+\hypertarget{interface_able_polecat___registry_interface_ab2683892f307a0f42eb0d869edfe5349}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!mark\+Updated@{mark\+Updated}}
+\index{mark\+Updated@{mark\+Updated}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{mark\+Updated}]{\setlength{\rightskip}{0pt plus 5cm}mark\+Updated (
+\begin{DoxyParamCaption}
+\item[{}]{\$id, }
+\item[{}]{\$status = {\ttfamily FALSE}}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_ab2683892f307a0f42eb0d869edfe5349}
+Mark registry entry corresponding to given id as updated.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$id,.} & \\
+\hline
+boolean & {\em \$status} & T\+R\+U\+E if update was successful otherwise F\+A\+L\+S\+E. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \hyperlink{class_able_polecat___registry_abstract_ab2683892f307a0f42eb0d869edfe5349}{Able\+Polecat\+\_\+\+Registry\+Abstract}.
+
+\hypertarget{interface_able_polecat___registry_interface_ac91aa5a1d02834beeb440a94d33c6072}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!reset\+Update\+Lists@{reset\+Update\+Lists}}
+\index{reset\+Update\+Lists@{reset\+Update\+Lists}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{reset\+Update\+Lists}]{\setlength{\rightskip}{0pt plus 5cm}reset\+Update\+Lists (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___registry_interface_ac91aa5a1d02834beeb440a94d33c6072}
+Load list of ids for registry entries eligible for update.
+
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___registry_abstract_ac91aa5a1d02834beeb440a94d33c6072}{Able\+Polecat\+\_\+\+Registry\+Abstract}.
+
+
+
+\subsection{Field Documentation}
+\hypertarget{interface_able_polecat___registry_interface_ab35f60dabadc5a0003b72790aa298df2}{}\index{Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}!K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D@{K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D}}
+\index{K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D@{K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D}!Able\+Polecat\+\_\+\+Registry\+Interface@{Able\+Polecat\+\_\+\+Registry\+Interface}}
+\subsubsection[{K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}const K\+E\+Y\+\_\+\+A\+R\+T\+I\+C\+L\+E\+\_\+\+I\+D = \textquotesingle{}id\textquotesingle{}}\label{interface_able_polecat___registry_interface_ab35f60dabadc5a0003b72790aa298df2}
+Registry keys. 
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/Registry.\+php\end{DoxyCompactItemize}

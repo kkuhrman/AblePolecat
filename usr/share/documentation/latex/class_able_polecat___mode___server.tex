@@ -1,0 +1,311 @@
+\hypertarget{class_able_polecat___mode___server}{}\section{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server Class Reference}
+\label{class_able_polecat___mode___server}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Mode\+\_\+\+Server\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.806452cm]{class_able_polecat___mode___server}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___mode___server_a365e24d7b066205cafa2a5cce3a4f224}{sleep} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___mode___server_aa7f01cbd17bffdbbb7511a3c37756064}{execute} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___mode___server_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{get\+Id} ()
+\item 
+static \hyperlink{class_able_polecat___mode___server_a4ef9bd37ba3ce8a13c1e8bcf4f72a630}{get\+Name} ()
+\item 
+static \hyperlink{class_able_polecat___mode___server_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}{get\+Environment\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name)
+\item 
+static \hyperlink{class_able_polecat___mode___server_a68bdefd00518f09963ea3fa95cd2a242}{set\+Environment\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name, \$value)
+\item 
+static \hyperlink{class_able_polecat___mode___server_aefd1705bf4d05f2c642eaeb400639367}{handle\+Error} (\$errno, \$errstr, \$errfile=N\+U\+L\+L, \$errline=N\+U\+L\+L, \$errcontext=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___mode___server_a7e7be427ff1899a7386be4019db2d59d}{handle\+Exception} (Exception \$Exception)
+\item 
+static \hyperlink{class_able_polecat___mode___server_a049626e8b9364098553ee05897b55111}{log\+Boot\+Message} (\$type, \$msg)
+\end{DoxyCompactItemize}
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_able_polecat___mode___server_a74b892c8c0b86bf9d04c5819898c51e7}{}const {\bfseries U\+U\+I\+D} = \textquotesingle{}2621ce80-\/5df4-\/11e3-\/949a-\/0800200c9a66\textquotesingle{}\label{class_able_polecat___mode___server_a74b892c8c0b86bf9d04c5819898c51e7}
+
+\item 
+\hypertarget{class_able_polecat___mode___server_a244352f035b82b20b0efa506167fd862}{}const {\bfseries N\+A\+M\+E} = \textquotesingle{}\hyperlink{class_able_polecat___mode___server}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}\textquotesingle{}\label{class_able_polecat___mode___server_a244352f035b82b20b0efa506167fd862}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___mode___server_a1edabbfbec5258ee9df5fc2f236f51b4}{initialize\+Error\+Reporting} ()
+\item 
+\hyperlink{class_able_polecat___mode___server_a37906da60d0165610266b97b07bc5267}{validate\+Command\+Link} (\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Target, \$direction)
+\item 
+\hyperlink{class_able_polecat___mode___server_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___mode___server_acd5d4d9d37844d2fda39ed558dc2b454}{shutdown} (\$status=0)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Core Commands 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___mode___server_aa7f01cbd17bffdbbb7511a3c37756064}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!execute@{execute}}
+\index{execute@{execute}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}execute (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+Interface}}]{\$\+Command}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___mode___server_aa7f01cbd17bffdbbb7511a3c37756064}
+Execute a command or pass back/forward chain of responsibility.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} & {\em \$\+Command} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result} 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___command___target_interface_aa7f01cbd17bffdbbb7511a3c37756064}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}.
+
+\hypertarget{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!get\+Environment\+Variable@{get\+Environment\+Variable}}
+\index{get\+Environment\+Variable@{get\+Environment\+Variable}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{get\+Environment\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Environment\+Variable (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{}]{\$name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}
+Returns assigned value of given environment variable.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent} & Agent seeking access. \\
+\hline
+string & {\em \$name} & Name of requested environment variable.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Assigned value of given variable or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___mode___exception}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Exception}} & If environment is not initialized. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implements \hyperlink{interface_able_polecat___mode_interface_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+Interface}.
+
+\hypertarget{class_able_polecat___mode___server_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!get\+Id@{get\+Id}}
+\index{get\+Id@{get\+Id}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{get\+Id}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Id (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_acfaa3a96d0cb5a4c0d4d710dcba41e9e}
+Return unique, system-\/wide identifier.
+
+\begin{DoxyReturn}{Returns}
+U\+U\+I\+D. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article___static_interface_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+\_\+\+Static\+Interface}.
+
+\hypertarget{class_able_polecat___mode___server_a4ef9bd37ba3ce8a13c1e8bcf4f72a630}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!get\+Name@{get\+Name}}
+\index{get\+Name@{get\+Name}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{get\+Name}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a4ef9bd37ba3ce8a13c1e8bcf4f72a630}
+Return Common name.
+
+\begin{DoxyReturn}{Returns}
+string Common name. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article___static_interface_a4ef9bd37ba3ce8a13c1e8bcf4f72a630}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+\_\+\+Static\+Interface}.
+
+\hypertarget{class_able_polecat___mode___server_aefd1705bf4d05f2c642eaeb400639367}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!handle\+Error@{handle\+Error}}
+\index{handle\+Error@{handle\+Error}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{handle\+Error}]{\setlength{\rightskip}{0pt plus 5cm}static handle\+Error (
+\begin{DoxyParamCaption}
+\item[{}]{\$errno, }
+\item[{}]{\$errstr, }
+\item[{}]{\$errfile = {\ttfamily NULL}, }
+\item[{}]{\$errline = {\ttfamily NULL}, }
+\item[{}]{\$errcontext = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_aefd1705bf4d05f2c642eaeb400639367}
+Handle errors triggered by child objects. \hypertarget{class_able_polecat___mode___server_a7e7be427ff1899a7386be4019db2d59d}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!handle\+Exception@{handle\+Exception}}
+\index{handle\+Exception@{handle\+Exception}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{handle\+Exception}]{\setlength{\rightskip}{0pt plus 5cm}static handle\+Exception (
+\begin{DoxyParamCaption}
+\item[{Exception}]{\$\+Exception}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a7e7be427ff1899a7386be4019db2d59d}
+Handle exceptions thrown by child objects.
+
+\begin{DoxyRefDesc}{Todo}
+\item[\hyperlink{todo__todo000007}{Todo}]\+: hand control back to the server or otherwise fail gracefully. no W\+S\+O\+D \end{DoxyRefDesc}
+\hypertarget{class_able_polecat___mode___server_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___mode___server_a91098fa7d1917ce4833f284bbef12627}
+Extends constructor. \hypertarget{class_able_polecat___mode___server_a1edabbfbec5258ee9df5fc2f236f51b4}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!initialize\+Error\+Reporting@{initialize\+Error\+Reporting}}
+\index{initialize\+Error\+Reporting@{initialize\+Error\+Reporting}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{initialize\+Error\+Reporting}]{\setlength{\rightskip}{0pt plus 5cm}initialize\+Error\+Reporting (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___mode___server_a1edabbfbec5258ee9df5fc2f236f51b4}
+Configure error reporting/handling. \hypertarget{class_able_polecat___mode___server_a049626e8b9364098553ee05897b55111}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!log\+Boot\+Message@{log\+Boot\+Message}}
+\index{log\+Boot\+Message@{log\+Boot\+Message}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{log\+Boot\+Message}]{\setlength{\rightskip}{0pt plus 5cm}static log\+Boot\+Message (
+\begin{DoxyParamCaption}
+\item[{}]{\$type, }
+\item[{}]{\$msg}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a049626e8b9364098553ee05897b55111}
+Write information to the boot log if it is open.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$type} & S\+T\+A\+T\+U\+S $\vert$ W\+A\+R\+N\+I\+N\+G $\vert$ E\+R\+R\+O\+R. \\
+\hline
+string & {\em \$msg} & Body of message.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Message as sent, if written, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___mode___server_a68bdefd00518f09963ea3fa95cd2a242}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!set\+Environment\+Variable@{set\+Environment\+Variable}}
+\index{set\+Environment\+Variable@{set\+Environment\+Variable}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{set\+Environment\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}static set\+Environment\+Variable (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{}]{\$name, }
+\item[{}]{\$value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a68bdefd00518f09963ea3fa95cd2a242}
+Assign value of given environment variable.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent} & Agent seeking access. \\
+\hline
+string & {\em \$name} & Name of requested environment variable. \\
+\hline
+mixed & {\em \$value} & Value of variable.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if variable is set, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___mode___exception}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Exception}} & If environment is not initialized. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implements \hyperlink{interface_able_polecat___mode_interface_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+Interface}.
+
+\hypertarget{class_able_polecat___mode___server_acd5d4d9d37844d2fda39ed558dc2b454}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!shutdown@{shutdown}}
+\index{shutdown@{shutdown}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{shutdown}]{\setlength{\rightskip}{0pt plus 5cm}static shutdown (
+\begin{DoxyParamCaption}
+\item[{}]{\$status = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___mode___server_acd5d4d9d37844d2fda39ed558dc2b454}
+Shut down Able Polecat server and send H\+T\+T\+P response.
+
+
+\begin{DoxyParams}[1]{Parameters}
+int & {\em \$status} & Return code. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___mode___server_a365e24d7b066205cafa2a5cce3a4f224}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!sleep@{sleep}}
+\index{sleep@{sleep}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{sleep}]{\setlength{\rightskip}{0pt plus 5cm}sleep (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___mode___server_a365e24d7b066205cafa2a5cce3a4f224}
+Serialize object to cache.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject,.} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
+\hypertarget{class_able_polecat___mode___server_a37906da60d0165610266b97b07bc5267}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!validate\+Command\+Link@{validate\+Command\+Link}}
+\index{validate\+Command\+Link@{validate\+Command\+Link}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{validate\+Command\+Link}]{\setlength{\rightskip}{0pt plus 5cm}validate\+Command\+Link (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}}]{\$\+Target, }
+\item[{}]{\$direction}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___mode___server_a37906da60d0165610266b97b07bc5267}
+Validates given command target as a forward or reverse C\+O\+R link.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} & {\em \$\+Target,.} & \\
+\hline
+string & {\em \$direction} & \textquotesingle{}forward\textquotesingle{} $\vert$ \textquotesingle{}reverse\textquotesingle{}\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if proposed C\+O\+R link is acceptable, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___mode___server_a3f2135f6ad45f51d075657f6d20db2cd}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!wakeup@{wakeup}}
+\index{wakeup@{wakeup}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{wakeup}]{\setlength{\rightskip}{0pt plus 5cm}static wakeup (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a3f2135f6ad45f51d075657f6d20db2cd}
+Create a new instance of object or restore cached object to previous state.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}} & Session status helps determine if connection is new or established.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___cache_object_interface}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface} Initialized server resource ready for business or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6ad45f51d075657f6d20db2cd}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Mode/Server.\+php\end{DoxyCompactItemize}

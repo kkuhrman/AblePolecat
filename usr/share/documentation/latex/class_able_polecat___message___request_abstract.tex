@@ -1,0 +1,335 @@
+\hypertarget{class_able_polecat___message___request_abstract}{}\section{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract Class Reference}
+\label{class_able_polecat___message___request_abstract}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.036364cm]{class_able_polecat___message___request_abstract}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a24f01da16b0dd5c8443a359fc63ad6a2}{get\+Request\+Path\+Info} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a271cb279757d7442621be8d9cc655456}{get\+Request\+Path} (\$as\+String=T\+R\+U\+E)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a857d46fb7d0a91198f2fdc173f65cf75}{get\+Request\+Query\+String} (\$as\+String=T\+R\+U\+E)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a29afed20445af05cf3ef1c9e63a11c22}{get\+Base\+Url} (\$trailing\+\_\+slash=T\+R\+U\+E)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a22300f7ad45068a4ab569ba6d1a6c605}{get\+Raw\+Request\+Log\+Record\+Id} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a320f8cf6bf704c301b24f83e4d0c3a22}{get\+Redirect\+Url} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a1e05d92c1527e5fbe83db15156e54457}{validate\+Resource\+Name} (\$requested\+Resource\+Name)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_ae78e05faf338016b4c1baeae80316a12}{get\+Host\+Name} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a8c5a689e9be7d35d0d01d0194637a7d2}{get\+Resource} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a1777165184f881f2a13ff0ad75c9bb20}{get\+Query\+String\+Field\+Value} (\$field\+Name)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_aef696836fa5e996d12af5c12882f2c01}{set\+Raw\+Request\+Log\+Record\+Id} (\$raw\+Request\+Log\+Record\+Id)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___message___request_abstract_a94d2e558bba777f54dcc10f1bfc4dca5}{unmarshall\+Args\+List} (\$method\+\_\+name, \$args, \$options=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a43f7e5e819f06b30b8b5c4f3830dcdf9}{analyze\+Request\+Path} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a270b494c9f519f8e57e3242b18181703}{filter\+Entity\+Body} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a47caae27fc361cff72e9eb53f59032e0}{filter\+Query\+String} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a61811fe0b7325f59e02c3ceeabd58309}{initialize\+Host\+Url} ()
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a82910e6debe7f12fa5e10998ba7acf65}{make\+Request\+Query\+String} (\$parameters)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a68d60b0c45c9bea3c9241f05369b0169}{set\+Resource} (\$resource=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___message___request_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___message___request_abstract_a43f7e5e819f06b30b8b5c4f3830dcdf9}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!analyze\+Request\+Path@{analyze\+Request\+Path}}
+\index{analyze\+Request\+Path@{analyze\+Request\+Path}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{analyze\+Request\+Path}]{\setlength{\rightskip}{0pt plus 5cm}analyze\+Request\+Path (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a43f7e5e819f06b30b8b5c4f3830dcdf9}
+Break off path from host name and analyze components. \hypertarget{class_able_polecat___message___request_abstract_a270b494c9f519f8e57e3242b18181703}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!filter\+Entity\+Body@{filter\+Entity\+Body}}
+\index{filter\+Entity\+Body@{filter\+Entity\+Body}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{filter\+Entity\+Body}]{\setlength{\rightskip}{0pt plus 5cm}filter\+Entity\+Body (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a270b494c9f519f8e57e3242b18181703}
+Filter (sanitize) entity body if sent (e.\+g. P\+O\+S\+T data). \hypertarget{class_able_polecat___message___request_abstract_a47caae27fc361cff72e9eb53f59032e0}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!filter\+Query\+String@{filter\+Query\+String}}
+\index{filter\+Query\+String@{filter\+Query\+String}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{filter\+Query\+String}]{\setlength{\rightskip}{0pt plus 5cm}filter\+Query\+String (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a47caae27fc361cff72e9eb53f59032e0}
+Filter (sanitize) query string if sent. \hypertarget{class_able_polecat___message___request_abstract_a29afed20445af05cf3ef1c9e63a11c22}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Base\+Url@{get\+Base\+Url}}
+\index{get\+Base\+Url@{get\+Base\+Url}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Base\+Url}]{\setlength{\rightskip}{0pt plus 5cm}get\+Base\+Url (
+\begin{DoxyParamCaption}
+\item[{}]{\$trailing\+\_\+slash = {\ttfamily TRUE}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a29afed20445af05cf3ef1c9e63a11c22}
+\begin{DoxyReturn}{Returns}
+string Base U\+R\+L (host name\mbox{[}/alias\mbox{]}). 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a29afed20445af05cf3ef1c9e63a11c22}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_ae78e05faf338016b4c1baeae80316a12}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Host\+Name@{get\+Host\+Name}}
+\index{get\+Host\+Name@{get\+Host\+Name}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Host\+Name}]{\setlength{\rightskip}{0pt plus 5cm}get\+Host\+Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_ae78e05faf338016b4c1baeae80316a12}
+\begin{DoxyReturn}{Returns}
+string 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_ae78e05faf338016b4c1baeae80316a12}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a1777165184f881f2a13ff0ad75c9bb20}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Query\+String\+Field\+Value@{get\+Query\+String\+Field\+Value}}
+\index{get\+Query\+String\+Field\+Value@{get\+Query\+String\+Field\+Value}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Query\+String\+Field\+Value}]{\setlength{\rightskip}{0pt plus 5cm}get\+Query\+String\+Field\+Value (
+\begin{DoxyParamCaption}
+\item[{}]{\$field\+Name}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a1777165184f881f2a13ff0ad75c9bb20}
+Return value of query string field if it exists.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$field\+Name} & Name of query string field (parameter).\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Value of given query string field or N\+U\+L\+L. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___message___request_abstract_a22300f7ad45068a4ab569ba6d1a6c605}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Raw\+Request\+Log\+Record\+Id@{get\+Raw\+Request\+Log\+Record\+Id}}
+\index{get\+Raw\+Request\+Log\+Record\+Id@{get\+Raw\+Request\+Log\+Record\+Id}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Raw\+Request\+Log\+Record\+Id}]{\setlength{\rightskip}{0pt plus 5cm}get\+Raw\+Request\+Log\+Record\+Id (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a22300f7ad45068a4ab569ba6d1a6c605}
+\begin{DoxyReturn}{Returns}
+mixed I\+D corresponding to record of raw request in database. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a22300f7ad45068a4ab569ba6d1a6c605}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a320f8cf6bf704c301b24f83e4d0c3a22}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Redirect\+Url@{get\+Redirect\+Url}}
+\index{get\+Redirect\+Url@{get\+Redirect\+Url}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Redirect\+Url}]{\setlength{\rightskip}{0pt plus 5cm}get\+Redirect\+Url (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a320f8cf6bf704c301b24f83e4d0c3a22}
+\begin{DoxyReturn}{Returns}
+mixed Redirect U\+R\+L or F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a320f8cf6bf704c301b24f83e4d0c3a22}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a271cb279757d7442621be8d9cc655456}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Request\+Path@{get\+Request\+Path}}
+\index{get\+Request\+Path@{get\+Request\+Path}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Request\+Path}]{\setlength{\rightskip}{0pt plus 5cm}get\+Request\+Path (
+\begin{DoxyParamCaption}
+\item[{}]{\$as\+String = {\ttfamily TRUE}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a271cb279757d7442621be8d9cc655456}
+Return the path part of request U\+R\+I.
+
+
+\begin{DoxyParams}[1]{Parameters}
+bool & {\em \$as\+String} & If T\+R\+U\+E return path as string, otherwise return parts in array.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed return type depends on value of \$as\+String 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a271cb279757d7442621be8d9cc655456}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a24f01da16b0dd5c8443a359fc63ad6a2}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Request\+Path\+Info@{get\+Request\+Path\+Info}}
+\index{get\+Request\+Path\+Info@{get\+Request\+Path\+Info}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Request\+Path\+Info}]{\setlength{\rightskip}{0pt plus 5cm}get\+Request\+Path\+Info (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a24f01da16b0dd5c8443a359fc63ad6a2}
+Return info relating to analysis of U\+R\+I request path.
+
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a24f01da16b0dd5c8443a359fc63ad6a2}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a857d46fb7d0a91198f2fdc173f65cf75}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Request\+Query\+String@{get\+Request\+Query\+String}}
+\index{get\+Request\+Query\+String@{get\+Request\+Query\+String}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Request\+Query\+String}]{\setlength{\rightskip}{0pt plus 5cm}get\+Request\+Query\+String (
+\begin{DoxyParamCaption}
+\item[{}]{\$as\+String = {\ttfamily TRUE}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a857d46fb7d0a91198f2fdc173f65cf75}
+Return the query string part of request U\+R\+I.
+
+
+\begin{DoxyParams}[1]{Parameters}
+bool & {\em \$as\+String} & If T\+R\+U\+E return query string as U\+R\+L encoded string, otherwise return parts in array.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed return type depends on value of \$as\+String 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a857d46fb7d0a91198f2fdc173f65cf75}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a8c5a689e9be7d35d0d01d0194637a7d2}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!get\+Resource@{get\+Resource}}
+\index{get\+Resource@{get\+Resource}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{get\+Resource}]{\setlength{\rightskip}{0pt plus 5cm}get\+Resource (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a8c5a689e9be7d35d0d01d0194637a7d2}
+\begin{DoxyReturn}{Returns}
+string Request resource (U\+R\+I/\+U\+R\+L). 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a8c5a689e9be7d35d0d01d0194637a7d2}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a91098fa7d1917ce4833f284bbef12627}
+Extends \+\_\+\+\_\+construct().
+
+Sub-\/classes should override to initialize properties. \hypertarget{class_able_polecat___message___request_abstract_a61811fe0b7325f59e02c3ceeabd58309}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!initialize\+Host\+Url@{initialize\+Host\+Url}}
+\index{initialize\+Host\+Url@{initialize\+Host\+Url}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{initialize\+Host\+Url}]{\setlength{\rightskip}{0pt plus 5cm}initialize\+Host\+Url (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a61811fe0b7325f59e02c3ceeabd58309}
+Initialize U\+R\+L of host (or virtual host). \hypertarget{class_able_polecat___message___request_abstract_a82910e6debe7f12fa5e10998ba7acf65}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!make\+Request\+Query\+String@{make\+Request\+Query\+String}}
+\index{make\+Request\+Query\+String@{make\+Request\+Query\+String}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{make\+Request\+Query\+String}]{\setlength{\rightskip}{0pt plus 5cm}make\+Request\+Query\+String (
+\begin{DoxyParamCaption}
+\item[{}]{\$parameters}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a82910e6debe7f12fa5e10998ba7acf65}
+Generate a U\+R\+I request query string from an array of parameter N\+V\+P.
+
+
+\begin{DoxyParams}[1]{Parameters}
+Array & {\em \$parameters} & Array\mbox{[}name =$>$ value(s)\mbox{]}\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+string 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___message___request_abstract_aef696836fa5e996d12af5c12882f2c01}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!set\+Raw\+Request\+Log\+Record\+Id@{set\+Raw\+Request\+Log\+Record\+Id}}
+\index{set\+Raw\+Request\+Log\+Record\+Id@{set\+Raw\+Request\+Log\+Record\+Id}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{set\+Raw\+Request\+Log\+Record\+Id}]{\setlength{\rightskip}{0pt plus 5cm}set\+Raw\+Request\+Log\+Record\+Id (
+\begin{DoxyParamCaption}
+\item[{}]{\$raw\+Request\+Log\+Record\+Id}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_aef696836fa5e996d12af5c12882f2c01}
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$raw\+Request\+Log\+Record\+Id} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___message___request_abstract_a68d60b0c45c9bea3c9241f05369b0169}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!set\+Resource@{set\+Resource}}
+\index{set\+Resource@{set\+Resource}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{set\+Resource}]{\setlength{\rightskip}{0pt plus 5cm}set\+Resource (
+\begin{DoxyParamCaption}
+\item[{}]{\$resource = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___message___request_abstract_a68d60b0c45c9bea3c9241f05369b0169}
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$resource} & (U\+R\+I/\+U\+R\+L). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___message___request_abstract_a94d2e558bba777f54dcc10f1bfc4dca5}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!unmarshall\+Args\+List@{unmarshall\+Args\+List}}
+\index{unmarshall\+Args\+List@{unmarshall\+Args\+List}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{unmarshall\+Args\+List}]{\setlength{\rightskip}{0pt plus 5cm}static unmarshall\+Args\+List (
+\begin{DoxyParamCaption}
+\item[{}]{\$method\+\_\+name, }
+\item[{}]{\$args, }
+\item[{}]{\$options = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___message___request_abstract_a94d2e558bba777f54dcc10f1bfc4dca5}
+Marshall numeric-\/indexed array of variable method arguments.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$method\+\_\+name} & {\bfseries M\+E\+T\+H\+O\+D} is good enough. \\
+\hline
+Array & {\em \$args} & Variable list of arguments passed to method (i.\+e. get\+\_\+func\+\_\+args()). \\
+\hline
+mixed & {\em \$options} & Reserved for future use.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Array Associative array representing \mbox{[}argument name\mbox{]} =$>$ \mbox{[}argument value\mbox{]} 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___overloadable_interface_a94d2e558bba777f54dcc10f1bfc4dca5}{Able\+Polecat\+\_\+\+Overloadable\+Interface}.
+
+\hypertarget{class_able_polecat___message___request_abstract_a1e05d92c1527e5fbe83db15156e54457}{}\index{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}!validate\+Resource\+Name@{validate\+Resource\+Name}}
+\index{validate\+Resource\+Name@{validate\+Resource\+Name}!Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract@{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Abstract}}
+\subsubsection[{validate\+Resource\+Name}]{\setlength{\rightskip}{0pt plus 5cm}validate\+Resource\+Name (
+\begin{DoxyParamCaption}
+\item[{}]{\$requested\+Resource\+Name}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___message___request_abstract_a1e05d92c1527e5fbe83db15156e54457}
+Check resource name against list of allowable characters etc.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$requested\+Resource\+Name} & Name of requested resource.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+string Sanitized/normalized version of resource name. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___message___request_interface_a1e05d92c1527e5fbe83db15156e54457}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Message/Request.\+php\end{DoxyCompactItemize}

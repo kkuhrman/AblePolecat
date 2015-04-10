@@ -1,0 +1,48 @@
+\hypertarget{interface_able_polecat___access_control___resource_interface}{}\section{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface Interface Reference}
+\label{interface_able_polecat___access_control___resource_interface}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.951219cm]{interface_able_polecat___access_control___resource_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___access_control___resource_interface_aaba20e74dced7f11f018a5a86ead176e}{open} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \hyperlink{interface_able_polecat___access_control___resource___locater_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+Interface} \$Url=N\+U\+L\+L)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___access_control___resource_interface_aaba20e74dced7f11f018a5a86ead176e}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface}!open@{open}}
+\index{open@{open}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+Interface}}
+\subsubsection[{open}]{\setlength{\rightskip}{0pt plus 5cm}open (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent, }
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+Interface}}]{\$\+Url = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___resource_interface_aaba20e74dced7f11f018a5a86ead176e}
+Opens an existing resource or makes an empty one accessible depending on permissions.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$agent} & Agent seeking access. \\
+\hline
+\hyperlink{interface_able_polecat___access_control___resource___locater_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+Interface} & {\em \$\+Url} & Existing or new resource. \\
+\hline
+string & {\em \$name} & Optional common name for new resources.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if access to resource is granted, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___resource_abstract_aaba20e74dced7f11f018a5a86ead176e}{Able\+Polecat\+\_\+\+Resource\+Abstract}, and \hyperlink{class_able_polecat___database___pdo_a4ce5c2e3d8229d890939c780db9c8ba8}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Access\+Control/Resource.\+php\end{DoxyCompactItemize}

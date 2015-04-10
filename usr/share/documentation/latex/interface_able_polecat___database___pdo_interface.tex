@@ -1,0 +1,121 @@
+\hypertarget{interface_able_polecat___database___pdo_interface}{}\section{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface Interface Reference}
+\label{interface_able_polecat___database___pdo_interface}\index{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5.121951cm]{interface_able_polecat___database___pdo_interface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___database___pdo_interface_a5f04b6f467dace4e4b9a81611e658c4d}{get\+Error\+Code} ()
+\item 
+\hyperlink{interface_able_polecat___database___pdo_interface_aa17a52a88134e9ba51a0731ba3ba4d6f}{get\+Error\+Info} ()
+\item 
+\hyperlink{interface_able_polecat___database___pdo_interface_aaf8e789036f518ea4523e095d1892e34}{get\+Last\+Insert\+Id} ()
+\item 
+\hyperlink{interface_able_polecat___database___pdo_interface_a374c56d08c9fb9b44796f1a55512b974}{prepare\+Statement} (\$statement, \$driver\+\_\+options=array(P\+D\+O\+::\+A\+T\+T\+R\+\_\+\+C\+U\+R\+S\+O\+R=$>$ P\+D\+O\+::\+C\+U\+R\+S\+O\+R\+\_\+\+F\+W\+D\+O\+N\+L\+Y))
+\item 
+\hyperlink{interface_able_polecat___database___pdo_interface_ad6688f4cd3234b8d40f8f92bbcd07e73}{quote} (\$input)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___database___pdo_interface_a5f04b6f467dace4e4b9a81611e658c4d}{}\index{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}!get\+Error\+Code@{get\+Error\+Code}}
+\index{get\+Error\+Code@{get\+Error\+Code}!Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}}
+\subsubsection[{get\+Error\+Code}]{\setlength{\rightskip}{0pt plus 5cm}get\+Error\+Code (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database___pdo_interface_a5f04b6f467dace4e4b9a81611e658c4d}
+Returns an S\+Q\+L\+S\+T\+A\+T\+E, a five characters alphanumeric identifier defined in A\+N\+S\+I S\+Q\+L-\/92 standard.
+
+\begin{DoxyReturn}{Returns}
+mixed S\+Q\+L\+S\+T\+A\+T\+E or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_a5f04b6f467dace4e4b9a81611e658c4d}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database___pdo_interface_aa17a52a88134e9ba51a0731ba3ba4d6f}{}\index{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}!get\+Error\+Info@{get\+Error\+Info}}
+\index{get\+Error\+Info@{get\+Error\+Info}!Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}}
+\subsubsection[{get\+Error\+Info}]{\setlength{\rightskip}{0pt plus 5cm}get\+Error\+Info (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database___pdo_interface_aa17a52a88134e9ba51a0731ba3ba4d6f}
+Returns error information about last operation performed by this database handle.
+
+\begin{DoxyReturn}{Returns}
+mixed Array of error information or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_aa17a52a88134e9ba51a0731ba3ba4d6f}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database___pdo_interface_aaf8e789036f518ea4523e095d1892e34}{}\index{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}!get\+Last\+Insert\+Id@{get\+Last\+Insert\+Id}}
+\index{get\+Last\+Insert\+Id@{get\+Last\+Insert\+Id}!Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}}
+\subsubsection[{get\+Last\+Insert\+Id}]{\setlength{\rightskip}{0pt plus 5cm}get\+Last\+Insert\+Id (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database___pdo_interface_aaf8e789036f518ea4523e095d1892e34}
+\begin{DoxyReturn}{Returns}
+mixed I\+D of the last inserted row or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_aaf8e789036f518ea4523e095d1892e34}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database___pdo_interface_a374c56d08c9fb9b44796f1a55512b974}{}\index{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}!prepare\+Statement@{prepare\+Statement}}
+\index{prepare\+Statement@{prepare\+Statement}!Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}}
+\subsubsection[{prepare\+Statement}]{\setlength{\rightskip}{0pt plus 5cm}prepare\+Statement (
+\begin{DoxyParamCaption}
+\item[{}]{\$statement, }
+\item[{}]{\$driver\+\_\+options = {\ttfamily array(PDO\+:\+:ATTR\+\_\+CURSOR=$>$~PDO\+:\+:CURSOR\+\_\+FWDONLY)}}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database___pdo_interface_a374c56d08c9fb9b44796f1a55512b974}
+Prepares a S\+Q\+L statement for execution.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$statement} & S\+Q\+L statement to prepare. \\
+\hline
+array & {\em \$driver\+\_\+options} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+P\+D\+O\+Statement The prepared statement or N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_a374c56d08c9fb9b44796f1a55512b974}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+\hypertarget{interface_able_polecat___database___pdo_interface_ad6688f4cd3234b8d40f8f92bbcd07e73}{}\index{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}!quote@{quote}}
+\index{quote@{quote}!Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface@{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo\+Interface}}
+\subsubsection[{quote}]{\setlength{\rightskip}{0pt plus 5cm}quote (
+\begin{DoxyParamCaption}
+\item[{}]{\$input}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___database___pdo_interface_ad6688f4cd3234b8d40f8f92bbcd07e73}
+Places quotes around and escapes special characters within input string (if required).
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$input,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Quoted string that is theoretically safe to pass into an S\+Q\+L statement or F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___database___pdo_ad6688f4cd3234b8d40f8f92bbcd07e73}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+
+
+
+The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Database/Pdo.\+php\end{DoxyCompactItemize}

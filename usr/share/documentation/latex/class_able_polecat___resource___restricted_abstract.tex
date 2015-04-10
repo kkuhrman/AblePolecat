@@ -1,0 +1,249 @@
+\hypertarget{class_able_polecat___resource___restricted_abstract}{}\section{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract Class Reference}
+\label{class_able_polecat___resource___restricted_abstract}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.327913cm]{class_able_polecat___resource___restricted_abstract}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a645291218d5ad4046d1367bb9718867f}{has\+Permission} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject, \$requested\+Constraint\+Id)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___resource___restricted_abstract_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___resource___restricted_abstract_a5bdabdf819eef8c6337a4da78b55dc39}{has\+Access} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L, \$Constraint=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___resource___restricted_abstract_a46d5b25cc8f9b1ad658b5c6617536824}{lookup\+Constraint} (\$requested\+Constraint\+Id)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a06a5f893b4440639301618a91c8d5009}{check\+Constraint\+Settings} (\$constraint\+Id, \$subject\+Id)
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a7a7a5c16b7f7ba9b0a2660cd14dec01a}{get\+Wakeup\+Access\+Request} ()
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_ae323b90c762ce6cde341e8b9937bf7f6}{set\+Constraint} (\$constraint\+Id, \$authority\+Id=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a1653bc370f5ccc724c65b72c94882b79}{set\+Permission} (\$constraint\+Id, \$subject\+Id, \$authority\+Id=N\+U\+L\+L)
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a02f0a65ed7e607c39ff550ca15a28279}{set\+Wakeup\+Access\+Request} (\$Wakeup\+Access\+Request)
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a1ad601dd41b953bfa07c99f6b17d482d}{put\+Arguments} (\$arguments)
+\item 
+\hyperlink{class_able_polecat___resource___restricted_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_able_polecat___resource___restricted_abstract_afaf708052f29a25498aaf37ceb8aba6f}{}static {\bfseries \$\+Resource} = N\+U\+L\+L\label{class_able_polecat___resource___restricted_abstract_afaf708052f29a25498aaf37ceb8aba6f}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a06a5f893b4440639301618a91c8d5009}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!check\+Constraint\+Settings@{check\+Constraint\+Settings}}
+\index{check\+Constraint\+Settings@{check\+Constraint\+Settings}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{check\+Constraint\+Settings}]{\setlength{\rightskip}{0pt plus 5cm}check\+Constraint\+Settings (
+\begin{DoxyParamCaption}
+\item[{}]{\$constraint\+Id, }
+\item[{}]{\$subject\+Id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_a06a5f893b4440639301618a91c8d5009}
+Helper function with dual role -\/ check if constraint exists on resource A\+N\+D if subject is exempt from constraint.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$constraint\+Id} & i.\+e. \hyperlink{interface_able_polecat___access_control___article___static_interface_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface\+::get\+Id()} or Array of ids. \\
+\hline
+string & {\em \$subject\+Id} & Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface-\/$>$\hyperlink{class_able_polecat___resource_abstract_a12251d0c022e9e21c137a105ff683f13}{get\+Id()} or Array of ids.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Array\mbox{[}self\+::\+C\+O\+N\+S\+T\+R\+A\+I\+N\+T\+\_\+\+C\+A\+C\+H\+E\+D =$>$ bool, self\+::\+C\+O\+N\+S\+T\+R\+A\+I\+N\+T\+\_\+\+E\+X\+I\+S\+T\+S =$>$ bool, self\+::\+P\+E\+R\+M\+I\+S\+S\+I\+O\+N\+\_\+\+E\+X\+I\+S\+T\+S =$>$ bool\mbox{]} 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a7a7a5c16b7f7ba9b0a2660cd14dec01a}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!get\+Wakeup\+Access\+Request@{get\+Wakeup\+Access\+Request}}
+\index{get\+Wakeup\+Access\+Request@{get\+Wakeup\+Access\+Request}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{get\+Wakeup\+Access\+Request}]{\setlength{\rightskip}{0pt plus 5cm}get\+Wakeup\+Access\+Request (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_a7a7a5c16b7f7ba9b0a2660cd14dec01a}
+\begin{DoxyReturn}{Returns}
+string I\+D of access control constraint (requesting permission). 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a5bdabdf819eef8c6337a4da78b55dc39}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!has\+Access@{has\+Access}}
+\index{has\+Access@{has\+Access}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{has\+Access}]{\setlength{\rightskip}{0pt plus 5cm}static has\+Access (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}, }
+\item[{}]{\$\+Constraint = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___resource___restricted_abstract_a5bdabdf819eef8c6337a4da78b55dc39}
+Indicates whether given agent or role has requested access to this resource.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & \\
+\hline
+mixed & {\em \$\+Constraint} & Instance of \hyperlink{interface_able_polecat___access_control___constraint_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface} or corresponding I\+D.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if given agent or role has requested access to resource, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a645291218d5ad4046d1367bb9718867f}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!has\+Permission@{has\+Permission}}
+\index{has\+Permission@{has\+Permission}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{has\+Permission}]{\setlength{\rightskip}{0pt plus 5cm}has\+Permission (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject, }
+\item[{}]{\$requested\+Constraint\+Id}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___resource___restricted_abstract_a645291218d5ad4046d1367bb9718867f}
+Verifies that agent or role has given permission.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & \\
+\hline
+string & {\em \$requested\+Constraint\+Id} & i.\+e. \hyperlink{interface_able_polecat___access_control___article___static_interface_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface\+::get\+Id()}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if \$\+Subject has given permission, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___access_control___exception}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}} & if \$\+Authority is not privileged to access permissions. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implements \hyperlink{interface_able_polecat___resource___restricted_interface_a645291218d5ad4046d1367bb9718867f}{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Interface}.
+
+\hypertarget{class_able_polecat___resource___restricted_abstract_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_a91098fa7d1917ce4833f284bbef12627}
+Extends constructor. Sub-\/classes should override to initialize members. \hypertarget{class_able_polecat___resource___restricted_abstract_a46d5b25cc8f9b1ad658b5c6617536824}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!lookup\+Constraint@{lookup\+Constraint}}
+\index{lookup\+Constraint@{lookup\+Constraint}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{lookup\+Constraint}]{\setlength{\rightskip}{0pt plus 5cm}static lookup\+Constraint (
+\begin{DoxyParamCaption}
+\item[{}]{\$requested\+Constraint\+Id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___resource___restricted_abstract_a46d5b25cc8f9b1ad658b5c6617536824}
+Looks up a constraint based on given id.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$requested\+Constraint\+Id} & i.\+e. \hyperlink{interface_able_polecat___access_control___article___static_interface_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface\+::get\+Id()} or Array of ids.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{interface_able_polecat___access_control___constraint_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface} or N\+U\+L\+L. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a1ad601dd41b953bfa07c99f6b17d482d}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!put\+Arguments@{put\+Arguments}}
+\index{put\+Arguments@{put\+Arguments}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{put\+Arguments}]{\setlength{\rightskip}{0pt plus 5cm}put\+Arguments (
+\begin{DoxyParamCaption}
+\item[{}]{\$arguments}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_a1ad601dd41b953bfa07c99f6b17d482d}
+Helper function accepts string or array as input and returns array of string(s). 
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___command___exception}{Able\+Polecat\+\_\+\+Command\+\_\+\+Exception}} & \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{class_able_polecat___resource___restricted_abstract_ae323b90c762ce6cde341e8b9937bf7f6}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!set\+Constraint@{set\+Constraint}}
+\index{set\+Constraint@{set\+Constraint}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{set\+Constraint}]{\setlength{\rightskip}{0pt plus 5cm}set\+Constraint (
+\begin{DoxyParamCaption}
+\item[{}]{\$constraint\+Id, }
+\item[{}]{\$authority\+Id = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_ae323b90c762ce6cde341e8b9937bf7f6}
+Sets given constraint on the resource.
+
+By default, setting constraint on this resource denies this action to all agents and roles.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$requested\+Constraint\+Id} & i.\+e. \hyperlink{interface_able_polecat___access_control___article___static_interface_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface\+::get\+Id()} or Array of ids. \\
+\hline
+string & {\em \$authority\+Id} & Access control subject making the request.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool T\+R\+U\+E if constraint is set, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___access_control___exception}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}} & if any constraint(s) cannot be set on given resource(s). \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a1653bc370f5ccc724c65b72c94882b79}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!set\+Permission@{set\+Permission}}
+\index{set\+Permission@{set\+Permission}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{set\+Permission}]{\setlength{\rightskip}{0pt plus 5cm}set\+Permission (
+\begin{DoxyParamCaption}
+\item[{}]{\$constraint\+Id, }
+\item[{}]{\$subject\+Id, }
+\item[{}]{\$authority\+Id = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_a1653bc370f5ccc724c65b72c94882b79}
+Exempts subject from given constraint, if it exists, on requested resource.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$constraint\+Id} & i.\+e. \hyperlink{interface_able_polecat___access_control___article___static_interface_acfaa3a96d0cb5a4c0d4d710dcba41e9e}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Constraint\+Interface\+::get\+Id()} or Array of ids. \\
+\hline
+mixed & {\em \$subject\+Id} & Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface-\/$>$\hyperlink{class_able_polecat___resource_abstract_a12251d0c022e9e21c137a105ff683f13}{get\+Id()} or Array of ids. \\
+\hline
+string & {\em \$authority\+Id} & Access control subject making the request. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a02f0a65ed7e607c39ff550ca15a28279}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!set\+Wakeup\+Access\+Request@{set\+Wakeup\+Access\+Request}}
+\index{set\+Wakeup\+Access\+Request@{set\+Wakeup\+Access\+Request}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{set\+Wakeup\+Access\+Request}]{\setlength{\rightskip}{0pt plus 5cm}set\+Wakeup\+Access\+Request (
+\begin{DoxyParamCaption}
+\item[{}]{\$\+Wakeup\+Access\+Request}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___resource___restricted_abstract_a02f0a65ed7e607c39ff550ca15a28279}
+
+\begin{DoxyParams}{Parameters}
+{\em string} & I\+D of access control constraint (requesting permission). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___resource___restricted_abstract_a3f2135f6ad45f51d075657f6d20db2cd}{}\index{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}!wakeup@{wakeup}}
+\index{wakeup@{wakeup}!Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract@{Able\+Polecat\+\_\+\+Resource\+\_\+\+Restricted\+Abstract}}
+\subsubsection[{wakeup}]{\setlength{\rightskip}{0pt plus 5cm}static wakeup (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___resource___restricted_abstract_a3f2135f6ad45f51d075657f6d20db2cd}
+Create a new instance of object or restore cached object to previous state.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Instance of Able\+Polecat\+\_\+\+Resource\+\_\+\+Util 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6ad45f51d075657f6d20db2cd}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/polecat/public/core/\+Resource/Restricted.\+php\end{DoxyCompactItemize}
