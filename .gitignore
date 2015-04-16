@@ -1,0 +1,5 @@
+var/www/htdocs/.htaccess
+usr/etc
+#usr/mod
+#usr/lib
+var/log

@@ -20,6 +20,11 @@ interface AblePolecat_Registry_Entry_ClassLibraryInterface extends AblePolecat_R
   /**
    * @return string.
    */
+  public function getClassPrefix();
+  
+  /**
+   * @return string.
+   */
   public function getClassLibraryFullPath();
   
   /**
@@ -63,6 +68,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
       isset($Record['id']) ? $RegistryEntry->id = $Record['id'] : NULL;
       isset($Record['name']) ? $RegistryEntry->name = $Record['name'] : NULL;
       isset($Record['libType']) ? $RegistryEntry->libType = $Record['libType'] : NULL;
+      isset($Record['classPrefix']) ? $RegistryEntry->classPrefix = $Record['classPrefix'] : NULL;
       isset($Record['libFullPath']) ? $RegistryEntry->libFullPath = $Record['libFullPath'] : NULL;
       isset($Record['useLib']) ? $RegistryEntry->useLib = $Record['useLib'] : NULL;
     }
@@ -114,6 +120,9 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
       foreach($Node->childNodes as $key => $childNode) {
         switch ($childNode->nodeName) {
           default:
+            break;
+          case 'polecat:classPrefix':
+            $RegistryEntry->classPrefix = $childNode->nodeValue;
             break;
           case 'polecat:path':
             //
@@ -200,7 +209,8 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
         select(
           'id', 
           'name', 
-          'libType', 
+          'libType',
+          'classPrefix', 
           'libFullPath', 
           'useLib', 
           'lastModifiedTime')->
@@ -241,7 +251,8 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
       replace(
         'id', 
         'name', 
-        'libType', 
+        'libType',
+        'classPrefix',
         'libFullPath', 
         'useLib', 
         'lastModifiedTime')->
@@ -250,6 +261,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
         $this->getId(), 
         $this->getName(), 
         $this->getClassLibraryType(), 
+        $this->getClassPrefix(),
         $this->getClassLibraryFullPath(), 
         $this->getClassLibraryUseFlag(), 
         $this->getLastModifiedTime()
@@ -266,6 +278,13 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
    */
   public function getClassLibraryType() {
     return $this->getPropertyValue('libType');
+  }
+  
+  /**
+   * @return string.
+   */
+  public function getClassPrefix() {
+    return $this->getPropertyValue('classPrefix');
   }
   
   /**

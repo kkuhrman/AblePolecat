@@ -1,6 +1,6 @@
 <?php
 /**
- * @file      polecat/core/Resource/Core/Test.php
+ * @file      AblePolecat/core/Resource/Core/Test.php
  * @brief     Encapsulates results of local unit tests.
  *
  * @author    Karl Kuhrman

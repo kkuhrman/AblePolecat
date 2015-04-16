@@ -348,6 +348,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           }
         }
       }
+      else {
+        throw new AblePolecat_Mode_Exception("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
+      }
       
       if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
         //

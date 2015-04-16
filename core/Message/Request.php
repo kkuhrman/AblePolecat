@@ -155,6 +155,11 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   private $redirectUrl;
   
+  /**
+   * @var boolean Internal flag set TRUE if request is for core (built-in) resource.
+   */
+  private $requestResourceIsCore;
+  
   /********************************************************************************
    * Implementation of AblePolecat_OverloadableInterface.
    ********************************************************************************/
@@ -304,6 +309,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       if ($CommandResult->success() && count($CommandResult->value())) {
         $resourceName = $CommandResult->value();
         $resolvedResourceName = $resourceName[0]['name'];
+        $this->requestResourceIsCore = FALSE;
       }
       else {
         $message = sprintf("Request for unregistered resource %s/%s",
@@ -390,7 +396,6 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         //
         // Yes, a valid resource name was given.
         //
-        // $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
         $this->request_path_info[self::URI_RESOURCE_NAME] = $resourceName;
         $this->request_path_info[self::URI_REDIRECT] = FALSE;
       }
@@ -689,5 +694,11 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     $this->request_path_info = NULL;
     $this->rawRequestLogRecordId = NULL;
     $this->redirectUrl = FALSE;
+    
+    //
+    // By default, all requests are for a core resource unless a registry
+    // entry for URI path is retrieved.
+    //
+    $this->requestResourceIsCore = TRUE;
   }
 }

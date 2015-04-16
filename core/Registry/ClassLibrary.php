@@ -81,6 +81,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
           'id', 
           'name', 
           'libType', 
+          'classPrefix',
           'libFullPath', 
           'useLib', 
           'lastModifiedTime')->
@@ -127,6 +128,18 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->id = $corePackageNode->getAttribute('id');
       $RegistryEntry->name = $corePackageNode->getAttribute('name');
       $RegistryEntry->libType = strtolower($corePackageNode->getAttribute('type'));
+      if ($corePackageNode->hasChildNodes()) {
+        foreach($corePackageNode->childNodes as $key => $childNode) {
+          switch ($childNode->nodeName) {
+          default:
+            break;
+          case 'polecat:classPrefix':
+            $RegistryEntry->classPrefix = $childNode->nodeValue;
+            break;
+          }
+        }
+      }
+      $RegistryEntry->classPrefix = 'AblePolecat';
       $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
       $RegistryEntry->useLib = '1';
       self::$Registry->addRegistration($RegistryEntry);
@@ -153,6 +166,17 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->id = $applicationNode->getAttribute('id');
       $RegistryEntry->name = $applicationNode->getAttribute('name');
       $RegistryEntry->libType = strtolower($applicationNode->getAttribute('type'));
+      if ($applicationNode->hasChildNodes()) {
+        foreach($applicationNode->childNodes as $key => $childNode) {
+          switch ($childNode->nodeName) {
+          default:
+            break;
+          case 'polecat:classPrefix':
+            $RegistryEntry->classPrefix = $childNode->nodeValue;
+            break;
+          }
+        }
+      }
       $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
       $RegistryEntry->useLib = '1';
       self::$Registry->addRegistration($RegistryEntry);
@@ -227,6 +251,17 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->id = $corePackageNode->getAttribute('id');
       $RegistryEntry->name = $corePackageNode->getAttribute('name');
       $RegistryEntry->libType = strtolower($corePackageNode->getAttribute('type'));
+      if ($corePackageNode->hasChildNodes()) {
+        foreach($corePackageNode->childNodes as $key => $childNode) {
+          switch ($childNode->nodeName) {
+          default:
+            break;
+          case 'polecat:classPrefix':
+            $RegistryEntry->classPrefix = $childNode->nodeValue;
+            break;
+          }
+        }
+      }
       $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
       $RegistryEntry->useLib = '1';
       if ($RegistryEntry->save($Database)) {
@@ -254,6 +289,17 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->id = $applicationNode->getAttribute('id');
       $RegistryEntry->name = $applicationNode->getAttribute('name');
       $RegistryEntry->libType = strtolower($applicationNode->getAttribute('type'));
+      if ($applicationNode->hasChildNodes()) {
+        foreach($applicationNode->childNodes as $key => $childNode) {
+          switch ($childNode->nodeName) {
+          default:
+            break;
+          case 'polecat:classPrefix':
+            $RegistryEntry->classPrefix = $childNode->nodeValue;
+            break;
+          }
+        }
+      }
       $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
       $RegistryEntry->useLib = '1';
       if ($RegistryEntry->save($Database)) {

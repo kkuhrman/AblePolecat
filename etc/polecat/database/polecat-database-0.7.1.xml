@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<polecat_database version="0.7.1" xmlns:polecat="http://polecat.kuhrman.com/">
+  <polecat:database>
+    <polecat:tables>
+      <polecat:table name="cache" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="resourceId" type="char" size="36" null="NOT" />
+          <polecat:field name="statusCode" type="int" size="11" null="NOT" />
+          <polecat:field name="mimeType" type="varchar" size="255" null="NOT">
+            <polecat:fieldValue>Content-type: text/xml; charset=utf-8</polecat:fieldValue>
+            <polecat:fieldComment>deprecated</polecat:fieldComment>
+          </polecat:field>
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+          <polecat:field name="cacheData" type="longblob" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="UNIQUE KEY" name="cacheEntryKey">
+            <polecat:indexField name="resourceId" />
+            <polecat:indexField name="statusCode" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="class" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="classLibraryId" type="varchar" size="255" null="NOT" />
+          <polecat:field name="classFullPath" type="varchar" size="255" null="NOT" />
+          <polecat:field name="classFactoryMethod" type="varchar" size="255" null="NOT">
+            <polecat:fieldValue>__construct</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="UNIQUE KEY" name="name">
+            <polecat:indexField name="name" />
+          </polecat:index>
+          <polecat:index type="KEY" name="classLibraryId">
+            <polecat:indexField name="classLibraryId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="component" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="UNIQUE KEY" name="name">
+            <polecat:indexField name="name" />
+          </polecat:index>
+          <polecat:index type="KEY" name="classId">
+            <polecat:indexField name="classId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="connector" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="resourceId" type="char" size="36" null="NOT" />
+          <polecat:field name="requestMethod" type="char" size="16" null="NOT">
+            <polecat:fieldValue>GET</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="accessDeniedCode" type="int" size="11" null="NOT">
+            <polecat:fieldValue>403</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="UNIQUE KEY" name="resourceId">
+            <polecat:indexField name="resourceId" />
+            <polecat:indexField name="requestMethod" />
+          </polecat:index>
+          <polecat:index type="KEY" name="classId">
+            <polecat:indexField name="classId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="constraint" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="resourceId" type="char" size="36" null="NOT" />
+          <polecat:field name="constraintId" type="char" size="36" null="NOT" />
+          <polecat:field name="authorityId" type="char" size="36" null="NOT" />
+          <polecat:field name="time" type="timestamp" null="NOT">
+            <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
+          </polecat:field>
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="UNIQUE KEY" name="permissionId">
+            <polecat:indexField name="resourceId" />
+            <polecat:indexField name="constraintId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="error" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="errorId" type="bigint" size="20" null="NOT" auto="0" />
+          <polecat:field name="errorTime" type="timestamp" null="NOT">
+            <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="errorType" type="varchar" size="16" null="NOT">
+            <polecat:fieldValue>info</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="errorFile" type="varchar" size="255" null="NOT" />
+          <polecat:field name="errorLine" type="int" size="11" null="NOT" />
+          <polecat:field name="errorClass" type="varchar" size="255" null="NOT" />
+          <polecat:field name="errorFunction" type="varchar" size="255" null="NOT" />
+          <polecat:field name="errorMessage" type="text" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="errorId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="lib" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="libType" type="char" size="3" null="NOT" />
+          <polecat:field name="classPrefix" type="varchar" size="64" />
+          <polecat:field name="libFullPath" type="varchar" size="255" null="NOT" />
+          <polecat:field name="useLib" type="tinyint" size="4" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="KEY" name="libType">
+            <polecat:indexField name="libType" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="log" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="eventId" type="int" size="11" null="NOT" auto="0" />
+          <polecat:field name="eventTime" type="timestamp" null="NOT">
+            <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="userId" type="int" size="11" null="NOT">
+            <polecat:fieldValue>0</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="eventSeverity" type="char" size="11" null="NOT">
+            <polecat:fieldValue>0</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="eventMessage" type="text" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="eventId" />
+          </polecat:index>
+          <polecat:index type="KEY" name="user_id">
+            <polecat:indexField name="userId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="permission" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="sessionNumber" type="int" size="11" null="NOT" />
+          <polecat:field name="resourceId" type="char" size="36" null="NOT" />
+          <polecat:field name="constraintId" type="char" size="36" null="NOT" />
+          <polecat:field name="subjectId" type="char" size="36" null="NOT" />
+          <polecat:field name="authorityId" type="char" size="36" null="NOT" />
+          <polecat:field name="time" type="timestamp" null="NOT">
+            <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
+          </polecat:field>
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="UNIQUE KEY" name="permissionId">
+            <polecat:indexField name="sessionNumber" />
+            <polecat:indexField name="resourceId" />
+            <polecat:indexField name="constraintId" />
+            <polecat:indexField name="subjectId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="request" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="requestId" type="bigint" size="20" null="NOT" auto="0" />
+          <polecat:field name="requestTime" type="int" size="11" null="NOT" />
+          <polecat:field name="remoteAddress" type="varchar" size="32" null="NOT" />
+          <polecat:field name="remotePort" type="varchar" size="16" null="NOT" />
+          <polecat:field name="userAgent" type="varchar" size="255" null="NOT" />
+          <polecat:field name="requestMethod" type="varchar" size="16" null="NOT" />
+          <polecat:field name="requestUri" type="varchar" size="255" null="NOT" />
+          <polecat:field name="transactionId" type="varchar" size="24">
+            <polecat:fieldValue quotes="0">NULL</polecat:fieldValue>
+          </polecat:field>
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="requestId" />
+          </polecat:index>
+          <polecat:index type="KEY" name="remoteAddress">
+            <polecat:indexField name="remoteAddress" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="resource" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="hostName" type="varchar" size="255" null="NOT" />
+          <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="UNIQUE KEY" name="name">
+            <polecat:indexField name="name" />
+            <polecat:indexField name="hostName" />
+          </polecat:index>
+          <polecat:index type="KEY" name="classId">
+            <polecat:indexField name="classId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="response" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="resourceId" type="char" size="36" null="NOT" />
+          <polecat:field name="statusCode" type="int" size="11" null="NOT" />
+          <polecat:field name="defaultHeaders" type="varchar" size="1024">
+            <polecat:fieldValue quotes="0">NULL</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="classId" type="char" size="36" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="UNIQUE KEY" name="resourceId">
+            <polecat:indexField name="resourceId" />
+            <polecat:indexField name="statusCode" />
+          </polecat:index>
+          <polecat:index type="KEY" name="classId">
+            <polecat:indexField name="classId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="role" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="sessionNumber" type="int" size="11" null="NOT" />
+          <polecat:field name="roleId" type="char" size="36" null="NOT" />
+          <polecat:field name="userId" type="int" size="11" null="NOT">
+            <polecat:fieldValue>1</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="roleData" type="blob" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="KEY" name="userId">
+            <polecat:indexField name="userId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="savepoint" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="savepointId" type="varchar" size="24" null="NOT" />
+          <polecat:field name="transactionId" type="varchar" size="24" null="NOT" />
+          <polecat:field name="savepointName" type="varchar" size="255" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="savepointId" />
+          </polecat:index>
+          <polecat:index type="KEY" name="transactionId">
+            <polecat:indexField name="transactionId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="session" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="sessionNumber" type="int" size="11" null="NOT" auto="0" />
+          <polecat:field name="phpSessionId" type="varchar" size="255" null="NOT" />
+          <polecat:field name="hostName" type="varchar" size="255" null="NOT" />
+          <polecat:field name="remoteAddress" type="varchar" size="32" null="NOT" />
+          <polecat:field name="start" type="timestamp" null="NOT">
+            <polecat:fieldValue quotes="0">CURRENT_TIMESTAMP</polecat:fieldValue>
+          </polecat:field>
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="sessionNumber" />
+          </polecat:index>
+          <polecat:index type="UNIQUE KEY" name="phpSessionId">
+            <polecat:indexField name="phpSessionId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="template" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="id" type="char" size="36" null="NOT" />
+          <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="themeName" type="varchar" size="255" null="NOT">
+            <polecat:fieldValue>default</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="templateScope" type="varchar" size="72" null="NOT">
+            <polecat:fieldValue>document</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="articleId" type="char" size="36" null="NOT" />
+          <polecat:field name="docType" type="varchar" size="1024" null="NOT">
+            <polecat:fieldValue>a:4:{s:12:"namespaceUri";s:28:"http://www.w3.org/1999/xhtml";s:13:"qualifiedName";s:4:"html";s:8:"publicId";s:25:"-//W3C//DTD XHTML 1.1//EN";s:8:"systemId";s:44:"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";}</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="fullPath" type="varchar" size="255" null="NOT" />
+          <polecat:field name="lastModifiedTime" type="int" size="11" null="NOT" />
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="id" />
+          </polecat:index>
+          <polecat:index type="KEY" name="articleId">
+            <polecat:indexField name="articleId" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+      <polecat:table name="transaction" engine="InnoDB" charset="latin1">
+        <polecat:fields>
+          <polecat:field name="transactionId" type="varchar" size="24" null="NOT" />
+          <polecat:field name="sessionNumber" type="int" size="11" null="NOT" />
+          <polecat:field name="requestMethod" type="varchar" size="16" null="NOT" />
+          <polecat:field name="resourceId" type="varchar" size="36" null="NOT" />
+          <polecat:field name="createTime" type="int" size="11" null="NOT" />
+          <polecat:field name="updateTime" type="int" size="11" null="NOT" />
+          <polecat:field name="savepointId" type="varchar" size="24" null="NOT">
+            <polecat:fieldValue>OPEN</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="status" type="varchar" size="32" null="NOT">
+            <polecat:fieldValue>PENDING</polecat:fieldValue>
+          </polecat:field>
+          <polecat:field name="parentTransactionId" type="varchar" size="24">
+            <polecat:fieldValue quotes="0">NULL</polecat:fieldValue>
+          </polecat:field>
+        </polecat:fields>
+        <polecat:indexes>
+          <polecat:index type="PRIMARY KEY">
+            <polecat:indexField name="transactionId" />
+          </polecat:index>
+          <polecat:index type="KEY" name="requestMethod">
+            <polecat:indexField name="requestMethod" />
+          </polecat:index>
+          <polecat:index type="KEY" name="resourceId">
+            <polecat:indexField name="resourceId" />
+          </polecat:index>
+          <polecat:index type="KEY" name="sessionNumber">
+            <polecat:indexField name="sessionNumber" />
+          </polecat:index>
+        </polecat:indexes>
+      </polecat:table>
+    </polecat:tables>
+  </polecat:database>
+</polecat_database>
