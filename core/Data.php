@@ -9,7 +9,9 @@
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Array.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Scalar', 'Boolean.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Scalar', 'Integer.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Scalar', 'Null.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Data', 'Primitive', 'Scalar', 'String.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Data.php')));
 
@@ -59,7 +61,11 @@ class AblePolecat_Data {
         );
         break;
       case 'NULL':
+        $primitive = AblePolecat_Data_Primitive_Scalar_Null::typeCast($data);
+        break;
       case 'boolean':
+        $primitive = AblePolecat_Data_Primitive_Scalar_Boolean::typeCast($data);
+        break;
       case 'integer':
         $primitive = AblePolecat_Data_Primitive_Scalar_Integer::typeCast($data);
         break;
