@@ -43,6 +43,23 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
   const UUID = '3c421fbe-df90-11e4-b585-0050569e00a2';
   const NAME = 'AblePolecat_Transaction_Test';
   
+  /**
+   * Property key constants.
+   */
+  const KEY_CLASS_FILE_PATH     = 'filePath';
+  const KEY_CLASS_NAME          = 'className';
+  const KEY_CLASS_INSTANCE      = 'classInstance';
+  
+  /**
+   * @var Array Information about class subject of test.
+   */
+  private $testClass;
+  
+  /**
+   * @var Array Names of test methods to execute.
+   */
+  private $testMethods;
+  
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
    ********************************************************************************/
@@ -106,7 +123,7 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
           //
           // Extract name of unit test(s) from URI path & query string.
           //
-          if ($this->getTestDirective()) {
+          if (FALSE === $this->getTestDirective()) {
             //
             // Select unit test(s).
             //
@@ -222,15 +239,16 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
     // File exists, so include it and build the test class name (by convention).
     //
     include_once($testClassPath);
+    $this->testClass[self::KEY_CLASS_FILE_PATH] = $testClassPath;
     $testPath = array_shift($requestPathPartsTransform);
     $testClassName = sprintf("%sTest_%s", $libPrefix, implode('_', $requestPathPartsTransform));
-    // AblePolecat_Debug::kill($testClassName);
-    // $testClassName::runTests();
-    die('@todo: check if we are running all tests or only certain methods.');
-    // else {
-      // 
-    // }
+    $this->testClass[self::KEY_CLASS_NAME] = $testClassName;
     
+    //
+    // @todo: check if we are running all tests or only certain methods.
+    //
+    $testDirectiveSet = TRUE;
+        
     return $testDirectiveSet;
   }
   
@@ -264,10 +282,30 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
    * @throw AblePolecat_Transaction_Exception If cannot be brought to a satisfactory state.
    */
   protected function executeTests() {
+    //
+    // Resource stores results of test(s).
+    //
     $Resource = AblePolecat_Resource_Core_Factory::wakeup(
       $this->getAgent(),
       'AblePolecat_Resource_Core_Test'
     );
+    
+    // 
+    // Get name of test class.
+    //
+    $testClassName = $this->testClass[self::KEY_CLASS_NAME];
+    
+    //
+    // Get names of test method(s) to execute.
+    //
+    if (count($this->testMethods)) {
+      foreach($this->testMethods as $key => $testMethodName) {
+        $result = $testClassName::$testMethodName();
+      }
+    }
+    else {
+      $result = $testClassName::runTests();
+    }
     return $Resource;
   }
   
@@ -311,5 +349,7 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
    */
   protected function initialize() {
     parent::initialize();
+    $this->testClass = array();
+    $this->testMethods = array();
   }
 }
