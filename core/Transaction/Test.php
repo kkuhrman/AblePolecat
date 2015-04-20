@@ -306,6 +306,12 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
     else {
       $result = $testClassName::runTests();
     }
+    
+    foreach($testClassName::getTestResults() as $key => $Result) {
+      $Resource->setTestResult($Result);
+    }
+    // $Resource->Results = $testClassName::getTestResults();
+    // AblePolecat_Debug::kill($Resource);
     return $Resource;
   }
   

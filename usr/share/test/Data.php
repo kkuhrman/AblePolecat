@@ -21,7 +21,6 @@ class AblePolecatTest_Data extends AblePolecat_UnitTest implements AblePolecat_U
     
     self::test_getDataTypeName();
     self::test_castPrimitiveType_pass();
-    AblePolecat_Debug::kill(self::getTestResults());
   }
   
   public static function test_getDataTypeName() {
@@ -37,7 +36,7 @@ class AblePolecatTest_Data extends AblePolecat_UnitTest implements AblePolecat_U
       }
     }
     catch (AblePolecat_UnitTest_Exception $Exception) {
-      self::setTestResult(__METHOD__, FALSE, $Exception->getMessage());
+      self::setTestResult(__METHOD__, FALSE, $Exception);
     }
   }
   
@@ -58,7 +57,7 @@ class AblePolecatTest_Data extends AblePolecat_UnitTest implements AblePolecat_U
       }
     }
     catch (AblePolecat_UnitTest_Exception $Exception) {
-      self::setTestResult(__METHOD__, FALSE, $Exception->getMessage());
+      self::setTestResult(__METHOD__, FALSE, $Exception);
     }
   }
  }

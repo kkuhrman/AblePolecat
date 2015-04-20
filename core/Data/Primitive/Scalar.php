@@ -48,6 +48,23 @@ abstract class AblePolecat_Data_Primitive_ScalarAbstract implements AblePolecat_
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_Dom_NodeInterface
+   ********************************************************************************/
+  
+  /**
+   * @param DOMDocument $Document.
+   *
+   * @return DOMElement Encapsulated data expressed as DOM node.
+   */
+  public function getDomNode(DOMDocument $Document = NULL) {
+    !isset($Document) ? $Document = new DOMDocument() : NULL;
+    $Element = $Document->createElement(AblePolecat_Data::getDataTypeName($this));
+    $cData = $Document->createCDATASection($this->__toString());
+    $Element->appendChild($cData);
+    return $Element;
+  }
+  
+  /********************************************************************************
    * Implementation of AblePolecat_Data_PrimitiveInterface
    ********************************************************************************/
   
@@ -63,19 +80,6 @@ abstract class AblePolecat_Data_Primitive_ScalarAbstract implements AblePolecat_
    */
   public function isNull() {
     return isset($this->data);
-  }
-  
-  /**
-   * @param DOMDocument $Document.
-   *
-   * @return DOMElement Encapsulated data expressed as DOM node.
-   */
-  public function getDomNode(DOMDocument $Document = NULL) {
-    !isset($Document) ? $Document = new DOMDocument() : NULL;
-    $Element = $Document->createElement(AblePolecat_Data::getDataTypeName($this));
-    $cData = $Document->createCDATASection($this->__toString());
-    $Element->appendChild($cData);
-    return $Element;
   }
   
   /********************************************************************************

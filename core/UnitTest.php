@@ -27,11 +27,11 @@ interface AblePolecat_UnitTestInterface {
   /**
    * Set result of given test.
    *
-   * @param string $methodName Name of test method.
+   * @param string $methodName Name of test method (best practice is to use __METHOD__ or __FUNCTION__).
    * @param boolean $result TRUE | FALSE (PASS | FAIL).
-   * @param string $message Message caught in thrown exception on test failure.
+   * @param AblePolecat_UnitTest_Exception $Exception thrown by test method.
    */
-  public static function setTestResult($methodName, $result, $message = NULL);
+  public static function setTestResult($methodName, $result, AblePolecat_UnitTest_Exception $Exception = NULL);
   
   /**
    * Run test on given class method and return result.
@@ -56,6 +56,10 @@ class AblePolecat_UnitTest {
    */
   private static $testResults = NULL;
   
+  /********************************************************************************
+   * Implementation of AblePolecat_UnitTestInterface
+   ********************************************************************************/
+   
   /**
    * @return Array Results of test(s).
    */
@@ -69,15 +73,39 @@ class AblePolecat_UnitTest {
   /**
    * Set result of given test.
    *
-   * @param string $methodName Name of test method.
+   * @param string $methodName Name of test method (best practice is to use __METHOD__ or __FUNCTION__).
    * @param boolean $result TRUE | FALSE (PASS | FAIL).
-   * @param string $message Message caught in thrown exception on test failure.
+   * @param AblePolecat_UnitTest_Exception $Exception thrown by test method.
    */
-  public static function setTestResult($methodName, $result, $message = NULL) {
+  public static function setTestResult($methodName, $result, AblePolecat_UnitTest_Exception $Exception = NULL) {
     if (!isset(self::$testResults)) {
       self::$testResults = array();
     }
-    self::$testResults[$methodName] = array('result' => $result, 'message' => $message);
+    
+    //
+    // Create the test result object.
+    //
+    $testResult = new AblePolecat_UnitTest_Result();
+    $methodParts = explode('::', $methodName);
+    if (count($methodParts) == 2) {
+      $testResult->setClassName($methodParts[0]);
+      $testResult->setFunctionName($methodParts[1]);
+    }
+    else if (count($methodParts) == 1) {
+      $testResult->setFunctionName($methodParts[0]);
+    }
+    switch ($result) {
+      default:
+        break;
+      case TRUE:
+        $testResult->setPass();
+        break;
+      case FALSE:
+        $testResult->setFail($Exception);
+        break;
+    }
+    // AblePolecat_Debug::kill($testResult);
+    self::$testResults[] = $testResult;
   }
   
   /**
@@ -150,4 +178,8 @@ class AblePolecat_UnitTest {
     
     return $success;
   }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
 }
