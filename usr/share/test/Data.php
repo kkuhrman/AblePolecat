@@ -21,6 +21,7 @@ class AblePolecatTest_Data extends AblePolecat_UnitTest implements AblePolecat_U
     
     self::test_getDataTypeName();
     self::test_castPrimitiveType_pass();
+    // self::test_castPrimitiveType_fail();
   }
   
   public static function test_getDataTypeName() {
@@ -51,6 +52,27 @@ class AblePolecatTest_Data extends AblePolecat_UnitTest implements AblePolecat_U
         'AblePolecat_Data',
         'castPrimitiveType',
         array('this is a string'),
+        $expectedResult
+      )) {
+        self::setTestResult(__METHOD__, TRUE);
+      }
+    }
+    catch (AblePolecat_UnitTest_Exception $Exception) {
+      self::setTestResult(__METHOD__, FALSE, $Exception);
+    }
+  }
+  
+  public static function test_castPrimitiveType_fail() {
+    try {
+      //
+      // Since expected result is not scalar must use AblePolecat_UnitTest_Result.
+      //
+      $expectedResult = new AblePolecat_UnitTest_Result();
+      $expectedResult->setDataTypeName('AblePolecat_Data_Exception');
+      if (self::testMethod(
+        'AblePolecat_Data',
+        'castPrimitiveType',
+        array(new AblePolecatTest_Data()),
         $expectedResult
       )) {
         self::setTestResult(__METHOD__, TRUE);

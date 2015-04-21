@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.1
  */
 
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core.php')));
@@ -70,7 +70,7 @@ class AblePolecat_Resource_Core_Test extends AblePolecat_Resource_CoreAbstract {
     //
     $Element = $Document->createElement('testResultSets');
     $Element = AblePolecat_Dom::appendChildToParent($Element, $Document);
-    // AblePolecat_Debug::kill($Element);
+    
     //
     // Add child elements for properties.
     //
@@ -78,26 +78,11 @@ class AblePolecat_Resource_Core_Test extends AblePolecat_Resource_CoreAbstract {
       $resultSetElement = $Document->createElement('testResultSet');
       $resultSetElement->setAttribute('className', $className);
       $Element->appendChild($resultSetElement);
-      // $resultSetElement = AblePolecat_Dom::appendChildToParent($resultSetElement, $Document, $Element);
       foreach($ResultSet as $key => $Result) {
         $resultElement = $Result->getDomNode($Document);
         $resultSetElement->appendChild($resultElement);
       }
     }
-    // while($property) {
-      // $tagName = $this->getPropertyKey();
-      // $childElement = $Document->createElement($tagName);
-      // if (is_a($property, 'AblePolecat_Data_Primitive_ScalarInterface')) {
-        // $cData = $Document->createCDATASection($property->__toString());
-        // $childElement->appendChild($cData);
-      // }
-      // else {
-        // $childNode = $property->getDomNode($Document);
-        // $childElement->appendChild($childNode);
-      // }
-      // $childElement = AblePolecat_Dom::appendChildToParent($childElement, $Document);
-      // $property = $this->getNextProperty();
-    // }
     
     return $Element;
   }

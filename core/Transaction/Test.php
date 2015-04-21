@@ -168,13 +168,16 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
     //
     // Check query string for lib directive.
     //
+    $RegistryEntry = NULL;
     $libFullPath = NULL;
     $queryString = $this->getRequest()->getRequestQueryString(FALSE);
     $libPrefix = '';
+    $libVal = '';
     if (isset($queryString['lib']) && isset($queryString['lib'][0])) {
       $libParm = $queryString['lib'][0];
-      $libVal = $this->transformRequestPathPart($libParm, 'lib');
-      
+      $libName = $this->transformLibNameParm($libParm);
+      $libVal = $libName;
+
       //
       // Assumption is that user will pass library name before id but either 
       // will be looked for.
@@ -189,23 +192,36 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
           'useLib', 
           'lastModifiedTime')->
         from('lib')->
-        where(sprintf("`name` = '%s'", $libVal));
+        where(sprintf("`name` = '%s'", $libName));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {
           $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create($registrationInfo[0]);
-          $libPrefix = $RegistryEntry->getClassPrefix();
-          if (($RegistryEntry->getClassLibraryType() == 'app') ||
-              ($RegistryEntry->getClassLibraryType() == 'mod')) {
-            $libFullPath = dirname(dirname($RegistryEntry->getClassLibraryFullPath()));
-          }
-          else {
-            if ($RegistryEntry->getName() == 'AblePolecat') {
-              $libFullPath = dirname($RegistryEntry->getClassLibraryFullPath());
-            }
-          }
         }
+      }
+      else {
+        $libId = $this->transformLibIdParm($libParm);
+        $libVal = $libId;
+        $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::fetch($libId);
+      }
+    }
+    
+    if (!isset($RegistryEntry)) {
+      throw new AblePolecat_Transaction_Exception("No registry entry exists for the class library identified by '$libVal'.");
+    }
+    
+    //
+    // Get class library details from registry.
+    //
+    $libPrefix = $RegistryEntry->getClassPrefix();
+    if (($RegistryEntry->getClassLibraryType() == 'app') ||
+        ($RegistryEntry->getClassLibraryType() == 'mod')) {
+      $libFullPath = dirname(dirname($RegistryEntry->getClassLibraryFullPath()));
+    }
+    else {
+      if ($RegistryEntry->getName() == 'AblePolecat') {
+        $libFullPath = dirname($RegistryEntry->getClassLibraryFullPath());
       }
     }
     $libTestPath = implode(DIRECTORY_SEPARATOR, array($libFullPath, 'usr', 'share', 'test'));
@@ -310,43 +326,56 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
     foreach($testClassName::getTestResults() as $key => $Result) {
       $Resource->setTestResult($Result);
     }
-    // $Resource->Results = $testClassName::getTestResults();
-    // AblePolecat_Debug::kill($Resource);
     return $Resource;
+  }
+  
+  /**
+   * Transform query string parameter for class library id.
+   *
+   *
+   * @param string $parameter
+   *
+   * @return string.
+   */
+  public function transformLibIdParm($parameter) {
+    $transform = '';
+    $words = explode(' ', $parameter);
+    $transformParts = array();
+    foreach($words as $key => $word) {
+      $transformParts[] = str_replace(' ', '-', trim($word));
+    }
+    $transform = implode('-', $transformParts);
+    return $transform;
+  }
+  
+  /**
+   * Transform query string parameter for class library name.
+   *
+   *
+   * @param string $parameter
+   *
+   * @return string.
+   */
+  public function transformLibNameParm($parameter) {
+    $transform = '';
+    $words = explode(' ', $parameter);
+    $transformParts = array();
+    foreach($words as $key => $word) {
+      $transformParts[] = str_replace(' ', '', ucwords(strtolower(str_replace('-', ' ', trim($word)))));
+    }
+    $transform = implode('-', $transformParts);
+    return $transform;
   }
   
   /**
    * Format test class path/name part by convention.
    *
-   * @param string $pathPart
-   * @param string $transformation path | class | lib | method
+   * @param string $parameter
    *
    * @return string.
    */
-  public function transformRequestPathPart($pathPart, $transformation = 'class') {
-    
-    $transform = '';
-    
-    switch ($transformation) {
-      default:
-        break;
-      case 'lib':
-      case 'path':
-        //
-        // library ids and names and directory and file names can contain hyphens.
-        //
-        $words = explode(' ', $pathPart);
-        $transformParts = array();
-        foreach($words as $key => $word) {
-          $transformParts[] = str_replace(' ', '', ucwords(strtolower(str_replace('-', ' ', trim($word)))));
-        }
-        $transform = implode('-', $transformParts);
-        break;
-      case 'class':
-      case 'method':
-        $transform = str_replace(' ', '', ucwords(strtolower(str_replace('-', ' ', trim($pathPart)))));
-        break;
-    }
+  public function transformRequestPathPart($parameter) {
+    $transform = str_replace(' ', '', ucwords(strtolower(str_replace('-', ' ', trim($parameter)))));
     return $transform;
   }
   

@@ -147,11 +147,17 @@ class AblePolecat_UnitTest {
     //
     // Run unit test.
     //
-    $returnValue = call_user_func_array($callable, $args);
+    $returnValue = 'null';
+    try {
+      $returnValue = call_user_func_array($callable, $args);
+    }
+    catch (Exception $Exception) {
+      $returnValue = $Exception;
+    }
     if (is_a($expectedReturnValue, 'AblePolecat_UnitTest_Result')) {
       $reportExpectedValue = $expectedReturnValue->getDataTypeName();
       $reportReturnValue = AblePolecat_Data::getDataTypeName($returnValue);
-      if ($reportExpectedValue !== $reportReturnValue) {
+      if ($reportExpectedValue != $reportReturnValue) {
         throw new AblePolecat_UnitTest_Exception(sprintf("Unit test of %s::%s failed. Expected %s, returned %s.",
           $className,
           $methodName,
