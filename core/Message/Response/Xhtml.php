@@ -23,6 +23,9 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
   const ELEMENT_HEAD            = 'head';
   const ELEMENT_BODY            = 'body';
   
+  const SUBSTITUTE_MARKER_REFERER     = '{!Referer__c}';
+  const SUBSTITUTE_MARKER_REDIRECT    = '{!Redirect__c}';
+  
   /**
    * @var string.
    */
@@ -183,6 +186,12 @@ class AblePolecat_Message_Response_Xhtml extends AblePolecat_Message_ResponseAbs
    * @return string.
    */
   protected function postProcessEntityBody($entityBody) {
+    //
+    // Default values for referer (resource id) and redirect.
+    //
+    $this->setSubstitutionMarker(self::SUBSTITUTE_MARKER_REFERER, $this->getResource()->getId());
+    $this->setSubstitutionMarker(self::SUBSTITUTE_MARKER_REDIRECT, $this->getResource()->getId());
+    
     //
     // Resolve problems caused by encoding of brackets ('{', '}')
     // @todo: although this works, encoding problem should be resolved in DOM class.

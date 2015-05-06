@@ -113,6 +113,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       $templateId = $Node->getAttribute('id');
       $themeName = NULL;
       $templateScope = NULL;
+      $articleId = NULL;
       $classId = NULL;
       $className = NULL;
       $docType = NULL;
@@ -132,16 +133,33 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
             //
             // Verify class (articleId) reference.
             //
-            $classId = $childNode->nodeValue;
+            $articleId = $childNode->nodeValue;
             $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
-              getRegistrationById($classId);
+              getRegistrationById($articleId);
             if (isset($ClassRegistration)) {
+              $classId = $articleId;
               $className = $ClassRegistration->getName();
               $lastModifiedTime = $ClassRegistration->getLastModifiedTime();
             }
             else {
-              $message = sprintf("template article %s references invalid class id %s.",
-                $classId,
+              //
+              // Article id does not reference a class directly.
+              // Check component registration for class id.
+              //
+              $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::fetch();
+              if (isset($ComponentRegistration)) {
+                $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
+                  getRegistrationById($ComponentRegistration->getClassId());
+                if (isset($ClassRegistration)) {
+                  $classId = $articleId;
+                  $className = $ClassRegistration->getName();
+                  $lastModifiedTime = $ClassRegistration->getLastModifiedTime();
+                }
+              }
+            }
+            if (!isset($ClassRegistration)) {
+              $message = sprintf("template article %s references invalid class %s.",
+                $articleId,
                 $className
               );
               $RegistryEntry = NULL;
@@ -266,7 +284,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
           'fullPath', 
           'lastModifiedTime')->
         from('template')->
-        where(sprintf("`articleId` = '%s' AND `themeName` = '%s'", $classId, $themeName));
+        where(sprintf("`articleId` = '%s' AND `themeName` = '%s'", $articleId, $themeName));
       $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
@@ -282,14 +300,14 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
       // Check if template is already registered.
       //
       $RegistryEntry = NULL;
-      if (isset($registeredTemplates[$themeName][$classId])) {
-        $RegistryEntry = $registeredTemplates[$themeName][$classId];
+      if (isset($registeredTemplates[$themeName][$articleId])) {
+        $RegistryEntry = $registeredTemplates[$themeName][$articleId];
       }
       else {
         $RegistryEntry = AblePolecat_Registry_Entry_Template::create();
         $RegistryEntry->id = self::generateUUID();
         $RegistryEntry->themeName = $themeName;
-        $RegistryEntry->articleId = $classId;
+        $RegistryEntry->articleId = $articleId;
       }
       $RegistryEntry->name = $Node->getAttribute('name');
       $RegistryEntry->templateScope = $templateScope;          

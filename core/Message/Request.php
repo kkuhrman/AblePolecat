@@ -451,6 +451,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    * Filter (sanitize) entity body if sent (e.g. POST data).
    */
   protected function filterEntityBody() {
+    
     if (isset($_POST) && count($_POST)) {
       //
       // Is the search parameter present in the POST data or query string?

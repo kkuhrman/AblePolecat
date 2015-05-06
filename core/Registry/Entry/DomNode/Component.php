@@ -67,13 +67,26 @@ class AblePolecat_Registry_Entry_DomNode_Component extends AblePolecat_Registry_
     $RegistryEntry = AblePolecat_Registry_Entry_DomNode_Component::create();
     $RegistryEntry->id = $Node->getAttribute('id');
     $RegistryEntry->name = $Node->getAttribute('name');
-    $RegistryEntry->classId = $Node->getAttribute('id');
-    // foreach($Node->childNodes as $key => $childNode) {
-      // switch ($childNode->nodeName) {
-        // default:
-          // break;
-      // }
-    // }
+    
+    //
+    // By default, the id of the component is the class id. However, it is 
+    // possible to register several components, which share a single class.
+    // In such cases, the component id and the class id must not be the same.
+    //
+    if ($Node->hasChildNodes()) {
+      foreach($Node->childNodes as $key => $childNode) {
+        switch ($childNode->nodeName) {
+          default:
+            break;
+          case 'polecat:componentClass':
+            $RegistryEntry->classId = $childNode->getAttribute('id');
+            break;
+        }
+      } 
+    }
+    else {
+      $RegistryEntry->classId = $Node->getAttribute('id');
+    }
     return $RegistryEntry;
   }
   

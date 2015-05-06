@@ -57,6 +57,13 @@ interface AblePolecat_ResourceInterface
   public function getUri();
   
   /**
+   * Return resource id for redirect.
+   *
+   * @return string resource id.
+   */
+  public function getRedirectResourceId();
+  
+  /**
    * Set unique resource ID.
    *
    * @param string $resourceId.
@@ -69,6 +76,13 @@ interface AblePolecat_ResourceInterface
    * @param string $resourceName.
    */
   public function setName($resourceName);
+  
+  /**
+   * Set resource id for redirect.
+   *
+   * @param string $resourceId.
+   */
+  public function setRedirectResourceId($resourceId);
 }
 
 abstract class AblePolecat_ResourceAbstract 
@@ -94,6 +108,11 @@ abstract class AblePolecat_ResourceAbstract
    * @var string Resource name unique to localhost.
    */
   private $resourceName;
+  
+  /**
+   * @var string Id of resource for redirection.
+   */
+  private $redirectResourceId;
   
   /**
    * Validates request URI path to ensure resource request can be fulfilled.
@@ -183,12 +202,24 @@ abstract class AblePolecat_ResourceAbstract
   }
   
   /**
+   * Return resource id for redirect.
+   *
+   * @return string resource id.
+   */
+  public function getRedirectResourceId() {
+    return $this->redirectResourceId;
+  }
+  
+  /**
    * Set unique resource ID.
    *
    * @param string $resourceId.
    */
   public function setId($resourceId) {
     $this->resourceId = $resourceId;
+    if (!isset($this->redirectResourceId)) {
+      $this->redirectResourceId = $this->resourceId;
+    }
   }
   
   /**
@@ -198,6 +229,15 @@ abstract class AblePolecat_ResourceAbstract
    */
   public function setName($resourceName) {
     $this->resourceName = $resourceName;
+  }
+  
+  /**
+   * Set resource id for redirect.
+   *
+   * @param string $redirectResourceId.
+   */
+  public function setRedirectResourceId($redirectResourceId) {
+    $this->redirectResourceId = $redirectResourceId;
   }
     
   /********************************************************************************
@@ -259,6 +299,7 @@ abstract class AblePolecat_ResourceAbstract
     }
     $this->resourceId = NULL;
     $this->resourceName = NULL;
+    $this->redirectResourceId = NULL;
     $this->initialize();
   }
   
