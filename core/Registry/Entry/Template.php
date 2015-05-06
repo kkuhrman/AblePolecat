@@ -146,7 +146,7 @@ class AblePolecat_Registry_Entry_Template extends AblePolecat_Registry_EntryAbst
               // Article id does not reference a class directly.
               // Check component registration for class id.
               //
-              $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::fetch();
+              $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::fetch($articleId);
               if (isset($ComponentRegistration)) {
                 $ClassRegistration = AblePolecat_Registry_Class::wakeup()->
                   getRegistrationById($ComponentRegistration->getClassId());
