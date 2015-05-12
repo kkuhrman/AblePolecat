@@ -122,7 +122,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
     $corePackageNode = $Nodes->item(0);
-    $coreClassLibraryId = $corePackageNode->getAttribute('id');
+    // $coreClassLibraryId = $corePackageNode->getAttribute('id');
     if (isset($corePackageNode)) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
       $RegistryEntry->id = $corePackageNode->getAttribute('id');
@@ -245,7 +245,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'package');
     $corePackageNode = $Nodes->item(0);
-    $coreClassLibraryId = $corePackageNode->getAttribute('id');
+    // $coreClassLibraryId = $corePackageNode->getAttribute('id');
     if (isset($corePackageNode)) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::create();
       $RegistryEntry->id = $corePackageNode->getAttribute('id');

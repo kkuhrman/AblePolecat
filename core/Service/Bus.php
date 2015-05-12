@@ -345,6 +345,7 @@ class AblePolecat_Service_Bus extends AblePolecat_CacheObjectAbstract implements
       case AblePolecat_Resource_Core_Ack::UUID:
       case AblePolecat_Resource_Core_Error::UUID:
       case AblePolecat_Resource_Core_Form::UUID:
+      case AblePolecat_Resource_Core_Test::UUID:
       case AblePolecat_Resource_Restricted_Install::UUID:
       case AblePolecat_Resource_Restricted_Update::UUID:
       case AblePolecat_Resource_Restricted_Util::UUID:

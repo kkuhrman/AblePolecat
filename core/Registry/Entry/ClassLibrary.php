@@ -168,6 +168,22 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
               }
             }
             $RegistryEntry->libFullPath = $checkSanitizedPath;
+            
+            //
+            // If classPrefix is not defined in class library registry entry
+            // for local project, retrieve it from module project config file.
+            //
+            $classPrefix = $RegistryEntry->getClassPrefix();
+            if (!isset($classPrefix) && ($RegistryEntry->libType == 'mod')) {
+              $moduleConfFile = AblePolecat_Mode_Config::getModuleConfFile($RegistryEntry);
+              if (isset($moduleConfFile)) {
+                $Nodes = AblePolecat_Dom::getElementsByTagName($moduleConfFile, 'classPrefix');
+                $classPrefixNode = $Nodes->item(0);
+                if (isset($classPrefixNode)) {
+                  $RegistryEntry->classPrefix = $classPrefixNode->nodeValue;
+                }
+              }
+            }
             break;
         }
       }

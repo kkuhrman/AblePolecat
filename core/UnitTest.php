@@ -158,12 +158,12 @@ class AblePolecat_UnitTest {
       $reportExpectedValue = $expectedReturnValue->getDataTypeName();
       $reportReturnValue = AblePolecat_Data::getDataTypeName($returnValue);
       if ($reportExpectedValue != $reportReturnValue) {
-        throw new AblePolecat_UnitTest_Exception(sprintf("Unit test of %s::%s failed. Expected %s, returned %s.",
+        throw self::createMismatchException(
           $className,
           $methodName,
           $reportExpectedValue,
           $reportReturnValue
-        ));
+        );
       }
       //
       // @todo: further evaluation of $expectedReturnValue against actual result.
@@ -173,12 +173,12 @@ class AblePolecat_UnitTest {
       if ($returnValue !== $expectedReturnValue) {
         is_scalar($returnValue) ? $reportReturnValue = strval($returnValue) : $reportReturnValue = AblePolecat_Data::getDataTypeName($returnValue);
         is_scalar($expectedReturnValue) ? $reportExpectedValue = strval($expectedReturnValue) : $reportExpectedValue = AblePolecat_Data::getDataTypeName($expectedReturnValue);
-        throw new AblePolecat_UnitTest_Exception(sprintf("Unit test of %s::%s failed. Expected %s, returned %s.",
+        throw self::createMismatchException(
           $className,
           $methodName,
           $reportExpectedValue,
           $reportReturnValue
-        ));
+        );
       }
     }
     
@@ -188,4 +188,31 @@ class AblePolecat_UnitTest {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Create an exception based on expected results not matching actual results.
+   *
+   * This function does not throw an exception, rather returns the exception 
+   * object, ready to throw or pass to a utility function like @see setTestResult().
+   *
+   * @param string $className,
+   * @param string $methodName
+   * @param mixed $reportExpectedValue
+   * @param mixed $reportReturnValue
+   *
+   * @return AblePolecat_UnitTest_Exception.
+   */
+  public static function createMismatchException(
+    $className,
+    $methodName,
+    $reportExpectedValue,
+    $reportReturnValue
+  ) {
+    return new AblePolecat_UnitTest_Exception(sprintf("Unit test of %s::%s failed. Expected %s, returned %s.",
+      $className,
+      $methodName,
+      $reportExpectedValue,
+      $reportReturnValue
+    ));
+  }
 }
