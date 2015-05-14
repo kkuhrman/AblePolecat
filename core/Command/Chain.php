@@ -63,8 +63,9 @@ interface AblePolecat_Command_ChainInterface
    * logging are operational. This method provides a means to catch these.
    *
    * @param string $message.
+   * @param int $severity E_USER_ERROR | E_USER_NOTICE
    */
-  public static function triggerError($message);
+  public static function triggerError($message, $severity = E_USER_ERROR);
 }
 
 class AblePolecat_Command_Chain 
@@ -314,11 +315,12 @@ class AblePolecat_Command_Chain
    * logging are operational. This method provides a means to catch these.
    *
    * @param string $message.
+   * @param int $severity E_USER_ERROR | E_USER_NOTICE
    */
-  public static function triggerError($message) {
+  public static function triggerError($message, $severity = E_USER_ERROR) {
     AblePolecat_Log_Boot::wakeup()->
       putMessage(AblePolecat_LogInterface::ERROR, $message);
-    trigger_error($message, E_USER_ERROR);
+    trigger_error($message, $severity);
   }
   
   /********************************************************************************

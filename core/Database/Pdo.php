@@ -155,7 +155,13 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       }
       else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_System')) {
         try {
+          //
+          // Persistent connections are not closed at the end of the script, 
+          // but are cached and re-used when another script requests a 
+          // connection using the same credentials.
+          //
           $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass);
+          // $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass, array(PDO::ATTR_PERSISTENT => true));
           $this->setLocater($Url);
         } 
         catch (PDOException $Exception) {
