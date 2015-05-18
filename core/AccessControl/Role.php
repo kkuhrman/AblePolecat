@@ -12,9 +12,17 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessContro
 require_once(ABLE_POLECAT_CORE . DIRECTORY_SEPARATOR . 'CacheObject.php');
 
 interface AblePolecat_AccessControl_RoleInterface extends AblePolecat_AccessControl_SubjectInterface, AblePolecat_CacheObjectInterface {
+  /**
+   * Verify that given agent is authorized to be assigned role.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent.
+   *
+   * @throw AblePolecat_AccessControl_Exception if agent is not authorized for role.
+   */
+  public function isAuthorized(AblePolecat_AccessControl_AgentInterface $Agent);
 }
 
-abstract class AblePolecat_AccessControl_RoleAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_RoleInterface {
+abstract class AblePolecat_AccessControl_RoleAbstract extends AblePolecat_AccessControl_SubjectAbstract implements AblePolecat_AccessControl_RoleInterface {
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_ArticleInterface.
@@ -26,6 +34,40 @@ abstract class AblePolecat_AccessControl_RoleAbstract extends AblePolecat_CacheO
    * @return string.
    */
   public static function getScope() {
-    return 'USER';
+    return 'SYSTEM';
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_RoleInterface.
+   ********************************************************************************/
+  
+  /**
+   * Verify that given agent is authorized to be assigned role.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent.
+   *
+   * @throw AblePolecat_AccessControl_Exception if agent is not authorized for role.
+   */
+  public function isAuthorized(AblePolecat_AccessControl_AgentInterface $Agent) {
+    //
+    // System user is granted 'default allow' on all roles.
+    //
+    if (!is_a($Agent, 'AblePolecat_AccessControl_Agent_User_System')) {
+      throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
+        $Agent->getName(),
+        $this->getName()
+      ));
+    }
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    parent::initialize();
   }
 }

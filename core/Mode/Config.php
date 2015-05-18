@@ -10,7 +10,6 @@
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Connector.php')));
-
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
 
 class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
@@ -350,21 +349,22 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       }
       else {
         AblePolecat_Command_Chain::triggerError("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
-        // throw new AblePolecat_Mode_Exception("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
       }
       
       if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
         //
+        // Assign database client role to system user.
+        //
+        $SystemUser = $this->getAgent();
+        $DatabaseClientRole = AblePolecat_AccessControl_Role_Client_Database::wakeup($SystemUser);
+        $DatabaseLocater = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->CoreDatabaseConnectionSettings['dsn']);
+        $DatabaseClientRole->setResourceLocater($DatabaseLocater);
+        $SystemUser->assignActiveRole($DatabaseClientRole);
+        
+        //
         // Attempt a connection.
         //
         $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
-        $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->CoreDatabaseConnectionSettings['dsn']);
-        $this->CoreDatabaseConnectionSettings['connected'] = $this->CoreDatabase->open($this->getAgent(), $DbUrl);
-        $dbErrors = self::$ConfigMode->CoreDatabase->flushErrors();
-        foreach($dbErrors as $errorNumber => $error) {
-          $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
-        }
       }
     }
     return $this->CoreDatabase;

@@ -13,6 +13,12 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessContro
 class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_AgentAbstract {
   
   /**
+   * Anonymous user id and name.
+   */
+  const USER_ID   = '4f5dcf9d-fd9a-11e4-b890-0050569e00a2';
+  const USER_NAME = 'Anonymous';
+  
+  /**
    * @var AblePolecat_AccessControl_Agent_User Instance of singleton.
    */
   private static $User;
@@ -72,5 +78,7 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
    */
   protected function initialize() {
     parent::initialize();
+    $this->setId(self::USER_ID);
+    $this->setName(self::USER_NAME);
   }
 }

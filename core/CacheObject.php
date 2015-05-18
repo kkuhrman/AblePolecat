@@ -80,7 +80,7 @@ abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjec
   final protected function __construct() {
     $args = func_get_args();
     if (isset($args[0]) && is_a($args[0], 'AblePolecat_AccessControl_SubjectInterface')) {
-      $this->CommandInvoker = $args[0];
+      $this->setDefaultCommandInvoker($args[0]);
     }
     else {
       // $this->CommandInvoker = AblePolecat_AccessControl_Agent_User::wakeup();

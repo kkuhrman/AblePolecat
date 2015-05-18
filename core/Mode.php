@@ -272,6 +272,7 @@ abstract class AblePolecat_ModeAbstract
   protected function initialize() {
     //
     // Access control agent (system agent).
+    // @todo: wakeup() subject should be session.
     //
     $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User_System::wakeup());
   }

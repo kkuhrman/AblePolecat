@@ -36,12 +36,8 @@
         <polecat:path>AccessControl/Resource/Locater.php</polecat:path>
         <polecat:classFactoryMethod>create</polecat:classFactoryMethod>
       </polecat:class>
-      <polecat:class id="f054b0df-b7a4-11e4-a12d-0050569e00a2" name="AblePolecat_AccessControl_Role_User_Anonymous">
-        <polecat:path>AccessControl/Role/User/Anonymous.php</polecat:path>
-        <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
-      </polecat:class>
-      <polecat:class id="25b9b53a-b7a5-11e4-a12d-0050569e00a2" name="AblePolecat_AccessControl_Role_User_Authenticated">
-        <polecat:path>AccessControl/Role/User/Authenticated.php</polecat:path>
+      <polecat:class id="8b130da3-fd90-11e4-b890-0050569e00a2" name="AblePolecat_AccessControl_Role_Client_Database">
+        <polecat:path>AccessControl/Role/Client/Database.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
       <polecat:class id="22293034-fd86-11e4-b890-0050569e00a2" name="AblePolecat_AccessControl_Token_Dsn">

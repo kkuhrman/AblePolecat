@@ -35,6 +35,12 @@ class AblePolecat_AccessControl_Token_Dsn
   implements AblePolecat_AccessControl_Token_DsnInterface {
   
   /**
+   * System user id and name.
+   */
+  const TOKEN_ID   = 'ba93f4ba-fd9e-11e4-b890-0050569e00a2';
+  const TOKEN_NAME = 'Database Login';
+  
+  /**
    * @var string username.
    */
   private $userName;
@@ -66,6 +72,23 @@ class AblePolecat_AccessControl_Token_Dsn
     $data = unserialize($data);
     isset($data[self::PROPERTY_PASS]) ? $this->setPassword($data[self::PROPERTY_PASS]) : NULL;
     isset($data[self::PROPERTY_USER]) ? $this->setUsername($data[self::PROPERTY_USER]) : NULL;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_TokenInterface.
+   ********************************************************************************/
+  
+  /**
+   * Creational method.
+   *
+   * @return AblePolecat_AccessControl_TokenInterface Concrete instance of class.
+   */
+  public static function create() {
+    $AccessControlToken = new AblePolecat_AccessControl_Token_Dsn();
+    $args = func_get_args();
+    isset($args[0]) ? $AccessControlToken->setUsername($args[0]) : NULL;
+    isset($args[1]) ? $AccessControlToken->setPassword($args[1]) : NULL;
+    return $AccessControlToken;
   }
   
   /********************************************************************************
@@ -102,5 +125,16 @@ class AblePolecat_AccessControl_Token_Dsn
    */
   public function setPassword($password) {
     $this->password = $password;
+  }
+  
+  /**
+   * Extends __construct().
+   */
+  protected function initialize() {
+    //
+    // Article properties.
+    //
+    $this->setId(self::TOKEN_ID);
+    $this->setName(self::TOKEN_NAME);
   }
 }

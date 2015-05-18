@@ -48,16 +48,7 @@ interface AblePolecat_AccessControl_AgentInterface extends AblePolecat_AccessCon
   public function refreshActiveRoles();
 }
 
-abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_AccessControl_AgentInterface {
-  /**
-   * @var int id of token.
-   */
-  private $id;
-  
-  /**
-   * @var string Name of token.
-   */
-  private $name;
+abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_AccessControl_SubjectAbstract implements AblePolecat_AccessControl_AgentInterface {
   
   /**
    * @var Array[AblePolecat_AccessControl_RoleInterface].
@@ -75,28 +66,6 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
    */
   public static function getScope() {
     return 'USER';
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
-   ********************************************************************************/
-  
-  /**
-   * Return token id.
-   *
-   * @return string Subject unique identifier.
-   */
-  public function getId() {
-    return $this->id;
-  }
-  
-  /**
-   * Common name, need not be unique.
-   *
-   * @return string Common name.
-   */
-  public function getName() {
-    return $this->name;
   }
   
   /********************************************************************************
@@ -188,8 +157,6 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
       //
       // No roles assigned, assume anonymous user.
       //
-      $Role = $ClassRegistry->loadClass('AblePolecat_AccessControl_Role_User_Anonymous');
-      $this->assignActiveRole($Role);
     }
     
     return $this->ActiveRoles;
@@ -200,38 +167,10 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Cache
    ********************************************************************************/
   
   /**
-   * Set user id.
-   *
-   * @return string $id.
-   */
-  protected function setId($id) {
-    $this->id = $id;
-  }
-  
-  /**
-   * Set user name.
-   *
-   * @return string $name.
-   */
-  protected function setName($name) {
-    $this->name = $name;
-  }
-  
-  /**
    * Extends __construct().
-   * Sub-classes should override to initialize properties.
    */
   protected function initialize() {
-    //
-    // Agents invoke their own commands.
-    //
-    $this->setDefaultCommandInvoker($this);
-    
-    //
-    // Article properties.
-    //
-    $this->id = NULL;
-    $this->name = NULL;
+    parent::initialize();
     
     //
     // Internal storage of roles assigned to agent.

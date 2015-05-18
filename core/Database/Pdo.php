@@ -111,7 +111,25 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Database)) {
-      self::$Database = new AblePolecat_Database_Pdo($Subject);
+      if (isset($Subject)) {
+        $dbClientRole = $Subject->getActiveRole(AblePolecat_AccessControl_Role_Client_Database::ROLE_ID);
+        if ($dbClientRole) {
+          //
+          // Attempt to open database connection.
+          //
+          self::$Database = new AblePolecat_Database_Pdo($Subject);
+          self::$Database->open($Subject);
+        }
+        else {
+          throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
+            $Subject->getName(),
+            AblePolecat_AccessControl_Role_Client_Database::ROLE_NAME
+          ));
+        }
+      }
+      else {
+        self::$Database = new AblePolecat_Database_Pdo();
+      }
     }
     return self::$Database;
   }
@@ -133,14 +151,35 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $open = FALSE;
     
-    //
-    // @todo: access control
-    //
-    if (isset($Url) && is_a($Url, 'AblePolecat_AccessControl_Resource_Locater_DsnInterface')) {
-      $dsn = $Url->getDsn();
-      $dbUser = $Url->getUsername();
-      $dbPass = $Url->getPassword();
-      
+    $dsn = NULL;
+    $dbUser = NULL;
+    $dbPass = NULL;
+    if (isset($Agent)) {
+      $dbClientRole = $Agent->getActiveRole(AblePolecat_AccessControl_Role_Client_Database::ROLE_ID);
+      if ($dbClientRole) {
+        $Url = $dbClientRole->getResourceLocater();
+        $AccessControlToken = $dbClientRole->getAccessControlToken();
+        if (isset($Url) && isset($AccessControlToken)) {
+          $dsn = $Url->getDsn();
+          $dbUser = $AccessControlToken->getUsername();
+          $dbPass = $AccessControlToken->getPassword();
+        }
+      }
+      else {
+        throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
+          $Agent->getName(),
+          AblePolecat_AccessControl_Role_Client_Database::ROLE_NAME
+        ));
+      }
+    }
+    else {
+      if (isset($Url) && is_a($Url, 'AblePolecat_AccessControl_Resource_Locater_DsnInterface')) {
+        $dsn = $Url->getDsn();
+        $dbUser = $Url->getUsername();
+        $dbPass = $Url->getPassword();
+      }
+    }
+    if (isset($dsn) && isset($dbUser) && isset($dbPass)) {
       //
       // This prevents users from establishing a connection to an unsecured MySql server
       // on a local computer without specifying a database, user or password (as would be
@@ -160,8 +199,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
           // but are cached and re-used when another script requests a 
           // connection using the same credentials.
           //
-          $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass);
-          // $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass, array(PDO::ATTR_PERSISTENT => true));
+          $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass, array(PDO::ATTR_PERSISTENT => true));
           $this->setLocater($Url);
         } 
         catch (PDOException $Exception) {
@@ -171,7 +209,6 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
       }
     }
     $open = isset($this->DatabaseConnection);
-
     return $open;
   }
   
