@@ -55,11 +55,6 @@ interface AblePolecat_Database_PdoInterface extends AblePolecat_DatabaseInterfac
 class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements AblePolecat_Database_PdoInterface {
     
   /**
-   * @var AblePolecat_Database_Pdo Instance of singleton.
-   */
-  protected static $Database = NULL;
-  
-  /**
    * @var resource Database connection.
    */
   private $DatabaseConnection;
@@ -110,28 +105,29 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * @return AblePolecat_Database_Pdo or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (!isset(self::$Database)) {
-      if (isset($Subject)) {
-        $dbClientRole = $Subject->getActiveRole(AblePolecat_AccessControl_Role_Client_Database::ROLE_ID);
-        if ($dbClientRole) {
-          //
-          // Attempt to open database connection.
-          //
-          self::$Database = new AblePolecat_Database_Pdo($Subject);
-          self::$Database->open($Subject);
-        }
-        else {
-          throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
-            $Subject->getName(),
-            AblePolecat_AccessControl_Role_Client_Database::ROLE_NAME
-          ));
-        }
+    
+    $Database = NULL;
+
+    if (isset($Subject)) {
+      $dbClientRole = $Subject->getActiveRole(AblePolecat_AccessControl_Role_Client_Database::ROLE_ID);
+      if ($dbClientRole) {
+        //
+        // Attempt to open database connection.
+        //
+        $Database = new AblePolecat_Database_Pdo($Subject);
+        $Database->open($Subject);
       }
       else {
-        self::$Database = new AblePolecat_Database_Pdo();
+        throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
+          $Subject->getName(),
+          AblePolecat_AccessControl_Role_Client_Database::ROLE_NAME
+        ));
       }
     }
-    return self::$Database;
+    else {
+      $Database = new AblePolecat_Database_Pdo();
+    }
+    return $Database;
   }
   
   /********************************************************************************
@@ -192,20 +188,23 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         );
         $this->DatabaseConnection = NULL;
       }
-      else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_User_System')) {
-        try {
-          //
-          // Persistent connections are not closed at the end of the script, 
-          // but are cached and re-used when another script requests a 
-          // connection using the same credentials.
-          //
-          $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass, array(PDO::ATTR_PERSISTENT => true));
-          $this->setLocater($Url);
-        } 
-        catch (PDOException $Exception) {
-          $this->error_info[] = $Exception->getMessage();
-          $this->DatabaseConnection = NULL;
-        }
+      try {
+        //
+        // Persistent connections are not closed at the end of the script, 
+        // but are cached and re-used when another script requests a 
+        // connection using the same credentials.
+        //
+        // $options = NULL;
+        // if (is_a($Agent, 'AblePolecat_AccessControl_Agent_User_System')) {
+          // $options = array(PDO::ATTR_PERSISTENT => true);
+        // }
+        $options = array(PDO::ATTR_PERSISTENT => true);
+        $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass, $options);
+        $this->setLocater($Url);
+      } 
+      catch (PDOException $Exception) {
+        $this->error_info[] = $Exception->getMessage();
+        $this->DatabaseConnection = NULL;
       }
     }
     $open = isset($this->DatabaseConnection);
@@ -309,8 +308,8 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    *
    * @return boolean TRUE if database connection is functional, otherwise FALSE.
    */
-  public static function ready() {
-    return (isset(self::$Database) && isset(self::$Database->DatabaseConnection));
+  public function ready() {
+    return isset($this->DatabaseConnection);
   }
   
   /********************************************************************************

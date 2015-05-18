@@ -61,7 +61,7 @@ interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_Resour
    *
    * @return boolean TRUE if database connection is functional, otherwise FALSE.
    */
-  public static function ready();
+  public function ready();
 }
 
 abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_DatabaseInterface {

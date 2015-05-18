@@ -58,6 +58,7 @@ abstract class AblePolecat_AccessControl_RoleAbstract extends AblePolecat_Access
         $this->getName()
       ));
     }
+    return TRUE;
   }
   
   /********************************************************************************

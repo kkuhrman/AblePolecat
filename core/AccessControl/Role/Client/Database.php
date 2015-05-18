@@ -51,6 +51,30 @@ class AblePolecat_AccessControl_Role_Client_Database
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_AccessControl_RoleInterface.
+   ********************************************************************************/
+  
+  /**
+   * Verify that given agent is authorized to be assigned role.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent.
+   *
+   * @throw AblePolecat_AccessControl_Exception if agent is not authorized for role.
+   */
+  public function isAuthorized(AblePolecat_AccessControl_AgentInterface $Agent) {
+    
+    $isAuthorized = FALSE;
+    
+    if (is_a($Agent, 'AblePolecat_AccessControl_Agent_User')) {
+      $isAuthorized = TRUE;
+    }
+    else {
+      $isAuthorized = parent::isAuthorized($Agent);
+    }
+    return $isAuthorized;
+  }
+  
+  /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Role_ClientInterface.
    ********************************************************************************/
   

@@ -97,7 +97,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
       case 'POST':
         $referer = $this->getRequest()->getQueryStringFieldValue(AblePolecat_Transaction_RestrictedInterface::ARG_REFERER);
         if (isset($referer)) {
-          $CoreDatabase = AblePolecat_Mode_Config::wakeup()->getCoreDatabase();
+          $UserDatabaseConnection = $this->getUserDatabaseConnection();
           switch($referer) {
             default:
               //
@@ -109,7 +109,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 //
                 // Get rid of db errors.
                 //
-                $dbErrors = $CoreDatabase->flushErrors();
+                // $dbErrors = $UserDatabaseConnection->flushErrors();
                 
                 //
                 // First, establish connection to db and update local project 
@@ -119,6 +119,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                   //
                   // Connection established, update local project conf file.
                   //
+                  // $UserDatabaseConnection = $this->getUserDatabaseConnection();
                   $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
                   $coreDatabaseElementId = AblePolecat_Mode_Config::getCoreDatabaseId();
                   $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
@@ -134,17 +135,18 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                   $localProjectConfFile->save($localProjectConfFilepath);
                 }
               }
+              $UserDatabaseConnection = $this->getUserDatabaseConnection();
               
               //
               // Order is important. FK UUIDs are generated first by classes, 
               // which reference them second.
               //
-              if ($CoreDatabase->ready()) {
+              if ($UserDatabaseConnection->ready()) {
                 //
                 // Step 1. Install current database schema.
                 //
-                AblePolecat_Database_Schema::install($CoreDatabase);
-                $dbErrors = $CoreDatabase->flushErrors();
+                AblePolecat_Database_Schema::install($UserDatabaseConnection);
+                $dbErrors = $UserDatabaseConnection->flushErrors();
                 foreach($dbErrors as $errorNumber => $error) {
                   $error = AblePolecat_Database_Pdo::getErrorMessage($error);
                   AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
@@ -163,7 +165,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 // FK references to [lib].[id]:
                 // [class].[classLibraryId]
                 //
-                AblePolecat_Registry_ClassLibrary::install($CoreDatabase);
+                AblePolecat_Registry_ClassLibrary::install($UserDatabaseConnection);
                 
                 //
                 // Step 3. Register classes ([class]).
@@ -173,7 +175,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 // [connector].[classId]
                 // [component].[classId]
                 //
-                AblePolecat_Registry_Class::install($CoreDatabase);
+                AblePolecat_Registry_Class::install($UserDatabaseConnection);
                 
                 //
                 // Step 4. Register resources ([resource]).
@@ -181,31 +183,31 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 // [connector].[resourceId]
                 // [response].[resourceId]
                 //
-                AblePolecat_Registry_Resource::install($CoreDatabase);
+                AblePolecat_Registry_Resource::install($UserDatabaseConnection);
                 
                 //
                 // Step 5. Register connectors ([connector]).
                 //
-                AblePolecat_Registry_Connector::install($CoreDatabase);
+                AblePolecat_Registry_Connector::install($UserDatabaseConnection);
                 
                 //
                 // Step 6. Register responses ([response]).
                 // FK references to [response].[id]:
                 // [template].[articleId]
                 //
-                AblePolecat_Registry_Response::install($CoreDatabase);
+                AblePolecat_Registry_Response::install($UserDatabaseConnection);
                 
                 //
                 // Step 7. Register components ([component]).
                 // FK references to [component].[id]:
                 // [template].[articleId]
                 //
-                AblePolecat_Registry_Component::install($CoreDatabase);
+                AblePolecat_Registry_Component::install($UserDatabaseConnection);
                 
                 //
                 // Step 8. Register templates ([template]).
                 //
-                AblePolecat_Registry_Template::install($CoreDatabase);
+                AblePolecat_Registry_Template::install($UserDatabaseConnection);
                 
                 //
                 // @todo: status message of some kind?
@@ -217,7 +219,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 $this->setStatus(self::TX_STATE_COMPLETED);
               }
               else {
-                $dbErrors = $CoreDatabase->flushErrors();
+                $dbErrors = $UserDatabaseConnection->flushErrors();
                 $error = 'Database authentication failed';
                 foreach($dbErrors as $errorNumber => $error) {
                   $error = AblePolecat_Database_Pdo::getErrorMessage($error);
@@ -243,7 +245,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 // FK references to [lib].[id]:
                 // [class].[classLibraryId]
                 //
-                AblePolecat_Registry_ClassLibrary::update($CoreDatabase);
+                AblePolecat_Registry_ClassLibrary::update($UserDatabaseConnection);
                 
                 //
                 // Step 2. Update classes ([class]).
@@ -253,7 +255,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 // [connector].[classId]
                 // [component].[classId]
                 //
-                AblePolecat_Registry_Class::update($CoreDatabase);
+                AblePolecat_Registry_Class::update($UserDatabaseConnection);
                 
                 //
                 // Step 3. Update resources ([resource]).
@@ -261,31 +263,31 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 // [connector].[resourceId]
                 // [response].[resourceId]
                 //
-                AblePolecat_Registry_Resource::update($CoreDatabase);
+                AblePolecat_Registry_Resource::update($UserDatabaseConnection);
                 
                 //
                 // Step 4. Update connectors ([connector]).
                 //
-                AblePolecat_Registry_Connector::update($CoreDatabase);
+                AblePolecat_Registry_Connector::update($UserDatabaseConnection);
                 
                 //
                 // Step 5. Update responses ([response]).
                 // FK references to [response].[id]:
                 // [template].[articleId]
                 //
-                AblePolecat_Registry_Response::update($CoreDatabase);
+                AblePolecat_Registry_Response::update($UserDatabaseConnection);
                 
                 //
                 // Step 6. Update components ([component]).
                 // FK references to [component].[id]:
                 // [template].[articleId]
                 //
-                AblePolecat_Registry_Component::update($CoreDatabase);
+                AblePolecat_Registry_Component::update($UserDatabaseConnection);
                 
                 //
                 // Step 7. Update templates ([template]).
                 //
-                AblePolecat_Registry_Template::update($CoreDatabase);
+                AblePolecat_Registry_Template::update($UserDatabaseConnection);
                 
                 //
                 // @todo: status message of some kind?
@@ -297,7 +299,7 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                 $this->setStatus(self::TX_STATE_COMPLETED);
               }
               else {
-                $dbErrors = $CoreDatabase->flushErrors();
+                $dbErrors = $UserDatabaseConnection->flushErrors();
                 $error = 'Database authentication failed';
                 foreach($dbErrors as $errorNumber => $error) {
                   $error = AblePolecat_Database_Pdo::getErrorMessage($error);

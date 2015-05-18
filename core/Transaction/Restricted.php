@@ -44,6 +44,11 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
    */
   private $dsn;
   
+  /**
+   * @var AblePolecat_Database_Pdo.
+   */
+  private $UserDatabaseConnection;
+  
   /********************************************************************************
    * Implementation of AblePolecat_TransactionInterface.
    ********************************************************************************/
@@ -106,7 +111,6 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
         $savePointId = AblePolecat_Mode_Session::getSessionVariable($this->getAgent(), AblePolecat_Host::POLECAT_INSTALL_SAVEPT);
         break;
     }
-    
     return $this->run();
   }
   
@@ -223,47 +227,19 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
         $this->dsn = sprintf("mysql://%s:%s@localhost/%s", $userName, $password, $databaseName);
         
         //
-        // Check for existing project database connection.
+        // Assign database client role to user.
         //
-        $CoreDatabase = AblePolecat_Mode_Config::wakeup()->getCoreDatabase();
-        if($CoreDatabase->ready()) {
-          //
-          // If database connection already exists, check authentication against
-          // dsn in local project configuration file.
-          //
-          $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-          $coreDatabaseElementId = AblePolecat_Mode_Config::getCoreDatabaseId();
-          $localProjectConfFileDsn = NULL;
-          $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
-          if (isset($Node)) {
-            foreach($Node->childNodes as $key => $childNode) {
-              if($childNode->nodeName == 'polecat:dsn') {
-                $localProjectConfFileDsn = $childNode->nodeValue;
-                break;
-              }
-            }
-          }
-          if (isset($localProjectConfFileDsn) && ($localProjectConfFileDsn == $this->dsn)) {
-            $authenticated = TRUE;
-          }
-          else {
-            $this->dsn = NULL;
-          }
-        }
-        else {
-          //
-          // If database connection is not already established, attempt one.
-          //
-          $SystemAgent = AblePolecat_AccessControl_Agent_User_System::wakeup();
-          $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->dsn);
-          $CoreDatabase->open($SystemAgent, $DbUrl);
-          if($CoreDatabase->ready()) {
-            $authenticated = TRUE;
-          }
-          else {
-            $this->dsn = NULL;
-          } 
-        }
+        $User = AblePolecat_AccessControl_Agent_User::wakeup();
+        $DatabaseClientRole = AblePolecat_AccessControl_Role_Client_Database::wakeup($User);
+        $DatabaseLocater = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->dsn);
+        $DatabaseClientRole->setResourceLocater($DatabaseLocater);
+        $User->assignActiveRole($DatabaseClientRole);
+        
+        //
+        // Attempt a connection.
+        //
+        $this->UserDatabaseConnection = AblePolecat_Database_Pdo::wakeup($User);
+        $authenticated = $this->UserDatabaseConnection->ready();
         break;
     }
     return $authenticated;
@@ -281,10 +257,18 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
    ********************************************************************************/
   
   /**
+   * @var AblePolecat_Database_Pdo.
+   */
+  public function getUserDatabaseConnection() {
+    return $this->UserDatabaseConnection;
+  }
+  
+  /**
    * Extends __construct().
    */
   protected function initialize() {
     parent::initialize();
     $this->dsn = NULL;
+    $this->UserDatabaseConnection = NULL;
   }
 }
