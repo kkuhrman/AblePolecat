@@ -1,56 +1,21 @@
 <?php
 /**
- * @file      polecat/core/AccessControl/Agent/System.php
- * @brief     Built-in system agent.
+ * @file      polecat/core/AccessControl/Agent/User/System.php
+ * @brief     Built-in system user/agent.
  * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent.php')));
 
-class AblePolecat_AccessControl_Agent_System extends AblePolecat_AccessControl_AgentAbstract {
+class AblePolecat_AccessControl_Agent_User_System extends AblePolecat_AccessControl_AgentAbstract {
   
   /**
-   * @var AblePolecat_AccessControl_Agent_System Instance of singleton.
+   * @var AblePolecat_AccessControl_Agent_User_System Instance of singleton.
    */
   private static $System;
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_ArticleInterface.
-   ********************************************************************************/
-  
-  /**
-   * General purpose of object implementing this interface.
-   *
-   * @return string.
-   */
-  public static function getScope() {
-    return 'SYSTEM';
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_AccessControl_Article_DynamicInterface.
-   ********************************************************************************/
-  
-  /**
-   * System unique ID.
-   *
-   * @return scalar Subject unique identifier.
-   */
-  public function getId() {
-    return 1;
-  }
-  
-  /**
-   * Common name, need not be unique.
-   *
-   * @return string Common name.
-   */
-  public function getName() {
-    return 'system';
-  }
   
   /********************************************************************************
    * Implementation of AblePolecat_CacheObjectInterface.
@@ -69,7 +34,7 @@ class AblePolecat_AccessControl_Agent_System extends AblePolecat_AccessControl_A
    *
    * @param AblePolecat_AccessControl_SubjectInterface Session status helps determine if connection is new or established.
    *
-   * @return AblePolecat_AccessControl_Agent_System Initialized access control service or NULL.
+   * @return AblePolecat_AccessControl_Agent_User_System Initialized access control service or NULL.
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     
@@ -79,7 +44,7 @@ class AblePolecat_AccessControl_Agent_System extends AblePolecat_AccessControl_A
       // it as default command invoker. Agents invoke their own commands.
       // @see AblePolecat_AccessControl_AgentAbstract::initialize()
       //
-      self::$System = new AblePolecat_AccessControl_Agent_System();
+      self::$System = new AblePolecat_AccessControl_Agent_User_System();
       AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'System agent initialized.');
     }
     return self::$System;
