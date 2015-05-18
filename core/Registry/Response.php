@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -200,7 +200,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
           'lastModifiedTime')->
         from('response')->
         where(sprintf("`name` = '%s'", $name));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {
@@ -245,7 +245,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
           'classId', 
           'lastModifiedTime')->
         from('response');
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $Result = $CommandResult->value();        
         foreach($Result as $key => $Record) {
@@ -277,7 +277,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
         delete()->
         from('response')->
         where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
     }
     return parent::completeUpdate();
   }
@@ -345,7 +345,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
         'lastModifiedTime')->
       from('response')->
       where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
-    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
     if ($CommandResult->success()) {
       $QueryResult = $CommandResult->value();
       if (isset($QueryResult[0])) {
@@ -390,7 +390,7 @@ class AblePolecat_Registry_Response extends AblePolecat_RegistryAbstract {
             set('lastModifiedTime')->
             values($mostRecentModifiedTime)->
             where(sprintf("`resourceId` = '%s' AND `statusCode` = %d", $resourceId, $statusCode));
-          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
           $ResponseRegistration->lastModifiedTime = $mostRecentModifiedTime;
         }
       }

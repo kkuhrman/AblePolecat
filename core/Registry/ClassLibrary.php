@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -87,7 +87,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
           'lastModifiedTime')->
         from('lib')->
         where('`useLib` = 1');
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $Result = $CommandResult->value();        
         foreach($Result as $key => $Library) {
@@ -456,7 +456,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
         delete()->
         from('lib')->
         where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
     }
     return parent::completeUpdate();
   }

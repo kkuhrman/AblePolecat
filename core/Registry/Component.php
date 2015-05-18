@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -243,7 +243,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
         select('id', 'name', 'classId')->
         from('component')->
         where(sprintf("`name` = '%s'", $name));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {
@@ -281,7 +281,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
       $sql = __SQL()->
         select('id', 'name', 'classId')->
         from('component');
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $Result = $CommandResult->value();        
         foreach($Result as $key => $Record) {
@@ -313,7 +313,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
         delete()->
         from('component')->
         where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
     }
     return parent::completeUpdate();
   }

@@ -12,7 +12,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry.php')));
@@ -206,7 +206,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
           'lastModifiedTime')->
         from('connector')->
         where(sprintf("`name` = '%s'", $name));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $Records = $CommandResult->value();
         if (isset($Records[0])) {
@@ -251,7 +251,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
           'classId', 
           'lastModifiedTime')->
         from('connector');
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $Result = $CommandResult->value();        
         foreach($Result as $key => $Record) {
@@ -283,7 +283,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
         delete()->
         from('connector')->
         where(sprintf("`id` IN ('%s')", implode("','", $notUpdatedIds)));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
     }
     return parent::completeUpdate();
   }
@@ -427,7 +427,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
           'lastModifiedTime')->
         from('connector')->
         where(sprintf("`resourceId` = '%s' AND `requestMethod` = '%s'", $resourceId, $requestMethod));
-    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
     if ($CommandResult->success()) {
       $QueryResult = $CommandResult->value();
       if (isset($QueryResult[0])) {

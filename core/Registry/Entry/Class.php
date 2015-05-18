@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Registry', 'Entry.php')));
@@ -58,7 +58,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
         parent::__set('lastModifiedTime', $this->fileStat['mtime']);
       }
       else {
-        AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), 
+        AblePolecat_Command_Log::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), 
           "Failed to retrieve file stats on $value.", AblePolecat_LogInterface::WARNING);
         $value = NULL;
       }
@@ -176,7 +176,7 @@ class AblePolecat_Registry_Entry_Class extends AblePolecat_Registry_EntryAbstrac
           'lastModifiedTime')->
         from('class')->
         where(sprintf("`id` = '%s'", $primaryKey));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success() && is_array($CommandResult->value())) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {

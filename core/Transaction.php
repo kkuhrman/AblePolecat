@@ -11,7 +11,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Dynamic.php')));
@@ -230,7 +230,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
     
     $ArgsList = AblePolecat_ArgsList::create();
     isset($args[0]) ? $Subject = $args[0] : $Subject = NULL;
-    if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_System')) {
+    if (isset($Subject) && is_a($Subject, 'AblePolecat_AccessControl_Agent_User_System')) {
       $ArgsList->{self::TX_ARG_SUBJECT} = $Subject;
       foreach($args as $key => $value) {
         switch ($method_name) {
@@ -771,7 +771,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
               $ResourceRegistration->getId(), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );
-          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+          $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
           if ($CommandResult->success() && count($CommandResult->value())) {
             //
             // Resume existing transaction.

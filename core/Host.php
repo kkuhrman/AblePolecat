@@ -227,7 +227,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         // 
         // Get user agent and dispatch request to service bus.
         //
-        $Host->Response = AblePolecat_Service_Bus::wakeup(AblePolecat_AccessControl_Agent_System::wakeup())->
+        $Host->Response = AblePolecat_Service_Bus::wakeup(AblePolecat_AccessControl_Agent_User_System::wakeup())->
           dispatch(AblePolecat_AccessControl_Agent_User::wakeup(), $Request);
       }    
       
@@ -394,7 +394,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     //
     // Access control agent (super user).
     //
-    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_System::wakeup());
+    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User_System::wakeup());
     
     //
     // Initiate application mode and establish as reverse command target.

@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Installer.php')));
@@ -99,7 +99,7 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
       //
       // Load schema file.
       //
-      $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
+      $Agent = AblePolecat_AccessControl_Agent_User_System::wakeup();
       $schemaFilePath = AblePolecat_Mode_Config::getEnvironmentVariable($Agent, AblePolecat_Mode_Config::VAR_CONF_PATH_DBSCHEMA);
       $schemaFile = new DOMDocument();
       $schemaFile->load($schemaFilePath);

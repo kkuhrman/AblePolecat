@@ -30,7 +30,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
@@ -193,7 +193,7 @@ class AblePolecat_Transaction_Test extends  AblePolecat_TransactionAbstract {
           'lastModifiedTime')->
         from('lib')->
         where(sprintf("`name` = '%s'", $libName));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_System::wakeup(), $sql);
+      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
       if ($CommandResult->success()) {
         $registrationInfo = $CommandResult->value();
         if (isset($registrationInfo[0])) {

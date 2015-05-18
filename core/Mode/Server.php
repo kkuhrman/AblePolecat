@@ -16,7 +16,7 @@
  * @version   0.7.2
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'System.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User', 'System.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'Server.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Boot.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Log', 'Pdo.php')));
@@ -292,7 +292,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     // Error resource.
     //
-    $Invoker = AblePolecat_AccessControl_Agent_System::wakeup();
+    $Invoker = AblePolecat_AccessControl_Agent_User_System::wakeup();
     $Resource = AblePolecat_Resource_Core_Factory::wakeup(
       $Invoker,
       'AblePolecat_Resource_Core_Error',
@@ -407,7 +407,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       //
       // Apparently, no other log facility was available to handle the message
       //
-      AblePolecat_Log_Syslog::wakeup(AblePolecat_AccessControl_Agent_System::wakeup())->putMessage($type, $msg);
+      AblePolecat_Log_Syslog::wakeup(AblePolecat_AccessControl_Agent_User_System::wakeup())->putMessage($type, $msg);
     }
     
     //
@@ -469,7 +469,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       //
       // Apparently, no other log facility was available to handle the message
       //
-      AblePolecat_Log_Syslog::wakeup(AblePolecat_AccessControl_Agent_System::wakeup())->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
+      AblePolecat_Log_Syslog::wakeup(AblePolecat_AccessControl_Agent_User_System::wakeup())->putMessage(AblePolecat_LogInterface::WARNING, $errorMessage);
     }
     
     //

@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Transaction.php')));
@@ -254,7 +254,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
           //
           // If database connection is not already established, attempt one.
           //
-          $SystemAgent = AblePolecat_AccessControl_Agent_System::wakeup();
+          $SystemAgent = AblePolecat_AccessControl_Agent_User_System::wakeup();
           $DbUrl = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->dsn);
           $CoreDatabase->open($SystemAgent, $DbUrl);
           if($CoreDatabase->ready()) {

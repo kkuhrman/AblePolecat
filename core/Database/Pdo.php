@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
  
 require_once(ABLE_POLECAT_CORE. DIRECTORY_SEPARATOR . 'Database.php');
@@ -153,7 +153,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         );
         $this->DatabaseConnection = NULL;
       }
-      else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_System')) {
+      else if (isset($Agent) && is_a($Agent, 'AblePolecat_AccessControl_Agent_User_System')) {
         try {
           //
           // Persistent connections are not closed at the end of the script, 

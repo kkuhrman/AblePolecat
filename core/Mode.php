@@ -273,6 +273,6 @@ abstract class AblePolecat_ModeAbstract
     //
     // Access control agent (system agent).
     //
-    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_System::wakeup());
+    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User_System::wakeup());
   }
 }

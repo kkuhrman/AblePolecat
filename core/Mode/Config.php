@@ -5,7 +5,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Pdo.php')));
@@ -349,7 +349,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         }
       }
       else {
-        throw new AblePolecat_Mode_Exception("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
+        AblePolecat_Command_Chain::triggerError("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
+        // throw new AblePolecat_Mode_Exception("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
       }
       
       if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
@@ -424,7 +425,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     $coreClassLibraryConfFile = NULL;
     if (isset(self::$ConfigMode)) {
       if (!isset(self::$ConfigMode->coreClassLibraryConfFile)) {
-        $Agent = AblePolecat_AccessControl_Agent_System::wakeup();
+        $Agent = AblePolecat_AccessControl_Agent_User_System::wakeup();
         $coreFilePath = self::getCoreClassLibraryConfFilepath();
         self::$ConfigMode->coreClassLibraryConfFile = new DOMDocument();
         self::$ConfigMode->coreClassLibraryConfFile->load($coreFilePath);

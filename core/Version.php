@@ -83,17 +83,17 @@
  * @author    Karl Kuhrman
  * @copyright [BDS II License] 
  * @ref       https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md
- * @version   0.7.1
+ * @version   0.7.2
  */
 
 /**
  * Most current version is loaded from conf file. These are defaults.
  */
-define('ABLE_POLECAT_VERSION_NAME', '0.7.1-DEV');
+define('ABLE_POLECAT_VERSION_NAME', '0.7.2-DEV');
 define('ABLE_POLECAT_VERSION_ID', 'ABLE_POLECAT_CORE_0_7_1_DEV');
 define('ABLE_POLECAT_VERSION_MAJOR', '0');
 define('ABLE_POLECAT_VERSION_MINOR', '7');
-define('ABLE_POLECAT_VERSION_REVISION', '1');
+define('ABLE_POLECAT_VERSION_REVISION', '2');
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 
@@ -103,17 +103,17 @@ final class AblePolecat_Version implements AblePolecat_AccessControl_Article_Sta
    * Article Constants.
    */
   const UUID = '25226229-b3d6-11e4-976e-0050569e00a2';
-  const NAME = '0.7.1';
+  const NAME = '0.7.2';
   
   /**
    * Core class library configuration file number.
    */
-  const CORE_CLASS_LIB_NUMBER = '0.7.1';
+  const CORE_CLASS_LIB_NUMBER = '0.7.2';
   
   /**
    * Database schema.
    */
-  const DB_SCHEMA = '0.7.1';
+  const DB_SCHEMA = '0.7.2';
   
   /**
    * AblePolecat_Version INstance of singleton.
