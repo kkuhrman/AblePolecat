@@ -19,7 +19,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Command', 'Chain.php')));
@@ -65,6 +65,15 @@ interface AblePolecat_ModeInterface extends
    * @throw AblePolecat_Mode_Exception If environment is not initialized.
    */
   public static function setEnvironmentVariable(AblePolecat_AccessControl_AgentInterface $Agent, $name, $value);
+  
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param string  $reason   Reason for shut down.
+   * @param string  $message  Message associated with shut down request.
+   * @param int     $status   Return code.
+   */
+  public static function shutdown($reason, $message, $status = 0);
 }
 
 abstract class AblePolecat_ModeAbstract 
@@ -136,6 +145,21 @@ abstract class AblePolecat_ModeAbstract
   }
   
   /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+   
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param string  $reason   Reason for shut down.
+   * @param string  $message  Message associated with shut down request.
+   * @param int     $status   Return code.
+   */
+  public static function shutdown($reason, $message, $status = 0) {
+    exit($status);
+  }
+  
+  /********************************************************************************
    * Error and exception handling functions.
    ********************************************************************************/
   
@@ -183,15 +207,6 @@ abstract class AblePolecat_ModeAbstract
    */
   protected function getAgent() {
     return $this->getDefaultCommandInvoker();
-  }
-  
-  /**
-   * Shut down Able Polecat server and send HTTP response.
-   *
-   * @param int $status Return code.
-   */
-  protected static function shutdown($status = 0) {
-    exit($status);
   }
   
   /**

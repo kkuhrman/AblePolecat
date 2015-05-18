@@ -8,7 +8,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR , array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Ack.php')));
@@ -47,11 +47,13 @@ class AblePolecat_Resource_Core_Factory extends AblePolecat_Resource_CoreAbstrac
           self::$Resource = AblePolecat_Resource_Core_Error::wakeup();
           self::$Resource->Reason = 'Core class does not exist.';
           self::$Resource->Message = sprintf("Able Polecat cannot load core class given by [%s].", $className);
+          self::$Resource->Status = AblePolecat_Error::NO_ERROR_CODE_GIVEN;
           break;
         case 'AblePolecat_Resource_Core_Error':
           self::$Resource = AblePolecat_Resource_Core_Error::wakeup();
           isset($args[2]) ? self::$Resource->Reason = $args[2] : self::$Resource->Reason = 'Unknown Error.';
           isset($args[3]) ? self::$Resource->Message = $args[3] : self::$Resource->Message = 'Able Polecat directed to issue error response but no reason or message was given.';
+          isset($args[4]) ? self::$Resource->Status = $args[4] : self::$Resource->Status = AblePolecat_Error::NO_ERROR_CODE_GIVEN;
           break;
         case 'AblePolecat_Resource_Core_Form':
           self::$Resource = AblePolecat_Resource_Core_Form::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());

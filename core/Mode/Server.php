@@ -13,7 +13,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'System.php')));
@@ -221,7 +221,11 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         }
         break;
       case AblePolecat_Command_Shutdown::UUID:
-        self::shutdown($Command->getStatus());
+        self::shutdown(
+          $Command->getReason(),
+          $Command->getMessage(),
+          $Command->getStatus()
+        );
         break;
       case AblePolecat_Command_Server_Version::UUID:
         $Version = AblePolecat_Version::getVersion(TRUE, 'text');
@@ -275,6 +279,49 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       throw new AblePolecat_Mode_Exception("Cannot access variable '$name'. Environment is not initialized.");
     }
     return $VariableSet;
+  }
+     
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param string  $reason   Reason for shut down.
+   * @param string  $message  Message associated with shut down request.
+   * @param int     $status   Return code.
+   */
+  public static function shutdown($reason, $message, $status = 0) {
+    //
+    // Error resource.
+    //
+    $Invoker = AblePolecat_AccessControl_Agent_System::wakeup();
+    $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+      $Invoker,
+      'AblePolecat_Resource_Core_Error',
+      $reason, 
+      $message, 
+      $status
+    );
+    
+    //
+    // Response registration.
+    //
+    $ResponseRegistration = AblePolecat_Registry_Entry_DomNode_Response::create();
+    $ResponseRegistration->resourceId = AblePolecat_Resource_Core_Error::UUID; 
+    $ResponseRegistration->statusCode = 200;
+    $ResponseRegistration->id = AblePolecat_Message_Response_Xml::UUID;
+    $ResponseRegistration->name = 'AblePolecat_Message_Response_Xml';
+    $ResponseRegistration->classId = AblePolecat_Message_Response_Xml::UUID;
+    
+    //
+    // Create and send response.
+    //
+    $Response = AblePolecat_Message_Response_Xml::create($ResponseRegistration);
+    $Response->setEntityBody($Resource);
+    $Response->send();
+    
+    //
+    // Exit.
+    //
+    parent::shutdown($reason, $message, $status);
   }
   
   /********************************************************************************
@@ -364,29 +411,15 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     }
     
     //
-    // @todo: give user, application modes chance to do something with shut down command.
+    // shut down and send response
     //
-    $display_errors = ini_get('display_errors');
-    if ($shutdown && ($display_errors != 0)) {
-      $reason = 'Critical Error';
-      $code = $errno;
-      self::shutdown($code);
-    }
-    else if ($display_errors != 0) {
-      //
-      // User induced script to vomit error on screen.
-      //
-      print('<p>display_errors set to ' . $display_errors . '</p>');
-      print('<p>' . 
-        $msg . 
-        '<ul><li>' .
-        $errfile . 
-        '</li><li>' .
-        $errline .
-        '</li></ul></p>'
-      );
-      exit($errno);
-    }
+    $reason = 'Critical Error';
+    AblePolecat_Command_Shutdown::invoke(
+      self::$ServerMode->getDefaultCommandInvoker(), 
+      $reason,
+      $errorMessage,
+      $errno
+    );
     return $shutdown;
   }
   
@@ -448,7 +481,11 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     //
     $reason = 'Unhandled exception';
     $code = $Exception->getCode();
-    self::shutdown($code);
+    self::shutdown(
+      $reason,
+      $errorMessage,
+      $code
+    );
   }
   
   /********************************************************************************
@@ -525,15 +562,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * Helper functions.
    ********************************************************************************/
     
-  /**
-   * Shut down Able Polecat server and send HTTP response.
-   *
-   * @param int $status Return code.
-   */
-  protected static function shutdown($status = 0) {
-    parent::shutdown($status);
-  }
-  
   /**
    * Validates given command target as a forward or reverse COR link.
    *

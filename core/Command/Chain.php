@@ -9,7 +9,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'CacheObject.php')));
@@ -182,7 +182,19 @@ class AblePolecat_Command_Chain
       }
     }
     else {
-      self::triggerError(__METHOD__ . ' There are no command targets assigned to chain of responsibility.');
+      if (is_a($Command, 'AblePolecat_Command_Shutdown')) {
+        //
+        // Shutdown ordered prior to CoR being established.
+        //
+        AblePolecat_Mode_Server::shutdown(
+          $Command->getReason(),
+          $Command->getMessage(),
+          $Command->getStatus()
+        );
+      }
+      else {
+        self::triggerError(__METHOD__ . ' There are no command targets assigned to chain of responsibility.');
+      }
     }
     
     if (isset($Target)) {

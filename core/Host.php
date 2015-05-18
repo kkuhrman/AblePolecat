@@ -6,7 +6,7 @@
  *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
- * @version   0.7.0
+ * @version   0.7.2
  */
 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Get.php')));
@@ -147,7 +147,11 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
         // Host shut down command overrides server mode shut down command
         // because it needs to send HTTP response before terminating.
         //
-        self::shutdown($Command->getStatus());
+        self::shutdown(
+          $Command->getReason(),
+          $Command->getMessage(),
+          $Command->getStatus()
+        );
         break;
     }
     //
@@ -155,6 +159,35 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     //
     $Result = $this->delegateCommand($Command, $Result);
     return $Result;
+  }
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_ModeInterface.
+   ********************************************************************************/
+  
+  /**
+   * Shut down Able Polecat server and send HTTP response.
+   *
+   * @param string  $reason   Reason for shut down.
+   * @param string  $message  Message associated with shut down request.
+   * @param int     $status   Return code.
+   */
+  public static function shutdown($reason, $message, $status = 0) {
+    if (isset(self::$Host)) {
+      if (!isset(self::$Host->Response)) {
+        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
+          self::$Host->getDefaultCommandInvoker(),
+          'AblePolecat_Resource_Core_Error',
+          $message,
+          $reason,
+          $status
+        );
+        self::$Host->Response = AblePolecat_Message_Response_Xml::create(500);
+        self::$Host->Response->setEntityBody($Resource);
+      }
+      self::$Host->Response->send();
+    }
+    exit($status);
   }
   
   /********************************************************************************
@@ -321,29 +354,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
-  
-  /**
-   * Shut down Able Polecat server and send HTTP response.
-   *
-   * @param int $status Return code.
-   */
-  protected static function shutdown($status = 0) {
-    if (isset(self::$Host)) {
-      if (!isset(self::$Host->Response)) {
-        $Resource = AblePolecat_Resource_Core_Factory::wakeup(
-          self::$Host->getDefaultCommandInvoker(),
-          'AblePolecat_Resource_Core_Error',
-          'Forced shut down',
-          'Able Polecat server was directed to shut down before generating response to request URI.'
-        );
-        self::$Host->Response = AblePolecat_Message_Response_Xml::create(500);
-        self::$Host->Response->setEntityBody($Resource);
-      }
-      self::$Host->Response->send();
-    }
-    exit($status);
-  }
-  
+    
   /**
    * Validates given command target as a forward or reverse COR link.
    *
