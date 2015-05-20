@@ -52,6 +52,11 @@ class AblePolecat_Environment_User extends AblePolecat_EnvironmentAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**

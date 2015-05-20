@@ -15,8 +15,8 @@ class AblePolecat_AccessControl_Agent_User_System extends AblePolecat_AccessCont
   /**
    * System user id and name.
    */
-  const USER_ID   = 'beaddfd6-fd94-11e4-b890-0050569e00a2';
-  const USER_NAME = 'System';
+  const SYSTEM_USER_ID   = 'beaddfd6-fd94-11e4-b890-0050569e00a2';
+  const SYSTEM_USER_NAME = 'System';
   
   /**
    * @var AblePolecat_AccessControl_Agent_User_System Instance of singleton.
@@ -33,6 +33,11 @@ class AblePolecat_AccessControl_Agent_User_System extends AblePolecat_AccessCont
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -66,7 +71,7 @@ class AblePolecat_AccessControl_Agent_User_System extends AblePolecat_AccessCont
    */
   protected function initialize() {
     parent::initialize();
-    $this->setId(self::USER_ID);
-    $this->setName(self::USER_NAME);
+    $this->setId(self::SYSTEM_USER_ID);
+    $this->setName(self::SYSTEM_USER_NAME);
   }
 }

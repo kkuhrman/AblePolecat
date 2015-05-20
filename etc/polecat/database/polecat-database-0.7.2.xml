@@ -286,6 +286,7 @@
         <polecat:fields>
           <polecat:field name="sessionNumber" type="int" size="11" null="NOT" auto="0" />
           <polecat:field name="phpSessionId" type="varchar" size="255" null="NOT" />
+          <polecat:field name="userId" type="char" size="36" />
           <polecat:field name="hostName" type="varchar" size="255" null="NOT" />
           <polecat:field name="remoteAddress" type="varchar" size="32" null="NOT" />
           <polecat:field name="start" type="timestamp" null="NOT">
@@ -298,6 +299,9 @@
           </polecat:index>
           <polecat:index type="UNIQUE KEY" name="phpSessionId">
             <polecat:indexField name="phpSessionId" />
+          </polecat:index>
+          <polecat:index type="KEY" name="userId">
+            <polecat:indexField name="userId" />
           </polecat:index>
         </polecat:indexes>
       </polecat:table>
@@ -364,9 +368,10 @@
         <polecat:fields>
           <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="authority" type="varchar" size="255" null="NOT" />
         </polecat:fields>
         <polecat:indexes>
-          <polecat:index type="KEY" name="id">
+          <polecat:index type="PRIMARY KEY">
             <polecat:indexField name="id" />
           </polecat:index>
         </polecat:indexes>

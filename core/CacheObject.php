@@ -44,15 +44,68 @@ interface AblePolecat_CacheObjectInterface {
 abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjectInterface {
   
   /**
+   * @var Array Garbage collection - store cache objects in order created.
+   */
+  private static $garbageCollection = NULL;
+  
+  /**
    * @var AblePolecat_AccessControl_SubjectInterface Typically, the subject passed to wakeup().
    */
   private $CommandInvoker;
   
   /**
+   * @var bool Internal flag helps avoid redundant calls to sleep().
+   */
+  private $asleep;
+  
+  /********************************************************************************
+   * Implementation of AblePolecat_CacheObjectInterface.
+   ********************************************************************************/
+   
+  /**
+   * Serialize object to cache.
+   *
+   * @param AblePolecat_AccessControl_SubjectInterface $Subject.
+   */
+  public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {   
+    if (FALSE === $this->asleep) {
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("%s->sleep().",
+        AblePolecat_Data::getDataTypeName($this)
+      ));
+      $this->asleep = TRUE;
+    }
+    else {
+      throw new AblePolecat_Exception(sprintf("%s->sleep() has already been called.",
+        AblePolecat_Data::getDataTypeName($this)
+      ));
+    }
+  }
+  
+  /********************************************************************************
+   * Helper functions.
+   ********************************************************************************/
+   
+  /**
    * Extends __construct().
    * Sub-classes initialize properties here.
    */
   abstract protected function initialize();
+  
+  /**
+   * Delete cache objects in order created.
+   */
+  public static function cleanup() {
+    if (isset(self::$garbageCollection)) {
+      $CacheObject = array_pop(self::$garbageCollection);
+      while (isset($CacheObject)) {
+        $CacheObject->sleep();
+        // $CacheObject = NULL;
+        $CacheObject = array_pop(self::$garbageCollection);
+      }
+      self::$garbageCollection = NULL;
+      // exit(0);
+    }
+  }
   
   /**
    * Default command invoker.
@@ -72,6 +125,10 @@ abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjec
     $this->CommandInvoker = $Invoker;
   }
 	
+  /********************************************************************************
+   * Constructor/destructor.
+   ********************************************************************************/
+   
   /**
    * Cached objects must be created by wakeup().
    * Initialization of sub-classes should take place in initialize().
@@ -82,16 +139,18 @@ abstract class AblePolecat_CacheObjectAbstract implements AblePolecat_CacheObjec
     if (isset($args[0]) && is_a($args[0], 'AblePolecat_AccessControl_SubjectInterface')) {
       $this->setDefaultCommandInvoker($args[0]);
     }
-    else {
-      // $this->CommandInvoker = AblePolecat_AccessControl_Agent_User::wakeup();
-    }
+    $this->asleep = FALSE;
     $this->initialize();
+    if (!isset(self::$garbageCollection)) {
+      self::$garbageCollection = array();
+    }
+    self::$garbageCollection[] = $this;
   }
   
   /**
    * Serialization prior to going out of scope in sleep().
    */
   final public function __destruct() {
-    $this->sleep();
+    // $this->sleep();
   }
 }

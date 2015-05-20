@@ -70,6 +70,11 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -218,6 +223,6 @@ class AblePolecat_Mode_Application extends AblePolecat_ModeAbstract {
     //
     $this->ApplicationEnvironment = AblePolecat_Environment_Application::wakeup($this->getAgent($this));
     
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) mode is initialized.');
+    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Application(s) mode initialized.');
   }
 }

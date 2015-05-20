@@ -68,6 +68,11 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -81,6 +86,7 @@ class AblePolecat_Registry_Connector extends AblePolecat_RegistryAbstract {
     
     if (!isset(self::$Registry)) {
       self::$Registry = new AblePolecat_Registry_Connector($Subject);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Connector registry initialized.');
     }
     return self::$Registry;
   }

@@ -15,7 +15,7 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'R
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Message', 'Request', 'Delete.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 'Host.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Application.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Resource', 'Core', 'Factory.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Service', 'Bus.php')));
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Version.php')));
@@ -84,11 +84,16 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // Flush output buffer.
-    //
-    ob_end_flush();
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering flushed.');
+    try {
+      parent::sleep();
+      //
+      // Flush output buffer.
+      //
+      ob_end_flush();
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering flushed.');
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -107,6 +112,11 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       self::$Host = new AblePolecat_Host();
       
       //
+      // Initiate session/user.
+      //
+      $UserMode = AblePolecat_Mode_User::wakeup();
+      
+      //
       // Preprocess HTTP request.
       //
       $Request = self::getRequest();
@@ -116,10 +126,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       //
       self::$Host->saveRawRequest();
       
-      //
-      // Initiate session/user.
-      //
-      $User = AblePolecat_Mode_User::wakeup();
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Able Polecat HOST initialized.');
     }
     return self::$Host;
   }
@@ -174,6 +181,8 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    */
   public static function shutdown($reason, $message, $status = 0) {
     if (isset(self::$Host)) {
+      $shutdownMessage = sprintf("SHUTDOWN - %s. %s. status %d ", $reason, $message, $status);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $shutdownMessage);
       if (!isset(self::$Host->Response)) {
         $Resource = AblePolecat_Resource_Core_Factory::wakeup(
           self::$Host->getDefaultCommandInvoker(),
@@ -371,11 +380,10 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       default:
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Session');
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_User');
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
         $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
-        // $ValidLink = is_a($Target, 'AblePolecat_Mode_Server');
         break;
     }
     return $ValidLink;
@@ -403,10 +411,5 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
     $CommandChain = AblePolecat_Command_Chain::wakeup();
     $ApplicationMode = AblePolecat_Mode_Application::wakeup();
     $CommandChain->setCommandLink($ApplicationMode, $this);
-    
-    //
-    // Finalize initial logging.
-    //
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Able Polecat HOST initialized.');
   }
 }

@@ -161,21 +161,26 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    if (isset($fout)) {
-      //
-      // Only save messages to file in the event of an error during bootstrap.
-      //
-      if (isset(self::$Log) && $this->error) {
+    try {
+      parent::sleep();
+        if (isset($fout)) {
         //
-        // Message indicating end of logging.
+        // Only save messages to file in the event of an error during bootstrap.
         //
-        $msg = sprintf("Close boot log file");
-        $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
-        $terminate = array('########', '########', '########', '########');
-        fputcsv($fout, $terminate);
-        fclose($fout);
-        $fout = NULL;
+        if (isset(self::$Log) && $this->error) {
+          //
+          // Message indicating end of logging.
+          //
+          $msg = sprintf("Close boot log file");
+          $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
+          $terminate = array('########', '########', '########', '########');
+          fputcsv($fout, $terminate);
+          fclose($fout);
+          $fout = NULL;
+        }
       }
+    }
+    catch (AblePolecat_Exception $Exception) {
     }
   }
   

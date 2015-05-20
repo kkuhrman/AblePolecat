@@ -10,7 +10,7 @@
  
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Agent', 'User.php'))); 
 require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Environment', 'User.php')));
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'Session.php')));
 
 class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
   
@@ -61,6 +61,13 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+      // $UserAgent = AblePolecat_AccessControl_Agent_User::wakeup();
+      // $UserAgent->sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -74,9 +81,32 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
     
     if (!isset(self::$UserMode)) {
       //
-      // Create instance of session mode
+      // Create instance of user mode
       //
       self::$UserMode = new AblePolecat_Mode_User();
+      
+      //
+      // Wakeup session mode and establish as forward command target.
+      //
+      $CommandChain = AblePolecat_Command_Chain::wakeup();
+      $SessionMode = AblePolecat_Mode_Session::wakeup();
+      $CommandChain->setCommandLink(self::$UserMode, $SessionMode);
+      
+      //
+      // Wakeup user agent.
+      //
+      $UserAgent = AblePolecat_AccessControl_Agent_User::wakeup();
+      
+      //
+      // Load environment/configuration
+      //
+      //
+      self::$UserMode->UserEnvironment = AblePolecat_Environment_User::wakeup($UserAgent);
+      
+      //
+      // Complete initialization and finish logging.
+      //
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'User mode is initialized.');
     }
       
     return self::$UserMode;
@@ -180,10 +210,10 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
       default:
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Application');
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_Session');
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_Session');
+        $ValidLink = is_a($Target, 'AblePolecat_Host');
         break;
     }
     return $ValidLink;
@@ -196,22 +226,15 @@ class AblePolecat_Mode_User extends AblePolecat_ModeAbstract {
     
     //
     // Access control agent (system agent).
+    // @todo: Mode base class sets system user as default.
     //
-    $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User::wakeup());
+    // $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User::wakeup());
     
     //
-    // Wakeup session mode and establish as reverse command target.
+    // Wakeup host mode and establish as reverse command target.
     //
     $CommandChain = AblePolecat_Command_Chain::wakeup();
-    $SessionMode = AblePolecat_Mode_Session::wakeup();
-    $CommandChain->setCommandLink($SessionMode, $this);
-    
-    //
-    // Load environment/configuration
-    //
-    //
-    $this->UserEnvironment = AblePolecat_Environment_User::wakeup(AblePolecat_AccessControl_Agent_User::wakeup());
-    
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'User mode is initialized.');
+    $HostMode = AblePolecat_Host::wakeup();
+    $CommandChain->setCommandLink($HostMode, $this);
   }
 }

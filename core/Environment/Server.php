@@ -2,7 +2,11 @@
 /**
  * @file      polecat/core/Environment/Server.php
  * @brief     Environment for Able Polecat Server Mode.
- *
+ * 
+ * Server environment encapsulates:
+ * 1. Class library registry.
+ * 2. Class registry.
+ * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.7.2
@@ -27,16 +31,6 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
    * @var AblePolecat_Environment_Server Singleton instance.
    */
   private static $Environment = NULL;
-  
-  /**
-   * @var AblePolecat_Registry_Class
-   */
-  // private $ClassRegistry;
-  
-  /**
-   * @var AblePolecat_Registry_ClassLibrary
-   */
-  // private $ClassLibraryRegistry;
   
   /********************************************************************************
    * Implementation of AblePolecat_AccessControl_Article_StaticInterface.
@@ -70,6 +64,11 @@ class AblePolecat_Environment_Server extends AblePolecat_EnvironmentAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**

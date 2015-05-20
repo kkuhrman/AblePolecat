@@ -78,9 +78,6 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Acces
    * @param AblePolecat_AccessControl_RoleInterface $Role Assigned role.
    */
   public function assignActiveRole(AblePolecat_AccessControl_RoleInterface $Role) {
-    //
-    // @todo: access control check is agent permitted to be assigned given role.
-    //
     if (!isset($this->ActiveRoles[$Role->getId()])) {
       $this->ActiveRoles[$Role->getId()] = $Role;
     }
@@ -127,7 +124,7 @@ abstract class AblePolecat_AccessControl_AgentAbstract extends AblePolecat_Acces
     $sql = __SQL()->
       select('sessionNumber', 'roleId', 'userId', 'roleData')->
       from('role')->
-      where(sprintf("sessionNumber = '%s'", AblePolecat_Host::getSessionNumber()));
+      where(sprintf("sessionNumber = '%s'", AblePolecat_Session::getSessionNumber()));
     $CommandResult = AblePolecat_Command_Database_Query::invoke($this, $sql);
     if ($CommandResult->success()) {
       $results = $CommandResult->value();

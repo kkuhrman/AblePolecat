@@ -3,6 +3,13 @@
  * @file      polecat/core/Environment/Application.php
  * @brief     Environment for Able Polecat Application Mode.
  *
+ * Application environment encapsulates:
+ * 1. Component registry.
+ * 2. Connector registry.
+ * 3. Resource registry.
+ * 4. Response registry.
+ * 5. Template registry.
+ * 
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.7.2
@@ -62,6 +69,11 @@ class AblePolecat_Environment_Application extends AblePolecat_EnvironmentAbstrac
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**

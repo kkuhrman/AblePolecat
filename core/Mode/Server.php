@@ -104,6 +104,11 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -142,7 +147,7 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
       // Finalize initial logging.
       //
       self::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Able Polecat core version is %s", AblePolecat_Version::getVersion(TRUE, 'text')));
-      self::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode is initialized.');
+      self::logBootMessage(AblePolecat_LogInterface::STATUS, 'Server mode initialized.');
     }
     return self::$ServerMode;
   }
@@ -607,9 +612,13 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
   /**
    * Extends constructor.
    */
-  protected function initialize() {
-    
+  protected function initialize() {   
     parent::initialize();
+    
+    //
+    // Register cleanup() as a shut down function.
+    //
+    register_shutdown_function(array(__CLASS__, 'cleanup'));
     
     //
     // Error and exception handling.

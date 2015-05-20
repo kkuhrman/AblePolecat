@@ -34,6 +34,11 @@ class AblePolecat_AccessControl_Role_Client_Database
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -45,7 +50,6 @@ class AblePolecat_AccessControl_Role_Client_Database
    */
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     $Role = new AblePolecat_AccessControl_Role_Client_Database();
-    $User = AblePolecat_AccessControl_Agent_User::wakeup();
     $Role->isAuthorized($Subject);
     return $Role;
   }

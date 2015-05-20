@@ -205,11 +205,17 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // If transaction is complete but not committed, commit now.
-    //
-    if ($this->getStatus() == self::TX_STATE_COMPLETED) {
-      $this->commit();
+    try {
+      parent::sleep();
+      
+      //
+      // If transaction is complete but not committed, commit now.
+      //
+      if ($this->getStatus() == self::TX_STATE_COMPLETED) {
+        $this->commit();
+      }
+    }
+    catch (AblePolecat_Exception $Exception) {
     }
   }
   
@@ -608,7 +614,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
         //
         // Create record of transaction.
         //
-        $sessionNumber = AblePolecat_Mode_Session::getSessionNumber();
+        $sessionNumber = AblePolecat_Session::getSessionNumber();
         $sql = __SQL()->          
           insert(
             'transactionId',
@@ -767,7 +773,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
               'transactionId', 'savepointId', 'parentTransactionId')->
             from('transaction')->
             where(sprintf("`sessionNumber` = %s AND `resourceId` = '%s' AND `status` != '%s'", 
-              AblePolecat_Mode_Session::getSessionNumber(),
+              AblePolecat_Session::getSessionNumber(),
               $ResourceRegistration->getId(), 
               AblePolecat_TransactionInterface::TX_STATE_COMMITTED)
             );

@@ -135,6 +135,19 @@ class AblePolecat_Command_Chain
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    //
+    // Explicitly call sleep() on CoR in reverse order.
+    //
+    // try {
+      // parent::sleep();
+      // $Target = $this->targetList->pop();
+      // while ($Target) {
+        // $Target->sleep();
+        // $Target = $this->targetList->pop();
+      // }
+    // }
+    // catch(Exception $Exception) {
+    // }
   }
   
   /**

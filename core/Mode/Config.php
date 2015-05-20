@@ -3,6 +3,11 @@
  * @file      polecat/core/Mode/Config.php
  * @brief     Configuration mode checks critical settings, attempts to fix problems.
  *
+ * Config mode has the following duties:
+ * 1. Verify local environment path settings.
+ * 2. Establish system user connection to project database.
+ * 3. Load class library and class registries.
+ *
  * @author    Karl Kuhrman
  * @copyright [BDS II License] (https://github.com/kkuhrman/AblePolecat/blob/master/LICENSE.md)
  * @version   0.7.2
@@ -117,6 +122,11 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -172,6 +182,9 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
           // Project database is initialized and ready.
           //
           self::reportBootState(self::BOOT_STATE_CONFIG, 'Host configuration initialized.');
+          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Connected to project database [%s].",
+            self::$ConfigMode->CoreDatabase->getName()
+          ));
         }
         else {
           //
@@ -203,6 +216,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
             AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project database is not ready.');
           }
         }
+        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Config mode initialized.');
       }
       else {
         AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project configuration file is not accessible.');
@@ -363,6 +377,8 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         
         //
         // Attempt a connection.
+        // Polecat will use locater and token associated with db client role 
+        // (assigned above) to establish connection.
         //
         $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
       }

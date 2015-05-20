@@ -105,43 +105,41 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
               //
               break;
             case AblePolecat_Resource_Restricted_Install::UUID:
-              if (FALSE === AblePolecat_Mode_Config::coreDatabaseIsReady()) {
+              //
+              // First, establish connection to db and update local project 
+              // configuration file.
+              //
+              if ($this->authenticate()) {
                 //
-                // Get rid of db errors.
+                // Connection established, update local project conf file.
                 //
-                // $dbErrors = $UserDatabaseConnection->flushErrors();
-                
-                //
-                // First, establish connection to db and update local project 
-                // configuration file.
-                //
-                if ($this->authenticate()) {
-                  //
-                  // Connection established, update local project conf file.
-                  //
-                  // $UserDatabaseConnection = $this->getUserDatabaseConnection();
-                  $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
-                  $coreDatabaseElementId = AblePolecat_Mode_Config::getCoreDatabaseId();
-                  $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
-                  if (isset($Node)) {
-                    foreach($Node->childNodes as $key => $childNode) {
-                      if($childNode->nodeName == 'polecat:dsn') {
-                        $childNode->nodeValue = $this->getSecurityToken();
-                        break;
-                      }
+                // $UserDatabaseConnection = $this->getUserDatabaseConnection();
+                $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
+                $coreDatabaseElementId = AblePolecat_Mode_Config::getCoreDatabaseId();
+                $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
+                if (isset($Node)) {
+                  foreach($Node->childNodes as $key => $childNode) {
+                    if($childNode->nodeName == 'polecat:dsn') {
+                      $childNode->nodeValue = $this->getSecurityToken();
+                      break;
                     }
                   }
-                  $localProjectConfFilepath = AblePolecat_Mode_Config::getLocalProjectConfFilePath();
-                  $localProjectConfFile->save($localProjectConfFilepath);
                 }
+                $localProjectConfFilepath = AblePolecat_Mode_Config::getLocalProjectConfFilePath();
+                $localProjectConfFile->save($localProjectConfFilepath);
               }
               $UserDatabaseConnection = $this->getUserDatabaseConnection();
+              
+              //
+              // Get rid of db errors.
+              //
+              $dbErrors = $UserDatabaseConnection->flushErrors();
               
               //
               // Order is important. FK UUIDs are generated first by classes, 
               // which reference them second.
               //
-              if ($UserDatabaseConnection->ready()) {
+              if (isset($UserDatabaseConnection) && $UserDatabaseConnection->ready()) {
                 //
                 // Step 1. Install current database schema.
                 //
@@ -151,14 +149,6 @@ class AblePolecat_Transaction_Restricted_Update extends AblePolecat_Transaction_
                   $error = AblePolecat_Database_Pdo::getErrorMessage($error);
                   AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
                 }
-                
-                //
-                // @todo: this hack works around an error, which causes install
-                // procedure to fail because 'SELECT UUID()' returns NULL on 
-                // first call for some reason.
-                // 
-                // $uuid = AblePolecat_Registry_Entry_Resource::generateUUID();
-                // AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, $uuid);
                 
                 //
                 // Step 2. Register class libraries ([lib]).

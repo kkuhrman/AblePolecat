@@ -504,6 +504,10 @@ abstract class AblePolecat_Message_ResponseAbstract extends AblePolecat_MessageA
     return self::$Response;
   }
   
+  /********************************************************************************
+   * Constructor/destructor.
+   ********************************************************************************/
+  
   /**
    * send HTTP headers.
    */

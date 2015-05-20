@@ -84,6 +84,11 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
+    try {
+      parent::sleep();
+    }
+    catch (AblePolecat_Exception $Exception) {
+    }
   }
   
   /**
@@ -96,6 +101,7 @@ class AblePolecat_Registry_Resource extends AblePolecat_RegistryAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Registry)) {
       self::$Registry = new AblePolecat_Registry_Resource($Subject);
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Resource registry initialized.');
     }
     return self::$Registry;
   }

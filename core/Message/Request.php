@@ -702,4 +702,10 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     $this->requestResourceIsCore = TRUE;
   }
+  
+  /**
+   * send HTTP headers.
+   */
+  final public function __destruct() {
+  }
 }

@@ -8,7 +8,8 @@
  * @version   0.7.2
  */
 
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode', 'User.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Session.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Mode.php')));
 
 class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
   
@@ -27,21 +28,6 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
    * @var Instance of AblePolecat_SessionInterface.
    */
   private $Session;
-  
-  /**
-   * @var Array Initial PHP session state.
-   */
-  private $sessionGlobal;
-  
-  /**
-   * @var string PHP session ID.
-   */
-  private $sessionId;
-  
-  /**
-   * @var int Internal (Able Polecat) session ID.
-   */
-  private $sessionNumber;
   
   /**
    * @var AblePolecat_EnvironmentInterface.
@@ -79,22 +65,11 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    //
-    // Remove any unauthorized session settings.
-    //
-    foreach($_SESSION as $varName => $varValue) {
-      unset($_SESSION[$varName]);
+    try {
+      parent::sleep();
     }
-    foreach($this->sessionGlobal as $varName => $varValue) {
-      $_SESSION[$varName] = $varValue;
+    catch (AblePolecat_Exception $Exception) {
     }
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session state: ' . serialize($_SESSION));
-    
-    //
-    // Close and save PHP session.
-    //
-    session_write_close();
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session closed.');
   }
   
   /**
@@ -324,94 +299,6 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
   }
   
   /**
-   * @return AblePolecat_Message_RequestInterface
-   */
-  public static function getSessionId() {
-    
-    $sessionId = NULL;
-    
-    if (isset(self::$SessionMode)) {
-      $sessionId = self::$SessionMode->sessionId;
-    }
-    return $sessionId;
-  }
-  
-  /**
-   * @return int Internal (Able Polecat) session ID.
-   */
-  public static function getSessionNumber() {
-    
-    $sessionNumber = 0;
-    
-    if (isset(self::$SessionMode)) {
-      $sessionNumber = self::$SessionMode->sessionNumber;
-    }
-    return $sessionNumber;
-  }
-  
-  /**
-   * Retrieve variable from $_SESSION global variable.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject Class attempting to retrieve variable.
-   * @param string $variableName Name of session variable.
-   *
-   * @return mixed $variableValue Value of session variable or NULL.
-   */
-  public static function getSessionVariable(AblePolecat_AccessControl_SubjectInterface $Subject, $variableName) {
-    
-    $value = NULL;
-    
-    if (isset(self::$SessionMode) &&
-        isset(self::$SessionMode->sessionGlobal) && 
-        is_array(self::$SessionMode->sessionGlobal) && 
-        isset(self::$SessionMode->sessionGlobal[$variableName])) {
-      $className = get_class($Subject);
-      switch ($className) {
-        default:
-          break;
-        case 'AblePolecat_Transaction_Restricted_Install':
-          $value = self::$SessionMode->sessionGlobal[$className][$variableName];
-          break;
-      }
-    }
-    return $value;
-  }
-  
-  /**
-   * Save variable to $_SESSION global variable.
-   *
-   * @param AblePolecat_AccessControl_SubjectInterface $Subject Class attempting to set variable.
-   * @param string $variableName Name of session variable.
-   * @param mixed $variableValue Value of session variable.
-   */
-  public static function setSessionVariable(AblePolecat_AccessControl_SubjectInterface $Subject, $variableName, $variableValue) {
-    if (isset(self::$SessionMode) &&
-        isset(self::$SessionMode->sessionGlobal) && 
-        is_array(self::$SessionMode->sessionGlobal) && 
-        is_scalar($variableName)) {
-      $className = get_class($Subject);
-      switch ($className) {
-        default:
-          break;
-        case 'AblePolecat_Transaction_Restricted_Install':
-          !isset(self::$SessionMode->sessionGlobal[$className]) ? self::$SessionMode->sessionGlobal[$className] = array() : NULL;
-          switch ($variableName) {
-            default:
-              break;
-            case AblePolecat_Host::POLECAT_INSTALL_TRX:
-            case AblePolecat_Host::POLECAT_INSTALL_SAVEPT:
-            case AblePolecat_Host::POLECAT_INSTALL_DBNAME:
-            case AblePolecat_Host::POLECAT_INSTALL_DBUSER:
-            case AblePolecat_Host::POLECAT_INSTALL_DBPASS:
-              self::$SessionMode->sessionGlobal[$className][$variableName] = $variableValue;
-              break;
-          }
-          break;
-      }
-    }
-  }
-  
-  /**
    * Validates given command target as a forward or reverse COR link.
    *
    * @param AblePolecat_Command_TargetInterface $Target.
@@ -427,10 +314,14 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
       default:
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_FWD:
-        $ValidLink = is_a($Target, 'AblePolecat_Mode_User');
+        $ValidLink = (!is_a($Target, 'AblePolecat_Mode_User') &&
+          !is_a($Target, 'AblePolecat_Mode_Host') &&
+          !is_a($Target, 'AblePolecat_Mode_Application') &&
+          !is_a($Target, 'AblePolecat_Mode_Server')
+        );
         break;
       case AblePolecat_Command_TargetInterface::CMD_LINK_REV:
-        $ValidLink = is_a($Target, 'AblePolecat_Host');
+        $ValidLink = is_a($Target, 'AblePolecat_Mode_User');
         break;
     }
     return $ValidLink;
@@ -445,71 +336,23 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
     parent::initialize();
     
     //
-    // Wakeup host and establish as reverse command target.
-    //
-    $CommandChain = AblePolecat_Command_Chain::wakeup();
-    $Host = AblePolecat_Host::wakeup();
-    $CommandChain->setCommandLink($Host, $this);
-    
-    //
     // Start or resume session.
     // Able Polecat does not use PHP session. But it does check the session global variable
     // to ensure that it is not tampered with by extension classes.
     //
     $this->initializeSessionSecurity();
     AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session security initialized.');
-    session_start();
     
     //
-    // Cache session global variable to ensure that it is not used/tampered with by
-    // application/user mode.
+    // Start or resume session.
     //
-    $this->sessionGlobal = $_SESSION;
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session state: ' . serialize($_SESSION));
+    $this->Session = AblePolecat_Session::wakeup();
     
     //
-    // PHP session id
+    // Initialize user agent.
     //
-    $this->sessionId = session_id();
-    
-    //
-    // Use internal session number for RDBMS.
-    //
-    if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
-      $sql = __SQL()->
-        select(
-          'sessionNumber')->
-        from('session')->
-        where(sprintf("`phpSessionId` = '%s'", $this->sessionId));
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
-      if ($CommandResult->success() && count($CommandResult->value())) {
-        $Records = $CommandResult->value();
-        isset($Records[0]['sessionNumber']) ? $this->sessionNumber = $Records[0]['sessionNumber'] : NULL;
-      }
-      else {
-        isset($_SERVER['REMOTE_ADDR']) ? $remoteAddress = $_SERVER['REMOTE_ADDR'] : $remoteAddress = 'UNKNOWN';
-        $sql = __SQL()->
-          insert(
-            'phpSessionId', 
-            'hostName',
-            'remoteAddress')->
-          into('session')->
-          values(
-            $this->sessionId, 
-            AblePolecat_Host::getRequest()->getHostName(),
-            $remoteAddress
-          );
-        $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User::wakeup(), $sql);
-        if ($CommandResult->success() && count($CommandResult->value())) {
-          $Records = $CommandResult->value();
-          isset($Records['lastInsertId']) ? $this->sessionNumber = $Records['lastInsertId'] : NULL;
-        }
-      }
-    }
-    else {
-      $this->sessionNumber = 0;
-    }
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Session number is %d.", self::getSessionNumber()));
+    $UserAgent = AblePolecat_AccessControl_Agent_User::wakeup($this->Session);
+    // AblePolecat_Debug::kill($UserAgent);
     
     AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session mode is initialized.');
   }
