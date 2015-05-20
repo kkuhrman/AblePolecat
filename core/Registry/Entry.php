@@ -60,11 +60,9 @@ interface AblePolecat_Registry_EntryInterface
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
-   * @return AblePolecat_Registry_EntryInterface or NULL.
+   * @return AblePolecat_Command_Result or NULL.
    */
-  public function save(AblePolecat_DatabaseInterface $Database = NULL);
+  public function save();
   
   /**
    * Validates given value against primary key schema.
@@ -283,24 +281,16 @@ abstract class AblePolecat_Registry_EntryAbstract extends AblePolecat_DynamicObj
    * Execute DML to save registry entry to database.
    *
    * @param AblePolecat_QueryLanguage_Statement_Sql_Interface $sql.
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    *
-   * @return int Number of records effected.
+   * @return AblePolecat_Command_Result or NULL.
    */
-  protected function executeDml(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql,
-    AblePolecat_DatabaseInterface $Database = NULL) {
+  protected function executeDml(AblePolecat_QueryLanguage_Statement_Sql_Interface $sql) {
+    
     $Result = NULL;
-    if (isset($Database)) {
-      $Result = $Database->execute($sql);
-    }
-    else {
-      $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
-      if ($CommandResult->success()) {
-        $Result = $CommandResult->value();
-      }
-    }
-    if (isset($Result) && isset($Result['recordsEffected'])) {
-      $Result = $Result['recordsEffected'];
+    
+    $CommandResult = AblePolecat_Command_Database_Query::invoke(AblePolecat_AccessControl_Agent_User_System::wakeup(), $sql);
+    if ($CommandResult->success()) {
+      $Result = $CommandResult->value();
     }
     return $Result;
   }

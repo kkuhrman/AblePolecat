@@ -85,11 +85,9 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
   /**
    * Install class registry on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_DatabaseInterface $Database) {    
+  public static function install() {    
     //
     // Load local project configuration file.
     //
@@ -109,7 +107,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     }
     
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'component');
-    self::insertList($Database, $Nodes);
+    self::insertList($Nodes);
     
     //
     // Import components in class libraries.
@@ -121,7 +119,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
         $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
         if (isset($modConfFile)) {
           $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
-          self::insertList($Database, $modNodes);
+          self::insertList($modNodes);
         }
       }
     }
@@ -130,11 +128,9 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
   /**
    * Update current schema on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if update fails.
    */
-  public static function update(AblePolecat_DatabaseInterface $Database) {
+  public static function update() {
     //
     // Initialize update procedure.
     //
@@ -161,7 +157,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
     
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'component');
     foreach($Nodes as $key => $Node) {
-      self::insertNode($Database, $Node);
+      self::insertNode($Node);
     }
     
     //
@@ -175,7 +171,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
         if (isset($modConfFile)) {
           $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'component');
           foreach($modNodes as $key => $Node) {
-            self::insertNode($Database, $Node);
+            self::insertNode($Node);
           }
         }
       }
@@ -331,24 +327,22 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
   /**
    * Insert DOMNodeList into registry.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
    *
    */
-  protected static function insertList(AblePolecat_DatabaseInterface $Database, DOMNodeList $Nodes) {    
+  protected static function insertList(DOMNodeList $Nodes) {    
     foreach($Nodes as $key => $Node) {
-      self::insertNode($Database, $Node);
+      self::insertNode($Node);
     }
   }
   
   /**
    * Insert DOMNode into registry.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param DOMNode $Node DOMNode containing registry entry.
    *
    */
-  protected static function insertNode(AblePolecat_DatabaseInterface $Database, DOMNode $Node) {
+  protected static function insertNode(DOMNode $Node) {
     
     if (!isset(self::$Registry)) {
       $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
@@ -360,7 +354,7 @@ class AblePolecat_Registry_Component extends AblePolecat_RegistryAbstract {
       $ComponentRegistration = AblePolecat_Registry_Entry_DomNode_Component::import($Node);
       if (isset($ComponentRegistration)) {
         self::$Registry->addRegistration($ComponentRegistration);
-        if ($ComponentRegistration->save($Database)) {
+        if ($ComponentRegistration->save()) {
           self::$Registry->markUpdated($ComponentRegistration->id, TRUE);
         }
       }

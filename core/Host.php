@@ -86,11 +86,6 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     try {
       parent::sleep();
-      //
-      // Flush output buffer.
-      //
-      ob_end_flush();
-      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering flushed.');
     }
     catch (AblePolecat_Exception $Exception) {
     }
@@ -107,9 +102,20 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
   public static function wakeup(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
     if (!isset(self::$Host)) {
       //
+      // Application mode wakes up server mode before it can do anything.
+      //
+      $CommandChain = AblePolecat_Command_Chain::wakeup();
+      $ApplicationMode = AblePolecat_Mode_Application::wakeup();
+    
+      //
       // Create instance of Singleton.
       //
       self::$Host = new AblePolecat_Host();
+      
+      //
+      // Set application mode as reverse command target.
+      //
+      $CommandChain->setCommandLink($ApplicationMode, self::$Host);
       
       //
       // Initiate session/user.
@@ -318,7 +324,7 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
       // Check connection to core database.
       //
       $requestId = NULL;
-      if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
+      if (AblePolecat_Mode_Server::coreDatabaseIsReady()) {
         //
         // Log raw request.
         //
@@ -394,22 +400,8 @@ class AblePolecat_Host extends AblePolecat_Command_TargetAbstract {
    */
   protected function initialize() {
     //
-    // Turn on output buffering.
-    //
-    ob_start();
-    AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Output buffering started.');
-    
-    //
     // Access control agent (super user).
     //
     $this->setDefaultCommandInvoker(AblePolecat_AccessControl_Agent_User_System::wakeup());
-    
-    //
-    // Initiate application mode and establish as reverse command target.
-    // Application mode wakes up server mode before it can do anything.
-    //
-    $CommandChain = AblePolecat_Command_Chain::wakeup();
-    $ApplicationMode = AblePolecat_Mode_Application::wakeup();
-    $CommandChain->setCommandLink($ApplicationMode, $this);
   }
 }

@@ -8,9 +8,9 @@
  * @version   0.7.2
  */
  
-require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Database', 'Installer.php')));
+require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'AccessControl', 'Article', 'Static.php')));
 
-interface AblePolecat_Database_SchemaInterface extends AblePolecat_Database_InstallerInterface {
+interface AblePolecat_Database_SchemaInterface extends AblePolecat_AccessControl_Article_StaticInterface {
   
   /**
    * Get DDL statements for table objects.
@@ -18,6 +18,20 @@ interface AblePolecat_Database_SchemaInterface extends AblePolecat_Database_Inst
    * @return Array.
    */
   public function getTableDefinitions();
+  
+  /**
+   * Install current schema on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   */
+  public static function install(AblePolecat_DatabaseInterface $Database);
+  
+  /**
+   * Update current schema on existing Able Polecat database.
+   *
+   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
+   */
+  public static function update(AblePolecat_DatabaseInterface $Database);
 }
 
 class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterface {
@@ -80,8 +94,17 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
   }
   
   /********************************************************************************
-   * Implementation of AblePolecat_Database_InstallerInterface.
+   * Implementation of AblePolecat_Database_SchemaInterface.
    ********************************************************************************/
+  
+  /**
+   * Get DDL statements for table objects.
+   *
+   * @return Array.
+   */
+  public function getTableDefinitions() {
+    return $this->tableDdl;
+  }
    
   /**
    * Install current schema on existing Able Polecat database.
@@ -126,19 +149,6 @@ class AblePolecat_Database_Schema implements AblePolecat_Database_SchemaInterfac
    */
   public static function update(AblePolecat_DatabaseInterface $Database) {
     
-  }
-  
-  /********************************************************************************
-   * Implementation of AblePolecat_Database_SchemaInterface.
-   ********************************************************************************/
-  
-  /**
-   * Get DDL statements for table objects.
-   *
-   * @return Array.
-   */
-  public function getTableDefinitions() {
-    return $this->tableDdl;
   }
   
   /********************************************************************************

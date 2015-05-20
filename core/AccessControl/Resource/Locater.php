@@ -307,7 +307,7 @@ class AblePolecat_AccessControl_Resource_Locater implements AblePolecat_AccessCo
    * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
    */
   public static function create($url, $baseURL = NULL) {
-    isset($baseURL) ? $url = $baseURL . self::URI_SLASH . $url : NULL;
+    isset($baseURL) ? $url = $baseURL . AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH . $url : NULL;
     $Locater = new AblePolecat_AccessControl_Resource_Locater($url);
     return $Locater;
   }

@@ -44,11 +44,6 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
    */
   private $dsn;
   
-  /**
-   * @var AblePolecat_Database_Pdo.
-   */
-  private $UserDatabaseConnection;
-  
   /********************************************************************************
    * Implementation of AblePolecat_TransactionInterface.
    ********************************************************************************/
@@ -91,7 +86,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
         //
         // Check if Able Polecat database exists.
         //
-        if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
+        if (AblePolecat_Mode_Server::coreDatabaseIsReady()) {
           //
           // Database is active. Allow parent to handle from here.
           //
@@ -238,8 +233,7 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
         //
         // Attempt a connection.
         //
-        $this->UserDatabaseConnection = AblePolecat_Database_Pdo::wakeup($User);
-        $authenticated = $this->UserDatabaseConnection->ready();
+        $authenticated = AblePolecat_Mode_Server::connectUserToCoreDatabase();
         break;
     }
     return $authenticated;
@@ -257,18 +251,10 @@ abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_Tr
    ********************************************************************************/
   
   /**
-   * @var AblePolecat_Database_Pdo.
-   */
-  public function getUserDatabaseConnection() {
-    return $this->UserDatabaseConnection;
-  }
-  
-  /**
    * Extends __construct().
    */
   protected function initialize() {
     parent::initialize();
     $this->dsn = NULL;
-    $this->UserDatabaseConnection = NULL;
   }
 }

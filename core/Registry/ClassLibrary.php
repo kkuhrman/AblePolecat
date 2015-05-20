@@ -112,11 +112,9 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   /**
    * Install class registry on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_DatabaseInterface $Database) {
+  public static function install() {
     //
     // Core class library conf file.
     //
@@ -148,7 +146,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
       $RegistryEntry->useLib = '1';
       self::$Registry->addRegistration($RegistryEntry);
-      $RegistryEntry->save($Database);
+      $RegistryEntry->save();
     }
     else {
       $message = 'core class library configuration file must contain a package node.';
@@ -185,7 +183,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
       $RegistryEntry->useLib = '1';
       self::$Registry->addRegistration($RegistryEntry);
-      $RegistryEntry->save($Database);
+      $RegistryEntry->save();
     }
     else {
       //
@@ -200,7 +198,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
         self::$Registry->addRegistration($RegistryEntry);
-        $RegistryEntry->save($Database);
+        $RegistryEntry->save();
         
         //
         // If the class library is a module, load the corresponding project 
@@ -218,7 +216,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
             }
             if (isset($modRegistryEntry)) {
               self::$Registry->addRegistration($modRegistryEntry);
-              $modRegistryEntry->save($Database);
+              $modRegistryEntry->save();
             }
           }
         }
@@ -229,11 +227,9 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
   /**
    * Update current schema on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if update fails.
    */
-  public static function update(AblePolecat_DatabaseInterface $Database) {
+  public static function update() {
     //
     // Initialize update procedure.
     //
@@ -269,7 +265,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       }
       $RegistryEntry->libFullPath = ABLE_POLECAT_CORE;
       $RegistryEntry->useLib = '1';
-      if ($RegistryEntry->save($Database)) {
+      if ($RegistryEntry->save()) {
         $Registry->markUpdated($RegistryEntry->id, TRUE);
       }
     }
@@ -307,7 +303,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
       }
       $RegistryEntry->libFullPath = AblePolecat_Server_Paths::getFullPath('src');
       $RegistryEntry->useLib = '1';
-      if ($RegistryEntry->save($Database)) {
+      if ($RegistryEntry->save()) {
         $Registry->markUpdated($RegistryEntry->id, TRUE);
       }
     }
@@ -323,7 +319,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
     foreach($Nodes as $key => $Node) {
       $RegistryEntry = AblePolecat_Registry_Entry_ClassLibrary::import($Node);
       if (isset($RegistryEntry)) {
-        if ($RegistryEntry->save($Database)) {
+        if ($RegistryEntry->save()) {
           $Registry->markUpdated($RegistryEntry->id, TRUE);
         }
         
@@ -342,7 +338,7 @@ class AblePolecat_Registry_ClassLibrary extends AblePolecat_RegistryAbstract {
               ));
             }
             if (isset($modRegistryEntry)) {
-              if ($modRegistryEntry->save($Database)) {
+              if ($modRegistryEntry->save()) {
                 $Registry->markUpdated($modRegistryEntry->id, TRUE);
               }
             }

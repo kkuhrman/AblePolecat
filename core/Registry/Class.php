@@ -133,11 +133,9 @@ class AblePolecat_Registry_Class
   /**
    * Install class registry on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_DatabaseInterface $Database) {
+  public static function install() {
     //
     // Load class library registry.
     //
@@ -165,7 +163,7 @@ class AblePolecat_Registry_Class
     $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($coreClassLibraryId);
     if (isset($ClassLibraryRegistration)) {
       $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'class');
-      self::insertList($Database, $ClassLibraryRegistration, $Nodes);
+      self::insertList($ClassLibraryRegistration, $Nodes);
     }
     
     //
@@ -190,7 +188,7 @@ class AblePolecat_Registry_Class
     $ClassLibraryRegistration = $ClassLibraryRegistry->getRegistrationById($applicationClassLibraryId);
     if (isset($ClassLibraryRegistration)) {
       $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'class');
-      self::insertList($Database, $ClassLibraryRegistration, $Nodes);
+      self::insertList($ClassLibraryRegistration, $Nodes);
     }
     
     //
@@ -203,7 +201,7 @@ class AblePolecat_Registry_Class
         $modConfFile = AblePolecat_Mode_Config::getModuleConfFile($ClassLibraryRegistration);
         if (isset($modConfFile)) {
           $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'class');
-          self::insertList($Database, $ClassLibraryRegistration, $modNodes);
+          self::insertList($ClassLibraryRegistration, $modNodes);
         }
       }
     }
@@ -212,11 +210,9 @@ class AblePolecat_Registry_Class
   /**
    * Update current schema on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if update fails.
    */
-  public static function update(AblePolecat_DatabaseInterface $Database) {
+  public static function update() {
     //
     // Load class library registry.
     //
@@ -251,7 +247,7 @@ class AblePolecat_Registry_Class
     if (isset($ClassLibraryRegistration)) {
       $Nodes = AblePolecat_Dom::getElementsByTagName($coreFile, 'class');
       foreach($Nodes as $key => $Node) {
-        self::insertNode($Database, $ClassLibraryRegistration, $Node);
+        self::insertNode($ClassLibraryRegistration, $Node);
       }
     }
     
@@ -278,7 +274,7 @@ class AblePolecat_Registry_Class
     if (isset($ClassLibraryRegistration)) {
       $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'class');
       foreach($Nodes as $key => $Node) {
-        self::insertNode($Database, $ClassLibraryRegistration, $Node);
+        self::insertNode($ClassLibraryRegistration, $Node);
       }
     }
     
@@ -293,7 +289,7 @@ class AblePolecat_Registry_Class
         if (isset($modConfFile)) {
           $modNodes = AblePolecat_Dom::getElementsByTagName($modConfFile, 'class');
           foreach($modNodes as $key => $Node) {
-            self::insertNode($Database, $ClassLibraryRegistration, $Node);
+            self::insertNode($ClassLibraryRegistration, $Node);
           }
         }
       }
@@ -718,30 +714,26 @@ class AblePolecat_Registry_Class
   /**
    * Insert DOMNodeList into registry.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration 
    * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
    *
    */
   protected static function insertList(
-    AblePolecat_DatabaseInterface $Database, 
     AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration,
     DOMNodeList $Nodes) {
     foreach($Nodes as $key => $Node) {
-      self::insertNode($Database, $ClassLibraryRegistration, $Node);
+      self::insertNode($ClassLibraryRegistration, $Node);
     }
   }
   
   /**
    * Insert DOMNode into registry.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration 
    * @param DOMNode $Node DOMNode containing registry entry.
    *
    */
   protected static function insertNode(
-    AblePolecat_DatabaseInterface $Database, 
     AblePolecat_Registry_Entry_ClassLibrary $ClassLibraryRegistration,
     DOMNode $Node) {
 
@@ -768,7 +760,7 @@ class AblePolecat_Registry_Class
         }
       }
       self::$Registry->addRegistration($RegistryEntry);
-      if($RegistryEntry->save($Database)) {
+      if($RegistryEntry->save()) {
         self::$Registry->markUpdated($RegistryEntry->id, TRUE);
       }
     }

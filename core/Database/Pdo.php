@@ -53,7 +53,12 @@ interface AblePolecat_Database_PdoInterface extends AblePolecat_DatabaseInterfac
 }
 
 class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements AblePolecat_Database_PdoInterface {
-    
+  
+  /**
+   * @var PDO The encapsulated database connection.
+   */
+  private $DatabaseConnection;
+  
   /**
    * @var error information.
    */
@@ -195,7 +200,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
           // $options = array(PDO::ATTR_PERSISTENT => true);
         // }
         $options = array(PDO::ATTR_PERSISTENT => true);
-        $DatabaseConnection = new PDO($dsn, $dbUser, $dbPass, $options);
+        $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass, $options);
         
         //
         // Save locater. This will also set name.
@@ -206,11 +211,6 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         // Set unique id for pooled database connection.
         //
         $this->id = sprintf("%s.%s", $this->getName(), $dbUser);
-        
-        //
-        // Pool connection.
-        //
-        $this->setDatabaseConnection($DatabaseConnection);
         
         //
         // Set open flag.
@@ -289,8 +289,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $Results = array();
     
-    $DatabaseConnection = $this->getDatabaseConnection();
-    if (isset($DatabaseConnection)) {
+    if (isset($this->DatabaseConnection)) {
       switch ($sql->getDmlOp()) {
         default:
           $message = 'query() method cannot be used to process ' . $sql->getDmlOp() . ' statements.';
@@ -298,7 +297,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
           throw new AblePolecat_Database_Exception($message);
           break;
         case AblePolecat_QueryLanguage_Statement_Sql_Interface::SELECT:
-          $PreparedStatement = $DatabaseConnection->prepare($sql);
+          $PreparedStatement = $this->DatabaseConnection->prepare($sql);
           if($PreparedStatement->execute()) {
             $Results = $PreparedStatement->fetchAll(PDO::FETCH_ASSOC);
           }
@@ -323,8 +322,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * @return boolean TRUE if database connection is functional, otherwise FALSE.
    */
   public function ready() {
-    $DatabaseConnection = $this->getDatabaseConnection();
-    return isset($DatabaseConnection);
+    return isset($this->DatabaseConnection);
   }
   
   /********************************************************************************
@@ -340,9 +338,8 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $code = NULL;
     
-    $DatabaseConnection = $this->getDatabaseConnection();
-    if (isset($DatabaseConnection)) {
-      $code = $DatabaseConnection->errorCode();
+    if (isset($this->DatabaseConnection)) {
+      $code = $this->DatabaseConnection->errorCode();
     }
     return $code;
   }
@@ -356,9 +353,8 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $info = NULL;
     
-    $DatabaseConnection = $this->getDatabaseConnection();
-    if (isset($DatabaseConnection)) {
-      $info = $DatabaseConnection->errorInfo();
+    if (isset($this->DatabaseConnection)) {
+      $info = $this->DatabaseConnection->errorInfo();
     }
     return $info;
   }
@@ -370,9 +366,8 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $id = NULL;
     try {
-      $DatabaseConnection = $this->getDatabaseConnection();
-      if (isset($DatabaseConnection)) {
-        $id = $DatabaseConnection->lastInsertId();
+      if (isset($this->DatabaseConnection)) {
+        $id = $this->DatabaseConnection->lastInsertId();
       }
     }
     catch (PDOException $Exception) {
@@ -392,11 +387,11 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
   public function prepareStatement($statement, $driver_options = array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY)) {
     
     $PreparedStatement = NULL;
-    $DatabaseConnection = $this->getDatabaseConnection();
-    if (isset($DatabaseConnection)) {
+    
+    if (isset($this->DatabaseConnection)) {
       is_string($statement) ? $sql = $statement : $sql = NULL;
       is_a($statement, 'AblePolecat_QueryLanguage_StatementInterface') ? $sql = $statement->__toString() : NULL;
-      $PreparedStatement = $DatabaseConnection->prepare($sql, $driver_options);
+      $PreparedStatement = $this->DatabaseConnection->prepare($sql, $driver_options);
     }
     else {
       throw new AblePolecat_Database_Exception('No database connection.', AblePolecat_Error::DB_NO_CONNECTION);
@@ -412,8 +407,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * @return mixed Quoted string that is theoretically safe to pass into an SQL statement or FALSE.
    */
   public function quote($input) {
-    $DatabaseConnection = $this->getDatabaseConnection();
-    isset($DatabaseConnection) ? $output = $DatabaseConnection->quote($input) : $output = FALSE;
+    isset($this->DatabaseConnection) ? $output = $this->DatabaseConnection->quote($input) : $output = FALSE;
     return $output;
   }
   
@@ -577,9 +571,8 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    * Writes error information about last operation performed by this database handle to log.
    */
   public function logErrorInfo() {
-    $DatabaseConnection = $this->getDatabaseConnection();
-    if (isset($DatabaseConnection)) {
-      $info = $DatabaseConnection->errorInfo();
+    if (isset($this->DatabaseConnection)) {
+      $info = $this->DatabaseConnection->errorInfo();
       foreach($info as $key => $value) {
         throw new AblePolecat_Database_Exception(strval($value));
       }
@@ -601,18 +594,17 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     //
     $Results = array();
     
-    $DatabaseConnection = $this->getDatabaseConnection();
-    if (isset($DatabaseConnection)) {
-      $RecordCount = $DatabaseConnection->exec($sql);
+    if (isset($this->DatabaseConnection)) {
+      $RecordCount = $this->DatabaseConnection->exec($sql);
       if (!$RecordCount) {
         $Results['recordsEffected'] = 0;
-        $Results['errorInfo'] = $DatabaseConnection->errorInfo();
-        $this->error_info[] = $DatabaseConnection->errorInfo();
+        $Results['errorInfo'] = $this->DatabaseConnection->errorInfo();
+        $this->error_info[] = $this->DatabaseConnection->errorInfo();
       }
       else {
         $Results['recordsEffected'] = $RecordCount;
         if (AblePolecat_QueryLanguage_Statement_Sql_Interface::INSERT == $op) {
-          $lastInsertId = $DatabaseConnection->lastInsertId();
+          $lastInsertId = $this->DatabaseConnection->lastInsertId();
           $Results['lastInsertId'] = $lastInsertId;
         }
       }
@@ -631,6 +623,7 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    */
   protected function initialize() {
     parent::initialize();
+    $this->DatabaseConnection;
     $this->error_info = array();
     $this->id = NULL;
   }

@@ -135,11 +135,9 @@ class AblePolecat_Registry_Entry_Cache extends AblePolecat_Registry_EntryAbstrac
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
-   * @return AblePolecat_Registry_EntryInterface or NULL.
+   * @return AblePolecat_Command_Result or NULL.
    */
-  public function save(AblePolecat_DatabaseInterface $Database = NULL) {
+  public function save() {
     $sql = __SQL()->          
       replace(
         'resourceId', 
@@ -155,7 +153,7 @@ class AblePolecat_Registry_Entry_Cache extends AblePolecat_Registry_EntryAbstrac
         $this->getLastModifiedTime(), 
         $this->getCacheData()
       );
-    return $this->executeDml($sql, $Database);
+    return $this->executeDml($sql);
   }
   
   /********************************************************************************

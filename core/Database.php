@@ -65,12 +65,7 @@ interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_Resour
 }
 
 abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstract implements AblePolecat_DatabaseInterface {
-  
-  /**
-   * @var Array[PDO] Pooled PDO database connections.
-   */
-  private static $DatabaseConnections;
-  
+    
   /**
    * @var AblePolecat_AccessControl_Resource_Locater_DsnInterface URL used to open resource if any.
    */
@@ -123,31 +118,6 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
    ********************************************************************************/
   
   /**
-   * @return mixed PDO or NULL.
-   */
-  protected function getDatabaseConnection() {
-    
-    $DatabaseConnection = NULL;
-    $id = $this->getId();
-    if (isset(self::$DatabaseConnections[$id])) {
-      $DatabaseConnection = self::$DatabaseConnections[$id];
-    }
-    return $DatabaseConnection;
-  }
-  
-  /**
-   * Pool database connection if not already pooled.
-   * 
-   * @param PDO $DatabaseConnection.
-   */
-  protected function setDatabaseConnection(PDO $DatabaseConnection) {
-    $id = $this->getId();
-    if (!isset(self::$DatabaseConnections[$id])) {
-      self::$DatabaseConnections[$id] = $DatabaseConnection;
-    }
-  }
-  
-  /**
    * Sets URL used to open resource.
    *
    * @param AblePolecat_AccessControl_Resource_Locater_DsnInterface $Locater.
@@ -161,7 +131,6 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
    * Extends __construct().
    */
   protected function initialize() {
-    self::$DatabaseConnections = array();
     $this->Locater = NULL;
     $this->name = NULL;
   }

@@ -258,11 +258,9 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
    * If the encapsulated registration exists, based on id property, it will be updated
    * to reflect object state. Otherwise, a new registration record will be created.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
-   * @return AblePolecat_Registry_EntryInterface or NULL.
+   * @return AblePolecat_Command_Result or NULL.
    */
-  public function save(AblePolecat_DatabaseInterface $Database = NULL) {
+  public function save() {
     $sql = __SQL()->          
       replace(
         'id', 
@@ -282,7 +280,7 @@ class AblePolecat_Registry_Entry_ClassLibrary extends AblePolecat_Registry_Entry
         $this->getClassLibraryUseFlag(), 
         $this->getLastModifiedTime()
       );
-    return $this->executeDml($sql, $Database);
+    return $this->executeDml($sql);
   }
   
   /********************************************************************************

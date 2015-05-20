@@ -334,7 +334,7 @@ class AblePolecat_Session extends AblePolecat_AccessControl_SubjectAbstract impl
     //
     // Use internal session number for RDBMS.
     //
-    if (AblePolecat_Mode_Config::coreDatabaseIsReady()) {
+    if (AblePolecat_Mode_Server::coreDatabaseIsReady()) {
       $sql = __SQL()->
         select(
           'sessionNumber')->

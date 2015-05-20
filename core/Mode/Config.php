@@ -76,16 +76,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   private $moduleConfFilepaths;
   
   /**
-   * @var AblePolecat_Database_Pdo
-   */
-  private $CoreDatabase;
-  
-  /**
-   * @var Array Core server database connection settings.
-   */
-  private $CoreDatabaseConnectionSettings;
-  
-  /**
    * @var Array.
    */
   private $Variables;
@@ -171,56 +161,10 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       //
       self::$ConfigMode->Variables[self::VAR_CONF_PATH_CORE] = self::getCoreClassLibraryConfFilepath();
       
-      if (self::getLocalProjectConfFile()) {
-        //
-        // Project configuration file exists, attempt to connect to database.
-        //
-        self::$ConfigMode->getCoreDatabase();
-        
-        if (isset(self::$ConfigMode->CoreDatabase) && self::$ConfigMode->CoreDatabase->ready()) {
-          //
-          // Project database is initialized and ready.
-          //
-          self::reportBootState(self::BOOT_STATE_CONFIG, 'Host configuration initialized.');
-          AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, sprintf("Connected to project database [%s].",
-            self::$ConfigMode->CoreDatabase->getName()
-          ));
-        }
-        else {
-          //
-          // Project database is not ready. Trigger error if not install mode.
-          // Peek at HTTP request.
-          //
-          $installMode = FALSE;
-          isset($_SERVER['REQUEST_METHOD']) ? $method = $_SERVER['REQUEST_METHOD'] : $method = NULL;
-          switch ($method) {
-            default:
-              break;
-            case 'GET':
-              //
-              // Verify that the local project configuration file is writeable.
-              //
-              $localProjectConfFilePath = self::getLocalProjectConfFilePath();
-              $installMode = is_writeable($localProjectConfFilePath);
-              break;
-            case 'POST':
-              if (isset($_POST[AblePolecat_Transaction_RestrictedInterface::ARG_REFERER])) {
-                $referer = $_POST[AblePolecat_Transaction_RestrictedInterface::ARG_REFERER];
-                if ($referer === AblePolecat_Resource_Restricted_Install::UUID) {
-                  $installMode = TRUE;
-                }
-              }
-              break;
-          }
-          if ($installMode === FALSE) {
-            AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project database is not ready.');
-          }
-        }
-        AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Config mode initialized.');
-      }
-      else {
+      if (!self::getLocalProjectConfFile()) {
         AblePolecat_Command_Chain::triggerError('Boot sequence violation: Project configuration file is not accessible.');
       }
+      AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Config mode initialized.');
     }
     return self::$ConfigMode;
   }
@@ -303,90 +247,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
   }
   
   /********************************************************************************
-   * Database functions.
-   ********************************************************************************/
-  
-  /**
-   * @return boolean TRUE if core database connection is established, otherwise FALSE.
-   */
-  public static function coreDatabaseIsReady() {
-    
-    $dbReady = FALSE;
-    if (isset(self::$ConfigMode) && isset(self::$ConfigMode->CoreDatabase)) {
-      $dbReady = self::$ConfigMode->CoreDatabase->ready();
-    }
-    return $dbReady;
-  }
-  /**
-   * Initialize connection to core database.
-   *
-   * More than one application database can be defined in server conf file. 
-   * However, only ONE application database can be active per server mode. 
-   * If 'mode' attribute is empty, polecat will assume any mode. Otherwise, 
-   * database is defined for given mode only. The 'use' attribute indicates 
-   * that the database should be loaded for the respective server mode. Polecat 
-   * will scan database definitions until it finds one suitable for the current 
-   * server mode where the 'use' attribute is set. 
-   * @code
-   * <database id="core" name="polecat" mode="server" use="1">
-   *  <dsn>mysql://username:password@localhost/databasename</dsn>
-   * </database>
-   * @endcode
-   *
-   * Only one instance of core (server mode) database can be active.
-   * Otherwise, Able Polecat stops boot and throws exception.
-   *
-   */
-  public function getCoreDatabase() {
-    
-    if (!isset($this->CoreDatabase)) {
-      //
-      // Core database connection settings.
-      //
-      $this->CoreDatabaseConnectionSettings = array();
-      $this->CoreDatabaseConnectionSettings['connected'] = FALSE;
-      
-      //
-      // Get DSN from local project configuration file.
-      //
-      $localProjectConfFile = self::getLocalProjectConfFile();
-      $coreDatabaseElementId = self::getCoreDatabaseId();
-      $Node = AblePolecat_Dom::getElementById($localProjectConfFile, $coreDatabaseElementId);
-      if (isset($Node)) {
-        $this->CoreDatabaseConnectionSettings['name'] = $Node->getAttribute('name');
-        foreach($Node->childNodes as $key => $childNode) {
-          if($childNode->nodeName == 'polecat:dsn') {
-            $this->CoreDatabaseConnectionSettings['dsn'] = $childNode->nodeValue;
-            break;
-          }
-        }
-      }
-      else {
-        AblePolecat_Command_Chain::triggerError("Local project configuration file does not contain a locater for $coreDatabaseElementId.");
-      }
-      
-      if (isset($this->CoreDatabaseConnectionSettings['dsn'])) {
-        //
-        // Assign database client role to system user.
-        //
-        $SystemUser = $this->getAgent();
-        $DatabaseClientRole = AblePolecat_AccessControl_Role_Client_Database::wakeup($SystemUser);
-        $DatabaseLocater = AblePolecat_AccessControl_Resource_Locater_Dsn::create($this->CoreDatabaseConnectionSettings['dsn']);
-        $DatabaseClientRole->setResourceLocater($DatabaseLocater);
-        $SystemUser->assignActiveRole($DatabaseClientRole);
-        
-        //
-        // Attempt a connection.
-        // Polecat will use locater and token associated with db client role 
-        // (assigned above) to establish connection.
-        //
-        $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
-      }
-    }
-    return $this->CoreDatabase;
-  }
-  
-  /********************************************************************************
    * Helper functions.
    ********************************************************************************/
   
@@ -420,17 +280,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     }
     
     return $bootLogFilePath;
-  }
-  
-  /**
-   * @var Array Core server database connection settings.
-   */
-  public static function getCoreDatabaseConnectionSettings() {
-    $CoreDatabaseConnectionSettings = NULL;
-    if (isset(self::$ConfigMode)) {
-      $CoreDatabaseConnectionSettings = self::$ConfigMode->CoreDatabaseConnectionSettings;
-    }
-    return $CoreDatabaseConnectionSettings;
   }
   
   /**
@@ -810,7 +659,6 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     
     $this->Variables = array();
     $this->bootLogFilePath = NULL;
-    $this->CoreDatabase = NULL;
     $this->coreClassLibraryConfFile = NULL;
     $this->coreClassLibraryConfFilepath = NULL;
     $this->localProjectConfFile = NULL;

@@ -90,11 +90,9 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
   /**
    * Install class registry on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if install fails.
    */
-  public static function install(AblePolecat_DatabaseInterface $Database) {
+  public static function install() {
     //
     // Load local project configuration file.
     //
@@ -104,17 +102,15 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
     // Get list of package templates.
     //
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'template');
-    self::insertList($Database, $Nodes);
+    self::insertList($Nodes);
   }
   
   /**
    * Update current schema on existing Able Polecat database.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
-   *
    * @throw AblePolecat_Database_Exception if update fails.
    */
-  public static function update(AblePolecat_DatabaseInterface $Database) {
+  public static function update() {
     //
     // Initialize update procedure.
     //
@@ -127,7 +123,7 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
     $localProjectConfFile = AblePolecat_Mode_Config::getLocalProjectConfFile();
     $Nodes = AblePolecat_Dom::getElementsByTagName($localProjectConfFile, 'template');
     foreach($Nodes as $key => $Node) {
-      self::insertNode($Database, $Node);
+      self::insertNode($Node);
     }
     
     //
@@ -335,28 +331,22 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
   /**
    * Insert DOMNodeList into registry.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param DOMNodeList $Nodes List of DOMNodes containing registry entries.
    *
    */
-  protected static function insertList(
-    AblePolecat_DatabaseInterface $Database, 
-    DOMNodeList $Nodes) {
+  protected static function insertList(DOMNodeList $Nodes) {
     foreach($Nodes as $key => $Node) {
-      self::insertNode($Database, $Node);
+      self::insertNode($Node);
     }
   }
   
   /**
    * Insert DOMNode into registry.
    *
-   * @param AblePolecat_DatabaseInterface $Database Handle to existing database.
    * @param DOMNode $Node DOMNode containing registry entry.
    *
    */
-  protected static function insertNode(
-    AblePolecat_DatabaseInterface $Database, 
-    DOMNode $Node) {
+  protected static function insertNode(DOMNode $Node) {
 
     if (!isset(self::$Registry)) {
       $message = __METHOD__ . ' Cannot call method before registry class is initialized.';
@@ -368,7 +358,7 @@ class AblePolecat_Registry_Template extends AblePolecat_RegistryAbstract {
       $TemplateRegistrations = AblePolecat_Registry_Entry_Template::import($Node);
       foreach($TemplateRegistrations as $key => $TemplateRegistration) {
         self::$Registry->addRegistration($TemplateRegistration);
-        if ($TemplateRegistration->save($Database)) {
+        if ($TemplateRegistration->save()) {
           self::$Registry->markUpdated($TemplateRegistration->id, TRUE);
         }
       }
