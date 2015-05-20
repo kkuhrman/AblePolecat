@@ -149,44 +149,25 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
     
     $open = FALSE;
     
-    $dsn = NULL;
-    $dbUser = NULL;
-    $dbPass = NULL;
+    $dsnSettings = NULL;
     if (isset($Agent)) {
-      $dbClientRole = $Agent->getActiveRole(AblePolecat_AccessControl_Role_Client_Database::ROLE_ID);
-      if ($dbClientRole) {
-        $Url = $dbClientRole->getResourceLocater();
-        $AccessControlToken = $dbClientRole->getAccessControlToken();
-        if (isset($Url) && isset($AccessControlToken)) {
-          $dsn = $Url->getDsn();
-          $dbUser = $AccessControlToken->getUsername();
-          $dbPass = $AccessControlToken->getPassword();
-        }
-      }
-      else {
-        throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
-          $Agent->getName(),
-          AblePolecat_AccessControl_Role_Client_Database::ROLE_NAME
-        ));
-      }
+      $dsnSettings = $this->extractDsnSettingsFromAgentRole($Agent);
     }
     else {
       if (isset($Url) && is_a($Url, 'AblePolecat_AccessControl_Resource_Locater_DsnInterface')) {
-        $dsn = $Url->getDsn();
-        $dbUser = $Url->getUsername();
-        $dbPass = $Url->getPassword();
+        $dsnSettings = $this->extractDsnSettingsFromLocater($Url);
       }
     }
-    if (isset($dsn) && isset($dbUser) && isset($dbPass)) {
+    if (isset($dsnSettings)) {
       //
       // This prevents users from establishing a connection to an unsecured MySql server
       // on a local computer without specifying a database, user or password (as would be
       // the case if setting up a local WAMP/MAMP environment with default settings).
       //
-      if (($dbUser === '') || ($dbPass === '')) {
+      if (($dsnSettings[self::DSN_USER] === '') || ($dsnSettings[self::DSN_PASS] === '')) {
         $this->error_info[] = sprintf("Access denied. Able Polecat database connection requires user with password. user='%s' password='%s' given.",
-          $dbUser,
-          $dbPass
+          $dsnSettings[self::DSN_USER],
+          $dsnSettings[self::DSN_PASS]
         );
       }
       try {
@@ -195,22 +176,18 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         // but are cached and re-used when another script requests a 
         // connection using the same credentials.
         //
-        // $options = NULL;
-        // if (is_a($Agent, 'AblePolecat_AccessControl_Agent_User_System')) {
-          // $options = array(PDO::ATTR_PERSISTENT => true);
-        // }
         $options = array(PDO::ATTR_PERSISTENT => true);
-        $this->DatabaseConnection = new PDO($dsn, $dbUser, $dbPass, $options);
+        $this->DatabaseConnection = new PDO($dsnSettings[self::DSN_FULL], $dsnSettings[self::DSN_USER], $dsnSettings[self::DSN_PASS], $options);
         
         //
         // Save locater. This will also set name.
         //
-        $this->setLocater($Url);
+        $this->setLocater($dsnSettings[self::LOCATER]);
         
         //
         // Set unique id for pooled database connection.
         //
-        $this->id = sprintf("%s.%s", $this->getName(), $dbUser);
+        $this->id = sprintf("%s.%s", $this->getName(), $dsnSettings[self::DSN_USER]);
         
         //
         // Set open flag.
@@ -442,58 +419,64 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
    *   ],
    * ]
    *
-   * @param string $user
-   * @param string $password
-   * @param string $database
-   * @param string host
+   * @param AblePolecat_AccessControl_AgentInterface $agent Agent seeking access.
+   * @param AblePolecat_AccessControl_Resource_LocaterInterface $Url Existing or new resource.
+   * @param string $name Optional common name for new resources.
    *
-   * @return Array User grants on database server or NULL if connection failed.
+   * @return mixed Array with user grants or NULL.
    */
-  public function showGrants($user, $password, $database = NULL, $host = 'localhost') {
+  public function showGrants(AblePolecat_AccessControl_AgentInterface $Agent = NULL, AblePolecat_AccessControl_Resource_LocaterInterface $Url = NULL) {
     
     $privileges = NULL;
     
-    try {
-      //
-      // dsn = mysql://user:pass@localhost/database
-      //
-      $dsn = sprintf("mysql://%s:%s@%s", $user, $password, $host);
-      isset($database) ? $dsn .= "/$database" : NULL;
-      $DatabaseConnection = new PDO($dsn, $user, $password);
-      $PreparedStatement = $DatabaseConnection->prepare("SHOW GRANTS FOR CURRENT_USER()");
-      if($PreparedStatement->execute()) {
-        $grants = $PreparedStatement->fetchAll(PDO::FETCH_COLUMN);
-        if ($grants) {
-          $privileges = array();
-          foreach($grants as $recordNumber => $Record) {
-            $pos = strpos($Record, 'ON');
-            $rightSub = substr($Record, $pos, strlen($Record));
-            $leftSub = substr($Record, 0, $pos);
-            $pos = strpos($rightSub, 'TO');
-            $grantsOn = explode('.', trim(str_replace(array('ON', '`'), '', substr($rightSub, 0, $pos))));
-            isset($grantsOn[0]) ? $database = $grantsOn[0] : $database = NULL;
-            isset($grantsOn[1]) ? $dbObject = $grantsOn[1] : $dbObject = NULL;
-            if (!isset($privileges[$database])) {
-              $privileges[$database] = array();
-            }
-            if (!isset($privileges[$database][$dbObject])) {
-              $privileges[$database][$dbObject] = array();
-            }
-            
-            $leftSub = trim(str_replace('GRANT', '', $leftSub));
-            $leftSub = explode(', ', $leftSub);
-            foreach($leftSub as $key => $grant) {
-              $privileges[$database][$dbObject][$grant] = $key;
+    $dsnSettings = NULL;
+    if (isset($Agent)) {
+      $dsnSettings = $this->extractDsnSettingsFromAgentRole($Agent);
+    }
+    else {
+      
+    }
+    if (isset($dsnSettings)) {
+      try {
+        //
+        // dsn = mysql://user:pass@localhost/database
+        //
+        $DatabaseConnection = new PDO($dsnSettings[self::DSN_FULL], $dsnSettings[self::DSN_USER], $dsnSettings[self::DSN_PASS]);
+        $PreparedStatement = $DatabaseConnection->prepare("SHOW GRANTS FOR CURRENT_USER()");
+        if($PreparedStatement->execute()) {
+          $grants = $PreparedStatement->fetchAll(PDO::FETCH_COLUMN);
+          if ($grants) {
+            $privileges = array();
+            foreach($grants as $recordNumber => $Record) {
+              $pos = strpos($Record, 'ON');
+              $rightSub = substr($Record, $pos, strlen($Record));
+              $leftSub = substr($Record, 0, $pos);
+              $pos = strpos($rightSub, 'TO');
+              $grantsOn = explode('.', trim(str_replace(array('ON', '`'), '', substr($rightSub, 0, $pos))));
+              isset($grantsOn[0]) ? $database = $grantsOn[0] : $database = NULL;
+              isset($grantsOn[1]) ? $dbObject = $grantsOn[1] : $dbObject = NULL;
+              if (!isset($privileges[$database])) {
+                $privileges[$database] = array();
+              }
+              if (!isset($privileges[$database][$dbObject])) {
+                $privileges[$database][$dbObject] = array();
+              }
+              
+              $leftSub = trim(str_replace('GRANT', '', $leftSub));
+              $leftSub = explode(', ', $leftSub);
+              foreach($leftSub as $key => $grant) {
+                $privileges[$database][$dbObject][$grant] = $key;
+              }
             }
           }
         }
+        else {
+          $this->error_info[] = $PreparedStatement->errorInfo();
+        }
+      } 
+      catch (PDOException $Exception) {
+        $this->error_info[] = $Exception->getMessage();
       }
-      else {
-        $this->error_info[] = $PreparedStatement->errorInfo();
-      }
-    } 
-    catch (PDOException $Exception) {
-      $this->error_info[] = $Exception->getMessage();
     }
     return $privileges;
   }

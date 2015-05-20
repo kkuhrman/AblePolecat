@@ -51,7 +51,7 @@ class AblePolecat_AccessControl_Agent_User extends AblePolecat_AccessControl_Age
       //
       // If user is not anonymous, make sure a user record is registered with database.
       //
-      if (self::ANONYMOUS_USER_ID != $this->getId()) {
+      if (AblePolecat_Mode_Server::coreDatabaseIsReady() && (self::ANONYMOUS_USER_ID != $this->getId())) {
         //
         // User id will be null if this is first connection.
         //

@@ -17,6 +17,17 @@ require_once(implode(DIRECTORY_SEPARATOR, array(ABLE_POLECAT_CORE, 'Exception', 
 interface AblePolecat_DatabaseInterface extends AblePolecat_AccessControl_ResourceInterface, AblePolecat_CacheObjectInterface {
   
   /**
+   * DSN Property constants.
+   */
+  const DSN_FULL    = 'dsn';
+  const DSN_USER    = 'user';
+  const DSN_PASS    = 'pass';
+  const DSN_HOST    = 'host';
+  const DSN_PORT    = 'port';
+  const DSN_NAME    = 'database';
+  const LOCATER     = 'locater';
+  
+  /**
    * @return AblePolecat_AccessControl_Resource_Locater_DsnInterface URL used to open resource or NULL.
    */
   public function getLocater();
@@ -116,6 +127,61 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
   /********************************************************************************
    * Helper functions.
    ********************************************************************************/
+  
+  /**
+   * Extract user name, password, database name, host name etc. from agent role.
+   *
+   * @param AblePolecat_AccessControl_AgentInterface $Agent.
+   *
+   * @return mixed Array with DSN settings or NULL.
+   */
+  protected function extractDsnSettingsFromAgentRole(AblePolecat_AccessControl_AgentInterface $Agent) {
+    
+    $dsnSettings = NULL;
+    
+    $dbClientRole = $Agent->getActiveRole(AblePolecat_AccessControl_Role_Client_Database::ROLE_ID);
+    if ($dbClientRole) {
+      $Url = $dbClientRole->getResourceLocater();
+      $AccessControlToken = $dbClientRole->getAccessControlToken();
+      if (isset($Url) && isset($AccessControlToken)) {
+        $dsnSettings = array();
+        $dsnSettings[self::DSN_FULL] = $Url->getDsn();
+        $dsnSettings[self::DSN_NAME] = trim($Url->getPathname(), AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+        $dsnSettings[self::DSN_HOST] = $Url->getHostname();
+        $dsnSettings[self::DSN_PORT] = $Url->getPort();
+        $dsnSettings[self::DSN_USER] = $AccessControlToken->getUsername();
+        $dsnSettings[self::DSN_PASS] = $AccessControlToken->getPassword();
+        $dsnSettings[self::LOCATER]  = $Url;
+      }
+    }
+    else {
+      throw new AblePolecat_AccessControl_Exception(sprintf("%s is not authorized for %s role.",
+        $Agent->getName(),
+        AblePolecat_AccessControl_Role_Client_Database::ROLE_NAME
+      ));
+    }
+    return $dsnSettings;
+  }
+  
+  /**
+   * Extract user name, password, database name, host name etc. from locater.
+   *
+   * @param AblePolecat_AccessControl_Resource_Locater_DsnInterface $Locater.
+   *
+   * @return mixed Array with DSN settings or NULL.
+   */
+  protected function extractDsnSettingsFromLocater(AblePolecat_AccessControl_Resource_Locater_DsnInterface $Locater) {
+    
+    $dsnSettings = array();
+    $dsnSettings[self::DSN_FULL] = $Locater->getDsn();
+    $dsnSettings[self::DSN_NAME] = trim($Locater->getPathname(), AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+    $dsnSettings[self::DSN_HOST] = $Locater->getHostname();
+    $dsnSettings[self::DSN_PORT] = $Locater->getPort();
+    $dsnSettings[self::DSN_USER] = $Locater->getUsername();
+    $dsnSettings[self::DSN_PASS] = $Locater->getPassword();
+    $dsnSettings[self::LOCATER]  = $Locater;
+    return $dsnSettings;
+  }
   
   /**
    * Sets URL used to open resource.

@@ -612,17 +612,44 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     
     $connected = FALSE;
     
-    if (isset(self::$ServerMode)) {
-      if (isset(self::$ServerMode->CoreDatabase) && self::$ServerMode->CoreDatabase->ready()) {
-        throw new AblePolecat_Database_Exception('System user is connected to core database.');
+    $ServerMode = AblePolecat_Mode_Server::wakeup();
+    if (isset($ServerMode->CoreDatabase) && $ServerMode->CoreDatabase->ready()) {
+      //
+      // This is the case if DSN in local project configuration file already
+      // established a valid connection for system user; for example, user is
+      // attempting to run utilities or update core database. In this case we
+      // Simply check user grants.
+      //
+      $User = AblePolecat_AccessControl_Agent_User::wakeup();
+      $grants = $ServerMode->CoreDatabase->showGrants($User);
+      if(isset($grants)) {
+        $databaseName = $ServerMode->CoreDatabase->getName();
+        if(isset($grants[$databaseName])) {
+          $connected = (
+            isset($grants[$databaseName]['*']['SELECT']) &&
+            isset($grants[$databaseName]['*']['INSERT']) &&
+            isset($grants[$databaseName]['*']['UPDATE']) &&
+            isset($grants[$databaseName]['*']['DELETE']) &&
+            isset($grants[$databaseName]['*']['CREATE']) &&
+            isset($grants[$databaseName]['*']['DROP']) &&
+            isset($grants[$databaseName]['*']['INDEX']) &&
+            isset($grants[$databaseName]['*']['ALTER']) &&
+            isset($grants[$databaseName]['*']['CREATE TEMPORARY TABLES']) &&
+            isset($grants[$databaseName]['*']['LOCK TABLES'])
+          );
+        }
       }
-      else {
-        self::$ServerMode->CoreDatabase = NULL;
-        $User = AblePolecat_AccessControl_Agent_User::wakeup();
-        self::$ServerMode->CoreDatabase = AblePolecat_Database_Pdo::wakeup($User);
-        $dbErrors = self::$ServerMode->CoreDatabase->flushErrors();
-        $connected = self::$ServerMode->CoreDatabase->ready();
-      }
+    }
+    else {
+      //
+      // This is the case if DSN in local project configuration file does not 
+      // have a valid user name and password; for example, first time install.
+      //
+      $ServerMode->CoreDatabase = NULL;
+      $User = AblePolecat_AccessControl_Agent_User::wakeup();
+      $ServerMode->CoreDatabase = AblePolecat_Database_Pdo::wakeup($User);
+      $dbErrors = $ServerMode->CoreDatabase->flushErrors();
+      $connected = $ServerMode->CoreDatabase->ready();
     }
     return $connected;
   }
@@ -631,17 +658,15 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
     
     $installed = FALSE;
     
-    if (!isset(self::$ServerMode)) {
-      AblePolecat_Debug::kill(self::$ServerMode);
-      if ($self::$ServerMode->installMode) {
-        if (isset(self::$ServerMode->CoreDatabase)) {
-          if (self::$ServerMode->CoreDatabase->ready()) {
-            AblePolecat_Database_Schema::install(self::$ServerMode->CoreDatabase);
-            $dbErrors = self::$ServerMode->CoreDatabase->flushErrors();
-            foreach($dbErrors as $errorNumber => $error) {
-              $error = AblePolecat_Database_Pdo::getErrorMessage($error);
-              AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
-            }
+    $ServerMode = AblePolecat_Mode_Server::wakeup();
+    if ($ServerMode->installMode) {
+      if (isset($ServerMode->CoreDatabase)) {
+        if ($ServerMode->CoreDatabase->ready()) {
+          AblePolecat_Database_Schema::install($ServerMode->CoreDatabase);
+          $dbErrors = $ServerMode->CoreDatabase->flushErrors();
+          foreach($dbErrors as $errorNumber => $error) {
+            $error = AblePolecat_Database_Pdo::getErrorMessage($error);
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $error);
           }
         }
       }
