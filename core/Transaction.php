@@ -443,8 +443,7 @@ abstract class AblePolecat_TransactionAbstract extends AblePolecat_CacheObjectAb
       //
       // Database connection not established. Indicate status.
       //
-      $redirect = AblePolecat_Host::getRequest()->getBaseUrl() .
-        AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH . 
+      $redirect = AblePolecat_Host::getRequest()->getBaseUrl() . URI_SLASH . 
         AblePolecat_Message_RequestInterface::RESOURCE_NAME_INSTALL;
       $Resource = AblePolecat_Resource_Core_Factory::wakeup(
         $this->getDefaultCommandInvoker(),

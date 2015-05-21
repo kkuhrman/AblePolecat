@@ -146,7 +146,7 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
       if (isset($Url) && isset($AccessControlToken)) {
         $dsnSettings = array();
         $dsnSettings[self::DSN_FULL] = $Url->getDsn();
-        $dsnSettings[self::DSN_NAME] = trim($Url->getPathname(), AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+        $dsnSettings[self::DSN_NAME] = trim($Url->getPathname(), URI_SLASH);
         $dsnSettings[self::DSN_HOST] = $Url->getHostname();
         $dsnSettings[self::DSN_PORT] = $Url->getPort();
         $dsnSettings[self::DSN_USER] = $AccessControlToken->getUsername();
@@ -174,7 +174,7 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
     
     $dsnSettings = array();
     $dsnSettings[self::DSN_FULL] = $Locater->getDsn();
-    $dsnSettings[self::DSN_NAME] = trim($Locater->getPathname(), AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+    $dsnSettings[self::DSN_NAME] = trim($Locater->getPathname(), URI_SLASH);
     $dsnSettings[self::DSN_HOST] = $Locater->getHostname();
     $dsnSettings[self::DSN_PORT] = $Locater->getPort();
     $dsnSettings[self::DSN_USER] = $Locater->getUsername();
@@ -190,7 +190,7 @@ abstract class AblePolecat_DatabaseAbstract extends AblePolecat_CacheObjectAbstr
    */
   protected function setLocater(AblePolecat_AccessControl_Resource_Locater_DsnInterface $Locater) {
     $this->Locater = $Locater;
-    $this->name = trim($this->Locater->getPathname(), AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+    $this->name = trim($this->Locater->getPathname(), URI_SLASH);
   }
   
   /**

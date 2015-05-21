@@ -98,7 +98,7 @@ class AblePolecat_Transaction_Restricted_Util extends AblePolecat_Transaction_Re
               //
               if ($this->authenticate()) {
                 $requestPathInfo = $this->getRequest()->getRequestPathInfo();
-                $requestPathInfoParts = explode(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, $requestPathInfo[AblePolecat_Message_RequestInterface::URI_PATH]);
+                $requestPathInfoParts = explode(URI_SLASH, $requestPathInfo[AblePolecat_Message_RequestInterface::URI_PATH]);
                 isset($requestPathInfoParts[1]) ? $utilName = $requestPathInfoParts[1] : $utilName = NULL;
                 switch ($utilName) {
                   default:

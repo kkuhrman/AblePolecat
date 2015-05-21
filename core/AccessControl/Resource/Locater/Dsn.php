@@ -33,7 +33,7 @@ class AblePolecat_AccessControl_Resource_Locater_Dsn extends AblePolecat_AccessC
    * @return object Instance of class implementing AblePolecat_AccessControl_Resource_LocaterInterface or NULL.
    */
   public static function create($url, $baseURL = NULL) {
-    isset($baseURL) ? $url = $baseURL . AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH . $url : NULL;
+    isset($baseURL) ? $url = $baseURL . URI_SLASH . $url : NULL;
     $Locater = new AblePolecat_AccessControl_Resource_Locater_Dsn($url);
     return $Locater;
   }

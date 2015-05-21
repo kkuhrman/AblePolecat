@@ -214,7 +214,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   public function getRequestPath($asString = TRUE) {
     
-    $asString ? $path = implode(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, $this->request_path) : $path = $this->request_path;
+    $asString ? $path = implode(URI_SLASH, $this->request_path) : $path = $this->request_path;
     return $path;
   }
   
@@ -243,7 +243,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
    */
   public function getBaseUrl($trailing_slash = TRUE) {
     
-    $trailing_slash ? $host_url = $this->host_url : $host_url = rtrim($this->host_url, AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+    $trailing_slash ? $host_url = $this->host_url : $host_url = rtrim($this->host_url, URI_SLASH);
     return $host_url;
   }
   
@@ -274,7 +274,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     //
     $resolvedResourceName = FALSE;
     $sanitizedResourceName = strtolower(preg_replace(array('/[^\/\a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), $requestedResourceName));
-    $uriPathParts = explode(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, $sanitizedResourceName);
+    $uriPathParts = explode(URI_SLASH, $sanitizedResourceName);
     
     //
     // First, check for core resource request.
@@ -380,8 +380,8 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     isset($this->alias) ? $alias = $this->alias : $alias = '';
     isset($_SERVER['REQUEST_URI']) ? $request_uri = $_SERVER['REQUEST_URI'] : $request_uri = '';
     isset($_SERVER['QUERY_STRING']) ? $query_string = $_SERVER['QUERY_STRING'] : $query_string = '';
-    $this->request_path_info[self::URI_PATH] = trim(str_replace($alias, '', str_replace($query_string, '', $request_uri)), AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH . '?');
-    $this->request_path = explode(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, $this->request_path_info[self::URI_PATH]);
+    $this->request_path_info[self::URI_PATH] = trim(str_replace($alias, '', str_replace($query_string, '', $request_uri)), URI_SLASH . '?');
+    $this->request_path = explode(URI_SLASH, $this->request_path_info[self::URI_PATH]);
     
     //
     // Is there anything left of the path?
@@ -414,7 +414,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         //
         $query_string = $this->makeRequestQueryString(array(self::URI_SEARCH_PARAM => $this->request_path));
         $this->redirectUrl = sprintf("%s?%s",
-          implode(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, array($this->host_url, self::RESOURCE_NAME_SEARCH)),
+          implode(URI_SLASH, array($this->host_url, self::RESOURCE_NAME_SEARCH)),
           $query_string
         );
       }
@@ -439,7 +439,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
           $this->request_path_info[self::URI_REDIRECT] = TRUE;
           $query_string = $this->makeRequestQueryString(array(self::URI_SEARCH_PARAM => $this->entity_body[self::URI_SEARCH_PARAM]));
           $this->redirectUrl = sprintf("%s?%s",
-            implode(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, array($this->host_url, self::RESOURCE_NAME_SEARCH)),
+            implode(URI_SLASH, array($this->host_url, self::RESOURCE_NAME_SEARCH)),
             $query_string
           );
         }        
@@ -543,7 +543,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
     // Defined in ./etc/polecat/conf/path.config. Typically for local development environments.
     //
     if (defined('ABLE_POLECAT_ALIAS')) {
-      if (ABLE_POLECAT_ALIAS == AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH) {
+      if (ABLE_POLECAT_ALIAS == URI_SLASH) {
         //
         // This can cause problems with string manipulation. Unset alias if it is only '/'
         //
@@ -554,9 +554,9 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         // Make sure first character of given alias is a leading slash.
         //
         $given_alias = ABLE_POLECAT_ALIAS;
-        $pos = strpos(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, ABLE_POLECAT_ALIAS);
+        $pos = strpos(URI_SLASH, ABLE_POLECAT_ALIAS);
         if ($pos !== 0) {
-          $given_alias = AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH . ABLE_POLECAT_ALIAS;
+          $given_alias = URI_SLASH . ABLE_POLECAT_ALIAS;
         }
           
         //
@@ -564,10 +564,10 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
         // Eliminate OS-dependent path separators.
         //
         $document_root = str_replace(DIRECTORY_SEPARATOR, '&#47;', ABLE_POLECAT_DOCROOT);
-        $script_filename = str_replace(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, '&#47;', $_SERVER['SCRIPT_FILENAME']);
+        $script_filename = str_replace(URI_SLASH, '&#47;', $_SERVER['SCRIPT_FILENAME']);
         $request_path = str_replace($document_root, '', $script_filename);
-        $script_name = str_replace(AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, '&#47;', $_SERVER['SCRIPT_NAME']);
-        $alias = str_replace('&#47;', AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH, str_replace($request_path, '', $script_name));
+        $script_name = str_replace(URI_SLASH, '&#47;', $_SERVER['SCRIPT_NAME']);
+        $alias = str_replace('&#47;', URI_SLASH, str_replace($request_path, '', $script_name));
         if ($alias === $given_alias) {
           $this->alias = $given_alias;
         }
@@ -599,9 +599,9 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       $this->host_url .=  $this->alias;
     }
     else {
-      $this->host_url .= AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH;
+      $this->host_url .= URI_SLASH;
     }
-    $this->hostName = trim($this->hostName, AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH);
+    $this->hostName = trim($this->hostName, URI_SLASH);
   }
   
   /**
@@ -662,7 +662,7 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       //
       // Initialize full resource URI from incoming request.
       //
-      $this->resourceUri = $this->getBaseUrl() . AblePolecat_AccessControl_Resource_LocaterInterface::URI_SLASH . $this->getRequestPath(TRUE);
+      $this->resourceUri = $this->getBaseUrl() . URI_SLASH . $this->getRequestPath(TRUE);
     }
     else {
       //
