@@ -383,6 +383,10 @@
         <polecat:path>Session.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>
       </polecat:class>
+      <polecat:class id="04a4fe12-0475-11e5-9add-0050569e00a2" name="AblePolecat_Savepoint">
+        <polecat:path>Savepoint.php</polecat:path>
+        <polecat:classFactoryMethod>create</polecat:classFactoryMethod>
+      </polecat:class>
       <polecat:class id="7bf12d40-23df-11e4-8c21-0800200c9a66" name="AblePolecat_Transaction_Unrestricted">
         <polecat:path>Transaction/Unrestricted.php</polecat:path>
         <polecat:classFactoryMethod>wakeup</polecat:classFactoryMethod>

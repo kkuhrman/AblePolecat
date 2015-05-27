@@ -37,7 +37,9 @@ interface AblePolecat_Transaction_RestrictedInterface extends AblePolecat_Transa
   public function getSecurityToken();
 }
 
-abstract class AblePolecat_Transaction_RestrictedAbstract extends AblePolecat_TransactionAbstract {
+abstract class AblePolecat_Transaction_RestrictedAbstract 
+  extends AblePolecat_TransactionAbstract 
+  implements AblePolecat_Transaction_RestrictedInterface {
   
   /**
    * @var string DSN (default security token).

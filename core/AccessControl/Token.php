@@ -120,5 +120,4 @@ abstract class AblePolecat_AccessControl_TokenAbstract
    */
   final public function __destruct() {
   }
-  
 }
