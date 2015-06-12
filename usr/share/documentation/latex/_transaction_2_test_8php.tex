@@ -1,0 +1,30 @@
+\hypertarget{_transaction_2_test_8php}{}\section{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Transaction/\+Test.php File Reference}
+\label{_transaction_2_test_8php}\index{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Transaction/\+Test.\+php@{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Transaction/\+Test.\+php}}
+
+
+Built-\/in transaction manages local unit test execution.  
+
+
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_able_polecat___transaction___test}{Able\+Polecat\+\_\+\+Transaction\+\_\+\+Test}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Built-\/in transaction manages local unit test execution. 
+
+Any request for host/test/... will be directed here. The part of the U\+R\+I path, which follows ./test is expected to be a relative path off the test directory, which is root/usr/share/test by convention. The name of the test class is expected to be \mbox{[}Library\+Prefix\mbox{]}Test\+\_\+\mbox{[}Name\+Of\+Class\mbox{]}. As an example, Able\+Polecat is the library prefix for the core class library. A test class for the core class \hyperlink{class_able_polecat___data___primitive___scalar___string}{Able\+Polecat\+\_\+\+Data\+\_\+\+Primitive\+\_\+\+Scalar\+\_\+\+String} is expected to bear the name Able\+Polecat\+Test\+\_\+\+Data\+\_\+\+Primitive\+\_\+\+Scalar\+\_\+\+String and would be located in the file Able\+Polecat/usr/share/test/\+Data/\+Primitive/\+Scalar/\+String.\+php. So the request to run all tests for this class would be host/test/data/primitive/scalar/string (Able Polecat treats U\+R\+I paths as case insensitive). If we are running one or more specific test add /?test=test\+Name1+test\+Name2... to the query string and if we are running a test for a class in a library other than the core (and there is no override to get\+Test\+Directive()) one must pass the library name or id in the query string as well like so ./?lib=\mbox{[}lib\+Name $\vert$ lib\+Id\mbox{]}.
+
+In the case where a class name contains a mixed case word, such as \hyperlink{class_able_polecat___access_control___agent___user}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+\_\+\+User} (where \textquotesingle{}Access\+Control\textquotesingle{} is the mixed case word), the parts of the word should be separated by a hyphen in the request U\+R\+I as in ./test/access-\/control/agent/user. The same goes for method. Library ids and names, on the other hand, are likely to contain hyphens and so the syntax for breaking up words separated by hyphens is the same as passing multiple values for a parameter. For example, the library name Able\+Polecat-\/\+Dev would be passed like so ./?lib=able-\/polecat+dev and the library id 6f7bd8bb-\/e1f5-\/11e4-\/b585-\/0050569e00a2 like so 6f7bd8bb+e1f5+11e4+b585+0050569e00a2.
+
+\begin{DoxyAuthor}{Author}
+Karl Kuhrman 
+\end{DoxyAuthor}
+\begin{DoxyCopyright}{Copyright}
+https\+://github.com/kkuhrman/\+Able\+Polecat/blob/master/\+L\+I\+C\+E\+N\+S\+E.\+md \char`\"{}\+B\+D\+S I\+I License\char`\"{} 
+\end{DoxyCopyright}
+\begin{DoxyVersion}{Version}
+0.\+7.\+2 
+\end{DoxyVersion}

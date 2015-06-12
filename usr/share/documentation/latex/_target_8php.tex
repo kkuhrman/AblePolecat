@@ -1,0 +1,34 @@
+\hypertarget{_target_8php}{}\section{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Command/\+Target.php File Reference}
+\label{_target_8php}\index{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Command/\+Target.\+php@{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Command/\+Target.\+php}}
+
+
+The recipient of a synchronous command within scope of single script execution.  
+
+
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+interface \hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}
+\item 
+class \hyperlink{class_able_polecat___command___target_abstract}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Abstract}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The recipient of a synchronous command within scope of single script execution. 
+
+Implements the Chain of Responsibility (C\+O\+R) design pattern by linking with other command target objects.
+
+Similar to land/mobile telecommunications links, those in this implementation use forward and reverse link to describe the relationship between superior to subordinate, and subordinate to superior respectively.
+
+The intended work flow of this method is subordinate calls on superior, passing self as parameter. If approved to be next in C\+O\+R, superior returns reference to itself, which subordinate must save as reverse link. Otherwise, if link is not permitted, an exception is thrown and the whole thing fails.
+
+\begin{DoxyAuthor}{Author}
+Karl Kuhrman 
+\end{DoxyAuthor}
+\begin{DoxyCopyright}{Copyright}
+https\+://github.com/kkuhrman/\+Able\+Polecat/blob/master/\+L\+I\+C\+E\+N\+S\+E.\+md \char`\"{}\+B\+D\+S I\+I License\char`\"{} 
+\end{DoxyCopyright}
+\begin{DoxyVersion}{Version}
+0.\+7.\+2 
+\end{DoxyVersion}

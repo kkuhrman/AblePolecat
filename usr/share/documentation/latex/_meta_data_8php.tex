@@ -1,0 +1,40 @@
+\hypertarget{_meta_data_8php}{}\section{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Meta\+Data.php File Reference}
+\label{_meta_data_8php}\index{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Meta\+Data.\+php@{C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Meta\+Data.\+php}}
+
+
+A descriptor used to request an operation on specific properties of a web resource.  
+
+
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+interface \hyperlink{interface_able_polecat___meta_data_interface}{Able\+Polecat\+\_\+\+Meta\+Data\+Interface}
+\item 
+class \hyperlink{class_able_polecat___meta_data}{Able\+Polecat\+\_\+\+Meta\+Data}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A descriptor used to request an operation on specific properties of a web resource. 
+
+\hyperlink{interface_able_polecat___meta_data_interface}{Able\+Polecat\+\_\+\+Meta\+Data\+Interface} is a mashup of R\+E\+S\+T, R\+D\+F and query language concepts. It\textquotesingle{}s primary design goal is to strike a balance between simplicity and flexibility.
+
+The interface is designed with the expectation that its most common use will be to pass it as a resource request to a service client via the service bus to retrieve or manipulate a specific representation of an object over the web.
+
+In such cases, the \textquotesingle{}subject\textquotesingle{} would require at a minimum the U\+U\+I\+D of the service client and the named subject of the retrieval/manipulation target.
+
+The representation is likely the columns or properties to retrieve or manipulate and any value assignments (in the case of D\+M\+L).
+
+The combined predicate/object is similar to a F\+I\+L\+T\+E\+R or S\+Q\+L W\+H\+E\+R\+E statement.
+
+Lastly, options define extended service capabilities such as sorting, grouping, limits, offsets and so on.
+
+\begin{DoxyAuthor}{Author}
+Karl Kuhrman 
+\end{DoxyAuthor}
+\begin{DoxyCopyright}{Copyright}
+https\+://github.com/kkuhrman/\+Able\+Polecat/blob/master/\+L\+I\+C\+E\+N\+S\+E.\+md \char`\"{}\+B\+D\+S I\+I License\char`\"{} 
+\end{DoxyCopyright}
+\begin{DoxyVersion}{Version}
+0.\+7.\+2 
+\end{DoxyVersion}

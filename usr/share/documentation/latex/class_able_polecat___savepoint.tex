@@ -1,0 +1,158 @@
+\hypertarget{class_able_polecat___savepoint}{}\section{Able\+Polecat\+\_\+\+Savepoint Class Reference}
+\label{class_able_polecat___savepoint}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+Inheritance diagram for Able\+Polecat\+\_\+\+Savepoint\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.134146cm]{class_able_polecat___savepoint}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___savepoint_a4d9813fea8525b19a1d370eeb8fe41d6}{serialize} ()
+\item 
+\hyperlink{class_able_polecat___savepoint_a91b3cb8a65e42152cacf1cf222bd26f6}{unserialize} (\$data)
+\item 
+\hyperlink{class_able_polecat___savepoint_a83a4c2954e4da6dad24e596265e33d0a}{get\+Transaction\+Id} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___savepoint_ad9ade868bd136d32967059d1cccb3e92}{get\+Scope} ()
+\item 
+static \hyperlink{class_able_polecat___savepoint_a239b1c70258014a86569483c2d009de6}{create} ()
+\end{DoxyCompactItemize}
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{class_able_polecat___savepoint_ade806874ef80d8220f2d79c15884122d}{C\+L\+A\+S\+S\+\_\+\+I\+D} = \textquotesingle{}04a4fe12-\/0475-\/11e5-\/9add-\/0050569e00a2\textquotesingle{}
+\item 
+\hypertarget{class_able_polecat___savepoint_af796dca8d3ad5b3272b86a674fc90024}{}const {\bfseries C\+L\+A\+S\+S\+\_\+\+N\+A\+M\+E} = \textquotesingle{}\hyperlink{class_able_polecat___savepoint}{Able\+Polecat\+\_\+\+Savepoint}\textquotesingle{}\label{class_able_polecat___savepoint_af796dca8d3ad5b3272b86a674fc90024}
+
+\item 
+const \hyperlink{class_able_polecat___savepoint_a693979d85f1f89b2d1d1d6832d906efe}{P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D} = \textquotesingle{}id\textquotesingle{}
+\item 
+\hypertarget{class_able_polecat___savepoint_aab3d193493b30796383bfc740cdf4fea}{}const {\bfseries P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+N\+A\+M\+E} = \textquotesingle{}name\textquotesingle{}\label{class_able_polecat___savepoint_aab3d193493b30796383bfc740cdf4fea}
+
+\item 
+\hypertarget{class_able_polecat___savepoint_ae1770ba9fa04ca8466c8ddb3f9b57fe5}{}const {\bfseries P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+T\+R\+X\+I\+D} = \textquotesingle{}transaction id\textquotesingle{}\label{class_able_polecat___savepoint_ae1770ba9fa04ca8466c8ddb3f9b57fe5}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___savepoint_a9e2c7057a015ff443bdeb02e64e15749}{set\+Transaction\+Id} (\$id)
+\item 
+\hyperlink{class_able_polecat___savepoint_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___savepoint_a239b1c70258014a86569483c2d009de6}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!create@{create}}
+\index{create@{create}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{create}]{\setlength{\rightskip}{0pt plus 5cm}static create (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___savepoint_a239b1c70258014a86569483c2d009de6}
+Creational method.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___transaction_interface}{Able\+Polecat\+\_\+\+Transaction\+Interface} & {\em \$\+Transaction} & Parent transaction of save point. \\
+\hline
+string & {\em \$name} & Name of save point.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\hyperlink{class_able_polecat___savepoint}{Able\+Polecat\+\_\+\+Savepoint} Concrete instance of class. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___token_interface_a239b1c70258014a86569483c2d009de6}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Token\+Interface}.
+
+\hypertarget{class_able_polecat___savepoint_ad9ade868bd136d32967059d1cccb3e92}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!get\+Scope@{get\+Scope}}
+\index{get\+Scope@{get\+Scope}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{get\+Scope}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Scope (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___savepoint_ad9ade868bd136d32967059d1cccb3e92}
+General purpose of object implementing this interface.
+
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article_interface_ad9ade868bd136d32967059d1cccb3e92}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}.
+
+\hypertarget{class_able_polecat___savepoint_a83a4c2954e4da6dad24e596265e33d0a}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!get\+Transaction\+Id@{get\+Transaction\+Id}}
+\index{get\+Transaction\+Id@{get\+Transaction\+Id}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{get\+Transaction\+Id}]{\setlength{\rightskip}{0pt plus 5cm}get\+Transaction\+Id (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___savepoint_a83a4c2954e4da6dad24e596265e33d0a}
+Return the id of the parent transaction.
+
+\begin{DoxyReturn}{Returns}
+string Id of transaction. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___savepoint_interface_a83a4c2954e4da6dad24e596265e33d0a}{Able\+Polecat\+\_\+\+Savepoint\+Interface}.
+
+\hypertarget{class_able_polecat___savepoint_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___savepoint_a91098fa7d1917ce4833f284bbef12627}
+Extends \hyperlink{class_able_polecat___access_control___token_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct()}. \hypertarget{class_able_polecat___savepoint_a4d9813fea8525b19a1d370eeb8fe41d6}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!serialize@{serialize}}
+\index{serialize@{serialize}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___savepoint_a4d9813fea8525b19a1d370eeb8fe41d6}
+\begin{DoxyReturn}{Returns}
+string serialized representation of \hyperlink{class_able_polecat___data___primitive___scalar_abstract}{Able\+Polecat\+\_\+\+Data\+\_\+\+Primitive\+\_\+\+Scalar\+Abstract}. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___savepoint_a9e2c7057a015ff443bdeb02e64e15749}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!set\+Transaction\+Id@{set\+Transaction\+Id}}
+\index{set\+Transaction\+Id@{set\+Transaction\+Id}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{set\+Transaction\+Id}]{\setlength{\rightskip}{0pt plus 5cm}set\+Transaction\+Id (
+\begin{DoxyParamCaption}
+\item[{}]{\$id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___savepoint_a9e2c7057a015ff443bdeb02e64e15749}
+Set parent transaction id.
+
+\begin{DoxyReturn}{Returns}
+string \$id. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___savepoint_a91b3cb8a65e42152cacf1cf222bd26f6}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}unserialize (
+\begin{DoxyParamCaption}
+\item[{}]{\$data}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___savepoint_a91b3cb8a65e42152cacf1cf222bd26f6}
+\begin{DoxyReturn}{Returns}
+concrete instance of \hyperlink{class_able_polecat___data___primitive___scalar_abstract}{Able\+Polecat\+\_\+\+Data\+\_\+\+Primitive\+\_\+\+Scalar\+Abstract}. 
+\end{DoxyReturn}
+
+
+\subsection{Field Documentation}
+\hypertarget{class_able_polecat___savepoint_ade806874ef80d8220f2d79c15884122d}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!C\+L\+A\+S\+S\+\_\+\+I\+D@{C\+L\+A\+S\+S\+\_\+\+I\+D}}
+\index{C\+L\+A\+S\+S\+\_\+\+I\+D@{C\+L\+A\+S\+S\+\_\+\+I\+D}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{C\+L\+A\+S\+S\+\_\+\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}const C\+L\+A\+S\+S\+\_\+\+I\+D = \textquotesingle{}04a4fe12-\/0475-\/11e5-\/9add-\/0050569e00a2\textquotesingle{}}\label{class_able_polecat___savepoint_ade806874ef80d8220f2d79c15884122d}
+Article constants. \hypertarget{class_able_polecat___savepoint_a693979d85f1f89b2d1d1d6832d906efe}{}\index{Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}!P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D@{P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D}}
+\index{P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D@{P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D}!Able\+Polecat\+\_\+\+Savepoint@{Able\+Polecat\+\_\+\+Savepoint}}
+\subsubsection[{P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}const P\+R\+O\+P\+E\+R\+T\+Y\+\_\+\+I\+D = \textquotesingle{}id\textquotesingle{}}\label{class_able_polecat___savepoint_a693979d85f1f89b2d1d1d6832d906efe}
+Serialization constants. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\hyperlink{_savepoint_8php}{Savepoint.\+php}\end{DoxyCompactItemize}

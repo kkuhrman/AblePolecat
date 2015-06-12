@@ -1,0 +1,101 @@
+\hypertarget{class_able_polecat___unit_test}{}\section{Able\+Polecat\+\_\+\+Unit\+Test Class Reference}
+\label{class_able_polecat___unit_test}\index{Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___unit_test_a4bb3997297e951fb25f88e045c679605}{get\+Test\+Results} ()
+\item 
+static \hyperlink{class_able_polecat___unit_test_a1f2b834f83fc624f116235624eca4282}{set\+Test\+Result} (\$method\+Name, \$result, \hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception} \$Exception=N\+U\+L\+L)
+\item 
+static \hyperlink{class_able_polecat___unit_test_a1a4e354629fa94dd228424975a8dddeb}{test\+Method} (\$Test\+Subject, \$method\+Name, \$args, \$expected\+Return\+Value)
+\item 
+static \hyperlink{class_able_polecat___unit_test_a08b82141e50fa9304cc3982e5c46dae8}{create\+Mismatch\+Exception} (\$class\+Name, \$method\+Name, \$report\+Expected\+Value, \$report\+Return\+Value)
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___unit_test_a08b82141e50fa9304cc3982e5c46dae8}{}\index{Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}!create\+Mismatch\+Exception@{create\+Mismatch\+Exception}}
+\index{create\+Mismatch\+Exception@{create\+Mismatch\+Exception}!Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}}
+\subsubsection[{create\+Mismatch\+Exception}]{\setlength{\rightskip}{0pt plus 5cm}static create\+Mismatch\+Exception (
+\begin{DoxyParamCaption}
+\item[{}]{\$class\+Name, }
+\item[{}]{\$method\+Name, }
+\item[{}]{\$report\+Expected\+Value, }
+\item[{}]{\$report\+Return\+Value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___unit_test_a08b82141e50fa9304cc3982e5c46dae8}
+Create an exception based on expected results not matching actual results.
+
+This function does not throw an exception, rather returns the exception object, ready to throw or pass to a utility function like \begin{DoxySeeAlso}{See also}
+\hyperlink{class_able_polecat___unit_test_a1f2b834f83fc624f116235624eca4282}{set\+Test\+Result()}.
+\end{DoxySeeAlso}
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$class\+Name} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___unit_test_a4bb3997297e951fb25f88e045c679605}{}\index{Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}!get\+Test\+Results@{get\+Test\+Results}}
+\index{get\+Test\+Results@{get\+Test\+Results}!Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}}
+\subsubsection[{get\+Test\+Results}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Test\+Results (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___unit_test_a4bb3997297e951fb25f88e045c679605}
+\begin{DoxyReturn}{Returns}
+Array Results of test(s). 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___unit_test_a1f2b834f83fc624f116235624eca4282}{}\index{Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}!set\+Test\+Result@{set\+Test\+Result}}
+\index{set\+Test\+Result@{set\+Test\+Result}!Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}}
+\subsubsection[{set\+Test\+Result}]{\setlength{\rightskip}{0pt plus 5cm}static set\+Test\+Result (
+\begin{DoxyParamCaption}
+\item[{}]{\$method\+Name, }
+\item[{}]{\$result, }
+\item[{{\bf Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception}}]{\$\+Exception = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___unit_test_a1f2b834f83fc624f116235624eca4282}
+Set result of given test.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$method\+Name} & Name of test method (best practice is to use {\bfseries M\+E\+T\+H\+O\+D} or {\bfseries F\+U\+N\+C\+T\+I\+O\+N}). \\
+\hline
+boolean & {\em \$result} & T\+R\+U\+E $\vert$ F\+A\+L\+S\+E (P\+A\+S\+S $\vert$ F\+A\+I\+L). \\
+\hline
+\hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception} & {\em \$\+Exception} & thrown by test method. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_able_polecat___unit_test_a1a4e354629fa94dd228424975a8dddeb}{}\index{Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}!test\+Method@{test\+Method}}
+\index{test\+Method@{test\+Method}!Able\+Polecat\+\_\+\+Unit\+Test@{Able\+Polecat\+\_\+\+Unit\+Test}}
+\subsubsection[{test\+Method}]{\setlength{\rightskip}{0pt plus 5cm}static test\+Method (
+\begin{DoxyParamCaption}
+\item[{}]{\$\+Test\+Subject, }
+\item[{}]{\$method\+Name, }
+\item[{}]{\$args, }
+\item[{}]{\$expected\+Return\+Value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___unit_test_a1a4e354629fa94dd228424975a8dddeb}
+Run test on given class method and return result.
+
+For tests on non-\/static methods, the first parameter should be an instance of the class being tested. The name of the class will suffice for tests of static methods.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$\+Test\+Subject} & Instance or name of class subjected to test. \\
+\hline
+string & {\em \$method\+Name} & Name of method to test. \\
+\hline
+Array & {\em \$args} & Arguments passed to method. \\
+\hline
+mixed & {\em \$expected\+Return\+Value} & Result expected on success.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception}} & if any test fails. \\
+\hline
+\end{DoxyExceptions}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\hyperlink{_unit_test_8php}{Unit\+Test.\+php}\end{DoxyCompactItemize}
