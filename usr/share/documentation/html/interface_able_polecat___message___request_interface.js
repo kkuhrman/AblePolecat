@@ -23,6 +23,5 @@ var interface_able_polecat___message___request_interface =
     [ "URI_PATH", "interface_able_polecat___message___request_interface.html#af0e8f16a6215d6c08bacc2ab85269be6", null ],
     [ "URI_REDIRECT", "interface_able_polecat___message___request_interface.html#ac3264037680f6777d0b1f1f41c10e612", null ],
     [ "URI_RESOURCE_NAME", "interface_able_polecat___message___request_interface.html#a338a1b904d68254dc1d5ca30a68c7a2f", null ],
-    [ "URI_SEARCH_PARAM", "interface_able_polecat___message___request_interface.html#aabac9c0415cb1fc8114f38584031d039", null ],
-    [ "URI_SLASH", "interface_able_polecat___message___request_interface.html#a0ac31bc8411631c18da6cd1b189125d9", null ]
+    [ "URI_SEARCH_PARAM", "interface_able_polecat___message___request_interface.html#aabac9c0415cb1fc8114f38584031d039", null ]
 ];

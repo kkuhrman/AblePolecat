@@ -12,8 +12,6 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Mode\+\_\+\+Config\+:\begin{figure}
 \hyperlink{class_able_polecat___mode___config_a365e24d7b066205cafa2a5cce3a4f224}{sleep} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
 \item 
 \hyperlink{class_able_polecat___mode___config_aa7f01cbd17bffdbbb7511a3c37756064}{execute} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command)
-\item 
-\hyperlink{class_able_polecat___mode___config_a9585fbac2aec4e691bf7c5b9031a0fd3}{get\+Core\+Database} ()
 \end{DoxyCompactItemize}
 \subsection*{Static Public Member Functions}
 \begin{DoxyCompactItemize}
@@ -28,12 +26,7 @@ static \hyperlink{class_able_polecat___mode___config_a04e7e0f41da8037ae797868b61
 \item 
 static \hyperlink{class_able_polecat___mode___config_a68bdefd00518f09963ea3fa95cd2a242}{set\+Environment\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name, \$value)
 \item 
-static \hyperlink{class_able_polecat___mode___config_aa36943133d0afdd8efe4a026c3eec1b5}{core\+Database\+Is\+Ready} ()
-\item 
 static \hyperlink{class_able_polecat___mode___config_a98f25f25f60a178ec74bb6d61a2da394}{get\+Boot\+Log\+File\+Path} (\$as\+Str=T\+R\+U\+E)
-\item 
-\hypertarget{class_able_polecat___mode___config_a2eb991ebefbf1af0a620cdc6c109bf60}{}static {\bfseries get\+Core\+Database\+Connection\+Settings} ()\label{class_able_polecat___mode___config_a2eb991ebefbf1af0a620cdc6c109bf60}
-
 \item 
 static \hyperlink{class_able_polecat___mode___config_aacf69cc3cf05703578df104da8eb0bcd}{get\+Core\+Class\+Library\+Conf\+File} ()
 \item 
@@ -84,16 +77,6 @@ static \hyperlink{class_able_polecat___mode___config_a6a9eed480560ff670525c846bc
 
 
 \subsection{Member Function Documentation}
-\hypertarget{class_able_polecat___mode___config_aa36943133d0afdd8efe4a026c3eec1b5}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}!core\+Database\+Is\+Ready@{core\+Database\+Is\+Ready}}
-\index{core\+Database\+Is\+Ready@{core\+Database\+Is\+Ready}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}}
-\subsubsection[{core\+Database\+Is\+Ready}]{\setlength{\rightskip}{0pt plus 5cm}static core\+Database\+Is\+Ready (
-\begin{DoxyParamCaption}
-{}
-\end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___config_aa36943133d0afdd8efe4a026c3eec1b5}
-\begin{DoxyReturn}{Returns}
-boolean T\+R\+U\+E if core database connection is established, otherwise F\+A\+L\+S\+E. 
-\end{DoxyReturn}
 \hypertarget{class_able_polecat___mode___config_a6a9eed480560ff670525c846bc1889c4}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}!create\+Project\+Conf\+File@{create\+Project\+Conf\+File}}
 \index{create\+Project\+Conf\+File@{create\+Project\+Conf\+File}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}}
 \subsubsection[{create\+Project\+Conf\+File}]{\setlength{\rightskip}{0pt plus 5cm}static create\+Project\+Conf\+File (
@@ -171,24 +154,7 @@ bool & {\em \$as\+Str} & If F\+A\+L\+S\+E, return path hierarchy as array, other
 \begin{DoxyReturn}{Returns}
 mixed. 
 \end{DoxyReturn}
-\hypertarget{class_able_polecat___mode___config_a9585fbac2aec4e691bf7c5b9031a0fd3}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}!get\+Core\+Database@{get\+Core\+Database}}
-\index{get\+Core\+Database@{get\+Core\+Database}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}}
-\subsubsection[{get\+Core\+Database}]{\setlength{\rightskip}{0pt plus 5cm}get\+Core\+Database (
-\begin{DoxyParamCaption}
-{}
-\end{DoxyParamCaption}
-)}\label{class_able_polecat___mode___config_a9585fbac2aec4e691bf7c5b9031a0fd3}
-Initialize connection to core database.
-
-More than one application database can be defined in server conf file. However, only O\+N\+E application database can be active per server mode. If \textquotesingle{}mode\textquotesingle{} attribute is empty, polecat will assume any mode. Otherwise, database is defined for given mode only. The \textquotesingle{}use\textquotesingle{} attribute indicates that the database should be loaded for the respective server mode. Polecat will scan database definitions until it finds one suitable for the current server mode where the \textquotesingle{}use\textquotesingle{} attribute is set. 
-\begin{DoxyCode}
-<database \textcolor{keywordtype}{id}=\textcolor{stringliteral}{"core"} name=\textcolor{stringliteral}{"polecat"} mode=\textcolor{stringliteral}{"server"} use=\textcolor{stringliteral}{"1"}>
- <dsn>mysql:\textcolor{comment}{//username:password@localhost/databasename</dsn>}
-</database>
-\end{DoxyCode}
-
-
-Only one instance of core (server mode) database can be active. Otherwise, Able Polecat stops boot and throws exception. \hypertarget{class_able_polecat___mode___config_a2c846f82f5a9eaf53b91c3044368f90a}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}!get\+Core\+Database\+Id@{get\+Core\+Database\+Id}}
+\hypertarget{class_able_polecat___mode___config_a2c846f82f5a9eaf53b91c3044368f90a}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}!get\+Core\+Database\+Id@{get\+Core\+Database\+Id}}
 \index{get\+Core\+Database\+Id@{get\+Core\+Database\+Id}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Config@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}}
 \subsubsection[{get\+Core\+Database\+Id}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Core\+Database\+Id (
 \begin{DoxyParamCaption}
@@ -443,4 +409,4 @@ Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6a
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Mode/Config.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Mode/\hyperlink{_config_8php}{Config.\+php}\end{DoxyCompactItemize}

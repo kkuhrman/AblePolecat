@@ -57,27 +57,47 @@ var hierarchy =
         [ "AblePolecat_AccessControl_SubjectInterface", "interface_able_polecat___access_control___subject_interface.html", [
           [ "AblePolecat_AccessControl_AgentInterface", "interface_able_polecat___access_control___agent_interface.html", [
             [ "AblePolecat_AccessControl_AgentAbstract", "class_able_polecat___access_control___agent_abstract.html", [
-              [ "AblePolecat_AccessControl_Agent_System", "class_able_polecat___access_control___agent___system.html", null ],
-              [ "AblePolecat_AccessControl_Agent_User", "class_able_polecat___access_control___agent___user.html", null ]
+              [ "AblePolecat_AccessControl_Agent_User", "class_able_polecat___access_control___agent___user.html", null ],
+              [ "AblePolecat_AccessControl_Agent_User_System", "class_able_polecat___access_control___agent___user___system.html", null ]
             ] ]
           ] ],
           [ "AblePolecat_AccessControl_RoleInterface", "interface_able_polecat___access_control___role_interface.html", [
-            [ "AblePolecat_AccessControl_Role_UserInterface", "interface_able_polecat___access_control___role___user_interface.html", [
-              [ "AblePolecat_AccessControl_Role_User_Anonymous", "class_able_polecat___access_control___role___user___anonymous.html", null ],
-              [ "AblePolecat_AccessControl_Role_User_AuthenticatedInterface", "interface_able_polecat___access_control___role___user___authenticated_interface.html", [
-                [ "AblePolecat_AccessControl_Role_User_Authenticated", "class_able_polecat___access_control___role___user___authenticated.html", null ],
-                [ "AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Interface", "interface_able_polecat___access_control___role___user___authenticated___o_auth2_interface.html", [
-                  [ "AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract", "class_able_polecat___access_control___role___user___authenticated___o_auth2_abstract.html", null ]
-                ] ]
+            [ "AblePolecat_AccessControl_Role_ClientInterface", "interface_able_polecat___access_control___role___client_interface.html", [
+              [ "AblePolecat_AccessControl_Role_Client_DatabaseInterface", "interface_able_polecat___access_control___role___client___database_interface.html", [
+                [ "AblePolecat_AccessControl_Role_Client_Database", "class_able_polecat___access_control___role___client___database.html", null ]
+              ] ],
+              [ "AblePolecat_AccessControl_Role_ClientAbstract", "class_able_polecat___access_control___role___client_abstract.html", [
+                [ "AblePolecat_AccessControl_Role_Client_Database", "class_able_polecat___access_control___role___client___database.html", null ]
               ] ]
             ] ],
             [ "AblePolecat_AccessControl_RoleAbstract", "class_able_polecat___access_control___role_abstract.html", [
-              [ "AblePolecat_AccessControl_Role_User_Anonymous", "class_able_polecat___access_control___role___user___anonymous.html", null ],
-              [ "AblePolecat_AccessControl_Role_User_Authenticated", "class_able_polecat___access_control___role___user___authenticated.html", null ]
+              [ "AblePolecat_AccessControl_Role_ClientAbstract", "class_able_polecat___access_control___role___client_abstract.html", null ]
             ] ]
+          ] ],
+          [ "AblePolecat_AccessControl_SubjectAbstract", "class_able_polecat___access_control___subject_abstract.html", [
+            [ "AblePolecat_AccessControl_AgentAbstract", "class_able_polecat___access_control___agent_abstract.html", null ],
+            [ "AblePolecat_AccessControl_RoleAbstract", "class_able_polecat___access_control___role_abstract.html", null ],
+            [ "AblePolecat_Session", "class_able_polecat___session.html", null ]
           ] ],
           [ "AblePolecat_SessionInterface", "interface_able_polecat___session_interface.html", [
             [ "AblePolecat_Session", "class_able_polecat___session.html", null ]
+          ] ]
+        ] ],
+        [ "AblePolecat_AccessControl_TokenInterface", "interface_able_polecat___access_control___token_interface.html", [
+          [ "AblePolecat_AccessControl_Token_DsnInterface", "interface_able_polecat___access_control___token___dsn_interface.html", [
+            [ "AblePolecat_AccessControl_Token_Dsn", "class_able_polecat___access_control___token___dsn.html", null ]
+          ] ],
+          [ "AblePolecat_AccessControl_TokenAbstract", "class_able_polecat___access_control___token_abstract.html", [
+            [ "AblePolecat_AccessControl_Token_Dsn", "class_able_polecat___access_control___token___dsn.html", null ],
+            [ "AblePolecat_Savepoint", "class_able_polecat___savepoint.html", null ]
+          ] ],
+          [ "AblePolecat_SavepointInterface", "interface_able_polecat___savepoint_interface.html", [
+            [ "AblePolecat_Savepoint", "class_able_polecat___savepoint.html", null ]
+          ] ]
+        ] ],
+        [ "AblePolecat_ComponentInterface", "interface_able_polecat___component_interface.html", [
+          [ "AblePolecat_ComponentAbstract", "class_able_polecat___component_abstract.html", [
+            [ "AblePolecat_Component_Form", "class_able_polecat___component___form.html", null ]
           ] ]
         ] ],
         [ "AblePolecat_Registry_EntryInterface", "interface_able_polecat___registry___entry_interface.html", [
@@ -122,14 +142,20 @@ var hierarchy =
           ] ]
         ] ],
         [ "AblePolecat_TransactionInterface", "interface_able_polecat___transaction_interface.html", [
-          [ "AblePolecat_Transaction_RestrictedInterface", "interface_able_polecat___transaction___restricted_interface.html", null ],
-          [ "AblePolecat_TransactionAbstract", "class_able_polecat___transaction_abstract.html", [
+          [ "AblePolecat_Transaction_AuthenticateInterface", "interface_able_polecat___transaction___authenticate_interface.html", [
+            [ "AblePolecat_Transaction_AuthenticateAbstract", "class_able_polecat___transaction___authenticate_abstract.html", null ]
+          ] ],
+          [ "AblePolecat_Transaction_RestrictedInterface", "interface_able_polecat___transaction___restricted_interface.html", [
             [ "AblePolecat_Transaction_RestrictedAbstract", "class_able_polecat___transaction___restricted_abstract.html", [
               [ "AblePolecat_Transaction_Restricted_Install", "class_able_polecat___transaction___restricted___install.html", null ],
               [ "AblePolecat_Transaction_Restricted_Update", "class_able_polecat___transaction___restricted___update.html", null ],
               [ "AblePolecat_Transaction_Restricted_Util", "class_able_polecat___transaction___restricted___util.html", null ],
               [ "AblePolecat_Transaction_Restricted_Util_Register", "class_able_polecat___transaction___restricted___util___register.html", null ]
-            ] ],
+            ] ]
+          ] ],
+          [ "AblePolecat_TransactionAbstract", "class_able_polecat___transaction_abstract.html", [
+            [ "AblePolecat_Transaction_AuthenticateAbstract", "class_able_polecat___transaction___authenticate_abstract.html", null ],
+            [ "AblePolecat_Transaction_RestrictedAbstract", "class_able_polecat___transaction___restricted_abstract.html", null ],
             [ "AblePolecat_Transaction_Test", "class_able_polecat___transaction___test.html", null ],
             [ "AblePolecat_Transaction_Unrestricted", "class_able_polecat___transaction___unrestricted.html", null ]
           ] ]
@@ -187,13 +213,7 @@ var hierarchy =
             [ "AblePolecat_Command_ServerAbstract", "class_able_polecat___command___server_abstract.html", null ]
           ] ]
         ] ],
-        [ "AblePolecat_ComponentInterface", "interface_able_polecat___component_interface.html", [
-          [ "AblePolecat_ComponentAbstract", "class_able_polecat___component_abstract.html", null ]
-        ] ],
         [ "AblePolecat_Database_InstallerInterface", "interface_able_polecat___database___installer_interface.html", [
-          [ "AblePolecat_Database_SchemaInterface", "interface_able_polecat___database___schema_interface.html", [
-            [ "AblePolecat_Database_Schema", "class_able_polecat___database___schema.html", null ]
-          ] ],
           [ "AblePolecat_RegistryInterface", "interface_able_polecat___registry_interface.html", [
             [ "AblePolecat_Registry_ClassInterface", "interface_able_polecat___registry___class_interface.html", [
               [ "AblePolecat_Registry_Class", "class_able_polecat___registry___class.html", null ]
@@ -208,6 +228,9 @@ var hierarchy =
               [ "AblePolecat_Registry_Template", "class_able_polecat___registry___template.html", null ]
             ] ]
           ] ]
+        ] ],
+        [ "AblePolecat_Database_SchemaInterface", "interface_able_polecat___database___schema_interface.html", [
+          [ "AblePolecat_Database_Schema", "class_able_polecat___database___schema.html", null ]
         ] ],
         [ "AblePolecat_EnvironmentInterface", "interface_able_polecat___environment_interface.html", [
           [ "AblePolecat_EnvironmentAbstract", "class_able_polecat___environment_abstract.html", [
@@ -234,9 +257,7 @@ var hierarchy =
     [ "AblePolecat_CacheObjectInterface", "interface_able_polecat___cache_object_interface.html", [
       [ "AblePolecat_AccessControl_RoleInterface", "interface_able_polecat___access_control___role_interface.html", null ],
       [ "AblePolecat_CacheObjectAbstract", "class_able_polecat___cache_object_abstract.html", [
-        [ "AblePolecat_AccessControl_AgentAbstract", "class_able_polecat___access_control___agent_abstract.html", null ],
-        [ "AblePolecat_AccessControl_Role_User_Authenticated_OAuth2Abstract", "class_able_polecat___access_control___role___user___authenticated___o_auth2_abstract.html", null ],
-        [ "AblePolecat_AccessControl_RoleAbstract", "class_able_polecat___access_control___role_abstract.html", null ],
+        [ "AblePolecat_AccessControl_SubjectAbstract", "class_able_polecat___access_control___subject_abstract.html", null ],
         [ "AblePolecat_Command_Chain", "class_able_polecat___command___chain.html", null ],
         [ "AblePolecat_Command_TargetAbstract", "class_able_polecat___command___target_abstract.html", null ],
         [ "AblePolecat_DatabaseAbstract", "class_able_polecat___database_abstract.html", null ],
@@ -250,7 +271,6 @@ var hierarchy =
         [ "AblePolecat_Service_Bus", "class_able_polecat___service___bus.html", null ],
         [ "AblePolecat_Service_InitiatorAbstract", "class_able_polecat___service___initiator_abstract.html", null ],
         [ "AblePolecat_Service_ListenerAbstract", "class_able_polecat___service___listener_abstract.html", null ],
-        [ "AblePolecat_Session", "class_able_polecat___session.html", null ],
         [ "AblePolecat_TransactionAbstract", "class_able_polecat___transaction_abstract.html", null ]
       ] ],
       [ "AblePolecat_Command_ChainInterface", "interface_able_polecat___command___chain_interface.html", null ],
@@ -276,7 +296,9 @@ var hierarchy =
       [ "AblePolecat_Data_PrimitiveInterface", "interface_able_polecat___data___primitive_interface.html", [
         [ "AblePolecat_Data_Primitive_ScalarInterface", "interface_able_polecat___data___primitive___scalar_interface.html", [
           [ "AblePolecat_Data_Primitive_ScalarAbstract", "class_able_polecat___data___primitive___scalar_abstract.html", [
+            [ "AblePolecat_Data_Primitive_Scalar_Boolean", "class_able_polecat___data___primitive___scalar___boolean.html", null ],
             [ "AblePolecat_Data_Primitive_Scalar_Integer", "class_able_polecat___data___primitive___scalar___integer.html", null ],
+            [ "AblePolecat_Data_Primitive_Scalar_Null", "class_able_polecat___data___primitive___scalar___null.html", null ],
             [ "AblePolecat_Data_Primitive_Scalar_String", "class_able_polecat___data___primitive___scalar___string.html", null ]
           ] ]
         ] ],
@@ -305,7 +327,10 @@ var hierarchy =
       [ "AblePolecat_Dom_ElementInterface", "interface_able_polecat___dom___element_interface.html", [
         [ "AblePolecat_ComponentInterface", "interface_able_polecat___component_interface.html", null ]
       ] ],
-      [ "AblePolecat_Resource_CoreInterface", "interface_able_polecat___resource___core_interface.html", null ]
+      [ "AblePolecat_Resource_CoreInterface", "interface_able_polecat___resource___core_interface.html", null ],
+      [ "AblePolecat_UnitTest_ResultInterface", "interface_able_polecat___unit_test___result_interface.html", [
+        [ "AblePolecat_UnitTest_Result", "class_able_polecat___unit_test___result.html", null ]
+      ] ]
     ] ],
     [ "AblePolecat_Error", "class_able_polecat___error.html", null ],
     [ "AblePolecat_OverloadableInterface", "interface_able_polecat___overloadable_interface.html", [
@@ -385,6 +410,7 @@ var hierarchy =
         [ "AblePolecat_Registry_EntryInterface", "interface_able_polecat___registry___entry_interface.html", null ]
       ] ]
     ] ],
+    [ "AblePolecat_UnitTest", "class_able_polecat___unit_test.html", null ],
     [ "AblePolecat_UnitTestInterface", "interface_able_polecat___unit_test_interface.html", null ],
     [ "ArrayAccess", null, [
       [ "AblePolecat_Data_Primitive_ArrayInterface", "interface_able_polecat___data___primitive___array_interface.html", null ]
@@ -394,6 +420,7 @@ var hierarchy =
         [ "AblePolecat_AccessControl_Exception", "class_able_polecat___access_control___exception.html", null ],
         [ "AblePolecat_Clock_Exception", "class_able_polecat___clock___exception.html", null ],
         [ "AblePolecat_Command_Exception", "class_able_polecat___command___exception.html", null ],
+        [ "AblePolecat_Component_Exception", "class_able_polecat___component___exception.html", null ],
         [ "AblePolecat_Data_Exception", "class_able_polecat___data___exception.html", null ],
         [ "AblePolecat_Database_Exception", "class_able_polecat___database___exception.html", null ],
         [ "AblePolecat_Dom_Exception", "class_able_polecat___dom___exception.html", null ],
@@ -416,6 +443,7 @@ var hierarchy =
       [ "AblePolecat_Data_Primitive_ArrayInterface", "interface_able_polecat___data___primitive___array_interface.html", null ]
     ] ],
     [ "Serializable", null, [
+      [ "AblePolecat_AccessControl_TokenInterface", "interface_able_polecat___access_control___token_interface.html", null ],
       [ "AblePolecat_Data_PrimitiveInterface", "interface_able_polecat___data___primitive_interface.html", null ],
       [ "AblePolecat_Data_StructureInterface", "interface_able_polecat___data___structure_interface.html", null ]
     ] ]

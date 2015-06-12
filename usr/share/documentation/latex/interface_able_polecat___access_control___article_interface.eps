@@ -178,6 +178,8 @@ boxfont setfont
 (AblePolecat_AccessControl_Article_StaticInterface) cw
 (AblePolecat_AccessControl_ResourceInterface) cw
 (AblePolecat_AccessControl_SubjectInterface) cw
+(AblePolecat_AccessControl_TokenInterface) cw
+(AblePolecat_ComponentInterface) cw
 (AblePolecat_Registry_EntryInterface) cw
 (AblePolecat_TransactionInterface) cw
 (AblePolecat_AccessControl_AuthorityInterface) cw
@@ -185,8 +187,8 @@ boxfont setfont
 (AblePolecat_Command_ChainInterface) cw
 (AblePolecat_Command_TargetInterface) cw
 (AblePolecat_CommandInterface) cw
-(AblePolecat_ComponentInterface) cw
 (AblePolecat_Database_InstallerInterface) cw
+(AblePolecat_Database_SchemaInterface) cw
 (AblePolecat_EnvironmentInterface) cw
 (AblePolecat_Service_Bus) cw
 (AblePolecat_Version) cw
@@ -208,10 +210,14 @@ boundx scalefactor div boundy scalefactor div scale
 1.000000 9.000000 mark
  (AblePolecat_AccessControl_SubjectInterface) 1.000000 8.000000 box
 1.000000 8.000000 mark
- (AblePolecat_Registry_EntryInterface) 1.000000 7.000000 box
+ (AblePolecat_AccessControl_TokenInterface) 1.000000 7.000000 box
 1.000000 7.000000 mark
- (AblePolecat_TransactionInterface) 1.000000 6.000000 box
+ (AblePolecat_ComponentInterface) 1.000000 6.000000 box
 1.000000 6.000000 mark
+ (AblePolecat_Registry_EntryInterface) 1.000000 5.000000 box
+1.000000 5.000000 mark
+ (AblePolecat_TransactionInterface) 1.000000 4.000000 box
+1.000000 4.000000 mark
  (AblePolecat_AccessControl_AuthorityInterface) 3.000000 9.000000 box
  (AblePolecat_AccessControl_ConstraintInterface) 3.000000 8.000000 box
 3.000000 8.000000 mark
@@ -221,9 +227,9 @@ boundx scalefactor div boundy scalefactor div scale
 3.000000 6.000000 mark
  (AblePolecat_CommandInterface) 3.000000 5.000000 box
 3.000000 5.000000 mark
- (AblePolecat_ComponentInterface) 3.000000 4.000000 box
+ (AblePolecat_Database_InstallerInterface) 3.000000 4.000000 box
 3.000000 4.000000 mark
- (AblePolecat_Database_InstallerInterface) 3.000000 3.000000 box
+ (AblePolecat_Database_SchemaInterface) 3.000000 3.000000 box
 3.000000 3.000000 mark
  (AblePolecat_EnvironmentInterface) 3.000000 2.000000 box
 3.000000 2.000000 mark
@@ -253,7 +259,11 @@ solid
 solid
 0 0.000000 6.500000 hedge
 solid
-0.000000 10.000000 6.500000 vedge
+0 0.000000 5.500000 hedge
+solid
+0 0.000000 4.500000 hedge
+solid
+0.000000 10.000000 4.500000 vedge
 solid
 0 2.000000 9.500000 hedge
 solid

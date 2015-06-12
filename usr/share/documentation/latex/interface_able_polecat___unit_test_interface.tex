@@ -3,11 +3,27 @@
 \subsection*{Static Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
+static \hyperlink{interface_able_polecat___unit_test_interface_a4bb3997297e951fb25f88e045c679605}{get\+Test\+Results} ()
+\item 
 static \hyperlink{interface_able_polecat___unit_test_interface_a35055cbe4de87057d7ee44fa29cc8d90}{run\+Tests} ()
+\item 
+static \hyperlink{interface_able_polecat___unit_test_interface_a1f2b834f83fc624f116235624eca4282}{set\+Test\+Result} (\$method\+Name, \$result, \hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception} \$Exception=N\+U\+L\+L)
+\item 
+static \hyperlink{interface_able_polecat___unit_test_interface_a1a4e354629fa94dd228424975a8dddeb}{test\+Method} (\$Test\+Subject, \$method\+Name, \$args, \$expected\+Return\+Value)
 \end{DoxyCompactItemize}
 
 
 \subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___unit_test_interface_a4bb3997297e951fb25f88e045c679605}{}\index{Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}!get\+Test\+Results@{get\+Test\+Results}}
+\index{get\+Test\+Results@{get\+Test\+Results}!Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}}
+\subsubsection[{get\+Test\+Results}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Test\+Results (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___unit_test_interface_a4bb3997297e951fb25f88e045c679605}
+\begin{DoxyReturn}{Returns}
+Array Results of test(s). 
+\end{DoxyReturn}
 \hypertarget{interface_able_polecat___unit_test_interface_a35055cbe4de87057d7ee44fa29cc8d90}{}\index{Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}!run\+Tests@{run\+Tests}}
 \index{run\+Tests@{run\+Tests}!Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}}
 \subsubsection[{run\+Tests}]{\setlength{\rightskip}{0pt plus 5cm}static run\+Tests (
@@ -22,8 +38,58 @@ Run all the tests in the class.
 {\em \hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception}} & if any test fails. \\
 \hline
 \end{DoxyExceptions}
+\hypertarget{interface_able_polecat___unit_test_interface_a1f2b834f83fc624f116235624eca4282}{}\index{Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}!set\+Test\+Result@{set\+Test\+Result}}
+\index{set\+Test\+Result@{set\+Test\+Result}!Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}}
+\subsubsection[{set\+Test\+Result}]{\setlength{\rightskip}{0pt plus 5cm}static set\+Test\+Result (
+\begin{DoxyParamCaption}
+\item[{}]{\$method\+Name, }
+\item[{}]{\$result, }
+\item[{{\bf Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception}}]{\$\+Exception = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___unit_test_interface_a1f2b834f83fc624f116235624eca4282}
+Set result of given test.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$method\+Name} & Name of test method (best practice is to use {\bfseries M\+E\+T\+H\+O\+D} or {\bfseries F\+U\+N\+C\+T\+I\+O\+N}). \\
+\hline
+boolean & {\em \$result} & T\+R\+U\+E $\vert$ F\+A\+L\+S\+E (P\+A\+S\+S $\vert$ F\+A\+I\+L). \\
+\hline
+\hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception} & {\em \$\+Exception} & thrown by test method. \\
+\hline
+\end{DoxyParams}
+\hypertarget{interface_able_polecat___unit_test_interface_a1a4e354629fa94dd228424975a8dddeb}{}\index{Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}!test\+Method@{test\+Method}}
+\index{test\+Method@{test\+Method}!Able\+Polecat\+\_\+\+Unit\+Test\+Interface@{Able\+Polecat\+\_\+\+Unit\+Test\+Interface}}
+\subsubsection[{test\+Method}]{\setlength{\rightskip}{0pt plus 5cm}static test\+Method (
+\begin{DoxyParamCaption}
+\item[{}]{\$\+Test\+Subject, }
+\item[{}]{\$method\+Name, }
+\item[{}]{\$args, }
+\item[{}]{\$expected\+Return\+Value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___unit_test_interface_a1a4e354629fa94dd228424975a8dddeb}
+Run test on given class method and return result.
+
+For tests on non-\/static methods, the first parameter should be an instance of the class being tested. The name of the class will suffice for tests of static methods.
+
+
+\begin{DoxyParams}[1]{Parameters}
+mixed & {\em \$\+Test\+Subject} & Instance or name of class subjected to test. \\
+\hline
+string & {\em \$method\+Name} & Name of method to test. \\
+\hline
+Array & {\em \$args} & Arguments passed to method. \\
+\hline
+mixed & {\em \$expected\+Return\+Value} & Result expected on success.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___unit_test___exception}{Able\+Polecat\+\_\+\+Unit\+Test\+\_\+\+Exception}} & if any test fails. \\
+\hline
+\end{DoxyExceptions}
 
 
 The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/Unit\+Test.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\hyperlink{_unit_test_8php}{Unit\+Test.\+php}\end{DoxyCompactItemize}

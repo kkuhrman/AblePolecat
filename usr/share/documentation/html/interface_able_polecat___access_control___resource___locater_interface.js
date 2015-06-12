@@ -29,6 +29,5 @@ var interface_able_polecat___access_control___resource___locater_interface =
     [ "setPort", "interface_able_polecat___access_control___resource___locater_interface.html#a000ce1ff20433f6ac9297e01c31d0678", null ],
     [ "setProtocol", "interface_able_polecat___access_control___resource___locater_interface.html#ae2238ca228e0bb56ca0ae233893c0b91", null ],
     [ "setSearch", "interface_able_polecat___access_control___resource___locater_interface.html#a6e37be4a04e8d920899c3a699b295c30", null ],
-    [ "setUsername", "interface_able_polecat___access_control___resource___locater_interface.html#ac359b701a2ccaff746dd480f03314244", null ],
-    [ "URI_SLASH", "interface_able_polecat___access_control___resource___locater_interface.html#a0ac31bc8411631c18da6cd1b189125d9", null ]
+    [ "setUsername", "interface_able_polecat___access_control___resource___locater_interface.html#ac359b701a2ccaff746dd480f03314244", null ]
 ];

@@ -185,6 +185,7 @@ boxfont setfont
 (AblePolecat_MetaData) cw
 (AblePolecat_ModeAbstract) cw
 (AblePolecat_QueryLanguage_Statement_SqlAbstract) cw
+(AblePolecat_Transaction_AuthenticateInterface) cw
 (AblePolecat_Transaction_RestrictedInterface) cw
 (AblePolecat_TransactionAbstract) cw
 /boxwidth boxwidth marginwidth 2 mul add def
@@ -215,9 +216,12 @@ boundx scalefactor div boundy scalefactor div scale
 3.000000 2.000000 mark
  (AblePolecat_QueryLanguage_Statement_SqlAbstract) 4.000000 2.000000 box
 4.000000 2.000000 mark
- (AblePolecat_Transaction_RestrictedInterface) 6.000000 2.000000 box
- (AblePolecat_TransactionAbstract) 6.000000 1.000000 box
+ (AblePolecat_Transaction_AuthenticateInterface) 6.000000 2.000000 box
+6.000000 2.000000 mark
+ (AblePolecat_Transaction_RestrictedInterface) 6.000000 1.000000 box
 6.000000 1.000000 mark
+ (AblePolecat_TransactionAbstract) 6.000000 0.000000 box
+6.000000 0.000000 mark
 
 % ----- relations -----
 
@@ -264,4 +268,6 @@ solid
 solid
 0 5.000000 1.500000 hedge
 solid
-5.000000 3.000000 1.500000 vedge
+0 5.000000 0.500000 hedge
+solid
+5.000000 3.000000 0.500000 vedge

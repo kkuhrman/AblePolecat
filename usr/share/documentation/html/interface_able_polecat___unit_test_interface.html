@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>Able Polecat: AblePolecat_UnitTestInterface Interface Reference</title>
+<title>AblePolecat: AblePolecat_UnitTestInterface Interface Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,10 +31,10 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">Able Polecat
-   &#160;<span id="projectnumber">0.7.0</span>
+   <div id="projectname">AblePolecat
+   &#160;<span id="projectnumber">0.7.2</span>
    </div>
-   <div id="projectbrief">Able Polecat Core Class Library</div>
+   <div id="projectbrief">LAMP stack middleware for business systems integration</div>
   </td>
  </tr>
  </tbody>
@@ -116,10 +116,40 @@ $(document).ready(function(){initNavTree('interface_able_polecat___unit_test_int
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a4bb3997297e951fb25f88e045c679605"><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___unit_test_interface.html#a4bb3997297e951fb25f88e045c679605">getTestResults</a> ()</td></tr>
+<tr class="separator:a4bb3997297e951fb25f88e045c679605"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35055cbe4de87057d7ee44fa29cc8d90"><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___unit_test_interface.html#a35055cbe4de87057d7ee44fa29cc8d90">runTests</a> ()</td></tr>
 <tr class="separator:a35055cbe4de87057d7ee44fa29cc8d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f2b834f83fc624f116235624eca4282"><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___unit_test_interface.html#a1f2b834f83fc624f116235624eca4282">setTestResult</a> ($methodName, $result, <a class="el" href="class_able_polecat___unit_test___exception.html">AblePolecat_UnitTest_Exception</a> $Exception=NULL)</td></tr>
+<tr class="separator:a1f2b834f83fc624f116235624eca4282"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a4e354629fa94dd228424975a8dddeb"><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___unit_test_interface.html#a1a4e354629fa94dd228424975a8dddeb">testMethod</a> ($TestSubject, $methodName, $args, $expectedReturnValue)</td></tr>
+<tr class="separator:a1a4e354629fa94dd228424975a8dddeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a4bb3997297e951fb25f88e045c679605"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static getTestResults </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Array Results of test(s). </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a35055cbe4de87057d7ee44fa29cc8d90"></a>
 <div class="memitem">
 <div class="memproto">
@@ -150,8 +180,120 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1f2b834f83fc624f116235624eca4282"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static setTestResult </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$methodName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_able_polecat___unit_test___exception.html">AblePolecat_UnitTest_Exception</a>&#160;</td>
+          <td class="paramname"><em>$Exception</em> = <code>NULL</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set result of given test.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">string</td><td class="paramname">$methodName</td><td>Name of test method (best practice is to use <b>METHOD</b> or <b>FUNCTION</b>). </td></tr>
+    <tr><td class="paramtype">boolean</td><td class="paramname">$result</td><td>TRUE | FALSE (PASS | FAIL). </td></tr>
+    <tr><td class="paramtype"><a class="el" href="class_able_polecat___unit_test___exception.html">AblePolecat_UnitTest_Exception</a></td><td class="paramname">$Exception</td><td>thrown by test method. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a1a4e354629fa94dd228424975a8dddeb"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static testMethod </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$TestSubject</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$methodName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$args</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$expectedReturnValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Run test on given class method and return result.</p>
+<p>For tests on non-static methods, the first parameter should be an instance of the class being tested. The name of the class will suffice for tests of static methods.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">mixed</td><td class="paramname">$TestSubject</td><td>Instance or name of class subjected to test. </td></tr>
+    <tr><td class="paramtype">string</td><td class="paramname">$methodName</td><td>Name of method to test. </td></tr>
+    <tr><td class="paramtype">Array</td><td class="paramname">$args</td><td>Arguments passed to method. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$expectedReturnValue</td><td>Result expected on success.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="class_able_polecat___unit_test___exception.html">AblePolecat_UnitTest_Exception</a></td><td>if any test fails. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this interface was generated from the following file:<ul>
-<li>C:/wamp/www/polecat/public/core/UnitTest.php</li>
+<li>C:/wamp/www/AblePolecat-Dev/usr/lib/AblePolecat/core/<a class="el" href="_unit_test_8php.html">UnitTest.php</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -159,7 +301,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="interface_able_polecat___unit_test_interface.html">AblePolecat_UnitTestInterface</a></li>
-    <li class="footer">Generated on Fri Apr 10 2015 11:24:53 for Able Polecat by
+    <li class="footer">Generated on Fri Jun 12 2015 11:52:34 for AblePolecat by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

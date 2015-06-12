@@ -39,14 +39,6 @@ static \hyperlink{class_able_polecat___mode___session_a702bed9f8676ac48dc8186bb5
 static \hyperlink{class_able_polecat___mode___session_ab28f62aa08c1b2156d70700ee9bd2504}{collect\+Session\+Garbage} (\$lifetime)
 \item 
 static \hyperlink{class_able_polecat___mode___session_acb3fc86b241bf55942bd3a72f15bdc18}{create\+Session\+Id} ()
-\item 
-static \hyperlink{class_able_polecat___mode___session_aa8a076017fb010a456c1afbb4a94da2e}{get\+Session\+Id} ()
-\item 
-static \hyperlink{class_able_polecat___mode___session_aec7157d76bfc0a3a0f577f90fae7bc33}{get\+Session\+Number} ()
-\item 
-static \hyperlink{class_able_polecat___mode___session_a8b8c4e7cd29f54e85cbde74c21f22250}{get\+Session\+Variable} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject, \$variable\+Name)
-\item 
-static \hyperlink{class_able_polecat___mode___session_aa518ae714a59feda52322b4a27283ba8}{set\+Session\+Variable} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject, \$variable\+Name, \$variable\+Value)
 \end{DoxyCompactItemize}
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
@@ -63,7 +55,6 @@ const \hyperlink{class_able_polecat___mode___session_a74b892c8c0b86bf9d04c581989
 \item 
 \hyperlink{class_able_polecat___mode___session_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
 \end{DoxyCompactItemize}
-\subsection*{Additional Inherited Members}
 
 
 \subsection{Member Function Documentation}
@@ -202,46 +193,6 @@ string Common name.
 
 Implements \hyperlink{interface_able_polecat___access_control___article___static_interface_a4ef9bd37ba3ce8a13c1e8bcf4f72a630}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+\_\+\+Static\+Interface}.
 
-\hypertarget{class_able_polecat___mode___session_aa8a076017fb010a456c1afbb4a94da2e}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}!get\+Session\+Id@{get\+Session\+Id}}
-\index{get\+Session\+Id@{get\+Session\+Id}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}}
-\subsubsection[{get\+Session\+Id}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Session\+Id (
-\begin{DoxyParamCaption}
-{}
-\end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___session_aa8a076017fb010a456c1afbb4a94da2e}
-\begin{DoxyReturn}{Returns}
-\hyperlink{interface_able_polecat___message___request_interface}{Able\+Polecat\+\_\+\+Message\+\_\+\+Request\+Interface} 
-\end{DoxyReturn}
-\hypertarget{class_able_polecat___mode___session_aec7157d76bfc0a3a0f577f90fae7bc33}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}!get\+Session\+Number@{get\+Session\+Number}}
-\index{get\+Session\+Number@{get\+Session\+Number}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}}
-\subsubsection[{get\+Session\+Number}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Session\+Number (
-\begin{DoxyParamCaption}
-{}
-\end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___session_aec7157d76bfc0a3a0f577f90fae7bc33}
-\begin{DoxyReturn}{Returns}
-int Internal (Able Polecat) session I\+D. 
-\end{DoxyReturn}
-\hypertarget{class_able_polecat___mode___session_a8b8c4e7cd29f54e85cbde74c21f22250}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}!get\+Session\+Variable@{get\+Session\+Variable}}
-\index{get\+Session\+Variable@{get\+Session\+Variable}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}}
-\subsubsection[{get\+Session\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Session\+Variable (
-\begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject, }
-\item[{}]{\$variable\+Name}
-\end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___session_a8b8c4e7cd29f54e85cbde74c21f22250}
-Retrieve variable from \$\+\_\+\+S\+E\+S\+S\+I\+O\+N global variable.
-
-
-\begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & Class attempting to retrieve variable. \\
-\hline
-string & {\em \$variable\+Name} & Name of session variable.\\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-mixed \$variable\+Value Value of session variable or N\+U\+L\+L. 
-\end{DoxyReturn}
 \hypertarget{class_able_polecat___mode___session_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}!initialize@{initialize}}
 \index{initialize@{initialize}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}}
 \subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
@@ -316,26 +267,6 @@ bool T\+R\+U\+E if variable is set, otherwise F\+A\+L\+S\+E.
 
 Implements \hyperlink{interface_able_polecat___mode_interface_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+Interface}.
 
-\hypertarget{class_able_polecat___mode___session_aa518ae714a59feda52322b4a27283ba8}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}!set\+Session\+Variable@{set\+Session\+Variable}}
-\index{set\+Session\+Variable@{set\+Session\+Variable}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}}
-\subsubsection[{set\+Session\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}static set\+Session\+Variable (
-\begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject, }
-\item[{}]{\$variable\+Name, }
-\item[{}]{\$variable\+Value}
-\end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___session_aa518ae714a59feda52322b4a27283ba8}
-Save variable to \$\+\_\+\+S\+E\+S\+S\+I\+O\+N global variable.
-
-
-\begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject} & Class attempting to set variable. \\
-\hline
-string & {\em \$variable\+Name} & Name of session variable. \\
-\hline
-mixed & {\em \$variable\+Value} & Value of session variable. \\
-\hline
-\end{DoxyParams}
 \hypertarget{class_able_polecat___mode___session_a365e24d7b066205cafa2a5cce3a4f224}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}!sleep@{sleep}}
 \index{sleep@{sleep}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Session@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}}
 \subsubsection[{sleep}]{\setlength{\rightskip}{0pt plus 5cm}sleep (
@@ -422,4 +353,4 @@ Constants.
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Mode/Session.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Mode/Session.\+php\end{DoxyCompactItemize}

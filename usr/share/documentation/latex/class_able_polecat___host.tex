@@ -22,6 +22,8 @@ static \hyperlink{class_able_polecat___host_a4ef9bd37ba3ce8a13c1e8bcf4f72a630}{g
 \item 
 static \hyperlink{class_able_polecat___host_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
 \item 
+static \hyperlink{class_able_polecat___host_a55c20682b992aa8250b1d03f03f58385}{shutdown} (\$reason, \$message, \$status=0)
+\item 
 static \hyperlink{class_able_polecat___host_a8133d3834528b23c3532c2435512a5e0}{route\+Request} ()
 \item 
 static \hyperlink{class_able_polecat___host_a8bc323d82e5265f16d9cd356d0a02dba}{get\+Request} ()
@@ -58,11 +60,6 @@ static \hyperlink{class_able_polecat___host_a8bc323d82e5265f16d9cd356d0a02dba}{g
 \hyperlink{class_able_polecat___host_a37906da60d0165610266b97b07bc5267}{validate\+Command\+Link} (\hyperlink{interface_able_polecat___command___target_interface}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface} \$Target, \$direction)
 \item 
 \hyperlink{class_able_polecat___host_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
-\end{DoxyCompactItemize}
-\subsection*{Static Protected Member Functions}
-\begin{DoxyCompactItemize}
-\item 
-static \hyperlink{class_able_polecat___host_acd5d4d9d37844d2fda39ed558dc2b454}{shutdown} (\$status=0)
 \end{DoxyCompactItemize}
 
 
@@ -153,17 +150,23 @@ Alias for \hyperlink{class_able_polecat___host_a3f2135f6ad45f51d075657f6d20db2cd
 {}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___host_a38f0060a6ffc8f7c8acf011755c284c8}
-Helper function -\/ saves some data about raw H\+T\+T\+P request. \hypertarget{class_able_polecat___host_acd5d4d9d37844d2fda39ed558dc2b454}{}\index{Able\+Polecat\+\_\+\+Host@{Able\+Polecat\+\_\+\+Host}!shutdown@{shutdown}}
+Helper function -\/ saves some data about raw H\+T\+T\+P request. \hypertarget{class_able_polecat___host_a55c20682b992aa8250b1d03f03f58385}{}\index{Able\+Polecat\+\_\+\+Host@{Able\+Polecat\+\_\+\+Host}!shutdown@{shutdown}}
 \index{shutdown@{shutdown}!Able\+Polecat\+\_\+\+Host@{Able\+Polecat\+\_\+\+Host}}
 \subsubsection[{shutdown}]{\setlength{\rightskip}{0pt plus 5cm}static shutdown (
 \begin{DoxyParamCaption}
+\item[{}]{\$reason, }
+\item[{}]{\$message, }
 \item[{}]{\$status = {\ttfamily 0}}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___host_acd5d4d9d37844d2fda39ed558dc2b454}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___host_a55c20682b992aa8250b1d03f03f58385}
 Shut down Able Polecat server and send H\+T\+T\+P response.
 
 
 \begin{DoxyParams}[1]{Parameters}
+string & {\em \$reason} & Reason for shut down. \\
+\hline
+string & {\em \$message} & Message associated with shut down request. \\
+\hline
 int & {\em \$status} & Return code. \\
 \hline
 \end{DoxyParams}
@@ -230,4 +233,4 @@ Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6a
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/Host.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/Host.\+php\end{DoxyCompactItemize}

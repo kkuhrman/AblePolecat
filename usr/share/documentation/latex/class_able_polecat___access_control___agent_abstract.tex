@@ -3,18 +3,104 @@
 Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[height=5.121951cm]{class_able_polecat___access_control___agent_abstract}
+\includegraphics[height=3.414634cm]{class_able_polecat___access_control___agent_abstract}
 \end{center}
 \end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___access_control___agent_abstract_aa20eaa314f35da6155b74a1f631393b8}{assign\+Active\+Role} (\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} \$Role)
+\item 
+\hyperlink{class_able_polecat___access_control___agent_abstract_a368167873f151dd37d88e11f6a5f10ad}{get\+Active\+Role} (\$role\+Id)
+\item 
+\hyperlink{class_able_polecat___access_control___agent_abstract_a8db7ea97d01a0687141844be9a76f250}{get\+Active\+Role\+Ids} ()
+\item 
+\hyperlink{class_able_polecat___access_control___agent_abstract_af655f2dcc765ece1fcd66a407d53c4cb}{refresh\+Active\+Roles} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___access_control___agent_abstract_ad9ade868bd136d32967059d1cccb3e92}{get\+Scope} ()
+\end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \hyperlink{class_able_polecat___access_control___agent_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
 \end{DoxyCompactItemize}
-\subsection*{Additional Inherited Members}
 
 
 \subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___access_control___agent_abstract_aa20eaa314f35da6155b74a1f631393b8}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}!assign\+Active\+Role@{assign\+Active\+Role}}
+\index{assign\+Active\+Role@{assign\+Active\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}}
+\subsubsection[{assign\+Active\+Role}]{\setlength{\rightskip}{0pt plus 5cm}assign\+Active\+Role (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}}]{\$\+Role}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___access_control___agent_abstract_aa20eaa314f35da6155b74a1f631393b8}
+Assign given role to agent.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} & {\em \$\+Role} & Assigned role. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___agent_interface_aa20eaa314f35da6155b74a1f631393b8}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}.
+
+\hypertarget{class_able_polecat___access_control___agent_abstract_a368167873f151dd37d88e11f6a5f10ad}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}!get\+Active\+Role@{get\+Active\+Role}}
+\index{get\+Active\+Role@{get\+Active\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}}
+\subsubsection[{get\+Active\+Role}]{\setlength{\rightskip}{0pt plus 5cm}get\+Active\+Role (
+\begin{DoxyParamCaption}
+\item[{}]{\$role\+Id}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___access_control___agent_abstract_a368167873f151dd37d88e11f6a5f10ad}
+Return active role by id.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$role\+Id} & The I\+D of the active role, if assigned.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Instance of \hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___agent_interface_a368167873f151dd37d88e11f6a5f10ad}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}.
+
+\hypertarget{class_able_polecat___access_control___agent_abstract_a8db7ea97d01a0687141844be9a76f250}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}!get\+Active\+Role\+Ids@{get\+Active\+Role\+Ids}}
+\index{get\+Active\+Role\+Ids@{get\+Active\+Role\+Ids}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}}
+\subsubsection[{get\+Active\+Role\+Ids}]{\setlength{\rightskip}{0pt plus 5cm}get\+Active\+Role\+Ids (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___access_control___agent_abstract_a8db7ea97d01a0687141844be9a76f250}
+Returns a list of I\+Ds of all assigned, active roles.
+
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___agent_interface_a8db7ea97d01a0687141844be9a76f250}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}.
+
+\hypertarget{class_able_polecat___access_control___agent_abstract_ad9ade868bd136d32967059d1cccb3e92}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}!get\+Scope@{get\+Scope}}
+\index{get\+Scope@{get\+Scope}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}}
+\subsubsection[{get\+Scope}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Scope (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___access_control___agent_abstract_ad9ade868bd136d32967059d1cccb3e92}
+General purpose of object implementing this interface.
+
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___article_interface_ad9ade868bd136d32967059d1cccb3e92}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}.
+
 \hypertarget{class_able_polecat___access_control___agent_abstract_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}!initialize@{initialize}}
 \index{initialize@{initialize}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}}
 \subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
@@ -22,8 +108,24 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstr
 {}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___access_control___agent_abstract_a91098fa7d1917ce4833f284bbef12627}
-Extends \hyperlink{class_able_polecat___cache_object_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct()}. Sub-\/classes should override to initialize properties. 
+Extends \hyperlink{class_able_polecat___cache_object_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct()}. \hypertarget{class_able_polecat___access_control___agent_abstract_af655f2dcc765ece1fcd66a407d53c4cb}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}!refresh\+Active\+Roles@{refresh\+Active\+Roles}}
+\index{refresh\+Active\+Roles@{refresh\+Active\+Roles}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}}
+\subsubsection[{refresh\+Active\+Roles}]{\setlength{\rightskip}{0pt plus 5cm}refresh\+Active\+Roles (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___access_control___agent_abstract_af655f2dcc765ece1fcd66a407d53c4cb}
+Load agent roles active for for current session.
+
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___agent_interface_af655f2dcc765ece1fcd66a407d53c4cb}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}.
+
+
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Access\+Control/Agent.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Access\+Control/\hyperlink{_agent_8php}{Agent.\+php}\end{DoxyCompactItemize}

@@ -12,6 +12,8 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Mode\+Interface\+:\begin{figure}[H]
 static \hyperlink{interface_able_polecat___mode_interface_a04e7e0f41da8037ae797868b61b6df77}{get\+Environment\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name)
 \item 
 static \hyperlink{interface_able_polecat___mode_interface_a68bdefd00518f09963ea3fa95cd2a242}{set\+Environment\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name, \$value)
+\item 
+static \hyperlink{interface_able_polecat___mode_interface_a55c20682b992aa8250b1d03f03f58385}{shutdown} (\$reason, \$message, \$status=0)
 \end{DoxyCompactItemize}
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
@@ -67,7 +69,7 @@ mixed Assigned value of given variable or N\+U\+L\+L.
 \end{DoxyExceptions}
 
 
-Implemented in \hyperlink{class_able_polecat___mode___config_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}, \hyperlink{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}, \hyperlink{class_able_polecat___mode___session_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}, \hyperlink{class_able_polecat___mode___application_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Application}, and \hyperlink{class_able_polecat___mode___user_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+User}.
+Implemented in \hyperlink{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}, \hyperlink{class_able_polecat___mode___config_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}, \hyperlink{class_able_polecat___mode___user_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+User}, \hyperlink{class_able_polecat___mode___application_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Application}, and \hyperlink{class_able_polecat___mode___session_a04e7e0f41da8037ae797868b61b6df77}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}.
 
 \hypertarget{interface_able_polecat___mode_interface_a68bdefd00518f09963ea3fa95cd2a242}{}\index{Able\+Polecat\+\_\+\+Mode\+Interface@{Able\+Polecat\+\_\+\+Mode\+Interface}!set\+Environment\+Variable@{set\+Environment\+Variable}}
 \index{set\+Environment\+Variable@{set\+Environment\+Variable}!Able\+Polecat\+\_\+\+Mode\+Interface@{Able\+Polecat\+\_\+\+Mode\+Interface}}
@@ -99,7 +101,31 @@ bool T\+R\+U\+E if variable is set, otherwise F\+A\+L\+S\+E.
 \end{DoxyExceptions}
 
 
-Implemented in \hyperlink{class_able_polecat___mode___config_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}, \hyperlink{class_able_polecat___mode___server_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}, \hyperlink{class_able_polecat___mode___session_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}, \hyperlink{class_able_polecat___mode___application_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Application}, and \hyperlink{class_able_polecat___mode___user_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+User}.
+Implemented in \hyperlink{class_able_polecat___mode___server_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}, \hyperlink{class_able_polecat___mode___config_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Config}, \hyperlink{class_able_polecat___mode___user_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+User}, \hyperlink{class_able_polecat___mode___application_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Application}, and \hyperlink{class_able_polecat___mode___session_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Session}.
+
+\hypertarget{interface_able_polecat___mode_interface_a55c20682b992aa8250b1d03f03f58385}{}\index{Able\+Polecat\+\_\+\+Mode\+Interface@{Able\+Polecat\+\_\+\+Mode\+Interface}!shutdown@{shutdown}}
+\index{shutdown@{shutdown}!Able\+Polecat\+\_\+\+Mode\+Interface@{Able\+Polecat\+\_\+\+Mode\+Interface}}
+\subsubsection[{shutdown}]{\setlength{\rightskip}{0pt plus 5cm}static shutdown (
+\begin{DoxyParamCaption}
+\item[{}]{\$reason, }
+\item[{}]{\$message, }
+\item[{}]{\$status = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___mode_interface_a55c20682b992aa8250b1d03f03f58385}
+Shut down Able Polecat server and send H\+T\+T\+P response.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$reason} & Reason for shut down. \\
+\hline
+string & {\em \$message} & Message associated with shut down request. \\
+\hline
+int & {\em \$status} & Return code. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \hyperlink{class_able_polecat___mode___server_a55c20682b992aa8250b1d03f03f58385}{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}, and \hyperlink{class_able_polecat___mode_abstract_a55c20682b992aa8250b1d03f03f58385}{Able\+Polecat\+\_\+\+Mode\+Abstract}.
 
 
 
@@ -111,4 +137,4 @@ Boot state messages.
 
 The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/Mode.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/Mode.\+php\end{DoxyCompactItemize}

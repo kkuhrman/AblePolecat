@@ -12,6 +12,8 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Mode\+\_\+\+Server\+:\begin{figure}
 \hyperlink{class_able_polecat___mode___server_a365e24d7b066205cafa2a5cce3a4f224}{sleep} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
 \item 
 \hyperlink{class_able_polecat___mode___server_aa7f01cbd17bffdbbb7511a3c37756064}{execute} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command)
+\item 
+\hyperlink{class_able_polecat___mode___server_a9585fbac2aec4e691bf7c5b9031a0fd3}{get\+Core\+Database} ()
 \end{DoxyCompactItemize}
 \subsection*{Static Public Member Functions}
 \begin{DoxyCompactItemize}
@@ -26,11 +28,23 @@ static \hyperlink{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61
 \item 
 static \hyperlink{class_able_polecat___mode___server_a68bdefd00518f09963ea3fa95cd2a242}{set\+Environment\+Variable} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent, \$name, \$value)
 \item 
+static \hyperlink{class_able_polecat___mode___server_a55c20682b992aa8250b1d03f03f58385}{shutdown} (\$reason, \$message, \$status=0)
+\item 
 static \hyperlink{class_able_polecat___mode___server_aefd1705bf4d05f2c642eaeb400639367}{handle\+Error} (\$errno, \$errstr, \$errfile=N\+U\+L\+L, \$errline=N\+U\+L\+L, \$errcontext=N\+U\+L\+L)
 \item 
 static \hyperlink{class_able_polecat___mode___server_a7e7be427ff1899a7386be4019db2d59d}{handle\+Exception} (Exception \$Exception)
 \item 
 static \hyperlink{class_able_polecat___mode___server_a049626e8b9364098553ee05897b55111}{log\+Boot\+Message} (\$type, \$msg)
+\item 
+static \hyperlink{class_able_polecat___mode___server_aa493f0ac5633a2902787572680d5a12a}{connect\+User\+To\+Core\+Database} ()
+\item 
+\hypertarget{class_able_polecat___mode___server_a17dc1fc2ae198aa7adc290bd3d3f997f}{}static {\bfseries install\+Core\+Database} ()\label{class_able_polecat___mode___server_a17dc1fc2ae198aa7adc290bd3d3f997f}
+
+\item 
+static \hyperlink{class_able_polecat___mode___server_aa36943133d0afdd8efe4a026c3eec1b5}{core\+Database\+Is\+Ready} ()
+\item 
+\hypertarget{class_able_polecat___mode___server_a2eb991ebefbf1af0a620cdc6c109bf60}{}static {\bfseries get\+Core\+Database\+Connection\+Settings} ()\label{class_able_polecat___mode___server_a2eb991ebefbf1af0a620cdc6c109bf60}
+
 \end{DoxyCompactItemize}
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
@@ -50,17 +64,38 @@ static \hyperlink{class_able_polecat___mode___server_a049626e8b9364098553ee05897
 \item 
 \hyperlink{class_able_polecat___mode___server_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
 \end{DoxyCompactItemize}
-\subsection*{Static Protected Member Functions}
-\begin{DoxyCompactItemize}
-\item 
-static \hyperlink{class_able_polecat___mode___server_acd5d4d9d37844d2fda39ed558dc2b454}{shutdown} (\$status=0)
-\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-Core Commands 
+System user and roles. Other member properties. Core Commands Logging. Base class. 
 
 \subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___mode___server_aa493f0ac5633a2902787572680d5a12a}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!connect\+User\+To\+Core\+Database@{connect\+User\+To\+Core\+Database}}
+\index{connect\+User\+To\+Core\+Database@{connect\+User\+To\+Core\+Database}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{connect\+User\+To\+Core\+Database}]{\setlength{\rightskip}{0pt plus 5cm}static connect\+User\+To\+Core\+Database (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_aa493f0ac5633a2902787572680d5a12a}
+Attempt to establish a connection to core database with user credentials.
+
+This function exists for one purpose, which is to establish a connection to the core project database in the case where the D\+S\+N in the local project configuration file does not contain the correct user name and password; for example, before installing an Able Polecat project or after overwriting the local project configuration file with the master.
+
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___database___exception}{Able\+Polecat\+\_\+\+Database\+\_\+\+Exception}} & If system user is already connected. \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{class_able_polecat___mode___server_aa36943133d0afdd8efe4a026c3eec1b5}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!core\+Database\+Is\+Ready@{core\+Database\+Is\+Ready}}
+\index{core\+Database\+Is\+Ready@{core\+Database\+Is\+Ready}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{core\+Database\+Is\+Ready}]{\setlength{\rightskip}{0pt plus 5cm}static core\+Database\+Is\+Ready (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_aa36943133d0afdd8efe4a026c3eec1b5}
+\begin{DoxyReturn}{Returns}
+boolean T\+R\+U\+E if core database connection is established, otherwise F\+A\+L\+S\+E. 
+\end{DoxyReturn}
 \hypertarget{class_able_polecat___mode___server_aa7f01cbd17bffdbbb7511a3c37756064}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!execute@{execute}}
 \index{execute@{execute}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
 \subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}execute (
@@ -82,7 +117,24 @@ Execute a command or pass back/forward chain of responsibility.
 
 Implements \hyperlink{interface_able_polecat___command___target_interface_aa7f01cbd17bffdbbb7511a3c37756064}{Able\+Polecat\+\_\+\+Command\+\_\+\+Target\+Interface}.
 
-\hypertarget{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!get\+Environment\+Variable@{get\+Environment\+Variable}}
+\hypertarget{class_able_polecat___mode___server_a9585fbac2aec4e691bf7c5b9031a0fd3}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!get\+Core\+Database@{get\+Core\+Database}}
+\index{get\+Core\+Database@{get\+Core\+Database}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
+\subsubsection[{get\+Core\+Database}]{\setlength{\rightskip}{0pt plus 5cm}get\+Core\+Database (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___mode___server_a9585fbac2aec4e691bf7c5b9031a0fd3}
+Initialize connection to core database.
+
+More than one application database can be defined in server conf file. However, only O\+N\+E application database can be active per server mode. If \textquotesingle{}mode\textquotesingle{} attribute is empty, polecat will assume any mode. Otherwise, database is defined for given mode only. The \textquotesingle{}use\textquotesingle{} attribute indicates that the database should be loaded for the respective server mode. Polecat will scan database definitions until it finds one suitable for the current server mode where the \textquotesingle{}use\textquotesingle{} attribute is set. 
+\begin{DoxyCode}
+<database \textcolor{keywordtype}{id}=\textcolor{stringliteral}{"core"} name=\textcolor{stringliteral}{"polecat"} mode=\textcolor{stringliteral}{"server"} use=\textcolor{stringliteral}{"1"}>
+ <dsn>mysql:\textcolor{comment}{//username:password@localhost/databasename</dsn>}
+</database>
+\end{DoxyCode}
+
+
+Only one instance of core (server mode) database can be active. Otherwise, Able Polecat stops boot and throws exception. \hypertarget{class_able_polecat___mode___server_a04e7e0f41da8037ae797868b61b6df77}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!get\+Environment\+Variable@{get\+Environment\+Variable}}
 \index{get\+Environment\+Variable@{get\+Environment\+Variable}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
 \subsubsection[{get\+Environment\+Variable}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Environment\+Variable (
 \begin{DoxyParamCaption}
@@ -231,20 +283,30 @@ bool T\+R\+U\+E if variable is set, otherwise F\+A\+L\+S\+E.
 
 Implements \hyperlink{interface_able_polecat___mode_interface_a68bdefd00518f09963ea3fa95cd2a242}{Able\+Polecat\+\_\+\+Mode\+Interface}.
 
-\hypertarget{class_able_polecat___mode___server_acd5d4d9d37844d2fda39ed558dc2b454}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!shutdown@{shutdown}}
+\hypertarget{class_able_polecat___mode___server_a55c20682b992aa8250b1d03f03f58385}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!shutdown@{shutdown}}
 \index{shutdown@{shutdown}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
 \subsubsection[{shutdown}]{\setlength{\rightskip}{0pt plus 5cm}static shutdown (
 \begin{DoxyParamCaption}
+\item[{}]{\$reason, }
+\item[{}]{\$message, }
 \item[{}]{\$status = {\ttfamily 0}}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___mode___server_acd5d4d9d37844d2fda39ed558dc2b454}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___mode___server_a55c20682b992aa8250b1d03f03f58385}
 Shut down Able Polecat server and send H\+T\+T\+P response.
 
 
 \begin{DoxyParams}[1]{Parameters}
+string & {\em \$reason} & Reason for shut down. \\
+\hline
+string & {\em \$message} & Message associated with shut down request. \\
+\hline
 int & {\em \$status} & Return code. \\
 \hline
 \end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___mode_interface_a55c20682b992aa8250b1d03f03f58385}{Able\+Polecat\+\_\+\+Mode\+Interface}.
+
 \hypertarget{class_able_polecat___mode___server_a365e24d7b066205cafa2a5cce3a4f224}{}\index{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}!sleep@{sleep}}
 \index{sleep@{sleep}!Able\+Polecat\+\_\+\+Mode\+\_\+\+Server@{Able\+Polecat\+\_\+\+Mode\+\_\+\+Server}}
 \subsubsection[{sleep}]{\setlength{\rightskip}{0pt plus 5cm}sleep (
@@ -308,4 +370,4 @@ Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6a
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Mode/Server.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Mode/Server.\+php\end{DoxyCompactItemize}

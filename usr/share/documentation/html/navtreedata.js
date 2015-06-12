@@ -1,6 +1,6 @@
 var NAVTREE =
 [
-  [ "Able Polecat", "index.html", [
+  [ "AblePolecat", "index.html", [
     [ "Able Polecat Architecture", "index.html", [
       [ "Introduction", "index.html#introduction", null ],
       [ "HTTP Request", "index.html#request", null ],
@@ -32,13 +32,14 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_authenticate_8php.html",
-"class_able_polecat___data.html",
-"class_able_polecat___log_abstract.html",
-"class_able_polecat___registry___connector.html#a74b892c8c0b86bf9d04c5819898c51e7",
-"class_able_polecat___service___exception.html",
-"interface_able_polecat___command___chain_interface.html#acb3b9b68b805ffd1619966a5ed7c0a39",
-"interface_able_polecat___registry_interface.html#a363ee22699ad46520333ef24f64798bb"
+"_ack_8php.html",
+"class_able_polecat___clock.html#ab478cbb4b392f7330eb26aac13cadc54",
+"class_able_polecat___dynamic_object_abstract.html#abc8e9e31bb15c8a44c3210ec551407c8",
+"class_able_polecat___mode___user.html#a365e24d7b066205cafa2a5cce3a4f224",
+"class_able_polecat___resource___core___factory.html#a285e624ef8874265991ea3478a7cd301",
+"class_able_polecat___transaction_abstract.html#adf1a35ad20e475c59cc0967d5764aa22",
+"interface_able_polecat___database_interface.html#aba618d13fc7fc2ddca23db57614cd14d",
+"interface_able_polecat___session_interface.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

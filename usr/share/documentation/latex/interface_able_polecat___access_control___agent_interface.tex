@@ -6,9 +6,94 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Inter
 \includegraphics[height=5.121951cm]{interface_able_polecat___access_control___agent_interface}
 \end{center}
 \end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{interface_able_polecat___access_control___agent_interface_aa20eaa314f35da6155b74a1f631393b8}{assign\+Active\+Role} (\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} \$Role)
+\item 
+\hyperlink{interface_able_polecat___access_control___agent_interface_a368167873f151dd37d88e11f6a5f10ad}{get\+Active\+Role} (\$role\+Id)
+\item 
+\hyperlink{interface_able_polecat___access_control___agent_interface_a8db7ea97d01a0687141844be9a76f250}{get\+Active\+Role\+Ids} ()
+\item 
+\hyperlink{interface_able_polecat___access_control___agent_interface_af655f2dcc765ece1fcd66a407d53c4cb}{refresh\+Active\+Roles} ()
+\end{DoxyCompactItemize}
 \subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{interface_able_polecat___access_control___agent_interface_aa20eaa314f35da6155b74a1f631393b8}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}!assign\+Active\+Role@{assign\+Active\+Role}}
+\index{assign\+Active\+Role@{assign\+Active\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}
+\subsubsection[{assign\+Active\+Role}]{\setlength{\rightskip}{0pt plus 5cm}assign\+Active\+Role (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}}]{\$\+Role}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___agent_interface_aa20eaa314f35da6155b74a1f631393b8}
+Assign given role to agent.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface} & {\em \$\+Role} & Assigned role. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \hyperlink{class_able_polecat___access_control___agent___user_aa20eaa314f35da6155b74a1f631393b8}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+\_\+\+User}, and \hyperlink{class_able_polecat___access_control___agent_abstract_aa20eaa314f35da6155b74a1f631393b8}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}.
+
+\hypertarget{interface_able_polecat___access_control___agent_interface_a368167873f151dd37d88e11f6a5f10ad}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}!get\+Active\+Role@{get\+Active\+Role}}
+\index{get\+Active\+Role@{get\+Active\+Role}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}
+\subsubsection[{get\+Active\+Role}]{\setlength{\rightskip}{0pt plus 5cm}get\+Active\+Role (
+\begin{DoxyParamCaption}
+\item[{}]{\$role\+Id}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___agent_interface_a368167873f151dd37d88e11f6a5f10ad}
+Return active role by id.
+
+
+\begin{DoxyParams}[1]{Parameters}
+string & {\em \$role\+Id} & The I\+D of the active role, if assigned.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Instance of \hyperlink{interface_able_polecat___access_control___role_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}, otherwise N\+U\+L\+L. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___access_control___agent_abstract_a368167873f151dd37d88e11f6a5f10ad}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}.
+
+\hypertarget{interface_able_polecat___access_control___agent_interface_a8db7ea97d01a0687141844be9a76f250}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}!get\+Active\+Role\+Ids@{get\+Active\+Role\+Ids}}
+\index{get\+Active\+Role\+Ids@{get\+Active\+Role\+Ids}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}
+\subsubsection[{get\+Active\+Role\+Ids}]{\setlength{\rightskip}{0pt plus 5cm}get\+Active\+Role\+Ids (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___agent_interface_a8db7ea97d01a0687141844be9a76f250}
+Returns a list of I\+Ds of all assigned, active roles.
+
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___access_control___agent_abstract_a8db7ea97d01a0687141844be9a76f250}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}.
+
+\hypertarget{interface_able_polecat___access_control___agent_interface_af655f2dcc765ece1fcd66a407d53c4cb}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}!refresh\+Active\+Roles@{refresh\+Active\+Roles}}
+\index{refresh\+Active\+Roles@{refresh\+Active\+Roles}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}
+\subsubsection[{refresh\+Active\+Roles}]{\setlength{\rightskip}{0pt plus 5cm}refresh\+Active\+Roles (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{interface_able_polecat___access_control___agent_interface_af655f2dcc765ece1fcd66a407d53c4cb}
+Load agent roles active for for current session.
+
+\begin{DoxyReturn}{Returns}
+Array. 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{class_able_polecat___access_control___agent_abstract_af655f2dcc765ece1fcd66a407d53c4cb}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Abstract}.
+
 
 
 The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Access\+Control/Agent.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Access\+Control/\hyperlink{_agent_8php}{Agent.\+php}\end{DoxyCompactItemize}

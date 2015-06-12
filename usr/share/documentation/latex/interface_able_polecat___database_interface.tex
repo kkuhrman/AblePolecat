@@ -16,12 +16,33 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Database\+Interface\+:\begin{figure
 \hyperlink{interface_able_polecat___database_interface_a2446b764608f23c472255a8e07076aff}{execute} (\hyperlink{interface_able_polecat___query_language___statement___sql___interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface} \$sql)
 \item 
 \hyperlink{interface_able_polecat___database_interface_a036b9fde55003e5c63dd6345b0f2a805}{query} (\hyperlink{interface_able_polecat___query_language___statement___sql___interface}{Able\+Polecat\+\_\+\+Query\+Language\+\_\+\+Statement\+\_\+\+Sql\+\_\+\+Interface} \$sql)
+\item 
+\hyperlink{interface_able_polecat___database_interface_a4196646b44144f7864b51e915f41fa84}{ready} ()
 \end{DoxyCompactItemize}
-\subsection*{Static Public Member Functions}
+\subsection*{Data Fields}
 \begin{DoxyCompactItemize}
 \item 
-static \hyperlink{interface_able_polecat___database_interface_a4becbc3a94a0b9220b452ccddc1c03ac}{ready} ()
+const \hyperlink{interface_able_polecat___database_interface_afb563f39fbf5617f63015accb2c49ef5}{D\+S\+N\+\_\+\+F\+U\+L\+L} = \textquotesingle{}dsn\textquotesingle{}
+\item 
+\hypertarget{interface_able_polecat___database_interface_aad94acbcdf3d56ac6664afbc8d8de3bc}{}const {\bfseries D\+S\+N\+\_\+\+U\+S\+E\+R} = \textquotesingle{}user\textquotesingle{}\label{interface_able_polecat___database_interface_aad94acbcdf3d56ac6664afbc8d8de3bc}
+
+\item 
+\hypertarget{interface_able_polecat___database_interface_ae7af7c1436dd105c0165c074a6fe910d}{}const {\bfseries D\+S\+N\+\_\+\+P\+A\+S\+S} = \textquotesingle{}pass\textquotesingle{}\label{interface_able_polecat___database_interface_ae7af7c1436dd105c0165c074a6fe910d}
+
+\item 
+\hypertarget{interface_able_polecat___database_interface_a1252befafdf6128a0374989e7c29473b}{}const {\bfseries D\+S\+N\+\_\+\+H\+O\+S\+T} = \textquotesingle{}host\textquotesingle{}\label{interface_able_polecat___database_interface_a1252befafdf6128a0374989e7c29473b}
+
+\item 
+\hypertarget{interface_able_polecat___database_interface_a6db77b3f6ece4eb7bcedf99e708247aa}{}const {\bfseries D\+S\+N\+\_\+\+P\+O\+R\+T} = \textquotesingle{}port\textquotesingle{}\label{interface_able_polecat___database_interface_a6db77b3f6ece4eb7bcedf99e708247aa}
+
+\item 
+\hypertarget{interface_able_polecat___database_interface_ac9d078581555d8a3db0ddc9556dd09dd}{}const {\bfseries D\+S\+N\+\_\+\+N\+A\+M\+E} = \textquotesingle{}database\textquotesingle{}\label{interface_able_polecat___database_interface_ac9d078581555d8a3db0ddc9556dd09dd}
+
+\item 
+\hypertarget{interface_able_polecat___database_interface_a5bbf7f9ad3e4e0b01fa53d3046cbe5f4}{}const {\bfseries L\+O\+C\+A\+T\+E\+R} = \textquotesingle{}locater\textquotesingle{}\label{interface_able_polecat___database_interface_a5bbf7f9ad3e4e0b01fa53d3046cbe5f4}
+
 \end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
 
 
 \subsection{Member Function Documentation}
@@ -114,13 +135,13 @@ Array Results/rowset.
 
 Implemented in \hyperlink{class_able_polecat___database___pdo_a036b9fde55003e5c63dd6345b0f2a805}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
 
-\hypertarget{interface_able_polecat___database_interface_a4becbc3a94a0b9220b452ccddc1c03ac}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!ready@{ready}}
+\hypertarget{interface_able_polecat___database_interface_a4196646b44144f7864b51e915f41fa84}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!ready@{ready}}
 \index{ready@{ready}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
-\subsubsection[{ready}]{\setlength{\rightskip}{0pt plus 5cm}static ready (
+\subsubsection[{ready}]{\setlength{\rightskip}{0pt plus 5cm}ready (
 \begin{DoxyParamCaption}
 {}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___database_interface_a4becbc3a94a0b9220b452ccddc1c03ac}
+)}\label{interface_able_polecat___database_interface_a4196646b44144f7864b51e915f41fa84}
 Indicates whether database connection is established and accessible.
 
 \begin{DoxyReturn}{Returns}
@@ -128,10 +149,16 @@ boolean T\+R\+U\+E if database connection is functional, otherwise F\+A\+L\+S\+E
 \end{DoxyReturn}
 
 
-Implemented in \hyperlink{class_able_polecat___database___pdo_a4becbc3a94a0b9220b452ccddc1c03ac}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
+Implemented in \hyperlink{class_able_polecat___database___pdo_a4196646b44144f7864b51e915f41fa84}{Able\+Polecat\+\_\+\+Database\+\_\+\+Pdo}.
 
 
+
+\subsection{Field Documentation}
+\hypertarget{interface_able_polecat___database_interface_afb563f39fbf5617f63015accb2c49ef5}{}\index{Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}!D\+S\+N\+\_\+\+F\+U\+L\+L@{D\+S\+N\+\_\+\+F\+U\+L\+L}}
+\index{D\+S\+N\+\_\+\+F\+U\+L\+L@{D\+S\+N\+\_\+\+F\+U\+L\+L}!Able\+Polecat\+\_\+\+Database\+Interface@{Able\+Polecat\+\_\+\+Database\+Interface}}
+\subsubsection[{D\+S\+N\+\_\+\+F\+U\+L\+L}]{\setlength{\rightskip}{0pt plus 5cm}const D\+S\+N\+\_\+\+F\+U\+L\+L = \textquotesingle{}dsn\textquotesingle{}}\label{interface_able_polecat___database_interface_afb563f39fbf5617f63015accb2c49ef5}
+D\+S\+N Property constants. 
 
 The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/Database.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/Database.\+php\end{DoxyCompactItemize}

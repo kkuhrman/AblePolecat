@@ -19,5 +19,7 @@ var class_able_polecat___message___response___xhtml =
     [ "ELEMENT_HEAD", "class_able_polecat___message___response___xhtml.html#a0cf8c4ced01a408e29b59adedfe802e2", null ],
     [ "ELEMENT_HTML", "class_able_polecat___message___response___xhtml.html#a8a4486691c89aa7944b0f5ccf39ba399", null ],
     [ "NAME", "class_able_polecat___message___response___xhtml.html#a244352f035b82b20b0efa506167fd862", null ],
+    [ "SUBSTITUTE_MARKER_REDIRECT", "class_able_polecat___message___response___xhtml.html#aa926e786b48723cc1966d6955aae4a96", null ],
+    [ "SUBSTITUTE_MARKER_REFERER", "class_able_polecat___message___response___xhtml.html#a6c64ee4fc21ea2318da5c6d4943eeddd", null ],
     [ "UUID", "class_able_polecat___message___response___xhtml.html#a74b892c8c0b86bf9d04c5819898c51e7", null ]
 ];

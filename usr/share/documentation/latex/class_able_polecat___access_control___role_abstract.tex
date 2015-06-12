@@ -3,15 +3,24 @@
 Inheritance diagram for Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[height=3.414634cm]{class_able_polecat___access_control___role_abstract}
+\includegraphics[height=2.987805cm]{class_able_polecat___access_control___role_abstract}
 \end{center}
 \end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___access_control___role_abstract_a544353080f75dc923ef2448de56ce63d}{is\+Authorized} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent)
+\end{DoxyCompactItemize}
 \subsection*{Static Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 static \hyperlink{class_able_polecat___access_control___role_abstract_ad9ade868bd136d32967059d1cccb3e92}{get\+Scope} ()
 \end{DoxyCompactItemize}
-\subsection*{Additional Inherited Members}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_able_polecat___access_control___role_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
+\end{DoxyCompactItemize}
 
 
 \subsection{Member Function Documentation}
@@ -31,8 +40,38 @@ string.
 
 Implements \hyperlink{interface_able_polecat___access_control___article_interface_ad9ade868bd136d32967059d1cccb3e92}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Article\+Interface}.
 
+\hypertarget{class_able_polecat___access_control___role_abstract_a91098fa7d1917ce4833f284bbef12627}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract}!initialize@{initialize}}
+\index{initialize@{initialize}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___access_control___role_abstract_a91098fa7d1917ce4833f284bbef12627}
+Extends \hyperlink{class_able_polecat___cache_object_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct()}. \hypertarget{class_able_polecat___access_control___role_abstract_a544353080f75dc923ef2448de56ce63d}{}\index{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract}!is\+Authorized@{is\+Authorized}}
+\index{is\+Authorized@{is\+Authorized}!Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract@{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Abstract}}
+\subsubsection[{is\+Authorized}]{\setlength{\rightskip}{0pt plus 5cm}is\+Authorized (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___access_control___role_abstract_a544353080f75dc923ef2448de56ce63d}
+Verify that given agent is authorized to be assigned role.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent,.} & \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{class_able_polecat___access_control___exception}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Exception}} & if agent is not authorized for role. \\
+\hline
+\end{DoxyExceptions}
+
+
+Implements \hyperlink{interface_able_polecat___access_control___role_interface_a544353080f75dc923ef2448de56ce63d}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Role\+Interface}.
+
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Access\+Control/Role.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Access\+Control/\hyperlink{_role_8php}{Role.\+php}\end{DoxyCompactItemize}

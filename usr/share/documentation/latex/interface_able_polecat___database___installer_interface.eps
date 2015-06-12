@@ -5,7 +5,7 @@
 %%For: 
 %Magnification: 1.00
 %%Orientation: Portrait
-%%BoundingBox: 0 0 500 193.548387
+%%BoundingBox: 0 0 500 258.064516
 %%Pages: 0
 %%BeginSetup
 %%EndSetup
@@ -19,13 +19,13 @@
 /marginwidth 10 def
 /distx 20 def
 /disty 40 def
-/boundaspect 2.583333 def  % aspect ratio of the BoundingBox (width/height)
+/boundaspect 1.937500 def  % aspect ratio of the BoundingBox (width/height)
 /boundx 500 def
 /boundy boundx boundaspect div def
 /xspacing 0 def
 /yspacing 0 def
 /rows 12 def
-/cols 4 def
+/cols 3 def
 /scalefactor 0 def
 /boxfont /Times-Roman findfont fontheight scalefont def
 
@@ -176,9 +176,7 @@ boxfont setfont
 (AblePolecat_Database_InstallerInterface) cw
 (AblePolecat_AccessControl_Article_StaticInterface) cw
 (AblePolecat_AccessControl_ArticleInterface) cw
-(AblePolecat_Database_SchemaInterface) cw
 (AblePolecat_RegistryInterface) cw
-(AblePolecat_Database_Schema) cw
 (AblePolecat_Registry_ClassInterface) cw
 (AblePolecat_RegistryAbstract) cw
 (AblePolecat_Registry_Class) cw
@@ -200,72 +198,62 @@ boundx scalefactor div boundy scalefactor div scale
 
 % ----- classes -----
 
- (AblePolecat_Database_InstallerInterface) 0.750000 9.000000 box
- (AblePolecat_AccessControl_Article_StaticInterface) 0.750000 10.000000 box
- (AblePolecat_AccessControl_ArticleInterface) 0.750000 11.000000 box
- (AblePolecat_Database_SchemaInterface) 0.000000 8.000000 box
- (AblePolecat_RegistryInterface) 1.500000 8.000000 box
- (AblePolecat_Database_Schema) 0.000000 7.000000 box
- (AblePolecat_Registry_ClassInterface) 1.000000 7.000000 box
- (AblePolecat_RegistryAbstract) 2.000000 7.000000 box
- (AblePolecat_Registry_Class) 1.000000 6.000000 box
- (AblePolecat_Registry_Class) 3.000000 6.000000 box
- (AblePolecat_Registry_ClassLibrary) 3.000000 5.000000 box
- (AblePolecat_Registry_Component) 3.000000 4.000000 box
- (AblePolecat_Registry_Connector) 3.000000 3.000000 box
- (AblePolecat_Registry_Resource) 3.000000 2.000000 box
- (AblePolecat_Registry_Response) 3.000000 1.000000 box
- (AblePolecat_Registry_Template) 3.000000 0.000000 box
+ (AblePolecat_Database_InstallerInterface) 0.500000 9.000000 box
+ (AblePolecat_AccessControl_Article_StaticInterface) 0.500000 10.000000 box
+ (AblePolecat_AccessControl_ArticleInterface) 0.500000 11.000000 box
+ (AblePolecat_RegistryInterface) 0.500000 8.000000 box
+ (AblePolecat_Registry_ClassInterface) 0.000000 7.000000 box
+ (AblePolecat_RegistryAbstract) 1.000000 7.000000 box
+ (AblePolecat_Registry_Class) 0.000000 6.000000 box
+ (AblePolecat_Registry_Class) 2.000000 6.000000 box
+ (AblePolecat_Registry_ClassLibrary) 2.000000 5.000000 box
+ (AblePolecat_Registry_Component) 2.000000 4.000000 box
+ (AblePolecat_Registry_Connector) 2.000000 3.000000 box
+ (AblePolecat_Registry_Resource) 2.000000 2.000000 box
+ (AblePolecat_Registry_Response) 2.000000 1.000000 box
+ (AblePolecat_Registry_Template) 2.000000 0.000000 box
 
 % ----- relations -----
 
 solid
-0 0.750000 9.000000 out
+0 0.500000 9.000000 out
 solid
-1 0.750000 10.000000 in
+1 0.500000 10.000000 in
 solid
-0 0.750000 10.000000 out
+0 0.500000 10.000000 out
 solid
-1 0.750000 11.000000 in
+1 0.500000 11.000000 in
 solid
-1 0.750000 8.250000 out
+1 0.500000 8.250000 out
 solid
-0.000000 1.500000 9.000000 conn
+0 0.500000 8.750000 in
 solid
-0 0.000000 8.750000 in
+1 0.500000 7.250000 out
 solid
-1 0.000000 7.250000 out
-solid
-0 1.500000 8.750000 in
-solid
-1 1.500000 7.250000 out
-solid
-1.000000 2.000000 8.000000 conn
+0.000000 1.000000 8.000000 conn
 solid
 0 0.000000 7.750000 in
+solid
+1 0.000000 6.250000 out
 solid
 0 1.000000 7.750000 in
 solid
 1 1.000000 6.250000 out
 solid
-0 2.000000 7.750000 in
+0 0.000000 6.750000 in
 solid
-1 2.000000 6.250000 out
+0 1.000000 6.500000 hedge
 solid
-0 1.000000 6.750000 in
+0 1.000000 5.500000 hedge
 solid
-0 2.000000 6.500000 hedge
+0 1.000000 4.500000 hedge
 solid
-0 2.000000 5.500000 hedge
+0 1.000000 3.500000 hedge
 solid
-0 2.000000 4.500000 hedge
+0 1.000000 2.500000 hedge
 solid
-0 2.000000 3.500000 hedge
+0 1.000000 1.500000 hedge
 solid
-0 2.000000 2.500000 hedge
+0 1.000000 0.500000 hedge
 solid
-0 2.000000 1.500000 hedge
-solid
-0 2.000000 0.500000 hedge
-solid
-2.000000 7.000000 0.500000 vedge
+1.000000 7.000000 0.500000 vedge

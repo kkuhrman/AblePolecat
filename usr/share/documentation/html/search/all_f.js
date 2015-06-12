@@ -1,12 +1,12 @@
 var searchData=
 [
-  ['oauth2_2ephp',['OAuth2.php',['../_o_auth2_8php.html',1,'']]],
   ['offsetexists',['offsetExists',['../class_able_polecat___data___primitive___array.html#a24ff257ec0c2221bc6fd7b1b4388e26e',1,'AblePolecat_Data_Primitive_Array\offsetExists()'],['../class_able_polecat___resource___list_abstract.html#a24ff257ec0c2221bc6fd7b1b4388e26e',1,'AblePolecat_Resource_ListAbstract\offsetExists()']]],
   ['offsetget',['offsetGet',['../class_able_polecat___data___primitive___array.html#a59aee6e89465b48f014699f41b521f87',1,'AblePolecat_Data_Primitive_Array\offsetGet()'],['../class_able_polecat___resource___list_abstract.html#a59aee6e89465b48f014699f41b521f87',1,'AblePolecat_Resource_ListAbstract\offsetGet()']]],
   ['offsetset',['offsetSet',['../class_able_polecat___data___primitive___array.html#ac6bde6b1eb50eb5377e91771fe46b7a3',1,'AblePolecat_Data_Primitive_Array\offsetSet()'],['../class_able_polecat___resource___list_abstract.html#ac6bde6b1eb50eb5377e91771fe46b7a3',1,'AblePolecat_Resource_ListAbstract\offsetSet()']]],
   ['offsetunset',['offsetUnset',['../class_able_polecat___data___primitive___array.html#a2411227ea7118b13495de9839fd4b563',1,'AblePolecat_Data_Primitive_Array\offsetUnset()'],['../class_able_polecat___resource___list_abstract.html#a2411227ea7118b13495de9839fd4b563',1,'AblePolecat_Resource_ListAbstract\offsetUnset()']]],
   ['onviolation',['onViolation',['../class_able_polecat___access_control___exception.html#afe9c26ecd42f5dbb6deaa4ab9c7483b5',1,'AblePolecat_AccessControl_Exception']]],
   ['open',['open',['../interface_able_polecat___access_control___resource_interface.html#aaba20e74dced7f11f018a5a86ead176e',1,'AblePolecat_AccessControl_ResourceInterface\open()'],['../class_able_polecat___database___pdo.html#a4ce5c2e3d8229d890939c780db9c8ba8',1,'AblePolecat_Database_Pdo\open()'],['../class_able_polecat___resource_abstract.html#aaba20e74dced7f11f018a5a86ead176e',1,'AblePolecat_ResourceAbstract\open()']]],
+  ['open_2ephp',['Open.php',['../_open_8php.html',1,'']]],
   ['opensession',['openSession',['../class_able_polecat___mode___session.html#ae60835168c2d61914c8b76491b5f52a2',1,'AblePolecat_Mode_Session']]],
   ['operator',['operator',['../interface_able_polecat___query_language___expression___binary_interface.html#a27d661679d6ca841f034118ea52159d8',1,'AblePolecat_QueryLanguage_Expression_BinaryInterface\operator()'],['../class_able_polecat___query_language___expression___binary_abstract.html#a27d661679d6ca841f034118ea52159d8',1,'AblePolecat_QueryLanguage_Expression_BinaryAbstract\operator()']]]
 ];

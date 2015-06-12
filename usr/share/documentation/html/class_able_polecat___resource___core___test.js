@@ -1,6 +1,8 @@
 var class_able_polecat___resource___core___test =
 [
+    [ "getDomNode", "class_able_polecat___resource___core___test.html#a3241c66cb1cbb7b720be191808876012", null ],
     [ "initialize", "class_able_polecat___resource___core___test.html#a91098fa7d1917ce4833f284bbef12627", null ],
+    [ "setTestResult", "class_able_polecat___resource___core___test.html#a3ff459f3e84f1bd6f9a800acf24dc98f", null ],
     [ "validateRequestPath", "class_able_polecat___resource___core___test.html#a285e624ef8874265991ea3478a7cd301", null ],
     [ "NAME", "class_able_polecat___resource___core___test.html#a244352f035b82b20b0efa506167fd862", null ],
     [ "UUID", "class_able_polecat___resource___core___test.html#a74b892c8c0b86bf9d04c5819898c51e7", null ]

@@ -7,5 +7,5 @@ var class_able_polecat___registry___entry___class =
     [ "getClassFullPath", "class_able_polecat___registry___entry___class.html#a007ade3aa1414f464fe5670e2ee3b3e5", null ],
     [ "getClassLibraryId", "class_able_polecat___registry___entry___class.html#a51ab292213d530e6ec65ef6c1a59b244", null ],
     [ "initialize", "class_able_polecat___registry___entry___class.html#a91098fa7d1917ce4833f284bbef12627", null ],
-    [ "save", "class_able_polecat___registry___entry___class.html#a999eef977eb899167ae02f83dd26a4ae", null ]
+    [ "save", "class_able_polecat___registry___entry___class.html#afc8a3c62679cf00ade9f15fb2a6d6132", null ]
 ];

@@ -8,5 +8,5 @@ var class_able_polecat___registry___entry___template =
     [ "getTemplateScope", "class_able_polecat___registry___entry___template.html#a1107269713ebd12a0dc5bcd12a16f8f0", null ],
     [ "getThemeName", "class_able_polecat___registry___entry___template.html#aa146c4c73f2e0eabc0630e1a4464a774", null ],
     [ "initialize", "class_able_polecat___registry___entry___template.html#a91098fa7d1917ce4833f284bbef12627", null ],
-    [ "save", "class_able_polecat___registry___entry___template.html#a999eef977eb899167ae02f83dd26a4ae", null ]
+    [ "save", "class_able_polecat___registry___entry___template.html#afc8a3c62679cf00ade9f15fb2a6d6132", null ]
 ];

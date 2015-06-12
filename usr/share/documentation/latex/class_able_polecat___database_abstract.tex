@@ -21,6 +21,10 @@ static \hyperlink{class_able_polecat___database_abstract_ad9ade868bd136d32967059
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
+\hyperlink{class_able_polecat___database_abstract_af1fa6f96b1716cfbc62d7f6557324709}{extract\+Dsn\+Settings\+From\+Agent\+Role} (\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} \$Agent)
+\item 
+\hyperlink{class_able_polecat___database_abstract_a806d4cf90bcf087102416eabc468783d}{extract\+Dsn\+Settings\+From\+Locater} (\hyperlink{interface_able_polecat___access_control___resource___locater___dsn_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+\_\+\+Dsn\+Interface} \$Locater)
+\item 
 \hyperlink{class_able_polecat___database_abstract_ac30bce81b062d34591a9ed8387c360d4}{set\+Locater} (\hyperlink{interface_able_polecat___access_control___resource___locater___dsn_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+\_\+\+Dsn\+Interface} \$Locater)
 \item 
 \hyperlink{class_able_polecat___database_abstract_a91098fa7d1917ce4833f284bbef12627}{initialize} ()
@@ -31,9 +35,44 @@ static \hyperlink{class_able_polecat___database_abstract_ad9ade868bd136d32967059
 \hypertarget{class_able_polecat___database_abstract_a19ea8cf80a6a5550cb509826cee11ec3}{}{\bfseries \$\+Locater}\label{class_able_polecat___database_abstract_a19ea8cf80a6a5550cb509826cee11ec3}
 
 \end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
 
 
 \subsection{Member Function Documentation}
+\hypertarget{class_able_polecat___database_abstract_af1fa6f96b1716cfbc62d7f6557324709}{}\index{Able\+Polecat\+\_\+\+Database\+Abstract@{Able\+Polecat\+\_\+\+Database\+Abstract}!extract\+Dsn\+Settings\+From\+Agent\+Role@{extract\+Dsn\+Settings\+From\+Agent\+Role}}
+\index{extract\+Dsn\+Settings\+From\+Agent\+Role@{extract\+Dsn\+Settings\+From\+Agent\+Role}!Able\+Polecat\+\_\+\+Database\+Abstract@{Able\+Polecat\+\_\+\+Database\+Abstract}}
+\subsubsection[{extract\+Dsn\+Settings\+From\+Agent\+Role}]{\setlength{\rightskip}{0pt plus 5cm}extract\+Dsn\+Settings\+From\+Agent\+Role (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface}}]{\$\+Agent}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___database_abstract_af1fa6f96b1716cfbc62d7f6557324709}
+Extract user name, password, database name, host name etc. from agent role.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___agent_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Agent\+Interface} & {\em \$\+Agent,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Array with D\+S\+N settings or N\+U\+L\+L. 
+\end{DoxyReturn}
+\hypertarget{class_able_polecat___database_abstract_a806d4cf90bcf087102416eabc468783d}{}\index{Able\+Polecat\+\_\+\+Database\+Abstract@{Able\+Polecat\+\_\+\+Database\+Abstract}!extract\+Dsn\+Settings\+From\+Locater@{extract\+Dsn\+Settings\+From\+Locater}}
+\index{extract\+Dsn\+Settings\+From\+Locater@{extract\+Dsn\+Settings\+From\+Locater}!Able\+Polecat\+\_\+\+Database\+Abstract@{Able\+Polecat\+\_\+\+Database\+Abstract}}
+\subsubsection[{extract\+Dsn\+Settings\+From\+Locater}]{\setlength{\rightskip}{0pt plus 5cm}extract\+Dsn\+Settings\+From\+Locater (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+\_\+\+Dsn\+Interface}}]{\$\+Locater}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___database_abstract_a806d4cf90bcf087102416eabc468783d}
+Extract user name, password, database name, host name etc. from locater.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___resource___locater___dsn_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Resource\+\_\+\+Locater\+\_\+\+Dsn\+Interface} & {\em \$\+Locater,.} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mixed Array with D\+S\+N settings or N\+U\+L\+L. 
+\end{DoxyReturn}
 \hypertarget{class_able_polecat___database_abstract_a66e49cc03d1511ec4c0290ffaa688079}{}\index{Able\+Polecat\+\_\+\+Database\+Abstract@{Able\+Polecat\+\_\+\+Database\+Abstract}!get\+Locater@{get\+Locater}}
 \index{get\+Locater@{get\+Locater}!Able\+Polecat\+\_\+\+Database\+Abstract@{Able\+Polecat\+\_\+\+Database\+Abstract}}
 \subsubsection[{get\+Locater}]{\setlength{\rightskip}{0pt plus 5cm}get\+Locater (
@@ -105,4 +144,4 @@ Sets U\+R\+L used to open resource.
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/Database.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/Database.\+php\end{DoxyCompactItemize}

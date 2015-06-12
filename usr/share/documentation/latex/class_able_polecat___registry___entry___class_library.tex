@@ -13,9 +13,11 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\
 \item 
 \hyperlink{class_able_polecat___registry___entry___class_library_a0a05b2e4b3a44390eeb042064e427b1a}{export} (D\+O\+M\+Document \$Document, D\+O\+M\+Element \$Parent)
 \item 
-\hyperlink{class_able_polecat___registry___entry___class_library_a999eef977eb899167ae02f83dd26a4ae}{save} (\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} \$Database=N\+U\+L\+L)
+\hyperlink{class_able_polecat___registry___entry___class_library_afc8a3c62679cf00ade9f15fb2a6d6132}{save} ()
 \item 
 \hyperlink{class_able_polecat___registry___entry___class_library_a78da81e3fa32c22602195abcf4c21d3c}{get\+Class\+Library\+Type} ()
+\item 
+\hyperlink{class_able_polecat___registry___entry___class_library_a2b16efeebea2966b34d452b3f53c4aea}{get\+Class\+Prefix} ()
 \item 
 \hyperlink{class_able_polecat___registry___entry___class_library_a826677cf6939d076fd64c902ba6c0217}{get\+Class\+Library\+Full\+Path} ()
 \item 
@@ -168,6 +170,20 @@ string.
 
 Implements \hyperlink{interface_able_polecat___registry___entry___class_library_interface_af40e03caa4b08fe0b0a39031aa87bd81}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library\+Interface}.
 
+\hypertarget{class_able_polecat___registry___entry___class_library_a2b16efeebea2966b34d452b3f53c4aea}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}!get\+Class\+Prefix@{get\+Class\+Prefix}}
+\index{get\+Class\+Prefix@{get\+Class\+Prefix}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}}
+\subsubsection[{get\+Class\+Prefix}]{\setlength{\rightskip}{0pt plus 5cm}get\+Class\+Prefix (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___registry___entry___class_library_a2b16efeebea2966b34d452b3f53c4aea}
+\begin{DoxyReturn}{Returns}
+string. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{interface_able_polecat___registry___entry___class_library_interface_a2b16efeebea2966b34d452b3f53c4aea}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library\+Interface}.
+
 \hypertarget{class_able_polecat___registry___entry___class_library_a421b5f1cf6301568ecc2f572537f0b90}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}!get\+Primary\+Key\+Field\+Names@{get\+Primary\+Key\+Field\+Names}}
 \index{get\+Primary\+Key\+Field\+Names@{get\+Primary\+Key\+Field\+Names}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}}
 \subsubsection[{get\+Primary\+Key\+Field\+Names}]{\setlength{\rightskip}{0pt plus 5cm}static get\+Primary\+Key\+Field\+Names (
@@ -214,31 +230,26 @@ Implements \hyperlink{interface_able_polecat___registry___entry_interface_aa44a4
 )\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___registry___entry___class_library_a91098fa7d1917ce4833f284bbef12627}
 Extends \+\_\+\+\_\+construct().
 
-Sub-\/classes should override to initialize arguments. \hypertarget{class_able_polecat___registry___entry___class_library_a999eef977eb899167ae02f83dd26a4ae}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}!save@{save}}
+Sub-\/classes should override to initialize arguments. \hypertarget{class_able_polecat___registry___entry___class_library_afc8a3c62679cf00ade9f15fb2a6d6132}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}!save@{save}}
 \index{save@{save}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+\_\+\+Class\+Library}}
 \subsubsection[{save}]{\setlength{\rightskip}{0pt plus 5cm}save (
 \begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Database\+Interface}}]{\$\+Database = {\ttfamily NULL}}
+{}
 \end{DoxyParamCaption}
-)}\label{class_able_polecat___registry___entry___class_library_a999eef977eb899167ae02f83dd26a4ae}
+)}\label{class_able_polecat___registry___entry___class_library_afc8a3c62679cf00ade9f15fb2a6d6132}
 Update or insert registration record.
 
 If the encapsulated registration exists, based on id property, it will be updated to reflect object state. Otherwise, a new registration record will be created.
 
-
-\begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} & {\em \$\+Database} & Handle to existing database.\\
-\hline
-\end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-\hyperlink{interface_able_polecat___registry___entry_interface}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface} or N\+U\+L\+L. 
+\hyperlink{class_able_polecat___command___result}{Able\+Polecat\+\_\+\+Command\+\_\+\+Result} or N\+U\+L\+L. 
 \end{DoxyReturn}
 
 
-Implements \hyperlink{interface_able_polecat___registry___entry_interface_a999eef977eb899167ae02f83dd26a4ae}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
+Implements \hyperlink{interface_able_polecat___registry___entry_interface_afc8a3c62679cf00ade9f15fb2a6d6132}{Able\+Polecat\+\_\+\+Registry\+\_\+\+Entry\+Interface}.
 
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Registry/\+Entry/Class\+Library.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Registry/\+Entry/Class\+Library.\+php\end{DoxyCompactItemize}

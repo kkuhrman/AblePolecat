@@ -15,6 +15,7 @@ var class_able_polecat___database___pdo =
     [ "prepareStatement", "class_able_polecat___database___pdo.html#a374c56d08c9fb9b44796f1a55512b974", null ],
     [ "query", "class_able_polecat___database___pdo.html#a036b9fde55003e5c63dd6345b0f2a805", null ],
     [ "quote", "class_able_polecat___database___pdo.html#ad6688f4cd3234b8d40f8f92bbcd07e73", null ],
-    [ "showGrants", "class_able_polecat___database___pdo.html#a5b19ddbce4af265b048ea2ab5e5e1b85", null ],
+    [ "ready", "class_able_polecat___database___pdo.html#a4196646b44144f7864b51e915f41fa84", null ],
+    [ "showGrants", "class_able_polecat___database___pdo.html#a045c11c3faab21a4b0011b28d76f621d", null ],
     [ "sleep", "class_able_polecat___database___pdo.html#a365e24d7b066205cafa2a5cce3a4f224", null ]
 ];

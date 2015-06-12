@@ -1,6 +1,7 @@
 var class_able_polecat___mode___server =
 [
     [ "execute", "class_able_polecat___mode___server.html#aa7f01cbd17bffdbbb7511a3c37756064", null ],
+    [ "getCoreDatabase", "class_able_polecat___mode___server.html#a9585fbac2aec4e691bf7c5b9031a0fd3", null ],
     [ "initialize", "class_able_polecat___mode___server.html#a91098fa7d1917ce4833f284bbef12627", null ],
     [ "initializeErrorReporting", "class_able_polecat___mode___server.html#a1edabbfbec5258ee9df5fc2f236f51b4", null ],
     [ "sleep", "class_able_polecat___mode___server.html#a365e24d7b066205cafa2a5cce3a4f224", null ],

@@ -30,9 +30,9 @@ static \hyperlink{class_able_polecat___registry___connector_a4ef9bd37ba3ce8a13c1
 \item 
 static \hyperlink{class_able_polecat___registry___connector_a3f2135f6ad45f51d075657f6d20db2cd}{wakeup} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
 \item 
-static \hyperlink{class_able_polecat___registry___connector_a97e9bacf538c072e0542eeb96d2475af}{install} (\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} \$Database)
+static \hyperlink{class_able_polecat___registry___connector_a7ee9452dbd39de4bfbe7a6dd9ed7bb65}{install} ()
 \item 
-static \hyperlink{class_able_polecat___registry___connector_a8398510e79e9787266fe116d6431948c}{update} (\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} \$Database)
+static \hyperlink{class_able_polecat___registry___connector_a00ce4d238d0651db584337f8e0b38c68}{update} ()
 \item 
 static \hyperlink{class_able_polecat___registry___connector_acc115629812d7e8a4f6aaea17adc0697}{get\+Core\+Resource\+Connector} (\$resource\+Id, \$request\+Method)
 \item 
@@ -54,9 +54,9 @@ const \hyperlink{class_able_polecat___registry___connector_a74b892c8c0b86bf9d04c
 \subsection*{Static Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-static \hyperlink{class_able_polecat___registry___connector_ac97c0e2eaa8d27a28bd44905b78fe92e}{insert\+List} (\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} \$Database, D\+O\+M\+Node\+List \$Nodes)
+static \hyperlink{class_able_polecat___registry___connector_ae0c6b369c501ff2019c804d040773afb}{insert\+List} (D\+O\+M\+Node\+List \$Nodes)
 \item 
-static \hyperlink{class_able_polecat___registry___connector_a7a907ef0ebc9d5ca61b7c04efa0eccd6}{insert\+Node} (\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} \$Database, D\+O\+M\+Node \$Node)
+static \hyperlink{class_able_polecat___registry___connector_a2d656f44be657e859578dbd09e5c5179}{insert\+Node} (D\+O\+M\+Node \$Node)
 \end{DoxyCompactItemize}
 
 
@@ -249,54 +249,43 @@ Implements \hyperlink{interface_able_polecat___registry_interface_a6f24c4ddef3e1
 {}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [protected]}}\label{class_able_polecat___registry___connector_a91098fa7d1917ce4833f284bbef12627}
-Extends constructor. \hypertarget{class_able_polecat___registry___connector_ac97c0e2eaa8d27a28bd44905b78fe92e}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!insert\+List@{insert\+List}}
+Extends constructor. \hypertarget{class_able_polecat___registry___connector_ae0c6b369c501ff2019c804d040773afb}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!insert\+List@{insert\+List}}
 \index{insert\+List@{insert\+List}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}}
 \subsubsection[{insert\+List}]{\setlength{\rightskip}{0pt plus 5cm}static insert\+List (
 \begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Database\+Interface}}]{\$\+Database, }
 \item[{D\+O\+M\+Node\+List}]{\$\+Nodes}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___registry___connector_ac97c0e2eaa8d27a28bd44905b78fe92e}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___registry___connector_ae0c6b369c501ff2019c804d040773afb}
 Insert D\+O\+M\+Node\+List into registry.
 
 
 \begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} & {\em \$\+Database} & Handle to existing database. \\
-\hline
 D\+O\+M\+Node\+List & {\em \$\+Nodes} & List of D\+O\+M\+Nodes containing registry entries. \\
 \hline
 \end{DoxyParams}
-\hypertarget{class_able_polecat___registry___connector_a7a907ef0ebc9d5ca61b7c04efa0eccd6}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!insert\+Node@{insert\+Node}}
+\hypertarget{class_able_polecat___registry___connector_a2d656f44be657e859578dbd09e5c5179}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!insert\+Node@{insert\+Node}}
 \index{insert\+Node@{insert\+Node}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}}
 \subsubsection[{insert\+Node}]{\setlength{\rightskip}{0pt plus 5cm}static insert\+Node (
 \begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Database\+Interface}}]{\$\+Database, }
 \item[{D\+O\+M\+Node}]{\$\+Node}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___registry___connector_a7a907ef0ebc9d5ca61b7c04efa0eccd6}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\label{class_able_polecat___registry___connector_a2d656f44be657e859578dbd09e5c5179}
 Insert D\+O\+M\+Node into registry.
 
 
 \begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} & {\em \$\+Database} & Handle to existing database. \\
-\hline
 D\+O\+M\+Node & {\em \$\+Node} & D\+O\+M\+Node containing registry entry. \\
 \hline
 \end{DoxyParams}
-\hypertarget{class_able_polecat___registry___connector_a97e9bacf538c072e0542eeb96d2475af}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!install@{install}}
+\hypertarget{class_able_polecat___registry___connector_a7ee9452dbd39de4bfbe7a6dd9ed7bb65}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!install@{install}}
 \index{install@{install}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}}
 \subsubsection[{install}]{\setlength{\rightskip}{0pt plus 5cm}static install (
 \begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Database\+Interface}}]{\$\+Database}
+{}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___connector_a97e9bacf538c072e0542eeb96d2475af}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___connector_a7ee9452dbd39de4bfbe7a6dd9ed7bb65}
 Install class registry on existing Able Polecat database.
 
-
-\begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} & {\em \$\+Database} & Handle to existing database.\\
-\hline
-\end{DoxyParams}
 
 \begin{DoxyExceptions}{Exceptions}
 {\em \hyperlink{class_able_polecat___database___exception}{Able\+Polecat\+\_\+\+Database\+\_\+\+Exception}} & if install fails. \\
@@ -304,7 +293,7 @@ Install class registry on existing Able Polecat database.
 \end{DoxyExceptions}
 
 
-Implements \hyperlink{interface_able_polecat___database___installer_interface_a97e9bacf538c072e0542eeb96d2475af}{Able\+Polecat\+\_\+\+Database\+\_\+\+Installer\+Interface}.
+Implements \hyperlink{interface_able_polecat___database___installer_interface_a7ee9452dbd39de4bfbe7a6dd9ed7bb65}{Able\+Polecat\+\_\+\+Database\+\_\+\+Installer\+Interface}.
 
 \hypertarget{class_able_polecat___registry___connector_a365e24d7b066205cafa2a5cce3a4f224}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!sleep@{sleep}}
 \index{sleep@{sleep}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}}
@@ -324,20 +313,15 @@ Serialize object to cache.
 
 Implements \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
 
-\hypertarget{class_able_polecat___registry___connector_a8398510e79e9787266fe116d6431948c}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!update@{update}}
+\hypertarget{class_able_polecat___registry___connector_a00ce4d238d0651db584337f8e0b38c68}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!update@{update}}
 \index{update@{update}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}}
 \subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}static update (
 \begin{DoxyParamCaption}
-\item[{{\bf Able\+Polecat\+\_\+\+Database\+Interface}}]{\$\+Database}
+{}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___connector_a8398510e79e9787266fe116d6431948c}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___registry___connector_a00ce4d238d0651db584337f8e0b38c68}
 Update current schema on existing Able Polecat database.
 
-
-\begin{DoxyParams}[1]{Parameters}
-\hyperlink{interface_able_polecat___database_interface}{Able\+Polecat\+\_\+\+Database\+Interface} & {\em \$\+Database} & Handle to existing database.\\
-\hline
-\end{DoxyParams}
 
 \begin{DoxyExceptions}{Exceptions}
 {\em \hyperlink{class_able_polecat___database___exception}{Able\+Polecat\+\_\+\+Database\+\_\+\+Exception}} & if update fails. \\
@@ -345,7 +329,7 @@ Update current schema on existing Able Polecat database.
 \end{DoxyExceptions}
 
 
-Implements \hyperlink{interface_able_polecat___database___installer_interface_a8398510e79e9787266fe116d6431948c}{Able\+Polecat\+\_\+\+Database\+\_\+\+Installer\+Interface}.
+Implements \hyperlink{interface_able_polecat___database___installer_interface_a00ce4d238d0651db584337f8e0b38c68}{Able\+Polecat\+\_\+\+Database\+\_\+\+Installer\+Interface}.
 
 \hypertarget{class_able_polecat___registry___connector_a3f2135f6ad45f51d075657f6d20db2cd}{}\index{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}!wakeup@{wakeup}}
 \index{wakeup@{wakeup}!Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector@{Able\+Polecat\+\_\+\+Registry\+\_\+\+Connector}}
@@ -378,4 +362,4 @@ Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6a
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Registry/Connector.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Registry/Connector.\+php\end{DoxyCompactItemize}

@@ -30,7 +30,7 @@ static \hyperlink{class_able_polecat___command___chain_a3f2135f6ad45f51d075657f6
 \item 
 static \hyperlink{class_able_polecat___command___chain_a8c95906f06450a060c5c9f0dc5b64fb5}{dispatch} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command)
 \item 
-static \hyperlink{class_able_polecat___command___chain_ae121fc73d26ff0d391d4cd120f88a820}{trigger\+Error} (\$message)
+static \hyperlink{class_able_polecat___command___chain_a797ad7554e54abd2e572ae912eae9c70}{trigger\+Error} (\$message, \$severity=E\+\_\+\+U\+S\+E\+R\+\_\+\+E\+R\+R\+O\+R)
 \end{DoxyCompactItemize}
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
@@ -201,13 +201,14 @@ Serialize object to cache.
 
 Implements \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
 
-\hypertarget{class_able_polecat___command___chain_ae121fc73d26ff0d391d4cd120f88a820}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}!trigger\+Error@{trigger\+Error}}
+\hypertarget{class_able_polecat___command___chain_a797ad7554e54abd2e572ae912eae9c70}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}!trigger\+Error@{trigger\+Error}}
 \index{trigger\+Error@{trigger\+Error}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}}
 \subsubsection[{trigger\+Error}]{\setlength{\rightskip}{0pt plus 5cm}static trigger\+Error (
 \begin{DoxyParamCaption}
-\item[{}]{\$message}
+\item[{}]{\$message, }
+\item[{}]{\$severity = {\ttfamily E\+\_\+USER\+\_\+ERROR}}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___command___chain_ae121fc73d26ff0d391d4cd120f88a820}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___command___chain_a797ad7554e54abd2e572ae912eae9c70}
 Write a message to boot log and trigger P\+H\+P error.
 
 Most errors in registry entry classes will result in a fatal application error. But most will also likely occur before standard error handling and logging are operational. This method provides a means to catch these.
@@ -216,10 +217,12 @@ Most errors in registry entry classes will result in a fatal application error. 
 \begin{DoxyParams}[1]{Parameters}
 string & {\em \$message,.} & \\
 \hline
+int & {\em \$severity} & E\+\_\+\+U\+S\+E\+R\+\_\+\+E\+R\+R\+O\+R $\vert$ E\+\_\+\+U\+S\+E\+R\+\_\+\+N\+O\+T\+I\+C\+E \\
+\hline
 \end{DoxyParams}
 
 
-Implements \hyperlink{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}.
+Implements \hyperlink{interface_able_polecat___command___chain_interface_a797ad7554e54abd2e572ae912eae9c70}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}.
 
 \hypertarget{class_able_polecat___command___chain_a3f2135f6ad45f51d075657f6d20db2cd}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}!wakeup@{wakeup}}
 \index{wakeup@{wakeup}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}}
@@ -246,4 +249,4 @@ Implements \hyperlink{interface_able_polecat___cache_object_interface_a3f2135f6a
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Command/Chain.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Command/\hyperlink{_chain_8php}{Chain.\+php}\end{DoxyCompactItemize}

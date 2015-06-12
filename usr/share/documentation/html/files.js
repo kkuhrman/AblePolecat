@@ -1,4 +1,4 @@
 var files =
 [
-    [ "public", "dir_f832923ad3cb060bc87ad85e68b8a1c3.html", "dir_f832923ad3cb060bc87ad85e68b8a1c3" ]
+    [ "wamp", "dir_2b9e166508d09dde5a99a7da5cdd2c5e.html", "dir_2b9e166508d09dde5a99a7da5cdd2c5e" ]
 ];

@@ -6,5 +6,5 @@ var class_able_polecat___registry___entry___dom_node___response =
     [ "getResourceId", "class_able_polecat___registry___entry___dom_node___response.html#a0ac412173b2b1d569ef90a1ac095ca5d", null ],
     [ "getStatusCode", "class_able_polecat___registry___entry___dom_node___response.html#a094778dd1c04fe44626000b47ea0c0bb", null ],
     [ "initialize", "class_able_polecat___registry___entry___dom_node___response.html#a91098fa7d1917ce4833f284bbef12627", null ],
-    [ "save", "class_able_polecat___registry___entry___dom_node___response.html#a999eef977eb899167ae02f83dd26a4ae", null ]
+    [ "save", "class_able_polecat___registry___entry___dom_node___response.html#afc8a3c62679cf00ade9f15fb2a6d6132", null ]
 ];

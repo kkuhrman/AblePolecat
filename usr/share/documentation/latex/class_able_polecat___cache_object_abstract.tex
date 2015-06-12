@@ -3,13 +3,20 @@
 Inheritance diagram for Able\+Polecat\+\_\+\+Cache\+Object\+Abstract\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[height=10.566038cm]{class_able_polecat___cache_object_abstract}
+\includegraphics[height=12.000000cm]{class_able_polecat___cache_object_abstract}
 \end{center}
 \end{figure}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
+\hyperlink{class_able_polecat___cache_object_abstract_a099a6a845fb971e5360c24af37db25a1}{sleep} (\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} \$Subject=N\+U\+L\+L)
+\item 
 \hyperlink{class_able_polecat___cache_object_abstract_a421831a265621325e1fdd19aace0c758}{\+\_\+\+\_\+destruct} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_able_polecat___cache_object_abstract_ac4dd0cb38112e22ce4a62fbcd8cbc467}{cleanup} ()
 \end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
@@ -22,7 +29,6 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Cache\+Object\+Abstract\+:\begin{fi
 \item 
 \hyperlink{class_able_polecat___cache_object_abstract_a095c5d389db211932136b53f25f39685}{\+\_\+\+\_\+construct} ()
 \end{DoxyCompactItemize}
-\subsection*{Additional Inherited Members}
 
 
 \subsection{Constructor \& Destructor Documentation}
@@ -43,10 +49,17 @@ Cached objects must be created by \hyperlink{interface_able_polecat___cache_obje
 {}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [final]}}\label{class_able_polecat___cache_object_abstract_a421831a265621325e1fdd19aace0c758}
-Serialization prior to going out of scope in \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{sleep()}. 
+Serialization prior to going out of scope in \hyperlink{class_able_polecat___cache_object_abstract_a099a6a845fb971e5360c24af37db25a1}{sleep()}. 
 
 \subsection{Member Function Documentation}
-\hypertarget{class_able_polecat___cache_object_abstract_a60be366090fa500d8062c7dfc40bfaf6}{}\index{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}!get\+Default\+Command\+Invoker@{get\+Default\+Command\+Invoker}}
+\hypertarget{class_able_polecat___cache_object_abstract_ac4dd0cb38112e22ce4a62fbcd8cbc467}{}\index{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}!cleanup@{cleanup}}
+\index{cleanup@{cleanup}!Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}}
+\subsubsection[{cleanup}]{\setlength{\rightskip}{0pt plus 5cm}static cleanup (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_able_polecat___cache_object_abstract_ac4dd0cb38112e22ce4a62fbcd8cbc467}
+Delete cache objects in order created. \hypertarget{class_able_polecat___cache_object_abstract_a60be366090fa500d8062c7dfc40bfaf6}{}\index{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}!get\+Default\+Command\+Invoker@{get\+Default\+Command\+Invoker}}
 \index{get\+Default\+Command\+Invoker@{get\+Default\+Command\+Invoker}!Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}}
 \subsubsection[{get\+Default\+Command\+Invoker}]{\setlength{\rightskip}{0pt plus 5cm}get\+Default\+Command\+Invoker (
 \begin{DoxyParamCaption}
@@ -79,8 +92,26 @@ Sets the default command handlers (invoker/target).
 \hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Invoker} & \\
 \hline
 \end{DoxyParams}
+\hypertarget{class_able_polecat___cache_object_abstract_a099a6a845fb971e5360c24af37db25a1}{}\index{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}!sleep@{sleep}}
+\index{sleep@{sleep}!Able\+Polecat\+\_\+\+Cache\+Object\+Abstract@{Able\+Polecat\+\_\+\+Cache\+Object\+Abstract}}
+\subsubsection[{sleep}]{\setlength{\rightskip}{0pt plus 5cm}bool Internal flag helps avoid redundant calls to sleep (
+\begin{DoxyParamCaption}
+\item[{{\bf Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface}}]{\$\+Subject = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_able_polecat___cache_object_abstract_a099a6a845fb971e5360c24af37db25a1}
+Serialize object to cache.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\hyperlink{interface_able_polecat___access_control___subject_interface}{Able\+Polecat\+\_\+\+Access\+Control\+\_\+\+Subject\+Interface} & {\em \$\+Subject,.} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{interface_able_polecat___cache_object_interface_a365e24d7b066205cafa2a5cce3a4f224}{Able\+Polecat\+\_\+\+Cache\+Object\+Interface}.
+
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/Cache\+Object.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\hyperlink{_cache_object_8php}{Cache\+Object.\+php}\end{DoxyCompactItemize}

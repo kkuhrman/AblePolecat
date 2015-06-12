@@ -20,7 +20,7 @@ Inheritance diagram for Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface\+:\
 \item 
 static \hyperlink{interface_able_polecat___command___chain_interface_a8c95906f06450a060c5c9f0dc5b64fb5}{dispatch} (\hyperlink{interface_able_polecat___command_interface}{Able\+Polecat\+\_\+\+Command\+Interface} \$Command)
 \item 
-static \hyperlink{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}{trigger\+Error} (\$message)
+static \hyperlink{interface_able_polecat___command___chain_interface_a797ad7554e54abd2e572ae912eae9c70}{trigger\+Error} (\$message, \$severity=E\+\_\+\+U\+S\+E\+R\+\_\+\+E\+R\+R\+O\+R)
 \end{DoxyCompactItemize}
 
 
@@ -104,13 +104,14 @@ Establish superior-\/subordinate relationship between two command targets.
 
 Implemented in \hyperlink{class_able_polecat___command___chain_acb3b9b68b805ffd1619966a5ed7c0a39}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
 
-\hypertarget{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!trigger\+Error@{trigger\+Error}}
+\hypertarget{interface_able_polecat___command___chain_interface_a797ad7554e54abd2e572ae912eae9c70}{}\index{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}!trigger\+Error@{trigger\+Error}}
 \index{trigger\+Error@{trigger\+Error}!Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface@{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain\+Interface}}
 \subsubsection[{trigger\+Error}]{\setlength{\rightskip}{0pt plus 5cm}static trigger\+Error (
 \begin{DoxyParamCaption}
-\item[{}]{\$message}
+\item[{}]{\$message, }
+\item[{}]{\$severity = {\ttfamily E\+\_\+USER\+\_\+ERROR}}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___command___chain_interface_ae121fc73d26ff0d391d4cd120f88a820}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{interface_able_polecat___command___chain_interface_a797ad7554e54abd2e572ae912eae9c70}
 Write a message to boot log and trigger P\+H\+P error.
 
 Most errors in registry entry classes will result in a fatal application error. But most will also likely occur before standard error handling and logging are operational. This method provides a means to catch these.
@@ -119,13 +120,15 @@ Most errors in registry entry classes will result in a fatal application error. 
 \begin{DoxyParams}[1]{Parameters}
 string & {\em \$message,.} & \\
 \hline
+int & {\em \$severity} & E\+\_\+\+U\+S\+E\+R\+\_\+\+E\+R\+R\+O\+R $\vert$ E\+\_\+\+U\+S\+E\+R\+\_\+\+N\+O\+T\+I\+C\+E \\
+\hline
 \end{DoxyParams}
 
 
-Implemented in \hyperlink{class_able_polecat___command___chain_ae121fc73d26ff0d391d4cd120f88a820}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
+Implemented in \hyperlink{class_able_polecat___command___chain_a797ad7554e54abd2e572ae912eae9c70}{Able\+Polecat\+\_\+\+Command\+\_\+\+Chain}.
 
 
 
 The documentation for this interface was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-C\+:/wamp/www/polecat/public/core/\+Command/Chain.\+php\end{DoxyCompactItemize}
+C\+:/wamp/www/\+Able\+Polecat-\/\+Dev/usr/lib/\+Able\+Polecat/core/\+Command/\hyperlink{_chain_8php}{Chain.\+php}\end{DoxyCompactItemize}

@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['class_5fid',['CLASS_ID',['../class_able_polecat___savepoint.html#ade806874ef80d8220f2d79c15884122d',1,'AblePolecat_Savepoint']]],
   ['clock_5fmode_5fchrono',['CLOCK_MODE_CHRONO',['../class_able_polecat___clock.html#af2923c94381ca4cb1e50aad421497de9',1,'AblePolecat_Clock']]],
   ['clock_5fstart_5ftime',['CLOCK_START_TIME',['../class_able_polecat___clock.html#aa04a01c008eabae54e6d664fe47de8a0',1,'AblePolecat_Clock']]],
   ['conf_5ffilename_5fproject',['CONF_FILENAME_PROJECT',['../class_able_polecat___server___paths.html#ac9d1bf76f1ea8ee87b7a467b37036ddb',1,'AblePolecat_Server_Paths']]],

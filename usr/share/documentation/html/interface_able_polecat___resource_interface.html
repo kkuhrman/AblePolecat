@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>Able Polecat: AblePolecat_ResourceInterface Interface Reference</title>
+<title>AblePolecat: AblePolecat_ResourceInterface Interface Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,10 +31,10 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">Able Polecat
-   &#160;<span id="projectnumber">0.7.0</span>
+   <div id="projectname">AblePolecat
+   &#160;<span id="projectnumber">0.7.2</span>
    </div>
-   <div id="projectbrief">Able Polecat Core Class Library</div>
+   <div id="projectbrief">LAMP stack middleware for business systems integration</div>
   </td>
  </tr>
  </tbody>
@@ -157,10 +157,14 @@ Inheritance diagram for AblePolecat_ResourceInterface:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a2ac86cae38fbe15a019d075d485ab702"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___resource_interface.html#a2ac86cae38fbe15a019d075d485ab702">getUri</a> ()</td></tr>
 <tr class="separator:a2ac86cae38fbe15a019d075d485ab702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd12d28cbfdd5a45fba85bbac51a0b12"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___resource_interface.html#abd12d28cbfdd5a45fba85bbac51a0b12">getRedirectResourceId</a> ()</td></tr>
+<tr class="separator:abd12d28cbfdd5a45fba85bbac51a0b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea086c97a20cf305b4a73485fd11763b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___resource_interface.html#aea086c97a20cf305b4a73485fd11763b">setId</a> ($resourceId)</td></tr>
 <tr class="separator:aea086c97a20cf305b4a73485fd11763b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a396944828c457deecbba6acb9bee6abf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___resource_interface.html#a396944828c457deecbba6acb9bee6abf">setName</a> ($resourceName)</td></tr>
 <tr class="separator:a396944828c457deecbba6acb9bee6abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ff3753741c61381678badc641e09318"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___resource_interface.html#a4ff3753741c61381678badc641e09318">setRedirectResourceId</a> ($resourceId)</td></tr>
+<tr class="separator:a4ff3753741c61381678badc641e09318"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_interface_able_polecat___cache_object_interface"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_interface_able_polecat___cache_object_interface')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="interface_able_polecat___cache_object_interface.html">AblePolecat_CacheObjectInterface</a></td></tr>
 <tr class="memitem:a365e24d7b066205cafa2a5cce3a4f224 inherit pub_methods_interface_able_polecat___cache_object_interface"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_able_polecat___cache_object_interface.html#a365e24d7b066205cafa2a5cce3a4f224">sleep</a> (<a class="el" href="interface_able_polecat___access_control___subject_interface.html">AblePolecat_AccessControl_SubjectInterface</a> $Subject=NULL)</td></tr>
 <tr class="separator:a365e24d7b066205cafa2a5cce3a4f224 inherit pub_methods_interface_able_polecat___cache_object_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -203,6 +207,25 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:ad9ade868bd136d32967059d1cccb3e92 inherit pub_static_methods_interface_able_polecat___access_control___article_interface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="abd12d28cbfdd5a45fba85bbac51a0b12"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">getRedirectResourceId </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Return resource id for redirect.</p>
+<dl class="section return"><dt>Returns</dt><dd>string resource id. </dd></dl>
+
+<p>Implemented in <a class="el" href="class_able_polecat___resource_abstract.html#abd12d28cbfdd5a45fba85bbac51a0b12">AblePolecat_ResourceAbstract</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a2ac86cae38fbe15a019d075d485ab702"></a>
 <div class="memitem">
 <div class="memproto">
@@ -272,8 +295,33 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a4ff3753741c61381678badc641e09318"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">setRedirectResourceId </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$resourceId</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set resource id for redirect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">string</td><td class="paramname">$resourceId,.</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="class_able_polecat___resource_abstract.html#a1e0f2eaa0b2087d67e47c9f9ab72eaab">AblePolecat_ResourceAbstract</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this interface was generated from the following file:<ul>
-<li>C:/wamp/www/polecat/public/core/Resource.php</li>
+<li>C:/wamp/www/AblePolecat-Dev/usr/lib/AblePolecat/core/Resource.php</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -281,7 +329,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="interface_able_polecat___resource_interface.html">AblePolecat_ResourceInterface</a></li>
-    <li class="footer">Generated on Fri Apr 10 2015 11:24:52 for Able Polecat by
+    <li class="footer">Generated on Fri Jun 12 2015 11:52:31 for AblePolecat by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>
