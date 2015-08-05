@@ -368,6 +368,7 @@
         <polecat:fields>
           <polecat:field name="id" type="char" size="36" null="NOT" />
           <polecat:field name="name" type="varchar" size="255" null="NOT" />
+          <polecat:field name="email" type="varchar" size="255" />
           <polecat:field name="authority" type="varchar" size="255" null="NOT" />
         </polecat:fields>
         <polecat:indexes>

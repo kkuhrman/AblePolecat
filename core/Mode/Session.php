@@ -352,7 +352,6 @@ class AblePolecat_Mode_Session extends AblePolecat_ModeAbstract {
     // Initialize user agent.
     //
     $UserAgent = AblePolecat_AccessControl_Agent_User::wakeup($this->Session);
-    // AblePolecat_Debug::kill($UserAgent);
     
     AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::STATUS, 'Session mode is initialized.');
   }

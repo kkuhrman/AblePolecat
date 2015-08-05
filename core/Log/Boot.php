@@ -16,8 +16,8 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
   /**
    * log file names.
    */
-  const LOG_NAME_BOOTSEQ = 'bootseq.csv';
-  const LOG_NAME_REQUEST = 'request.txt';
+  const LOG_NAME_DEBUG = 'debug.csv';
+  const LOG_NAME_ERROR = 'error.csv';
   
   /**
    * @var object Instance of Singleton.
@@ -62,7 +62,15 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    */
   public function putMessage($type, $msg) {
     
-    $fout = $this->getOutput();
+    $fout = FALSE;
+    if ($type === AblePolecat_LogInterface::ERROR) {
+      $fout = $this->getOutput(AblePolecat_LogInterface::ERROR);
+    }
+    else {
+      $fout = $this->getOutput(AblePolecat_LogInterface::DEBUG);
+    }
+    
+    
     if ($fout) {
       $time = $this->Clock->getElapsedTime(AblePolecat_Clock::ELAPSED_TIME_TOTAL_ACTIVE, TRUE);    
       !is_string($msg) ? $message = serialize($msg) : $message = $msg;
@@ -113,6 +121,7 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    */
   public function dumpRawRequest() {
     
+    $fout = $this->getOutput(AblePolecat_LogInterface::DEBUG);
     if ($fout) {
       // 
       // Banner separating this block from others
@@ -161,26 +170,31 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
    * @param AblePolecat_AccessControl_SubjectInterface $Subject.
    */
   public function sleep(AblePolecat_AccessControl_SubjectInterface $Subject = NULL) {
-    try {
-      parent::sleep();
+    if (isset(self::$Log)) {
+      try {
+        parent::sleep();
+        $fout = $this->getOutput(AblePolecat_LogInterface::DEBUG);
         if (isset($fout)) {
-        //
-        // Only save messages to file in the event of an error during bootstrap.
-        //
-        if (isset(self::$Log) && $this->error) {
           //
-          // Message indicating end of logging.
+          // Message indicating end of debug logging.
           //
           $msg = sprintf("Close boot log file");
           $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
+          
+          //
+          // A separator to make reading across sessions easier.
+          //
           $terminate = array('########', '########', '########', '########');
           fputcsv($fout, $terminate);
-          fclose($fout);
-          $fout = NULL;
         }
+        
+        //
+        // Close all output streams.
+        //
+        $this->closeOutput();
       }
-    }
-    catch (AblePolecat_Exception $Exception) {
+      catch (AblePolecat_Exception $Exception) {
+      }
     }
   }
   
@@ -200,14 +214,48 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
   }
   
   /**
+   * Close all open output streams.
+   */
+  protected function closeOutput() {
+    foreach ($this->flog as $type => $fout) {
+      fclose($fout);
+      unset($this->flog[$type]);
+    }
+  }
+  
+  /**
+   * Return the requested output stream if available.
+   *
+   * @param string $type ERROR | DEBUG.
+   *
    * @return mixed Resource (file) or NULL.
    */
-  protected function getOutput() {
-    if ($this->filePath && !isset($this->flog)) {
-      // $file_name = AblePolecat_Server_Paths::getFullPath('log') . DIRECTORY_SEPARATOR . self::LOG_NAME_BOOTSEQ;
-      $this->flog = @fopen($this->filePath, 'a');
+  protected function getOutput($type) {
+    
+    //
+    // Default to FALSE.
+    //
+    $fout = FALSE;
+    
+    switch ($type) {
+      default:
+        break;
+      case AblePolecat_LogInterface::DEBUG:
+      case AblePolecat_LogInterface::ERROR:
+        if (isset($this->flog[$type])) {
+          $fout = $this->flog[$type];
+        }
+        else {
+          if (isset($this->filePath[$type])) {
+            $fout = @fopen($this->filePath[$type], 'a');
+            if ($fout) {
+              $this->flog[$type] = $fout;
+            }
+          }
+        }
+        break;
     }
-    return $this->flog;
+    return $fout;
   }
   
   /**
@@ -218,7 +266,19 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
     $this->Clock = new AblePolecat_Clock();
     
     //
-    // Everything is ignored if the boot log feature is disabled.
+    // Errors are always logged.
+    //
+    $this->flog = array();
+    $this->filePath = array(
+      AblePolecat_LogInterface::ERROR => implode(DIRECTORY_SEPARATOR, array(
+          AblePolecat_Server_Paths::getFullPath('log'), 
+          AblePolecat_Log_Boot::LOG_NAME_ERROR,
+        )
+      ),
+    );
+    
+    //
+    // Debug log is not opened unless display_errors paramter is set in request quesry string.
     //
     isset($_REQUEST['display_errors']) ? $display_errors = $_REQUEST['display_errors'] : $display_errors = FALSE;
     switch ($display_errors) {
@@ -229,27 +289,29 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
       case 'strict':
         break;
     }
-    if ($display_errors === FALSE) {
-      $this->filePath = FALSE;
-    }
-    else {
-      global $ABLE_POLECAT_BOOT_LOG;
-      $this->filePath = $ABLE_POLECAT_BOOT_LOG;
-      if ($this->filePath && !file_exists($this->filePath)) {
-        $pathParts = explode(DIRECTORY_SEPARATOR, $this->filePath);
-        is_array($pathParts) ? $parentDir = array_pop($pathParts) : $parentDir = FALSE;
-        if ($parentDir && file_exists($parentDir) && !is_writeable($parentDir)) {
-          $this->filePath = FALSE;
-        }
-      }
+    if ($display_errors) {
+      $this->filePath[AblePolecat_LogInterface::DEBUG] = implode(DIRECTORY_SEPARATOR, array(
+        AblePolecat_Server_Paths::getFullPath('log'), 
+        AblePolecat_Log_Boot::LOG_NAME_DEBUG,
+        )
+      );
+      // $this->filePath = AblePolecat_Server_Paths::getFullPath('log'); // self::LOG_NAME_BOOTSEQ;
+      // global $ABLE_POLECAT_BOOT_LOG;
+      // $this->filePath = $ABLE_POLECAT_BOOT_LOG;
+      // if ($this->filePath && !file_exists($this->filePath)) {
+        // $pathParts = explode(DIRECTORY_SEPARATOR, $this->filePath);
+        // is_array($pathParts) ? $parentDir = array_pop($pathParts) : $parentDir = FALSE;
+        // if ($parentDir && file_exists($parentDir) && !is_writeable($parentDir)) {
+          // $this->filePath = FALSE;
+        // }
+      // }
     }
     
-    if ($this->filePath) {
+    if ($display_errors) {
       //
       // Start with no error condition.
       //
       $this->step = 1;
-      $this->flog = NULL;
       $this->error = FALSE;
       // $this->messages = array();
       
@@ -261,17 +323,13 @@ class AblePolecat_Log_Boot extends AblePolecat_LogAbstract {
       //
       // Initialize the output stream.
       //
-      $fout = $this->getOutput();
-      if ($fout) {
-        $DateTimeZone = new DateTimeZone('America/Chicago');
-        $DateTime = new DateTime('now', $DateTimeZone);
-        $msg = sprintf("Open boot log file @ %s", $DateTime->format('H:i:s u e'));
-        $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
-      }
+      $DateTimeZone = new DateTimeZone('America/Chicago');
+      $DateTime = new DateTime('now', $DateTimeZone);
+      $msg = sprintf("Open boot log file @ %s", $DateTime->format('H:i:s u e'));
+      $this->putMessage(AblePolecat_LogInterface::STATUS, $msg);
     }
     else {
       $this->step = -1;
-      $this->flog = NULL;
       $this->error = FALSE;
       // $this->messages = array();
     }

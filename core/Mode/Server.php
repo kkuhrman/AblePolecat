@@ -792,7 +792,6 @@ class AblePolecat_Mode_Server extends AblePolecat_ModeAbstract {
         // (assigned above) to establish connection.
         //
         $this->CoreDatabase = AblePolecat_Database_Pdo::wakeup($this->getAgent());
-        // AblePolecat_Debug::kill($this->CoreDatabase);
       }
     }
     return $this->CoreDatabase;

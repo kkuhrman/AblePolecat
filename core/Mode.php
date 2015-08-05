@@ -249,7 +249,7 @@ abstract class AblePolecat_ModeAbstract
    * @return mixed Message as sent, if written, otherwise FALSE.
    */
   protected function putBootMessage($type, $msg) {    
-    if (self::$display_errors) {
+    if (self::$display_errors || ($type == AblePolecat_LogInterface::ERROR)) {
       switch (self::$bootState) {
         default:
           $this->BootLog = AblePolecat_Log_Boot::wakeup($this->getAgent());
@@ -262,7 +262,9 @@ abstract class AblePolecat_ModeAbstract
           $this->BootLog = AblePolecat_Log_Syslog::wakeup($this->getAgent());
           break;
       }
-      $this->BootLog->putMessage($type, $msg);
+      if(isset($this->BootLog)) {
+        $this->BootLog->putMessage($type, $msg);
+      }
     }
   }
   

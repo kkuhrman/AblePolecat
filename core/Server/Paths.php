@@ -145,10 +145,6 @@ class AblePolecat_Server_Paths {
     if (self::verifyFile($search_path)) {
       $once ? include_once($search_path) : include($search_path);
       $ret = $search_path;
-      // $filePath = self::getFullPath('log') . DIRECTORY_SEPARATOR . 'includes.txt';
-      // $fout = @fopen($filePath, 'a');
-      // fwrite($fout, "$ret\n");
-      // fclose($fout);
     }
     else {
       //

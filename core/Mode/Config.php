@@ -145,7 +145,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
       //
       // Initialize boot log.
       //
-      if (FALSE === self::verifySystemFile(AblePolecat_Log_Boot::LOG_NAME_BOOTSEQ)) {
+      if (FALSE === self::verifySystemFile(AblePolecat_Log_Boot::LOG_NAME_ERROR)) {
         AblePolecat_Command_Chain::triggerError('Boot sequence violation: Boot log file is not accessible.');
       }
       
@@ -263,7 +263,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
     $bootLogFilePathParts = array(
       AblePolecat_Server_Paths::getFullPath('var'), 
       'log',
-      AblePolecat_Log_Boot::LOG_NAME_BOOTSEQ
+      AblePolecat_Log_Boot::LOG_NAME_ERROR
     );
     $bootLogFilePath = NULL;
     
@@ -603,7 +603,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
         $sysFilePathParts = self::getLocalProjectConfFilepath(FALSE);
         $sysFilePath = self::getLocalProjectConfFilepath();
         break;
-      case AblePolecat_Log_Boot::LOG_NAME_BOOTSEQ:
+      case AblePolecat_Log_Boot::LOG_NAME_ERROR:
         $sysFilePathParts = self::getBootLogFilePath(FALSE);
         $sysFilePath = self::getBootLogFilePath();
         break;
@@ -638,7 +638,7 @@ class AblePolecat_Mode_Config extends AblePolecat_ModeAbstract {
                   $verifiedSystemFilePath = $sysFilePath;
                 }
                 break;
-              case AblePolecat_Log_Boot::LOG_NAME_BOOTSEQ:
+              case AblePolecat_Log_Boot::LOG_NAME_ERROR:
                 $bootLog = AblePolecat_Log_Boot::wakeup();
                 $verifiedSystemFilePath = $sysFilePath;
                 break;

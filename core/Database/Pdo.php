@@ -195,6 +195,15 @@ class AblePolecat_Database_Pdo extends AblePolecat_DatabaseAbstract implements A
         $open = TRUE;
       } 
       catch (PDOException $Exception) {
+        if (isset($dsnSettings['locater'])) {
+          $Locater = $dsnSettings['locater'];
+          if (is_a($Locater, 'AblePolecat_AccessControl_Resource_Locater_Dsn')) {
+            $message = sprintf("Access denied. Could not connect to core database with locater %s", 
+              $Locater->getRawUrl()
+            );
+            AblePolecat_Mode_Server::logBootMessage(AblePolecat_LogInterface::ERROR, $message);
+          }
+        }
         $this->error_info[] = $Exception->getMessage();
       }
     }
