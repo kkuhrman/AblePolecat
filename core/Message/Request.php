@@ -496,15 +496,15 @@ abstract class AblePolecat_Message_RequestAbstract extends AblePolecat_MessageAb
       // Deal with array passed in query string.
       //
       if (is_array($argValue)) {
-        $argName = strtolower(addslashes($argName));
+        $argName = addslashes($argName);
         $this->query_string[$argName] = $argValue;
       }
       else {
         //
         // Sanitize
         //
-        $argName = strtolower(addslashes($argName));
-        $argValue = strtolower(addslashes($argValue));
+        $argName = addslashes($argName);
+        $argValue = addslashes($argValue);
         
         //
         // Store
